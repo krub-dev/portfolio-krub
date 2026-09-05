@@ -22,6 +22,28 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
+    <!--
+      Restore the saved theme and language before the page paints.
+
+      This has to be a blocking inline script in <head>, not part of the app:
+      the bundle loads as a module, which is deferred, so by the time Vue runs
+      the browser has already painted one frame. A visitor who chose light
+      would see a dark flash first. Six lines here buy that away.
+
+      main.js reads the same keys and takes over from whatever this leaves.
+    -->
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem('krub-theme')
+          if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light')
+          var lang = localStorage.getItem('krub-lang')
+          if (lang === 'en' || lang === 'es') document.documentElement.setAttribute('lang', lang)
+        } catch (e) {
+          // Blocked site data. The defaults in the markup already cover this.
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

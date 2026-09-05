@@ -10,9 +10,16 @@
   because the strings *are* the subject: it is a spec sheet, not a page. It
   never ships — the route is dev-only and this file is deleted before launch.
 */
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-const theme = ref('dark')
+import { useLang } from '../composables/useLang'
+import { useTheme } from '../composables/useTheme'
+
+const { theme, toggle: toggleTheme } = useTheme()
+const { lang, toggle: toggleLang } = useLang()
+const { t } = useI18n()
+
 // Read back what the browser actually computed for each custom property, so
 // the swatch labels cannot drift from tokens.css.
 const resolved = ref({})
@@ -25,7 +32,8 @@ const COLOR_TOKENS = [
   ['--fg', 'primary text'],
   ['--fg-2', 'secondary text'],
   ['--fg-3', 'tertiary text, mono labels'],
-  ['--acc', 'brand yellow'],
+  ['--acc', 'brand yellow — fills only'],
+  ['--acc-text', 'accent text on --ink'],
   ['--acc-2', 'yellow on hover'],
   ['--on-acc', 'text on yellow'],
   ['--mark', 'logo and footer heart'],
@@ -53,6 +61,18 @@ const RADII = [
   ['999px', 'pill buttons'],
 ]
 
+const SAMPLE_KEYS = [
+  'hero.badge',
+  'hero.body',
+  'nav.projects',
+  'tab.exp',
+  'me.cv',
+  'contact.body',
+  'footer.place',
+  'mq.m1',
+  'a11y.toggleTheme',
+]
+
 const SHADOWS = [
   ['Compact navbar', '0 14px 40px rgba(0,0,0,.28)'],
   ['Lemon bubble', '0 14px 34px rgba(0,0,0,.32)'],
@@ -67,13 +87,9 @@ function readTokens() {
   resolved.value = next
 }
 
-function toggleTheme() {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
-  // Dark is the absence of the attribute, exactly as useTheme() will do it in step 3.
-  if (theme.value === 'light') document.documentElement.setAttribute('data-theme', 'light')
-  else document.documentElement.removeAttribute('data-theme')
-  readTokens()
-}
+// The swatch labels show the computed values, so they have to be re-read after
+// the attribute on <html> changes. nextTick waits for the DOM write to land.
+watch(theme, () => nextTick(readTokens))
 
 onMounted(readTokens)
 </script>
@@ -82,13 +98,45 @@ onMounted(readTokens)
   <main class="preview">
     <header class="head">
       <div>
-        <p class="eyebrow">Step 02 · token sheet</p>
+        <p class="eyebrow">Step 03 · tokens, theme &amp; language</p>
         <h1 class="title">tokens.css</h1>
       </div>
-      <button class="toggle" type="button" @click="toggleTheme">
-        {{ theme === 'dark' ? 'Switch to light' : 'Switch to dark' }}
-      </button>
+      <div class="controls">
+        <button class="toggle" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
+          {{ theme === 'dark' ? 'Switch to light' : 'Switch to dark' }}
+        </button>
+        <button class="toggle" type="button" :aria-label="t('a11y.toggleLang')" @click="toggleLang">
+          {{ lang.toUpperCase() }} / {{ lang === 'en' ? 'ES' : 'EN' }}
+        </button>
+      </div>
     </header>
+
+    <section class="block">
+      <h2 class="h2">Dictionary</h2>
+      <p class="note">
+        Live from <code>src/locales/{{ lang }}.json</code>. Both toggles persist in
+        <code>localStorage</code> and survive a reload;
+        <code>&lt;html lang&gt;</code> is now <strong>{{ lang }}</strong>.
+      </p>
+      <div class="rows">
+        <div v-for="key in SAMPLE_KEYS" :key="key" class="row">
+          <div class="row-meta">
+            <code class="row-spec">{{ key }}</code>
+          </div>
+          <div class="row-demo dict">{{ t(key) }}</div>
+        </div>
+      </div>
+      <p class="note">
+        The headline is the one string that carried markup in the prototype. It is split into
+        parts instead, so no HTML lives in a translation file:
+      </p>
+      <p class="headline-demo">
+        {{ t('hero.title.line1') }}<br />
+        {{ t('hero.title.line2') }}<br />
+        {{ t('hero.title.line3pre') }}<span class="accent">{{ t('hero.title.line3accent') }}</span
+        >{{ t('hero.title.line3post') }}
+      </p>
+    </section>
 
     <section class="block">
       <h2 class="h2">Colour</h2>
@@ -214,6 +262,28 @@ onMounted(readTokens)
   margin: 0;
   font: 700 clamp(28px, 4vw, 44px) var(--font-mono);
   letter-spacing: -0.04em;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dict {
+  font: 400 15px var(--font-sans);
+  color: var(--fg-2);
+}
+
+.headline-demo {
+  margin: 0;
+  font: 700 clamp(28px, 4vw, 48px) var(--font-sans);
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+}
+
+.accent {
+  color: var(--acc-text);
 }
 
 .toggle {

@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "talk": "Let's talk ↗",
+    "me": "/me",
+    "projects": "/projects",
+    "stack": "/stack",
+    "test": "/testimonials",
+    "contact": "/contact"
+  },
+  "hero": {
+    "badge": "Available for work",
+    "title": {
+      "line1": "I build things",
+      "line2": "that hold up",
+      "line3pre": "on the ",
+      "line3accent": "backend",
+      "line3post": "."
+    },
+    "body": "Fullstack developer in Barcelona, leaning into backend: Java with Spring Boot, Node and databases. Vue on the front when needed. I used to do 3D, and it still shows in how I look at things.",
+    "cta1": "Let's talk ↗"
+  },
+  "tab": {
+    "exp": "/experience",
+    "edu": "/education"
+  },
+  "me": {
+    "title": "/me",
+    "p1": "I came from 3D and ended up programming — same thing, fewer twelve-hour renders.",
+    "p2": "Six years modelling and texturing for games, apps and e-commerce taught me to ship on time and to sweat the details. Now I do the same with REST APIs in Java Spring Boot and Node, relational databases and Vue SPAs.",
+    "p3": "From Murcia, living in Barcelona. Looking for a team where I can grow into backend while still poking at odd things in C on weekends.",
+    "cv": "Download CV (PDF)"
+  },
+  "exp": {
+    "e1": {
+      "t": "Fullstack developer · personal and collaborative projects",
+      "b": "REST APIs in Java Spring Boot and Node.js with relational databases, Vue SPAs wired to the backend, Git and agile practices. Peer-to-peer technical challenges at 42 Barcelona."
+    },
+    "e2": {
+      "t": "DIM Tech 3D · 3D artist and generalist",
+      "b": "Modelling, sculpting and texturing for games, apps and e-commerce. Product digitalisation for El Corte Inglés, Mayoral, GOBIK and Tesoro Yachts. Cross-functional teams and international client delivery."
+    }
+  },
+  "edu": {
+    "e1": {
+      "t": "Ironhack · Full Stack web development (IFCD0210)",
+      "b": "590 intensive hours: Java with Spring Boot, Node.js, MySQL and PostgreSQL, Docker, testing with JUnit and Mockito, Vue.js, cloud deployment and documentation with Postman and Swagger. Level 3 professional certificate, including a company internship."
+    },
+    "e2": {
+      "t": "42 Barcelona · programming and software development",
+      "b": "Data structures and algorithms in C, Bash, Git and Unix environments. Peer-to-peer methodology: team projects and code review between peers."
+    },
+    "e3": {
+      "t": "La Salle · Ramon Llull University",
+      "b": "Java fundamentals aligned with Oracle certification, plus web development with PHP and MySQL: OOP, database design and SQL."
+    }
+  },
+  "projects": {
+    "title": "/projects"
+  },
+  "stack": {
+    "title": "/stack",
+    "g1": "Languages",
+    "g2": "Backend",
+    "g3": "Frontend",
+    "g4": "Tools & workflow"
+  },
+  "test": {
+    "title": "/testimonials",
+    "t1": {
+      "q": "“[Client quote. Short, concrete, about a result.]”",
+      "n": "Name Surname",
+      "r": "CREANDOMIENTRAS"
+    },
+    "t2": {
+      "q": "“[Another quote. If you only have one, delete this card and the grid adjusts.]”",
+      "n": "Name Surname",
+      "r": "COMPANY / ROLE"
+    }
+  },
+  "contact": {
+    "title": "/contact",
+    "body": "Tell me the problem. I'll tell you how I'd solve it and how long it takes.",
+    "cta": "Let's talk ↗"
+  },
+  "menu": {
+    "label": "Menu",
+    "sub": "navigation",
+    "top": "back to top"
+  },
+  "footer": {
+    "rights": "©2026 KRUB.DEV",
+    "madePre": "DESIGNED & BUILT WITH",
+    "madePost": "BY",
+    "place": "BARCELONA, SPAIN"
+  },
+  "mq": {
+    "m1": "Fullstack developer → backend",
+    "m2": "From Murcia, based in Barcelona · Spain"
+  },
+  "a11y": {
+    "toggleTheme": "Switch colour theme",
+    "toggleLang": "Switch language",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "closeModal": "Close project",
+    "prevImage": "Previous image",
+    "nextImage": "Next image",
+    "backToTop": "Back to top"
+  }
+}

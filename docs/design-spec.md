@@ -41,8 +41,10 @@ These live in one global stylesheet and are the only source of colour in the pro
 --fg:        #F2F0EA;              /* primary text */
 --fg-2:      #A3A29D;              /* secondary text */
 --fg-3:      #6E6D69;              /* tertiary text, mono labels */
---acc:       #FFC800;              /* brand yellow */
+--acc:       #FFC800;              /* brand yellow — FILLS only */
 --acc-2:     #E6B400;              /* yellow on filled-button hover */
+--acc-text:  #FFC800;              /* accent TEXT on --ink | --surface */
+--acc-text-2:#E6B400;              /* hover of the above */
 --on-acc:    #0C0C0D;              /* text on yellow */
 --mark:      #FFC800;              /* logo and footer heart colour */
 --grid:      rgba(255,255,255,.045);/* background grid lines */
@@ -59,17 +61,38 @@ These live in one global stylesheet and are the only source of colour in the pro
 --fg:        #141416;
 --fg-2:      #5A5955;
 --fg-3:      #8A8985;
---acc:       #FFC800;   /* the yellow does NOT change between themes */
+--acc:       #FFC800;   /* the fill yellow does NOT change between themes */
 --acc-2:     #B98C00;
+--acc-text:  #8A6A00;   /* accent text darkens: #FFC800 scores 1.40:1 here */
+--acc-text-2:#6B5200;
 --on-acc:    #0C0C0D;
 --mark:      #0C0C0D;   /* in light mode the logo and the heart are black */
 --grid:      rgba(12,12,13,.05);
 --sec-idx:   .62;       /* the section number needs more opacity in light mode */
 ```
 
-`--mark` and `--sec-idx` exist precisely because the yellow does not have enough contrast on
-the light background. Anything that is yellow in dark mode and must be black in light mode
-uses `var(--mark)`, never `var(--acc)`.
+`--mark`, `--acc-text` and `--sec-idx` all exist for the same reason: `#FFC800` does not have
+enough contrast on the light background. Three different answers, because there are three
+different jobs:
+
+| Token | Job | Light-theme behaviour |
+|---|---|---|
+| `--acc` | **Fills** — a yellow surface with `--on-acc` text on it | stays `#FFC800` |
+| `--acc-text` | **Accent text** sitting on `--ink` or `--surface` | darkens to `#8A6A00` |
+| `--mark` | Things that must simply invert (logo, footer heart) | becomes `#0C0C0D` |
+
+Contrast against `--ink`, measured:
+
+| | dark | light |
+|---|---|---|
+| `#FFC800` as text | 12.58:1 ✅ | **1.40:1 ❌** |
+| `--acc-text` | 12.58:1 ✅ | 4.57:1 ✅ AA at any size |
+
+So: a yellow button keeps `--acc`. The accent word in the hero headline, the active navbar
+link, the current-period years in the timeline, the `[0N]` indices and the project type labels
+all use `var(--acc-text)` — they are text, and several of them are 10–12px, where the 3:1
+large-text allowance does not apply. The giant section number keeps `--acc`, since it is
+decorative, `aria-hidden` and already governed by `--sec-idx`.
 
 ### Typography
 
@@ -494,8 +517,8 @@ centred, TOP button hidden, smaller 4/5 photo, lemon at `bottom:16px; right:18px
 
 These are deliberate. They are not rough edges to be tidied up later:
 
-- The yellow `#FFC800` is identical in both themes; what changes is whatever is painted with
-  `--mark`.
+- The yellow `#FFC800` is identical in both themes **as a fill**; what changes is whatever is
+  painted with `--mark` or `--acc-text`.
 - The giant section number **overlaps** the title on purpose.
 - The square hero stage is empty on purpose: it is the slot for a future 3D scene. No
   explanatory text goes inside it.

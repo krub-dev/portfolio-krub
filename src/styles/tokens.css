@@ -15,8 +15,10 @@
   --fg: #f2f0ea;                      /* primary text */
   --fg-2: #a3a29d;                    /* secondary text */
   --fg-3: #6e6d69;                    /* tertiary text, mono labels */
-  --acc: #ffc800;                     /* brand yellow */
+  --acc: #ffc800;                     /* brand yellow — FILLS only */
   --acc-2: #e6b400;                   /* yellow on filled-button hover */
+  --acc-text: #ffc800;                /* accent TEXT sitting on --ink / --surface */
+  --acc-text-2: #e6b400;              /* hover of the above */
   --on-acc: #0c0c0d;                  /* text on yellow */
   --mark: #ffc800;                    /* logo and footer heart */
   --grid: rgba(255, 255, 255, 0.045); /* background grid lines */
@@ -32,7 +34,14 @@
    What changes is --mark, because #FFC800 has too little contrast on a light
    background. Anything yellow-in-dark that must be black-in-light uses
    var(--mark), never var(--acc). Same reasoning for --sec-idx: the giant
-   section number needs far more opacity to read on light. */
+   section number needs far more opacity to read on light.
+
+   --acc-text is the third case. #FFC800 as *text* on #F5F3EE scores 1.40:1,
+   which is unreadable, not merely tight — so accent text darkens to #8A6A00
+   (4.57:1, AA at any size) while accent FILLS stay #FFC800 with --on-acc on
+   top. Splitting fills from text is what lets the brand yellow survive the
+   light theme without the small mono labels becoming illegible.
+   See docs/decisions.md. */
 [data-theme='light'] {
   --ink: #f5f3ee;
   --surface: #ffffff;
@@ -43,6 +52,8 @@
   --fg-3: #8a8985;
   --acc: #ffc800;
   --acc-2: #b98c00;
+  --acc-text: #8a6a00;
+  --acc-text-2: #6b5200;
   --on-acc: #0c0c0d;
   --mark: #0c0c0d;
   --grid: rgba(12, 12, 13, 0.05);
@@ -78,12 +89,12 @@ body {
    different colour (the inactive navbar links, for instance) has to set it
    explicitly rather than unset it — this rule is what it is fighting. */
 a {
-  color: var(--acc);
+  color: var(--acc-text);
   text-decoration: none;
 }
 
 a:hover {
-  color: var(--acc-2);
+  color: var(--acc-text-2);
 }
 
 /* The fixed navbar is 96px tall at its largest, so anchored sections need that
