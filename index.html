@@ -15,8 +15,18 @@
       content="Portfolio of Kiko Rubio (krub), fullstack developer in Barcelona: Java with Spring Boot, Node, databases and Vue on the front."
     />
 
-    <link rel="icon" type="image/png" href="/assets/img/krub-icon.png" />
-    <link rel="apple-touch-icon" href="/assets/img/krub-icon.png" />
+    <!--
+      The tab icon is SVG: it stays crisp at any size and it is 5 KB. Built
+      from the vector logo, on a full-bleed yellow circle so the mark fills 78%
+      of the width — a favicon competing with twenty others in a tab strip has
+      to read at 16px, and a small mark floating in space disappears.
+
+      The PNG is for iOS, which still does not accept SVG for a home-screen
+      icon. It is a square rather than a circle on purpose: iOS applies its own
+      rounded-corner mask, and a circle would leave transparent corners.
+    -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!--
       Tints the browser UI on mobile. Two values so it follows the theme: the

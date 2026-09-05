@@ -565,3 +565,27 @@ changes is worse than no file, and `llms.txt` is a 2025 proposal, not a standard
 is certain and the benefit is not.
 
 If it is ever added, it should be generated from `src/data/` at build time, not written twice.
+
+---
+
+### 32. The favicon is built from the vector logo, not the old raster icon
+
+**Date:** 2026-09-05 · **Status:** active
+
+`assets/img/krub-icon.png` came from the previous site and was a rasterised version of the logo.
+Two problems: it was a PNG, and the mark sat small inside its canvas, so in a tab strip next to
+twenty other favicons it read as a smudge.
+
+`public/favicon.svg` is generated from the vector source (`krub logo.svg`), on a full-bleed
+`#FFC800` circle with the mark in `#0C0C0D`. The mark is scaled to **78% of the diameter** — a
+favicon has to survive at 16px, and a logo floating in whitespace does not. The path's bounding
+box was measured with `getBBox()` (949.2 × 564.26, aspect 1.6822 — the documented 1.682) so the
+centring is exact rather than eyeballed.
+
+`public/apple-touch-icon.png` is the same artwork at 180×180, because iOS still will not take an
+SVG for a home-screen icon. It is a **square**, not a circle: iOS applies its own rounded-corner
+mask, and a circle would leave transparent corners showing.
+
+The colours are literals inside an image file, which is not a token violation — an icon is
+rendered by the browser chrome, outside the page, where CSS variables do not exist. It also has
+to stay the same in both themes.
