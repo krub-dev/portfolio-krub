@@ -127,7 +127,7 @@ the modal while open.
 - Open Graph metadata and favicon.
 - Verify not one literal string remains in a `.vue` file.
 
-## Step 11.5 — Tests
+## Step 11.5 — Tests ✅
 
 Deliberately small. The point is that the project has a safety net and that the testing setup
 exists, not to chase coverage. After step 11, because that step still moves things.

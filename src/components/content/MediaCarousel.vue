@@ -13,6 +13,8 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { wrapIndex } from '../../utils/format'
+
 const props = defineProps({
   slides: { type: Number, default: 1 },
   slug: { type: String, required: true },
@@ -29,7 +31,7 @@ const label = computed(
 )
 
 function go(step) {
-  index.value = (index.value + step + props.slides) % props.slides
+  index.value = wrapIndex(index.value, step, props.slides)
 }
 </script>
 

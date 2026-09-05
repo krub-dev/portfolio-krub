@@ -16,6 +16,7 @@ import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
 import { useLang } from '../../composables/useLang'
 import { copy, cvPath, education, experience } from '../../data'
+import { formatPeriod } from '../../utils/format'
 
 const { lang } = useLang()
 const { t } = useI18n()
@@ -28,13 +29,9 @@ const options = computed(() => [
 ])
 const entries = computed(() => (tab.value === 'exp' ? experience : education))
 
-// "2024 — now" / "2018 — 2024" / "2025". A null `to` means still going, so the
-// row stays correct as years pass without anyone editing the data.
-function period(entry) {
-  if (entry.to === null) return `${entry.from} — ${t('time.now')}`
-  if (entry.to === entry.from) return entry.from
-  return `${entry.from} — ${entry.to}`
-}
+// A null `to` means still going, so the row stays correct as years pass
+// without anyone editing the data. See src/utils/format.js.
+const period = (entry) => formatPeriod(entry, t('time.now'))
 </script>
 
 <template>

@@ -615,3 +615,53 @@ knowing rather than discovering.
 
 Unused assets removed along the way: `krub-icon.png` (replaced by the new favicon),
 `krub-logo.webp` (referenced by nothing), and `banner-krub.png`.
+
+---
+
+### 34. Tests: Vitest for logic, Playwright for what only a browser can answer
+
+**Date:** 2026-09-06 · **Status:** active
+
+Twenty unit tests and five end-to-end flows. Deliberately small — the point is a safety net and
+a working setup, not coverage.
+
+**Vitest** covers pure logic and the two composables that touch storage: the timeline period
+formatter, the carousel's index wrapping, and that `useTheme` / `useLang` persist, restore,
+reject junk values, share one state between callers, and survive `localStorage` throwing.
+
+Both composables keep state at module scope, which is what makes every caller share one source
+of truth — and also means a plain import would leak state between tests. Each test calls
+`vi.resetModules()` and imports a fresh copy.
+
+**Playwright** covers the five things that could not be verified any other way, because they
+depend on scroll events, animation frames and CSS transitions actually advancing: the navbar
+going compact and shrinking to its contents, the footer sliding in without covering the last
+section, exactly one nav link being highlighted, the modal trapping focus and returning it, and
+theme and language surviving a reload. It runs against the production build, not the dev server.
+
+It paid for itself immediately — see the next entry.
+
+---
+
+### 35. `--footer-h` was 18px short: `contentRect` is the content box
+
+**Date:** 2026-09-06 · **Status:** active · **Bug found by the E2E suite**
+
+`useFooterHeight` measured the footer with `entry.contentRect.height` from its ResizeObserver.
+`contentRect` is the **content** box: it excludes padding and border. The footer has 9px of
+vertical padding and a 1px top border, so a 49px element was reported as 31px, and the page
+reserved 18px too little — the fixed footer sat on top of the end of the contact section.
+
+Two things made it hard to see. The initial measurement, taken with
+`getBoundingClientRect()`, was already correct; the observer then **overwrote** the right number
+with the wrong one, so the bug only appeared once something triggered a resize. And in the
+tooling browser used during development the observer never fired at all, so a manual check
+measured the correct initial value and passed.
+
+Fixed by using `getBoundingClientRect().height` in the observer too — the border-box height,
+which is what the page actually has to reserve.
+
+Two of the three initial E2E failures were bugs in the tests rather than the app:
+`scrollIntoViewIfNeeded` does not scroll when an element is already partly visible, so sections
+never crossed the spy's threshold; and a `.icon-btn` locator was matching the desktop control,
+which exists in the DOM but is hidden at mobile widths.

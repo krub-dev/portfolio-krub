@@ -23,6 +23,7 @@ import TabSwitch from '../components/base/TabSwitch.vue'
 import TimelineItem from '../components/base/TimelineItem.vue'
 import { useLang } from '../composables/useLang'
 import { useTheme } from '../composables/useTheme'
+import { formatPeriod } from '../utils/format'
 import {
   config,
   copy,
@@ -47,12 +48,7 @@ const { t } = useI18n()
 const hero = computed(() => copy.hero[lang.value])
 const marquee = computed(() => copy.marquee[lang.value])
 
-// Timeline rows: "2024 — now", "2018 — 2024", or just "2025" for one year.
-function period(entry) {
-  if (entry.to === null) return `${entry.from} — ${t('time.now')}`
-  if (entry.to === entry.from) return entry.from
-  return `${entry.from} — ${entry.to}`
-}
+const period = (entry) => formatPeriod(entry, t('time.now'))
 
 const collections = computed(() => [
   { name: 'projects', count: projects.length, sample: projects[0][lang.value].name },

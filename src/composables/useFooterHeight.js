@@ -28,21 +28,26 @@ export function useFooterHeight(elementRef) {
       observer?.disconnect()
       if (!el) return
 
-      observer = new ResizeObserver(([entry]) => {
-        publish(entry.contentRect.height + getBorders(el))
-      })
+      /*
+        getBoundingClientRect(), not entry.contentRect.
+
+        contentRect is the CONTENT box: it excludes padding and border. The
+        footer has 9px of vertical padding and a 1px top border, so measuring
+        it that way reported 31px for an element that occupies 49 — and the
+        page reserved 18px too little, letting the footer sit on top of the
+        end of the contact section.
+
+        It hid well. The initial measurement below was already correct; the
+        observer then overwrote it with the wrong number, so the bug only
+        appeared once something triggered a resize. An end-to-end test in a
+        real browser is what surfaced it.
+      */
+      observer = new ResizeObserver(() => publish(el.getBoundingClientRect().height))
       observer.observe(el)
       publish(el.getBoundingClientRect().height)
     },
     { immediate: true },
   )
-
-  // contentRect excludes borders; the footer has a 1px top border that the
-  // page still has to reserve space for.
-  function getBorders(el) {
-    const s = getComputedStyle(el)
-    return parseFloat(s.borderTopWidth) + parseFloat(s.borderBottomWidth)
-  }
 
   onUnmounted(() => {
     stop()
