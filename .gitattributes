@@ -1,0 +1,15 @@
+# Normalise every text file to LF, in the repository and in the working copy.
+# This overrides core.autocrlf, so the checkout is identical on Windows, on the
+# Linux build machine and inside WSL. Without it Git rewrites line endings on
+# every checkout and diffs show whole files as changed.
+* text=auto eol=lf
+
+# Binary assets: never touch these.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.ico   binary
+*.pdf  binary
+*.woff  binary
+*.woff2 binary
