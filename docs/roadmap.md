@@ -34,7 +34,7 @@ the component contracts.
 
 **Check:** the page loads blank, no console errors, fonts available.
 
-## Step 2 — Tokens and global styles
+## Step 2 — Tokens and global styles ✅
 
 - `src/styles/tokens.css` with both variable blocks from the spec (`:root` and
   `[data-theme="light"]`), the `@keyframes` (`marquee`, `dotHalo`, `bubbleIn`, `lemonShake`),
@@ -45,27 +45,27 @@ the component contracts.
 
 **Check:** flipping `data-theme="light"` by hand in the inspector changes the page colours.
 
-## Step 3 — Language and theme
+## Step 3 — Language and theme ✅
 
 - `useTheme()`: reads the saved preference, writes `data-theme` on `<html>`, persists.
-- `vue-i18n` with `en.json` and `es.json`, **defaulting to English**. The prototype's flat keys
-  carry over as they are (`hero.badge`, `nav.projects`, `me.p1`…). Careful: some values contain
-  HTML (`<br>`, the yellow `<span>` in the headline, the footer heart) — handled with component
-  interpolation or `v-html` at those specific points, and commented where it happens.
+- `vue-i18n` with `en.json` and `es.json`, **defaulting to English**. Dictionaries are nested
+  rather than flat, which is the shape vue-i18n resolves natively. The two prototype strings
+  that carried HTML were split into parts instead of using `v-html`, so no markup lives in a
+  translation file (decisions 8 and 9).
 - `useLang()`: persists in `localStorage["krub-lang"]` and updates `<html lang>`.
 
 **Check:** two throwaway buttons switch theme and language, and both survive a reload.
 
-## Step 4 — Data
+## Step 4 — Data ✅
 
 Extract projects, experience, education, stack, socials and testimonials to `src/data/`, shaped
-as described in §5 of the spec. Translatable project copy either stays inside the entry (an
-`en` / `es` object, as in the prototype) or moves to the dictionary: pick one and record it in
-`decisions.md`.
+as described in §5 of the spec. Resolved: **all** prose — the hero headline and the About
+paragraphs included — lives in `src/data/` with `en` / `es` side by side in one file, and
+`src/locales/` keeps only the strings the interface needs (decision 12).
 
 **Check:** a `console.log` of each collection with the expected shape.
 
-## Step 5 — Base components
+## Step 5 — Base components ✅
 
 `BaseButton`, `SectionHeading`, `TechIcon`, `StackGroup`, `SocialLink`, `TimelineItem`,
 `TabSwitch`, `AvailabilityBadge`, `SpeechBubble`. All stateless, with the props from
@@ -74,7 +74,7 @@ as described in §5 of the spec. Translatable project copy either stays inside t
 **Check:** a scratch route showing every variant of each one in both themes, compared against
 the design system prototype.
 
-## Step 6 — Sections, top to bottom
+## Step 6 — Sections, top to bottom ✅
 
 One per commit, in this order: `HeroSection`, `MarqueeBar`, `AboutSection`, `ProjectsSection`,
 `StackSection`, `TestimonialsSection`, `ContactSection`. Layout and data only; no scroll
@@ -83,7 +83,7 @@ behaviour yet.
 **Check:** the full static page matches the prototype on desktop and mobile, in both themes and
 both languages.
 
-## Step 7 — Fixed chrome
+## Step 7 — Fixed chrome ✅
 
 `TheNavbar` (compact state and the natural-width measurement), `TheFooter` (scroll entrance and
 publishing `--footer-h`), `TheMobileMenu`, `ScrollProgress`.
@@ -91,7 +91,7 @@ publishing `--footer-h`), `TheMobileMenu`, `ScrollProgress`.
 **Check:** scrolling down shrinks the navbar and brings the footer in; content is never covered
 by the footer; on mobile the footer is there from the start.
 
-## Step 8 — Pointer interaction
+## Step 8 — Pointer interaction ✅
 
 - `usePointer()`: one source of mouse position and one `requestAnimationFrame`.
 - `CursorFx` (10px dot + 40px ring, per §3.13 of the spec).
@@ -102,7 +102,7 @@ by the footer; on mobile the footer is there from the start.
 **Check:** with a mouse, the native cursor and the pointer hand are hidden everywhere; on touch
 none of it mounts. No animation loop survives unmount.
 
-## Step 9 — Scroll navigation
+## Step 9 — Scroll navigation ✅
 
 - `useScrollSpy()` and the yellow highlight on the active link (navbar and mobile menu).
 - Crossfade between the two `BackgroundGrid` layers on reaching "about".

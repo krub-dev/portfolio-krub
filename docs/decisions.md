@@ -322,3 +322,40 @@ The test for whether something should be a token is whether it should follow the
 eye that turned dark in the light theme would be a bug, not a feature. Same reasoning as the
 availability dot's green — the exception list in `CLAUDE.md` was just incomplete and now covers
 the whole mascot.
+
+---
+
+### 19. The scroll spy asks "has the top edge crossed a line", not "is it visible"
+
+**Date:** 2026-09-05 · **Status:** active
+
+The textbook answer for a scroll spy is an IntersectionObserver, and it is the wrong tool here.
+An observer reports how much of an element is on screen; the design asks whether a section's
+top edge has crossed a fixed line at 35% of the viewport. Those disagree exactly where it
+matters — a section taller than the window is never fully visible, and two short ones are
+visible at once, so an observer has to be talked into a decision the threshold makes directly.
+
+`useScrollSpy` walks the ids in document order and keeps the **last** one past the line. That
+is what makes it settle on the section you have scrolled into rather than the one still coming.
+
+`'top'` leads the list even though the hero has no nav link. While it is active none of the four
+links match, so nothing is highlighted until you have actually left the hero.
+
+Both this and the grid crossfade ride the shared listener in `useScroll` — no new listeners.
+
+---
+
+### 20. Two grid layers, two thresholds
+
+**Date:** 2026-09-05 · **Status:** active
+
+The background is two `BackgroundGrid` instances that crossfade, not one element that changes.
+They cannot be the same element: the hero layer is absolute and one viewport tall so it scrolls
+away with the hero, while the global layer is fixed, stops at the footer, and carries a mask
+that fades it downward.
+
+The swap fires when `#me` reaches 60% of the viewport — a different line from the spy's 35%,
+and deliberately earlier, so the background has settled before the nav link lights up.
+
+Verified at the pixel: the crossfade flips between scrollY 318 and 322 (line at 320), the
+highlight between 518 and 522 (line at 520).
