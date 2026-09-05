@@ -25,6 +25,7 @@ dist-ssr
 
 # Local tooling config
 .claude/
+CLAUDE.md
 
 # Design reference prototypes. Kept locally to measure exact values against,
 # not part of the build and not shipped.
