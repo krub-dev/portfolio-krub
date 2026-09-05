@@ -226,3 +226,51 @@ Design spec §4 lists "show testimonials" and "show lemon" as configuration. The
 `config.js` as plain booleans, alongside the footer clock's timezone, rather than becoming
 magic constants inside components. `showTestimonials` ships **off**, because the quotes in
 `testimonials.js` are still placeholders.
+
+---
+
+### 14. The hero's viewport-height escape is keyed to width, not just height
+
+**Date:** 2026-09-05 · **Status:** active · **Fixes a prototype bug**
+
+The hero and the marquee share a wrapper that is exactly `100svh`, so the yellow band lands at
+the fold. The prototype's only escape from that was `@media (max-height: 700px)`, which switched
+the wrapper to auto height.
+
+That is the wrong axis. Below 900px the hero grid collapses to a single column, so the stage
+stacks under the text and the section needs roughly twice the height. Measured at 375×812: the
+content overflowed its box by 35px and the marquee covered the bottom of the logo.
+
+It hid well. A real phone with browser chrome often reports a viewport under 700px tall, which
+fired the height rule and made the page look correct — this was first noticed as "fine on a real
+iPhone 12, broken in the inspector at the same device size". Emulators, taller phones, and any
+browser with collapsed toolbars do not get that accidental rescue.
+
+The rule is now `@media (max-width: 900px), (max-height: 700px)`. Width is the honest trigger:
+the single-column layout is what needs the room.
+
+Verified at 375×667, 375×812, 390×844, 412×915, 768×1024 (no overflow, nothing clipped, no
+horizontal scroll) and at 901×800 and 1280×800, where the two-column layout and the
+marquee-at-the-fold behaviour are unchanged.
+
+---
+
+### 15. The design spec's keyframe list was incomplete
+
+**Date:** 2026-09-05 · **Status:** active
+
+The spec lists four keyframes: `marquee`, `dotHalo`, `bubbleIn`, `lemonShake`. The prototype's
+hero also runs `nameOpen` and `nameSplit` — the animation that reveals "KIKO / RUBIO" out of
+"KRUB". It is the first thing a visitor sees, so it stays; both keyframes were added to
+`tokens.css` and the markup lives in `BrandName.vue`, with a reduced-motion branch that shows the
+finished state without moving.
+
+Two further spec/prototype disagreements, both resolved in favour of the **prototype**, on the
+grounds that it is the artefact that was reviewed and approved:
+
+- Hero headline: spec says `clamp(38px, 6.4vw, 82px)` / `-.04em`; prototype has
+  `clamp(38px, 6vw, 76px)` / `-.035em`.
+- Hero stage grid: spec says the 72px page pattern; prototype uses 40px, which is what stops it
+  reading as noise inside a 520px box.
+
+The spec table looks like transcription drift rather than intent.

@@ -57,7 +57,21 @@ function openProject(index) {
   flex-direction: column;
 }
 
-@media (max-height: 700px) {
+/*
+  Two escapes from the fixed viewport height, and both are needed.
+
+  The prototype only had the short-viewport one, which hid a bug: below 900px
+  the hero grid collapses to a single column, so the stage stacks under the
+  text and the section needs roughly twice the height. Forcing that into one
+  viewport clipped the logo behind the marquee — 35px of overflow at 375x812.
+
+  It went unnoticed because a real phone with browser chrome often reports a
+  viewport under 700px tall, which fired the height rule and papered over it.
+  Emulators, and phones with taller viewports, do not.
+
+  Width is the honest trigger: the single-column layout is what needs the room.
+*/
+@media (max-width: 900px), (max-height: 700px) {
   .hero-wrap {
     height: auto;
     min-height: 100svh;
