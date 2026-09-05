@@ -50,7 +50,7 @@ const { progress, atEnd } = useScroll()
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.28em;
-  text-transform: none;
+  text-transform: uppercase;
   color: var(--fg-3);
 }
 

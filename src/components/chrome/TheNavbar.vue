@@ -14,7 +14,7 @@
   It re-runs on resize and on language change, because the labels are what
   determine that width and Spanish is wider than English.
 */
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BrandLogo from '../base/BrandLogo.vue'
@@ -67,9 +67,16 @@ onMounted(() => {
 
 onUnmounted(() => window.removeEventListener('resize', measureNatural))
 
-// Labels change width with the language, so the measurement is stale after a
-// switch. Wait a tick for the new text to render before re-reading.
-watch(lang, () => requestAnimationFrame(measureNatural))
+/*
+  Labels change width with the language, so the measurement is stale the moment
+  it switches. nextTick waits for Vue to put the new text in the DOM;
+  requestAnimationFrame alone could fire before the patch and re-measure the
+  old labels.
+*/
+watch(lang, async () => {
+  await nextTick()
+  measureNatural()
+})
 </script>
 
 <template>
@@ -221,8 +228,16 @@ watch(lang, () => requestAnimationFrame(measureNatural))
   The inactive colour is set explicitly rather than left alone: the global rule
   in tokens.css paints every <a> yellow, so "not active" has to be stated.
 */
+/*
+  nowrap is not cosmetic. When the language switches, the capsule is still at
+  the width measured for the previous language for one frame; Spanish is wider,
+  so the links used to break mid-path — "/" on one line and the section name
+  underneath. A nav label is a path, not a sentence: it should never wrap, and
+  saying so removes the glitch at its source rather than racing the measurement.
+*/
 .link {
   color: var(--fg-2);
+  white-space: nowrap;
   transition: color 0.16s ease;
 }
 

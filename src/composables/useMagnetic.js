@@ -10,22 +10,25 @@ import { usePointer } from './usePointer'
   every nearby element lean at once reads as the page wobbling; picking a
   single winner reads as attraction.
 
-  The numbers are from the design spec §3.14 and are not arbitrary:
+  The shape of the pull is from the design spec §3.14:
     reach  = max(width, height) * 0.75 + 70   how far this element's pull carries
     score  = distance / reach                 0 at the centre, 1 at the edge of range
-    pull   = (1 - score)^2 * 16               squared, so it ramps up near the centre
+    pull   = (1 - score)^2 * MAX_PULL         squared, so it ramps up near the centre
 
-  Every element eases toward its target by 14% per frame rather than jumping to
-  it. That is what stops the element snapping when the cursor crosses into
-  range, and what lets it glide back to zero when the cursor leaves — including
-  the element that just lost, which is why the loop touches all of them and not
-  just the winner.
+  MAX_PULL and EASING are softer than the spec's 16px and 0.14: the effect read
+  as too eager and too far. Halving the easing is what makes it feel slow —
+  each frame covers less of the remaining distance, so the element glides
+  instead of snapping.
+
+  Every element eases toward its target, not just the winner. That is what lets
+  the one that just lost glide back to zero instead of jumping.
 */
 
 const REACH_PADDING = 70
 const REACH_FACTOR = 0.75
-const MAX_PULL = 16
-const EASING = 0.14
+const MAX_PULL = 10 //   how far an element can travel, in px
+const EASING = 0.07 //   fraction of the remaining distance covered per frame
+const DEAD_ZONE = 12 //  px around the resting centre where no pull is applied
 
 export function useMagnetic(rootSelector = '[data-magnetic]') {
   let elements = []
@@ -53,15 +56,26 @@ export function useMagnetic(rootSelector = '[data-magnetic]') {
       // Skip anything scrolled out of view: no point pulling what nobody sees.
       if (rect.bottom < 0 || rect.top > window.innerHeight) continue
 
-      const cx = rect.left + rect.width / 2
-      const cy = rect.top + rect.height / 2
+      /*
+        The RESTING centre, not the current one.
+
+        getBoundingClientRect() includes the transform we applied on the last
+        frame, so measuring it directly creates a feedback loop: the element
+        moves toward the pointer, which moves its centre, which changes the
+        direction of the pull, which moves it again. Near the middle of a
+        button that loop flips direction every frame and the element buzzes.
+        Subtracting the offset we know we applied breaks the loop.
+      */
+      const offset = offsets.get(el) ?? { x: 0, y: 0 }
+      const cx = rect.left + rect.width / 2 - offset.x
+      const cy = rect.top + rect.height / 2 - offset.y
       const distance = Math.hypot(pointer.x - cx, pointer.y - cy)
       const reach = Math.max(rect.width, rect.height) * REACH_FACTOR + REACH_PADDING
       const score = distance / reach
 
       if (score < bestScore) {
         bestScore = score
-        winner = { el, cx, cy, score }
+        winner = { el, cx, cy, score, distance }
       }
     }
 
@@ -70,7 +84,14 @@ export function useMagnetic(rootSelector = '[data-magnetic]') {
       let targetX = 0
       let targetY = 0
 
-      if (winner && winner.el === el) {
+      /*
+        The dead zone is the second half of the anti-jitter fix. Right on the
+        centre the direction vector is (0,0) and its normalised form is
+        meaningless — a pixel of mouse movement swings it 180°. Inside 12px
+        there is simply nothing to chase, which is also how it should feel:
+        the element has arrived.
+      */
+      if (winner && winner.el === el && winner.distance > DEAD_ZONE) {
         const pull = (1 - winner.score) ** 2 * MAX_PULL
         const dx = pointer.x - winner.cx
         const dy = pointer.y - winner.cy

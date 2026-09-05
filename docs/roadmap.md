@@ -155,3 +155,21 @@ advanced. A real browser runs all three.
 ## Step 12 — Publish
 
 `npm run build`, GitHub repository, deploy to Vercel or Netlify, `krub.dev` pointing at it.
+
+---
+
+## Later
+
+Not needed to get the site live. Written down so they do not evaporate.
+
+- **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
+  carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the inner
+  grid, so a Three.js scene replaces the `.mark` element and nothing else has to move. Needs the
+  model out of Blender first, exported as glTF/GLB.
+- **Rethink the stack section.** The icon grid is faithful to the spec but flat. Ideas so far:
+  animation, no colour, a mask, softened edges. Wants designing before it gets built.
+- **Give contact more weight** as the end of the page, and consider a simple form instead of only
+  a mailto. A form needs somewhere to send it — Web3Forms is already proven on CreandoMientras.
+
+These are design decisions, not implementation. Best done on a `dev` branch once the site is
+live, so `main` always matches what is published.

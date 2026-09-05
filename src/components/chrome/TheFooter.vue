@@ -48,7 +48,10 @@ const shown = computed(() => y.value > window.innerHeight * 0.55)
       <span class="rights">{{ t('footer.rights') }}</span>
     </div>
 
-    <button class="top" type="button" data-magnetic :aria-label="t('a11y.backToTop')" @click="$emit('go-top')">
+    <!-- Not magnetic: the design spec lists it, but a control that drifts
+         under the cursor at the moment you go to click it is worse than one
+         that stays put. Owner decision. -->
+    <button class="top" type="button" :aria-label="t('a11y.backToTop')" @click="$emit('go-top')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 19V5M5 12l7-7 7 7" />
       </svg>
