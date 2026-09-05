@@ -1,0 +1,161 @@
+/* ---------------------------------------------------------------------------
+   Design tokens and global resets.
+
+   Imported once, from main.js. This is the only file in the project allowed to
+   declare a literal colour. Everything else references var(--token).
+   See docs/design-spec.md §2.
+   --------------------------------------------------------------------------- */
+
+/* Dark theme. This is the default: no attribute on <html> means dark. */
+:root {
+  --ink: #0c0c0d;                     /* page background */
+  --surface: #141416;                 /* card and panel background */
+  --surface-2: #1c1c1f;               /* icon tile and chip background */
+  --line: rgba(255, 255, 255, 0.11);  /* every border in the project */
+  --fg: #f2f0ea;                      /* primary text */
+  --fg-2: #a3a29d;                    /* secondary text */
+  --fg-3: #6e6d69;                    /* tertiary text, mono labels */
+  --acc: #ffc800;                     /* brand yellow */
+  --acc-2: #e6b400;                   /* yellow on filled-button hover */
+  --on-acc: #0c0c0d;                  /* text on yellow */
+  --mark: #ffc800;                    /* logo and footer heart */
+  --grid: rgba(255, 255, 255, 0.045); /* background grid lines */
+  --sec-idx: 0.16;                    /* opacity of the giant section number */
+
+  /* Font stacks. The two families are loaded from Google Fonts in index.html. */
+  --font-sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+}
+
+/* Light theme.
+   Note that --acc does NOT change: the yellow is identical in both themes.
+   What changes is --mark, because #FFC800 has too little contrast on a light
+   background. Anything yellow-in-dark that must be black-in-light uses
+   var(--mark), never var(--acc). Same reasoning for --sec-idx: the giant
+   section number needs far more opacity to read on light. */
+[data-theme='light'] {
+  --ink: #f5f3ee;
+  --surface: #ffffff;
+  --surface-2: #edeae2;
+  --line: rgba(12, 12, 13, 0.13);
+  --fg: #141416;
+  --fg-2: #5a5955;
+  --fg-3: #8a8985;
+  --acc: #ffc800;
+  --acc-2: #b98c00;
+  --on-acc: #0c0c0d;
+  --mark: #0c0c0d;
+  --grid: rgba(12, 12, 13, 0.05);
+  --sec-idx: 0.62;
+}
+
+/* ---------------------------------------------------------------------------
+   Resets
+   --------------------------------------------------------------------------- */
+
+/* No global `box-sizing: border-box` on purpose. Every measurement in the
+   design spec was taken with the browser default (content-box); the few
+   elements that need border-box declare it themselves, like the 44px icon
+   tile. See docs/decisions.md. */
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--fg);
+  font-family: var(--font-sans);
+}
+
+/* Links are yellow by default across the whole site. Anywhere that needs a
+   different colour (the inactive navbar links, for instance) has to set it
+   explicitly rather than unset it — this rule is what it is fighting. */
+a {
+  color: var(--acc);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--acc-2);
+}
+
+/* The fixed navbar is 96px tall at its largest, so anchored sections need that
+   much breathing room or the heading lands underneath it. */
+section[id] {
+  scroll-margin-top: 96px;
+}
+
+/* Stack icons that are monochrome-dark (Express, Prisma, Three.js, GitHub,
+   Linux) are inverted in dark theme only, so they read against --surface-2. */
+[data-invert-dark] {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+[data-theme='light'] [data-invert-dark] {
+  filter: none;
+}
+
+/* The custom cursor replaces the native one, so both have to go. The
+   descendant selector is not optional: links and buttons ship their own
+   `cursor: pointer` and would otherwise show the hand on hover. Pointer
+   devices only — on touch there is no cursor to hide. */
+@media (hover: hover) {
+  [data-hide-cursor],
+  [data-hide-cursor] * {
+    cursor: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion
+   --------------------------------------------------------------------------- */
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* The availability dot: the core is static, this is the ring around it. It is
+   born small, fades in, grows and fades out completely before restarting —
+   which is why it reads as a pulse and not as a blink. */
+@keyframes dotHalo {
+  0% { opacity: 0; transform: scale(0.34); }
+  18% { opacity: 0.6; }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes lemonShake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  15% { transform: translate(-3px, 1px) rotate(-7deg); }
+  30% { transform: translate(3px, -1px) rotate(7deg); }
+  45% { transform: translate(-3px, 0) rotate(-5deg); }
+  60% { transform: translate(2px, 1px) rotate(4deg); }
+  80% { transform: translate(-1px, 0) rotate(-2deg); }
+}
+
+/* Reduced motion turns off the decorative loops (marquee, dot halo, lemon)
+   but deliberately leaves hover transitions alone — a .16s colour change is
+   not what this setting is asking about. Components that run a decorative
+   animation opt in with data-motion="decorative" so they can be switched off
+   here without this file needing to know their selectors. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [data-motion='decorative'] {
+    animation: none !important;
+  }
+}

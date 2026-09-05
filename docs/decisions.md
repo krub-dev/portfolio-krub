@@ -69,3 +69,35 @@ straight from disk. They are ~190 KB of files that are explicitly not production
 shipped copies already live in `public/`.
 
 They are still needed locally: when the spec does not state a value, it gets measured there.
+
+---
+
+### 6. No global `box-sizing: border-box`
+
+**Date:** 2026-09-05 · **Status:** active
+
+Every measurement in the design spec was taken against the browser default, `content-box`.
+Switching the whole project to `border-box` would silently change what `max-width` plus
+`padding` resolves to — the navbar capsule and the 44px icon tile being the obvious cases —
+and each of those would then need re-measuring against the prototype.
+
+The few elements that genuinely want `border-box` declare it themselves, which is what the
+spec already does for the icon tile.
+
+**Trade-off:** this goes against the common modern default, so it needs stating out loud
+rather than being discovered later.
+
+---
+
+### 7. `/preview` is a dev-only route
+
+**Date:** 2026-09-05 · **Status:** active
+
+A visual sheet for the token layer — swatches, type scale, radii, shadows, the four keyframes
+running live, and a theme switch — lives at `/preview`, registered only under
+`import.meta.env.DEV` and lazily imported, so it is absent from the production bundle
+(verified: no chunk for it, no strings from it in `dist/`).
+
+It is the one file allowed to contain literal strings in its template, because the strings are
+the subject rather than content. It grows in step 5 to cover the base components, and is
+deleted before launch.

@@ -13,6 +13,17 @@ const routes = [
   },
 ]
 
+// Dev-only scaffolding: a visual sheet for the tokens now, and for the base
+// components from step 5 on. Lazy-loaded and excluded from the production
+// build, so it never reaches the deployed site.
+if (import.meta.env.DEV) {
+  routes.push({
+    path: '/preview',
+    name: 'preview',
+    component: () => import('../views/PreviewView.vue'),
+  })
+}
+
 export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
