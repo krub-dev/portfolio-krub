@@ -2,9 +2,9 @@
 /*
   DEV SCAFFOLDING — not part of the site.
 
-  A visual check for the token layer: every colour, the type scale, the radii,
-  the shadows and the four keyframes, side by side and switchable between
-  themes. Step 5 will grow this route to cover the base components too.
+  A live specimen sheet: the design tokens, and every base component in all its
+  variants. Switch theme and language to check both. Compare against
+  Design System.dc.html.
 
   This is the one file exempt from the "no literal strings in a template" rule,
   because the strings *are* the subject: it is a spec sheet, not a page. It
@@ -13,6 +13,14 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import AvailabilityBadge from '../components/base/AvailabilityBadge.vue'
+import BaseButton from '../components/base/BaseButton.vue'
+import SectionHeading from '../components/base/SectionHeading.vue'
+import SocialLink from '../components/base/SocialLink.vue'
+import SpeechBubble from '../components/base/SpeechBubble.vue'
+import StackGroup from '../components/base/StackGroup.vue'
+import TabSwitch from '../components/base/TabSwitch.vue'
+import TimelineItem from '../components/base/TimelineItem.vue'
 import { useLang } from '../composables/useLang'
 import { useTheme } from '../composables/useTheme'
 import {
@@ -58,6 +66,14 @@ const collections = computed(() => [
     sample: `${config.showTestimonials ? 'section on' : 'section off'} · ${testimonials[0][lang.value].quote}`,
   },
 ])
+
+// Live state for the interactive components on this page.
+const tab = ref('exp')
+const tabOptions = computed(() => [
+  { value: 'exp', label: t('tab.exp') },
+  { value: 'edu', label: t('tab.edu') },
+])
+const timeline = computed(() => (tab.value === 'exp' ? experience : education))
 
 // Read back what the browser actually computed for each custom property, so
 // the swatch labels cannot drift from tokens.css.
@@ -136,8 +152,8 @@ onMounted(readTokens)
   <main class="preview">
     <header class="head">
       <div>
-        <p class="eyebrow">Step 04 · content &amp; data</p>
-        <h1 class="title">src/data</h1>
+        <p class="eyebrow">Step 05 · base components</p>
+        <h1 class="title">components/base</h1>
       </div>
       <div class="controls">
         <button class="toggle" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
@@ -148,6 +164,62 @@ onMounted(readTokens)
         </button>
       </div>
     </header>
+
+    <section class="block">
+      <h2 class="h2">Base components</h2>
+
+      <p class="note"><code>BaseButton</code> — variant × shape × size, plus mono.</p>
+      <div class="specimens">
+        <BaseButton variant="solid" size="lg">{{ t('actions.talk') }}</BaseButton>
+        <BaseButton variant="outline" size="md" mono>{{ t('actions.projects') }}</BaseButton>
+        <BaseButton variant="outline" size="md">{{ t('actions.cv') }}</BaseButton>
+        <BaseButton variant="solid" shape="square" size="sm">{{ t('actions.talk') }}</BaseButton>
+        <BaseButton variant="outline" shape="square" size="sm" mono>{{ t('tab.edu') }}</BaseButton>
+        <BaseButton variant="solid" size="lg" :href="`mailto:${email}`">{{ t('actions.talk') }}</BaseButton>
+      </div>
+      <p class="note">
+        The last one has <code>href</code>, so it rendered as an
+        <code>&lt;a&gt;</code> — hover it and check the status bar. The rest are
+        <code>&lt;button&gt;</code>.
+      </p>
+
+      <p class="note"><code>SectionHeading</code> — with index, with count, and bare.</p>
+      <div class="specimens headings">
+        <SectionHeading index="00" :title="t('section.me')" />
+        <SectionHeading index="01" :title="t('section.projects')" :count="projects.length" />
+        <SectionHeading :title="t('section.contact')" />
+      </div>
+
+      <p class="note"><code>TabSwitch</code> + <code>TimelineItem</code> — live, click the tabs.</p>
+      <TabSwitch v-model="tab" :options="tabOptions" />
+      <div class="timeline">
+        <TimelineItem
+          v-for="(entry, i) in timeline"
+          :key="entry.from + entry[lang].title"
+          :period="period(entry)"
+          :current="entry.current"
+          :title="entry[lang].title"
+          :body="entry[lang].body"
+          :is-last="i === timeline.length - 1"
+        />
+      </div>
+
+      <p class="note"><code>StackGroup</code> → <code>TechIcon</code> — the invert-on-dark ones are in Backend and Tools.</p>
+      <div class="stack-grid">
+        <StackGroup v-for="g in stack" :key="g.labelKey" :label="t(g.labelKey)" :items="g.items" />
+      </div>
+
+      <p class="note"><code>SocialLink</code>, <code>AvailabilityBadge</code>, <code>SpeechBubble</code>.</p>
+      <div class="specimens">
+        <SocialLink v-for="s in socials" :key="s.name" v-bind="s" />
+      </div>
+      <div class="specimens">
+        <AvailabilityBadge :label="copy.hero[lang].badge" />
+      </div>
+      <div class="specimens">
+        <SpeechBubble :text="lang === 'en' ? `Welcome! I'm Limonacho` : '¡Bienvenido! Soy Limonacho'" />
+      </div>
+    </section>
 
     <section class="block">
       <h2 class="h2">Content · src/data/</h2>
@@ -340,6 +412,31 @@ onMounted(readTokens)
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.specimens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+/* The giant section number overflows its box on purpose, so these need room
+   between them or the numbers collide with the row above. */
+.headings {
+  gap: 44px;
+  padding: 18px 0 8px;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
 }
 
 .dict {
