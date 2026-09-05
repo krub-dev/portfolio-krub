@@ -456,3 +456,112 @@ the rest is still readable inside the card.
 
 Audited across the rendered page: 25 interactive controls, all with an accessible name, none
 longer than 70 characters.
+
+---
+
+### 27. `--fg-3` was raised: the spec's value failed contrast
+
+**Date:** 2026-09-05 · **Status:** active · **Overrides the design spec**
+
+Lighthouse's accessibility audit came back at 93, and half of that was `--fg-3`. The spec's
+values scored **3.55:1** (dark, on `--surface`) and **3.16:1** (light, on `--ink`) — under the
+4.5:1 that text below 18pt requires.
+
+It matters because `--fg-3` is used almost only at 10–12px: the timeline years, the stack group
+labels, the technology line on a project card, the whole footer, the availability badge. Every
+one of those is small text, so none of them get the large-text allowance.
+
+Raised to `#868580` (dark) and `#706F6B` (light) — the smallest change that clears AA against
+both `--ink` and `--surface`. Measured after the change: 4.98 / 5.29 dark, 4.54 / 5.03 light.
+It is still visibly the quietest text on the page.
+
+Second token to be overridden for contrast, after `--acc-text`. The pattern is the same: the
+spec was written for how the colours look, not for what they measure.
+
+---
+
+### 28. The project card uses the overlay pattern, not a button around everything
+
+**Date:** 2026-09-05 · **Status:** active
+
+The card was one `<button>` wrapping all its content. That works for mouse and keyboard, but
+the control's accessible name becomes everything inside — title, type, summary, three
+technologies — announced as the name of a single button. Adding an `aria-label` fixed the
+announcement and broke WCAG 2.5.3 (Label in Name) instead: the visible text was no longer
+contained in the accessible name, so a voice-control user saying "click Showroom" would match
+nothing.
+
+The button now wraps only the title and is stretched over the card with an `::after` overlay.
+The accessible name is "Open project: Showroom", which contains the visible "Showroom"; the
+summary is ordinary readable text again; the whole card surface is still clickable — verified
+with `elementFromPoint` at all four corners.
+
+The focus ring needed one extra rule: without it the outline traced the invisible overlay — the
+entire card — instead of the title.
+
+---
+
+### 29. Other findings from the Lighthouse pass
+
+**Date:** 2026-09-05 · **Status:** active
+
+- **`aria-label` on a `<p>` is prohibited ARIA.** `aria-label` is only allowed on elements with
+  a role that supports a name, and `<p>` has none, so the hero name's label was silently doing
+  nothing. `role="img"` makes it legal and is the honest description: it is lettering, not a
+  paragraph. This was also the only thing failing Lighthouse 13's new "Agentic Browsing" audit.
+- **The language button's label did not contain its visible text.** It showed "EN" and was
+  labelled "Switch language". Now "EN — Switch language", so voice control can address it.
+- **`robots.txt` returned the SPA's `index.html`**, which Lighthouse parsed as an invalid
+  robots file. Added a real `robots.txt` and a one-URL `sitemap.xml` in `public/`.
+
+---
+
+### 30. Lighthouse results, and what is left on performance
+
+**Date:** 2026-09-05 · **Status:** informational
+
+After the fixes above, measured against the production build on `localhost:4173`:
+
+| | Desktop | Mobile |
+|---|---|---|
+| Performance | 98 | 82 |
+| Accessibility | **100** | **100** |
+| Best Practices | **100** | **100** |
+| SEO | **100** | **100** |
+
+The roadmap's target was 100 on accessibility and best practices. Met.
+
+Performance is not a roadmap target and the remaining gap is almost entirely one thing:
+**render-blocking requests, ~1,360 ms of the mobile LCP**, which is the Google Fonts stylesheet
+in `<head>`. Everything else is small — 24 KiB of unused JavaScript (vue-i18n and the router,
+both genuinely used) and 52 KiB from serving the profile photo as JPEG rather than WebP.
+Cumulative Layout Shift is 0.
+
+Two ways to remove the font cost, neither taken yet:
+
+- **Load the stylesheet asynchronously** (`media="print"` + `onload`). Small change; introduces
+  a flash of fallback text.
+- **Self-host the fonts.** More work, removes the third-party request entirely, and avoids
+  sending visitors' IPs to Google — which has been the subject of GDPR rulings in the EU.
+  This is the better answer for a site on a personal domain.
+
+Deferred on purpose until after deployment. This particular number is the one localhost
+distorts most: every other asset is served with zero latency while the font request goes to the
+real internet, so the fonts look disproportionately expensive here. Measure again on the
+deployed site before optimising against a number that is partly an artifact.
+
+---
+
+### 31. No `llms.txt`
+
+**Date:** 2026-09-05 · **Status:** active
+
+Lighthouse 13's "Agentic Browsing" category asks for one. It was written and then removed.
+
+The reason is maintenance, not scepticism about the idea: it is the only file in the project
+where the content would be duplicated **by hand** instead of coming from `src/data/`. Everything
+else on this site has exactly one source. A file that silently goes stale every time a project
+changes is worse than no file, and `llms.txt` is a 2025 proposal, not a standard — so the cost
+is certain and the benefit is not.
+
+If it is ever added, it should be generated from `src/data/` at build time, not written twice.

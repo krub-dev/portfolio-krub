@@ -100,7 +100,7 @@ watch(lang, () => requestAnimationFrame(measureNatural))
         <button class="icon-btn" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
           ◐
         </button>
-        <button class="lang-btn" type="button" :aria-label="t('a11y.toggleLang')" @click="toggleLang">
+        <button class="lang-btn" type="button" :aria-label="`${lang.toUpperCase()} — ${t('a11y.toggleLang')}`" @click="toggleLang">
           {{ lang.toUpperCase() }}
         </button>
         <a class="cta" :href="`mailto:${email}`">{{ t('actions.talk') }}</a>
@@ -127,7 +127,7 @@ watch(lang, () => requestAnimationFrame(measureNatural))
         <button class="icon-btn" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
           ◐
         </button>
-        <button class="lang-btn" type="button" :aria-label="t('a11y.toggleLang')" @click="toggleLang">
+        <button class="lang-btn" type="button" :aria-label="`${lang.toUpperCase()} — ${t('a11y.toggleLang')}`" @click="toggleLang">
           {{ lang.toUpperCase() }}
         </button>
       </div>

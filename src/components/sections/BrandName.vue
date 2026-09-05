@@ -23,7 +23,17 @@
 </script>
 
 <template>
-  <p class="name" aria-label="Kiko Rubio">
+  <!--
+    role="img" is what makes the aria-label legal here. aria-label is only
+    allowed on elements with a role that supports a name, and a <p> has none —
+    Lighthouse flags it as a prohibited attribute and a screen reader ignores
+    it, so the name was silently doing nothing.
+
+    role="img" is also the honest description: this is not a paragraph, it is a
+    piece of lettering that happens to be made of characters. The role tells
+    assistive tech to announce the label and skip the contents.
+  -->
+  <p class="name" role="img" aria-label="Kiko Rubio">
     <span aria-hidden="true">
       K<span class="reveal">IKO </span>
       <span class="split">RUB<span class="reveal">IO</span></span>

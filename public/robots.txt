@@ -1,0 +1,5 @@
+# krub.dev — a one-page portfolio. Everything is public and crawlable.
+User-agent: *
+Allow: /
+
+Sitemap: https://krub.dev/sitemap.xml

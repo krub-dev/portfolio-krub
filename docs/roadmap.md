@@ -118,7 +118,7 @@ the modal while open.
 
 **Check:** open and close each project, navigate images with the arrows, close with Escape.
 
-## Step 11 — Final pass
+## Step 11 — Final pass ✅
 
 - Accessibility: `aria-label` on every text-free button, `aria-hidden` on everything
   decorative, correct tab order, visible focus.

@@ -14,7 +14,7 @@
   --line: rgba(255, 255, 255, 0.11);  /* every border in the project */
   --fg: #f2f0ea;                      /* primary text */
   --fg-2: #a3a29d;                    /* secondary text */
-  --fg-3: #6e6d69;                    /* tertiary text, mono labels */
+  --fg-3: #868580;                    /* tertiary text, mono labels — see note below */
   --acc: #ffc800;                     /* brand yellow — FILLS only */
   --acc-2: #e6b400;                   /* yellow on filled-button hover */
   --acc-text: #ffc800;                /* accent TEXT sitting on --ink / --surface */
@@ -41,6 +41,13 @@
    (4.57:1, AA at any size) while accent FILLS stay #FFC800 with --on-acc on
    top. Splitting fills from text is what lets the brand yellow survive the
    light theme without the small mono labels becoming illegible.
+
+   --fg-3 is the fourth. The spec's values (#6E6D69 dark, #8A8985 light) scored
+   3.55 and 3.16 against the surfaces they sit on — below the 4.5:1 that text
+   under 18pt needs, and --fg-3 is used almost exclusively at 10-12px: the
+   timeline years, the stack group labels, the card technology line, the whole
+   footer. Raised to #868580 and #706F6B, the least change that clears AA on
+   both --ink and --surface. Still clearly the quietest text on the page.
    See docs/decisions.md. */
 [data-theme='light'] {
   --ink: #f5f3ee;
@@ -49,7 +56,7 @@
   --line: rgba(12, 12, 13, 0.13);
   --fg: #141416;
   --fg-2: #5a5955;
-  --fg-3: #8a8985;
+  --fg-3: #706f6b;
   --acc: #ffc800;
   --acc-2: #b98c00;
   --acc-text: #8a6a00;

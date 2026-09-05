@@ -2,19 +2,21 @@
 /*
   One project card. Emits `open` — it does not know the modal exists.
 
-  The whole card is clickable, so the accessible name and the keyboard path go
-  on a real <button> wrapping the content rather than a click handler on an
-  <article>. A div with @click is invisible to keyboard and screen-reader
-  users; this way Tab reaches it and Enter opens it, for free.
+  The whole card is clickable, but the button is only around the TITLE, then
+  stretched over the card with an ::after overlay. That is the standard pattern
+  for a fully-clickable card, and it is worth understanding why:
 
-  It carries an explicit aria-label. Without one a screen reader would fall
-  back to the button's contents and announce the whole card — title, type,
-  summary, three technologies — as the name of a single control. "Open project:
-  Showroom" is what a person actually needs to hear before deciding to press it;
-  the rest is still readable inside.
+  Wrapping the entire card in one <button> works with a mouse and with a
+  keyboard, but the control's accessible name becomes everything inside it —
+  title, type label, summary, three technologies, read out as the name of a
+  single button. Adding an aria-label fixes the announcement but then the
+  visible text is no longer contained in the accessible name, which breaks
+  WCAG 2.5.3 (Label in Name): someone using voice control says "click
+  Showroom" and nothing matches.
 
-  The striped frame is a placeholder. Once `image` is set on the entry in
-  src/data/projects.js, the <img> renders instead and shotLabel is ignored.
+  With the overlay the name is just the title, the summary stays ordinary
+  readable text next to it, and the entire card surface is still a click
+  target.
 */
 import { useI18n } from 'vue-i18n'
 
@@ -33,61 +35,51 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <article class="card">
-    <button
-      class="hit"
-      type="button"
-      data-magnetic
-      :aria-label="t('a11y.openProject', { name: props.name })"
-      @click="$emit('open')"
-    >
-      <span class="shot">
-        <img v-if="image" :src="image" :alt="name" class="shot-img" />
-        <span v-else class="shot-label">{{ shotLabel }}</span>
-      </span>
+  <article class="card" data-magnetic>
+    <div class="shot">
+      <img v-if="image" :src="image" :alt="name" class="shot-img" />
+      <span v-else class="shot-label">{{ shotLabel }}</span>
+    </div>
 
-      <span class="body">
-        <span class="title-row">
-          <span class="title">{{ name }}</span>
-          <span class="tag">{{ tag }}</span>
-        </span>
-        <span class="summary">{{ summary }}</span>
+    <div class="body">
+      <div class="title-row">
+        <h3 class="title">
+          <button
+            class="open"
+            type="button"
+            :aria-label="t('a11y.openProject', { name: props.name })"
+            @click="$emit('open')"
+          >
+            {{ name }}
+          </button>
+        </h3>
+        <span class="tag">{{ tag }}</span>
+      </div>
 
-        <span class="foot">
-          <span class="stack">{{ stack.slice(0, 3).join(' · ') }}</span>
-          <span class="arrow" aria-hidden="true">↗</span>
-        </span>
-      </span>
-    </button>
+      <p class="summary">{{ summary }}</p>
+
+      <div class="foot">
+        <span class="stack">{{ stack.slice(0, 3).join(' · ') }}</span>
+        <span class="arrow" aria-hidden="true">↗</span>
+      </div>
+    </div>
   </article>
 </template>
 
 <style scoped>
 .card {
+  position: relative;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--surface);
   overflow: hidden;
   display: flex;
+  flex-direction: column;
   transition: border-color 0.16s ease;
 }
 
 .card:hover {
   border-color: var(--acc-text);
-}
-
-/* Reset the button back to a plain block so it can be the card's shape. */
-.hit {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
 }
 
 .shot {
@@ -132,9 +124,39 @@ const { t } = useI18n()
 }
 
 .title {
+  margin: 0;
   font-size: 19px;
   font-weight: 600;
   color: var(--fg);
+}
+
+/* Strip the button back to plain text so the title still looks like a title. */
+.open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/*
+  This is what makes the whole card clickable while the button stays around
+  the title alone. The overlay is transparent and sits over everything, so a
+  click anywhere on the card lands on this button.
+*/
+.open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Without this the focus ring would trace the invisible overlay — the whole
+   card — instead of the title. Ring on the title, click target everywhere. */
+.open:focus-visible::after {
+  display: none;
 }
 
 .tag {
@@ -146,6 +168,7 @@ const { t } = useI18n()
 }
 
 .summary {
+  margin: 0;
   font-size: 15px;
   line-height: 1.55;
   color: var(--fg-2);
