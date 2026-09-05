@@ -3,15 +3,9 @@
   The hero: name, headline, paragraph, two CTAs on the left; the square stage
   with the logo on the right.
 
-  The stage is empty apart from the logo on purpose — it is the reserved slot
-  for a future 3D scene. No explanatory text goes inside it.
-
-  The logo is the PNG used as a CSS mask over a var(--mark) background rather
-  than as an <img>. That is what makes it follow the theme: yellow on dark,
-  black on light, from one file. Its 1.682 aspect ratio is fixed by the asset.
-
-  The 3D parallax on the logo and the magnetic pull on the stage arrive in
-  step 8; the hooks (data-magnetic, the wrapper div) are already here.
+  The stage on the right is LogoStage: it owns the logo, the inner grid and the
+  3D parallax. The availability badge is passed into its slot, because it sits
+  inside the stage but has nothing to do with the tilt.
 */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -21,6 +15,7 @@ import BaseButton from '../base/BaseButton.vue'
 import { useLang } from '../../composables/useLang'
 import { copy, email } from '../../data'
 import BrandName from './BrandName.vue'
+import LogoStage from './LogoStage.vue'
 
 const { lang } = useLang()
 const { t } = useI18n()
@@ -54,11 +49,9 @@ const hero = computed(() => copy.hero[lang.value])
         </div>
       </div>
 
-      <div class="stage" data-magnetic>
-        <div class="stage-grid" aria-hidden="true" />
-        <div class="mark" aria-hidden="true" />
+      <LogoStage>
         <AvailabilityBadge class="availability" :label="hero.badge" />
-      </div>
+      </LogoStage>
     </div>
   </section>
 </template>
@@ -131,41 +124,8 @@ const hero = computed(() => copy.hero[lang.value])
   padding: 14px 26px;
 }
 
-.stage {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  max-height: min(58vh, 520px);
-  justify-self: center;
-  width: 100%;
-  max-width: 520px;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: radial-gradient(80% 80% at 50% 40%, var(--surface) 0%, var(--ink) 100%);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 40px inside the stage, not the 72px of the page background: the stage is
-   small, and the page grid at full size reads as noise in here. */
-.stage-grid {
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-.mark {
-  width: 58%;
-  aspect-ratio: 1.682;
-  background: var(--mark);
-  -webkit-mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
-  mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
-  transition: transform 0.12s linear;
-}
-
+/* The stage, its grid and the logo all moved to LogoStage.vue in step 8, so
+   the parallax lives next to the markup it drives. */
 .availability {
   position: absolute;
   top: 14px;

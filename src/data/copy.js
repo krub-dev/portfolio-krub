@@ -65,6 +65,13 @@ export const copy = {
       body: 'Cuéntame el problema. Te digo cómo lo resolvería y cuánto tardo.',
     },
   },
+
+  // What Limonacho says when you poke him. The bubble hides itself after a few
+  // seconds; turn the whole mascot off in config.js.
+  lemon: {
+    en: { bubble: "Welcome! I'm Limonacho" },
+    es: { bubble: '¡Bienvenido! Soy Limonacho' },
+  },
 }
 
 export default copy

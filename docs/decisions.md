@@ -274,3 +274,51 @@ grounds that it is the artefact that was reviewed and approved:
   reading as noise inside a 520px box.
 
 The spec table looks like transcription drift rather than intent.
+
+---
+
+### 16. One rAF loop and a subscription list for everything that follows the mouse
+
+**Date:** 2026-09-05 · **Status:** active
+
+Four effects track the cursor: the custom cursor, the magnetic hover, the logo parallax and the
+lemon's pupils. Each one running its own `requestAnimationFrame` would mean four callbacks per
+frame competing to read layout and write styles, and four chances to leave a loop running after
+unmount.
+
+`usePointer(callback)` owns the single loop and a `Set` of subscribers. It starts when the first
+subscriber arrives and stops when the last one leaves.
+
+The pointer position is a **plain object, not a ref**. A reactive ref would re-render every
+component that reads it sixty times a second, for values that never reach a template —
+subscribers write to the DOM directly through their own element refs. Reactivity is for state
+the user sees; this is animation.
+
+Nothing subscribes on touch devices or below 900px, matching the design. `CursorFx` also hides
+itself with a media query, because the `v-if` is evaluated once at setup and a window resized
+across 900px would otherwise leave a dot frozen where the mouse last was.
+
+---
+
+### 17. The ring trails the dot in CSS, not in JavaScript
+
+**Date:** 2026-09-05 · **Status:** active
+
+Both cursor elements are given the same position every frame. The ring simply carries a 0.28s
+transition on `transform`, so the browser interpolates its way there while the dot arrives
+instantly. One line of CSS instead of a spring simulation, and the easing curve is the one the
+design spec already specifies.
+
+---
+
+### 18. Limonacho's colours are element colours, not tokens
+
+**Date:** 2026-09-05 · **Status:** active
+
+The lemon uses literal colours: the leaf greens, white eyes, `#0C0C0D` pupils, and pores mixed
+from `var(--acc)` toward black. The design spec §3.16 names each one.
+
+The test for whether something should be a token is whether it should follow the theme. A white
+eye that turned dark in the light theme would be a bug, not a feature. Same reasoning as the
+availability dot's green — the exception list in `CLAUDE.md` was just incomplete and now covers
+the whole mascot.

@@ -7,21 +7,31 @@
   publishes that variable — the fallback keeps the layout sane for the one
   frame before the first measurement lands.
 
-  data-hide-cursor is the hook for the custom cursor in step 8; the rule that
-  uses it already exists in tokens.css and only applies on pointer devices.
+  data-hide-cursor turns off the native cursor for the whole subtree; the rule
+  lives in tokens.css and only applies on pointer devices.
+
+  useMagnetic() is called here, once, rather than in each component that wants
+  the effect: it watches the document for [data-magnetic] and drives whichever
+  element is nearest the cursor. One owner, one loop.
 
   The scroll spy that fills `activeId` arrives in step 9, so no link is
   highlighted yet.
 */
 import { ref } from 'vue'
 
+import CursorFx from './components/chrome/CursorFx.vue'
+import LemonPet from './components/chrome/LemonPet.vue'
+import ScrollProgress from './components/chrome/ScrollProgress.vue'
 import TheFooter from './components/chrome/TheFooter.vue'
 import TheMobileMenu from './components/chrome/TheMobileMenu.vue'
 import TheNavbar from './components/chrome/TheNavbar.vue'
-import ScrollProgress from './components/chrome/ScrollProgress.vue'
+import { useMagnetic } from './composables/useMagnetic'
+import { config } from './data'
 
 const menuOpen = ref(false)
 const activeId = ref('')
+
+useMagnetic()
 
 function goTop() {
   // scroll-behavior:smooth in tokens.css animates this; under
@@ -42,9 +52,11 @@ function goTop() {
     />
 
     <ScrollProgress />
+    <CursorFx />
 
     <RouterView />
 
+    <LemonPet v-if="config.showLemon" />
     <TheFooter @go-top="goTop" />
   </div>
 </template>
