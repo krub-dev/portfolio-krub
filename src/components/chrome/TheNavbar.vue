@@ -74,7 +74,7 @@ watch(lang, () => requestAnimationFrame(measureNatural))
 
 <template>
   <header class="bar">
-    <div ref="capsule" class="capsule" :class="{ compact }" :style="{ maxWidth }">
+    <div ref="capsule" class="capsule" :class="{ compact }" :style="{ maxWidth }" data-motion="decorative">
       <a class="brand" href="#top" aria-label="krub.dev">
         <BrandLogo :height="compact ? 18 : 22" class="brand-logo" />
         <span class="brand-dev">.dev</span>

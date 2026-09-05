@@ -59,6 +59,6 @@
     "prevImage": "Previous image",
     "nextImage": "Next image",
     "backToTop": "Back to top",
-    "openProject": "Open project details"
+    "openProject": "Open project: {name}"
   }
 }

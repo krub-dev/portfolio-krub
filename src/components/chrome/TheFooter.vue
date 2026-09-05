@@ -32,7 +32,7 @@ const shown = computed(() => y.value > window.innerHeight * 0.55)
 </script>
 
 <template>
-  <footer ref="footer" class="footer" :class="{ shown }">
+  <footer ref="footer" class="footer" :class="{ shown }" data-motion="decorative">
     <div class="credit">
       <span class="made">
         {{ t('footer.madePre') }}

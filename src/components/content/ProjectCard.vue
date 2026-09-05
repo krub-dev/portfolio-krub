@@ -7,10 +7,18 @@
   <article>. A div with @click is invisible to keyboard and screen-reader
   users; this way Tab reaches it and Enter opens it, for free.
 
+  It carries an explicit aria-label. Without one a screen reader would fall
+  back to the button's contents and announce the whole card — title, type,
+  summary, three technologies — as the name of a single control. "Open project:
+  Showroom" is what a person actually needs to hear before deciding to press it;
+  the rest is still readable inside.
+
   The striped frame is a placeholder. Once `image` is set on the entry in
   src/data/projects.js, the <img> renders instead and shotLabel is ignored.
 */
-defineProps({
+import { useI18n } from 'vue-i18n'
+
+const props = defineProps({
   name: { type: String, required: true },
   tag: { type: String, required: true },
   summary: { type: String, required: true },
@@ -20,11 +28,19 @@ defineProps({
 })
 
 defineEmits(['open'])
+
+const { t } = useI18n()
 </script>
 
 <template>
   <article class="card">
-    <button class="hit" type="button" data-magnetic @click="$emit('open')">
+    <button
+      class="hit"
+      type="button"
+      data-magnetic
+      :aria-label="t('a11y.openProject', { name: props.name })"
+      @click="$emit('open')"
+    >
       <span class="shot">
         <img v-if="image" :src="image" :alt="name" class="shot-img" />
         <span v-else class="shot-label">{{ shotLabel }}</span>

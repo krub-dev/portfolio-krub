@@ -404,3 +404,55 @@ same width.
 The measurement is what makes it correct everywhere: on overlay-scrollbar platforms — phones,
 macOS by default — the gap is 0, no padding is added and nothing moves. Verified: 15px on
 desktop, none at 390px wide.
+
+---
+
+### 24. A visible focus ring, using `:focus-visible`
+
+**Date:** 2026-09-05 · **Status:** active · **Not in the design spec**
+
+The project had no focus indicator at all. That is worse here than in most sites: the custom
+cursor sets `cursor: none` across everything, so a keyboard user would have had no pointer AND
+no ring — nothing whatsoever to say where they were on the page.
+
+`:focus-visible`, not `:focus`. The browser decides: a keyboard user gets the ring, someone who
+clicked a button with a mouse does not. That removes the old excuse for stripping outlines
+because "they look bad on click".
+
+`outline` rather than a border or a box-shadow — it does not affect layout, it follows the
+border-radius, and it is not clipped by `overflow: hidden`.
+
+One override: on a filled yellow control the yellow ring would be invisible, so `--acc` fills
+switch their ring to `--fg`. Verified on the navbar CTA: yellow background, `#F2F0EA` ring.
+
+---
+
+### 25. Reduced motion covers transitions, not just keyframes
+
+**Date:** 2026-09-05 · **Status:** active
+
+The spec asks for the marquee, the dot halo and the sliding entrances to stop under
+`prefers-reduced-motion`. Half of that motion is not keyframe animation at all — the footer
+sliding in, the navbar capsule resizing over 0.55s and the grid crossfade are CSS transitions,
+and `animation: none` does nothing to them.
+
+The `[data-motion="decorative"]` rule now clears both. Killing a transition still leaves the
+element at its final value: the footer arrives, it just does not travel.
+
+Six elements are marked: both background grids, the navbar capsule, the availability ring, the
+marquee track and the footer. Colour and border hovers are deliberately NOT marked — a 0.16s
+colour change is not what the setting is asking about.
+
+---
+
+### 26. The project card gets an explicit `aria-label`
+
+**Date:** 2026-09-05 · **Status:** active
+
+The whole card is one `<button>`, so without a label a screen reader falls back to its contents
+and announces the title, the type, the summary and three technologies as the *name of a single
+control*. "Open project: Showroom" is what someone needs to hear before deciding to press it —
+the rest is still readable inside the card.
+
+Audited across the rendered page: 25 interactive controls, all with an accessible name, none
+longer than 70 characters.

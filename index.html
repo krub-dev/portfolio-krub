@@ -15,6 +15,40 @@
       content="Portfolio of Kiko Rubio (krub), fullstack developer in Barcelona: Java with Spring Boot, Node, databases and Vue on the front."
     />
 
+    <link rel="icon" type="image/png" href="/assets/img/krub-icon.png" />
+    <link rel="apple-touch-icon" href="/assets/img/krub-icon.png" />
+
+    <!--
+      Tints the browser UI on mobile. Two values so it follows the theme: the
+      media query is what makes a phone in light mode not get a black bar.
+    -->
+    <meta name="theme-color" content="#0C0C0D" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F5F3EE" media="(prefers-color-scheme: light)" />
+
+    <!--
+      Open Graph. Absolute URLs on purpose: the crawlers that read these (Slack,
+      WhatsApp, LinkedIn, X) fetch the page out of context and cannot resolve a
+      relative path.
+
+      English only. These are baked into the HTML at build time, so they cannot
+      follow the language toggle — and English is the default the site ships in.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://krub.dev/" />
+    <meta property="og:title" content="krub — Fullstack Developer" />
+    <meta
+      property="og:description"
+      content="Portfolio of Kiko Rubio (krub), fullstack developer in Barcelona: Java with Spring Boot, Node, databases and Vue on the front."
+    />
+    <meta property="og:image" content="https://krub.dev/assets/img/banner-krub.png" />
+    <meta property="og:image:alt" content="krub.dev" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:locale:alternate" content="es_ES" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@krub_dev" />
+    <meta name="twitter:creator" content="@krub_dev" />
+
     <!-- Space Grotesk 400/500/600/700 + JetBrains Mono 400/500/700 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

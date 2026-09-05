@@ -127,6 +127,31 @@ the modal while open.
 - Open Graph metadata and favicon.
 - Verify not one literal string remains in a `.vue` file.
 
+## Step 11.5 — Tests
+
+Deliberately small. The point is that the project has a safety net and that the testing setup
+exists, not to chase coverage. After step 11, because that step still moves things.
+
+**Vitest** — the Vite-native JUnit. Pure logic only, no browser, fast:
+
+- the timeline period formatter: `2024 — now`, `2018 — 2024`, and a single year printed once;
+- the carousel's wrap-around, including that going back from the first slide lands on the last
+  (JavaScript's `%` keeps the sign, so `-1 % 4` is `-1` — that is the bug the test guards);
+- `useTheme` / `useLang`: they persist, they restore, and they survive `localStorage` throwing.
+
+**Playwright** — a real Chromium, a handful of flows. Worth it for one specific reason: these
+are exactly the things that could not be verified during development, because the tooling
+browser ran no frames, so `requestAnimationFrame`, scroll events and CSS transitions never
+advanced. A real browser runs all three.
+
+- the navbar goes compact on scroll and shrinks to its content;
+- the footer slides in and never covers the last section;
+- exactly one nav link is highlighted while scrolling through the page;
+- the modal opens, traps focus, closes on Escape, and returns focus to the card;
+- theme and language survive a reload.
+
+**Check:** `npm run test` and `npm run test:e2e` both green from a clean checkout.
+
 ## Step 12 — Publish
 
 `npm run build`, GitHub repository, deploy to Vercel or Netlify, `krub.dev` pointing at it.

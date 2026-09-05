@@ -103,6 +103,35 @@ section[id] {
   scroll-margin-top: 96px;
 }
 
+/* ---------------------------------------------------------------------------
+   Focus
+
+   :focus-visible, not :focus. The browser decides: a keyboard user gets the
+   ring, someone who clicked a button with a mouse does not. That is the whole
+   reason the pseudo-class exists, and why the old habit of removing outlines
+   because "they look bad on click" is no longer a trade-off anyone has to make.
+
+   This matters more here than in most projects. The custom cursor sets
+   `cursor: none` across the whole site, so a keyboard user has no pointer AND,
+   without this, no focus ring either — nothing at all to say where they are.
+
+   outline rather than a border or a shadow: it does not affect layout, it
+   follows the element's border-radius, and it survives overflow:hidden.
+   --------------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--acc-text);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* On a filled yellow control the yellow ring would vanish. --fg reads against
+   both --acc and the page, so it works wherever these sit. */
+.v-solid:focus-visible,
+[class*='cta']:focus-visible,
+[class*='solid']:focus-visible {
+  outline-color: var(--fg);
+}
+
 /* Stack icons that are monochrome-dark (Express, Prisma, Three.js, GitHub,
    Linux) are inverted in dark theme only, so they read against --surface-2. */
 [data-invert-dark] {
@@ -183,7 +212,18 @@ section[id] {
     scroll-behavior: auto;
   }
 
+  /*
+    Both animation and transition, because the decorative motion on this site
+    comes as both: the marquee and the dot halo are keyframe animations, while
+    the footer sliding in, the navbar capsule resizing and the grid crossfade
+    are transitions. Killing the transition still leaves the element at its
+    final value — the footer arrives, it just does not travel.
+
+    Colour and border hovers are NOT marked, and stay: a 0.16s colour change is
+    not what this setting is asking about.
+  */
   [data-motion='decorative'] {
     animation: none !important;
+    transition: none !important;
   }
 }

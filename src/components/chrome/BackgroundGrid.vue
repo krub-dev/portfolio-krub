@@ -27,6 +27,7 @@ defineProps({
     class="bg-grid"
     :class="[variant, { visible }]"
     :style="{ backgroundSize: `${size}px ${size}px` }"
+    data-motion="decorative"
     aria-hidden="true"
   />
 </template>
@@ -57,6 +58,11 @@ defineProps({
   Stops at the footer rather than running under it, and fades out downward so
   the grid never competes with the text in the lower half of a section. The
   mask is the same gradient the design spec specifies.
+
+  The #000 stops are not a colour and are not a token candidate: in a mask,
+  what matters is the alpha channel, and #000 simply means "fully opaque here".
+  Swapping it for var(--ink) would change nothing visually and would suggest a
+  relationship to the theme that does not exist.
 */
 .global {
   position: fixed;
