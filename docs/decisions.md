@@ -589,3 +589,29 @@ mask, and a circle would leave transparent corners showing.
 The colours are literals inside an image file, which is not a token violation — an icon is
 rendered by the browser chrome, outside the page, where CSS variables do not exist. It also has
 to stay the same in both themes.
+
+---
+
+### 33. A purpose-built Open Graph banner
+
+**Date:** 2026-09-05 · **Status:** active
+
+`banner-krub.png` came from the previous site: 1500×500, which is a Twitter-header ratio, not
+the 1.91:1 that Open Graph cards are laid out for. It was getting cropped, and it did not look
+like this site.
+
+`og-banner.png` is the hero rendered at 1200×630 — the page background with its 72px grid, the
+square stage with the mark, the three-line headline with `backend` in `--acc`, the 104×3 yellow
+rule, and a mono footer line. Drawn on a canvas with the site's real fonts loaded, so the
+typography matches rather than approximates.
+
+`og:image:width` and `og:image:height` are declared so a crawler can lay out the card before
+the image finishes downloading.
+
+**Known duplication:** the headline is written into the image, so it is the one place besides
+`src/data/copy.js` where that sentence lives. Changing the hero copy means regenerating the
+banner. That is inherent to social images — they are rendered artifacts — but it is worth
+knowing rather than discovering.
+
+Unused assets removed along the way: `krub-icon.png` (replaced by the new favicon),
+`krub-logo.webp` (referenced by nothing), and `banner-krub.png`.
