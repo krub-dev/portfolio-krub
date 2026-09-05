@@ -9,4 +9,12 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
+
+  server: {
+    // Bind to every network interface, not just localhost, so a phone on the
+    // same Wi-Fi can open the dev server. Vite prints the LAN address as
+    // "Network:" when it starts. This is the local network only — nothing is
+    // exposed to the internet.
+    host: true,
+  },
 })
