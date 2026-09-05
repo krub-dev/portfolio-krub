@@ -142,6 +142,23 @@ section[id] {
   100% { opacity: 0; transform: scale(1); }
 }
 
+/*
+  The hero name reveal. Not listed in the design spec's keyframes section, but
+  it is in the prototype and it is the first thing a visitor sees, so it stays.
+
+  It starts as "K RUB", widens the hidden letters into "KIKO RUBIO", then drops
+  "RUBIO" onto a second line under "KIKO". nameOpen animates max-width because
+  width:auto is not animatable; 6ch is comfortably wider than the longest
+  fragment, and overflow:hidden does the reveal.
+*/
+@keyframes nameOpen {
+  to { max-width: 6ch; opacity: 1; }
+}
+
+@keyframes nameSplit {
+  to { transform: translate(calc(-5ch - 0.9em), 1.08em); }
+}
+
 @keyframes bubbleIn {
   from { opacity: 0; transform: translateY(6px) scale(0.94); }
   to { opacity: 1; transform: translateY(0) scale(1); }

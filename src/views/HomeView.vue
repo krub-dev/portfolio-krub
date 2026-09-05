@@ -1,7 +1,66 @@
 <script setup>
-// Step 1: the page is intentionally empty. Sections land in step 6.
+/*
+  The page. Sections top to bottom, in the order the design spec lists them.
+
+  Step 6 is layout only — no scroll behaviour, no navbar, no footer, no cursor.
+  Those arrive in steps 7 to 9.
+
+  The hero and the marquee share a wrapper that is exactly one viewport tall:
+  the hero flexes to fill it and the marquee sits flush at the bottom, so the
+  band lands right at the fold. Below 700px of viewport height that would
+  squash the hero, so the wrapper switches to auto height and the marquee just
+  follows the content.
+*/
+import { computed } from 'vue'
+
+import AboutSection from '../components/sections/AboutSection.vue'
+import ContactSection from '../components/sections/ContactSection.vue'
+import HeroSection from '../components/sections/HeroSection.vue'
+import MarqueeBar from '../components/sections/MarqueeBar.vue'
+import ProjectsSection from '../components/sections/ProjectsSection.vue'
+import StackSection from '../components/sections/StackSection.vue'
+import TestimonialsSection from '../components/sections/TestimonialsSection.vue'
+import { useLang } from '../composables/useLang'
+import { config, copy } from '../data'
+
+const { lang } = useLang()
+const marqueeItems = computed(() => copy.marquee[lang.value])
+
+// Placeholder until step 10 builds the modal.
+function openProject(index) {
+  console.log('open project', index)
+}
 </script>
 
 <template>
-  <main></main>
+  <main>
+    <div class="hero-wrap" data-hero-wrap>
+      <HeroSection />
+      <MarqueeBar :items="marqueeItems" />
+    </div>
+
+    <AboutSection />
+    <ProjectsSection @open="openProject" />
+    <StackSection />
+    <TestimonialsSection v-if="config.showTestimonials" />
+    <ContactSection />
+  </main>
 </template>
+
+<style scoped>
+.hero-wrap {
+  position: relative;
+  z-index: 1;
+  height: 100svh;
+  min-height: 640px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-height: 700px) {
+  .hero-wrap {
+    height: auto;
+    min-height: 100svh;
+  }
+}
+</style>
