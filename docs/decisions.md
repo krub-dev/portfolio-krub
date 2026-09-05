@@ -359,3 +359,48 @@ and deliberately earlier, so the background has settled before the nav link ligh
 
 Verified at the pixel: the crossfade flips between scrollY 318 and 322 (line at 320), the
 highlight between 518 and 522 (line at 520).
+
+---
+
+### 21. The modal is teleported to `<body>`
+
+**Date:** 2026-09-05 · **Status:** active
+
+`ProjectModal` renders inside a `<Teleport to="body">`. Left where it is declared it would sit
+inside `.app`, which has `position: relative` and `overflow-x: hidden` — a stacking context the
+dialog would be trapped in, and a clipping box that a fixed overlay has no business being inside.
+Teleport keeps the component's logic and props where they belong while putting its DOM at the
+top level.
+
+---
+
+### 22. Escape and the focus trap were added; the prototype has neither
+
+**Date:** 2026-09-05 · **Status:** active
+
+The design spec's modal closes on the backdrop and on the ✕ button. Both were kept, and two
+things added:
+
+- **Escape**, on a document listener that only exists while the dialog is open. A dialog that
+  cannot be dismissed from the keyboard is a trap.
+- **A focus trap** (`useFocusTrap`). Without it Tab walks straight out of the dialog into the
+  page behind — still there, still full of links, just invisible under a blur. It also restores
+  focus to the card that opened the dialog on close, so the page does not jump.
+
+The backdrop handler checks `event.target === event.currentTarget`, so a click that starts
+inside the panel and drifts onto the backdrop — selecting text — does not close it.
+
+---
+
+### 23. Locking body scroll compensates for the scrollbar
+
+**Date:** 2026-09-05 · **Status:** active
+
+`overflow: hidden` on `<body>` removes the scrollbar, the viewport gets ~15px wider, and the
+whole page visibly jumps sideways as the modal opens. `useBodyScrollLock` measures the gap
+(`window.innerWidth - document.documentElement.clientWidth`) and replaces it with padding of the
+same width.
+
+The measurement is what makes it correct everywhere: on overlay-scrollbar platforms — phones,
+macOS by default — the gap is 0, no padding is added and nothing moves. Verified: 15px on
+desktop, none at 390px wide.

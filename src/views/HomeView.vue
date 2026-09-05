@@ -11,8 +11,9 @@
   squash the hero, so the wrapper switches to auto height and the marquee just
   follows the content.
 */
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
+import ProjectModal from '../components/content/ProjectModal.vue'
 import AboutSection from '../components/sections/AboutSection.vue'
 import ContactSection from '../components/sections/ContactSection.vue'
 import HeroSection from '../components/sections/HeroSection.vue'
@@ -21,15 +22,21 @@ import ProjectsSection from '../components/sections/ProjectsSection.vue'
 import StackSection from '../components/sections/StackSection.vue'
 import TestimonialsSection from '../components/sections/TestimonialsSection.vue'
 import { useLang } from '../composables/useLang'
-import { config, copy } from '../data'
+import { config, copy, projects } from '../data'
 
 const { lang } = useLang()
 const marqueeItems = computed(() => copy.marquee[lang.value])
 
-// Placeholder until step 10 builds the modal.
-function openProject(index) {
-  console.log('open project', index)
-}
+/*
+  Which project the modal is showing. The index lives here rather than in
+  ProjectsSection because the modal is a sibling of it, not a child: it renders
+  over the whole page, so the page is what owns the state.
+
+  null means closed — one value carries both "is it open" and "which one",
+  so the two can never disagree.
+*/
+const openIndex = ref(null)
+const openProject = computed(() => (openIndex.value === null ? null : projects[openIndex.value]))
 </script>
 
 <template>
@@ -40,10 +47,16 @@ function openProject(index) {
     </div>
 
     <AboutSection />
-    <ProjectsSection @open="openProject" />
+    <ProjectsSection @open="openIndex = $event" />
     <StackSection />
     <TestimonialsSection v-if="config.showTestimonials" />
     <ContactSection />
+
+    <ProjectModal
+      :project="openProject"
+      :index="openIndex ?? 0"
+      @close="openIndex = null"
+    />
   </main>
 </template>
 

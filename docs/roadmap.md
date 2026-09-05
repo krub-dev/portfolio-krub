@@ -110,7 +110,7 @@ none of it mounts. No animation loop survives unmount.
 
 **Check:** while scrolling, the link for the section I am in is the only yellow one.
 
-## Step 10 — Project modal
+## Step 10 — Project modal ✅
 
 `ProjectModal` with `MediaCarousel` and `SpecList`. Body scroll lock, close on backdrop, on the
 button and **on Escape** (the prototype does not have this; it gets added). Focus trapped inside
