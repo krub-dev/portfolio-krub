@@ -187,16 +187,29 @@ pupils, logo parallax, magnetic hover). No per-component loops.
 
 ```
 src/
-├─ data/
+├─ data/               everything I wrote — both languages per file
+│   ├─ index.js          re-exports, and the "start here" explanation
+│   ├─ copy.js           hero headline, About paragraphs, marquee, contact line
 │   ├─ projects.js
 │   ├─ experience.js
 │   ├─ education.js
 │   ├─ stack.js
-│   ├─ socials.js
-│   └─ testimonials.js
-├─ locales/
+│   ├─ socials.js        + email + cvPath
+│   ├─ testimonials.js
+│   └─ config.js         on/off switches for the optional sections
+├─ locales/            strings the interface needs, not prose
 │   ├─ en.json
 │   └─ es.json
 └─ styles/
     └─ tokens.css        (:root + [data-theme="light"] + @keyframes + resets)
 ```
+
+The split is deliberate and it is the rule to keep:
+
+    sentences I wrote   ->   src/data/
+    labels the UI needs ->   src/locales/
+
+Content collections carry their own `en` / `es` objects rather than pointing at translation
+keys, so adding a project or reworking a paragraph is one file, not three, and no dictionary
+key can go stale. Components read the right half with
+`computed(() => entry[lang.value])`.

@@ -10,15 +10,54 @@
   because the strings *are* the subject: it is a spec sheet, not a page. It
   never ships — the route is dev-only and this file is deleted before launch.
 */
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useLang } from '../composables/useLang'
 import { useTheme } from '../composables/useTheme'
+import {
+  config,
+  copy,
+  education,
+  email,
+  experience,
+  projects,
+  socials,
+  stack,
+  testimonials,
+} from '../data'
 
 const { theme, toggle: toggleTheme } = useTheme()
 const { lang, toggle: toggleLang } = useLang()
 const { t } = useI18n()
+
+/*
+  This is the pattern every section component will use: pick the half of a data
+  entry that matches the current language. `lang` is a ref, so the computed
+  re-runs on its own when the language toggle is pressed.
+*/
+const hero = computed(() => copy.hero[lang.value])
+const marquee = computed(() => copy.marquee[lang.value])
+
+// Timeline rows: "2024 — now", "2018 — 2024", or just "2025" for one year.
+function period(entry) {
+  if (entry.to === null) return `${entry.from} — ${t('time.now')}`
+  if (entry.to === entry.from) return entry.from
+  return `${entry.from} — ${entry.to}`
+}
+
+const collections = computed(() => [
+  { name: 'projects', count: projects.length, sample: projects[0][lang.value].name },
+  { name: 'experience', count: experience.length, sample: experience[0][lang.value].title },
+  { name: 'education', count: education.length, sample: education[0][lang.value].title },
+  { name: 'stack', count: stack.reduce((n, g) => n + g.items.length, 0), sample: `${stack.length} groups` },
+  { name: 'socials', count: socials.length, sample: socials.map((s) => s.name).join(', ') },
+  {
+    name: 'testimonials',
+    count: testimonials.length,
+    sample: `${config.showTestimonials ? 'section on' : 'section off'} · ${testimonials[0][lang.value].quote}`,
+  },
+])
 
 // Read back what the browser actually computed for each custom property, so
 // the swatch labels cannot drift from tokens.css.
@@ -61,15 +100,14 @@ const RADII = [
   ['999px', 'pill buttons'],
 ]
 
+// Interface strings only — the prose now lives in src/data/copy.js.
 const SAMPLE_KEYS = [
-  'hero.badge',
-  'hero.body',
   'nav.projects',
   'tab.exp',
-  'me.cv',
-  'contact.body',
+  'actions.cv',
+  'time.now',
   'footer.place',
-  'mq.m1',
+  'modal.role',
   'a11y.toggleTheme',
 ]
 
@@ -98,8 +136,8 @@ onMounted(readTokens)
   <main class="preview">
     <header class="head">
       <div>
-        <p class="eyebrow">Step 03 · tokens, theme &amp; language</p>
-        <h1 class="title">tokens.css</h1>
+        <p class="eyebrow">Step 04 · content &amp; data</p>
+        <h1 class="title">src/data</h1>
       </div>
       <div class="controls">
         <button class="toggle" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
@@ -112,10 +150,54 @@ onMounted(readTokens)
     </header>
 
     <section class="block">
-      <h2 class="h2">Dictionary</h2>
+      <h2 class="h2">Content · src/data/</h2>
       <p class="note">
-        Live from <code>src/locales/{{ lang }}.json</code>. Both toggles persist in
-        <code>localStorage</code> and survive a reload;
+        Every sentence on the site comes from here, both languages in one file. Toggle the
+        language and watch it follow — nothing below is written in a component.
+      </p>
+
+      <div class="rows">
+        <div v-for="c in collections" :key="c.name" class="row">
+          <div class="row-meta">
+            <span class="row-name">{{ c.name }}.js</span>
+            <code class="row-spec">{{ c.count }} entries</code>
+          </div>
+          <div class="row-demo dict">{{ c.sample }}</div>
+        </div>
+        <div class="row">
+          <div class="row-meta">
+            <span class="row-name">socials.js</span>
+            <code class="row-spec">email + cvPath</code>
+          </div>
+          <div class="row-demo dict">{{ email }}</div>
+        </div>
+      </div>
+
+      <p class="note">Hero headline, straight from <code>copy.hero.{{ lang }}</code>:</p>
+      <p class="headline-demo">
+        {{ hero.line1 }}<br />
+        {{ hero.line2 }}<br />
+        {{ hero.line3pre }}<span class="accent">{{ hero.accent }}</span>{{ hero.line3post }}
+      </p>
+
+      <p class="note">Timeline periods, computed from <code>from</code> / <code>to</code>:</p>
+      <div class="rows">
+        <div v-for="(e, i) in [...experience, ...education]" :key="i" class="row">
+          <div class="row-meta">
+            <code class="row-spec" :class="{ current: e.current }">{{ period(e) }}</code>
+          </div>
+          <div class="row-demo dict">{{ e[lang].title }}</div>
+        </div>
+      </div>
+
+      <p class="note">Marquee phrases: {{ marquee.join('  //  ') }}</p>
+    </section>
+
+    <section class="block">
+      <h2 class="h2">Interface · src/locales/</h2>
+      <p class="note">
+        Labels the UI needs, from <code>src/locales/{{ lang }}.json</code>. Both toggles persist
+        in <code>localStorage</code> and survive a reload;
         <code>&lt;html lang&gt;</code> is now <strong>{{ lang }}</strong>.
       </p>
       <div class="rows">
@@ -126,16 +208,6 @@ onMounted(readTokens)
           <div class="row-demo dict">{{ t(key) }}</div>
         </div>
       </div>
-      <p class="note">
-        The headline is the one string that carried markup in the prototype. It is split into
-        parts instead, so no HTML lives in a translation file:
-      </p>
-      <p class="headline-demo">
-        {{ t('hero.title.line1') }}<br />
-        {{ t('hero.title.line2') }}<br />
-        {{ t('hero.title.line3pre') }}<span class="accent">{{ t('hero.title.line3accent') }}</span
-        >{{ t('hero.title.line3post') }}
-      </p>
     </section>
 
     <section class="block">
@@ -280,6 +352,12 @@ onMounted(readTokens)
   font: 700 clamp(28px, 4vw, 48px) var(--font-sans);
   letter-spacing: -0.04em;
   line-height: 0.98;
+}
+
+/* .row-spec is declared later in this file and would win on source order,
+   since both are single-class selectors. Two classes beats one. */
+.row-spec.current {
+  color: var(--acc-text);
 }
 
 .accent {

@@ -185,3 +185,44 @@ decorative, `aria-hidden`, and its opacity is already handled by `--sec-idx`.
 The global `a` / `a:hover` rules moved to the new tokens for the same reason.
 
 **Owner signed off on overriding the closed decision** after seeing the two themes side by side.
+
+---
+
+### 12. Content lives in `src/data/`, interface strings in `src/locales/`
+
+**Date:** 2026-09-05 · **Status:** active
+
+The roadmap left this open: do translatable project strings stay inside the entry or move to the
+dictionary? Answer: they stay in the entry — and the same rule was extended to every piece of
+prose on the site.
+
+    sentences I wrote     ->  src/data/    (both languages side by side in one file)
+    labels the UI needs   ->  src/locales/ (nav paths, button labels, aria-labels)
+
+So the hero headline, the About paragraphs, the marquee phrases and the contact line moved out
+of `en.json` / `es.json` into `src/data/copy.js`, next to the collections.
+
+The reason is editing, not purity. This content evolves for years: projects get added, the About
+text gets reworked, testimonials become real. With the dictionary approach, changing a paragraph
+means opening `en.json`, finding the right nesting, then doing it again in `es.json` — and adding
+a project means editing three files with nothing to stop you leaving an orphan key behind. With
+both languages in one file, a rewording is one edit in one place, and deleting an entry deletes
+its translations with it.
+
+`src/data/index.js` re-exports everything and carries the explanation, so there is one obvious
+file to open first.
+
+**Trade-off:** a real translation workflow (a translator, a TMS) wants all strings in one
+extractable format. Not the situation here — one bilingual author, editing prose in context.
+If that ever changes, the collections are still structured enough to extract mechanically.
+
+---
+
+### 13. `src/data/config.js` for the optional sections
+
+**Date:** 2026-09-05 · **Status:** active
+
+Design spec §4 lists "show testimonials" and "show lemon" as configuration. They live in
+`config.js` as plain booleans, alongside the footer clock's timezone, rather than becoming
+magic constants inside components. `showTestimonials` ships **off**, because the quotes in
+`testimonials.js` are still placeholders.
