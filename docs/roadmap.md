@@ -170,6 +170,15 @@ Not needed to get the site live. Written down so they do not evaporate.
   animation, no colour, a mask, softened edges. Wants designing before it gets built.
 - **Give contact more weight** as the end of the page, and consider a simple form instead of only
   a mailto. A form needs somewhere to send it — Web3Forms is already proven on CreandoMientras.
+- **Real testimonials.** The section is switched off in `config.js` until the quotes I am asking
+  for arrive. Placeholders were never going to ship.
+- **Bing Webmaster Tools.** Google Search Console is already set up and the sitemap submitted.
+  Bing is the same five minutes and also feeds DuckDuckGo.
+- **Turn Limonacho into something that answers.** A small chat backed by a model and given the
+  contents of `src/data/` as its context, so a visitor can ask about a project instead of reading
+  for it — with a bit of Murcian in the voice, because a mascot that talks like documentation is
+  not a mascot. Needs a server-side endpoint: an API key cannot live in a static bundle. The
+  speech bubble and its timers are already built and would become the chat surface.
 - **Self-host the two fonts.** Lighthouse on production: 98 desktop, 88 mobile, and the whole
   gap is the Google Fonts stylesheet — it blocks the first paint for 834 ms and makes a chain
   three hops deep, since the browser has to fetch the stylesheet before it learns which `.woff2`

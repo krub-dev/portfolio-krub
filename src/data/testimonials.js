@@ -5,9 +5,9 @@
   on purpose: a placeholder testimonial that reads like a genuine one is the
   kind of thing that quietly ships. Kept obviously fake so it cannot.
 
-  The section is visible (config.showTestimonials) so the layout can be built
-  and reviewed. Before launch: replace these with real quotes, or flip that
-  switch off and the section disappears entirely.
+  The section is hidden (config.showTestimonials is false) precisely because of
+  that. Replace these with real quotes and flip the switch back on; the layout
+  is already built and reviewed.
 
   If you only ever get one real quote, delete the second entry — the grid
   closes up on its own. There are no filler cards by design.

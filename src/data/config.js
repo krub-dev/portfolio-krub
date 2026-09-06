@@ -3,11 +3,18 @@
   Flip a boolean, reload, done — no component has to be touched.
 */
 export const config = {
-  // Testimonials. ON while building, so the section is visible and laid out.
-  // The quotes in testimonials.js are PLACEHOLDERS — deliberately written in
-  // brackets so they cannot be mistaken for real ones. Replace them with real
-  // quotes before launch, or set this to false and the section disappears.
-  showTestimonials: true,
+  /*
+    Testimonials.
+
+    OFF because the quotes in testimonials.js are placeholders, written in
+    brackets so they could never be mistaken for real ones. The section was
+    visible during the build so it could be laid out and reviewed; it has no
+    business being visible to a visitor until the quotes are real.
+
+    Flip to true once the people I am asking have sent theirs. The section, the
+    cards and the layout are all still here waiting.
+  */
+  showTestimonials: false,
 
   // Limonacho, the lemon mascot in the bottom-right corner.
   showLemon: true,

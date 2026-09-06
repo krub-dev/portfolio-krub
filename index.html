@@ -12,8 +12,16 @@
     <title>krub — Fullstack Developer</title>
     <meta
       name="description"
-      content="Portfolio of Kiko Rubio (krub), fullstack developer in Barcelona: Java with Spring Boot, Node, databases and Vue on the front."
+      content="Crafting what you see. Engineering what holds it up. Kiko Rubio — fullstack developer working in Java with Spring Boot, Node and Vue. Barcelona, Murcia, remote."
     />
+
+    <!--
+      One page, one address. www.krub.dev already 308s to the apex at the edge,
+      so this is belt and braces — but a crawler can also arrive with a tracking
+      query string appended, and without this it may treat that as a separate
+      page and split the ranking between the two.
+    -->
+    <link rel="canonical" href="https://krub.dev/" />
 
     <!--
       The tab icon is SVG: it stays crisp at any size and it is 5 KB. Built
@@ -25,14 +33,6 @@
       icon. It is a square rather than a circle on purpose: iOS applies its own
       rounded-corner mask, and a circle would leave transparent corners.
     -->
-    <!--
-      One page, one address. www.krub.dev already 308s to the apex at the edge,
-      so this is belt and braces — but a crawler can also arrive with a tracking
-      query string appended, and without this it may treat that as a separate
-      page and split the ranking between the two.
-    -->
-    <link rel="canonical" href="https://krub.dev/" />
-
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
@@ -56,7 +56,7 @@
     <meta property="og:title" content="krub — Fullstack Developer" />
     <meta
       property="og:description"
-      content="Portfolio of Kiko Rubio (krub), fullstack developer in Barcelona: Java with Spring Boot, Node, databases and Vue on the front."
+      content="Crafting what you see. Engineering what holds it up. Kiko Rubio — fullstack developer working in Java with Spring Boot, Node and Vue. Barcelona, Murcia, remote."
     />
     <meta property="og:image" content="https://krub.dev/assets/img/og-banner.png" />
     <!-- Declaring the size lets a crawler lay out the card before the image
@@ -94,7 +94,10 @@
         "url": "https://krub.dev/",
         "image": "https://krub.dev/assets/img/krub-pfp.jpeg",
         "jobTitle": "Fullstack Developer",
-        "address": { "@type": "PostalAddress", "addressLocality": "Barcelona", "addressCountry": "ES" },
+        "workLocation": [
+          { "@type": "Place", "name": "Barcelona, Spain" },
+          { "@type": "Place", "name": "Murcia, Spain" }
+        ],
         "email": "mailto:krubioillan@gmail.com",
         "knowsLanguage": ["es", "en"],
         "sameAs": [
