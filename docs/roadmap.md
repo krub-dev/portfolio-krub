@@ -168,23 +168,47 @@ the blob was purged from the git history before the repository went anywhere.
 
 Not needed to get the site live. Written down so they do not evaporate.
 
-- **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
-  carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the inner
-  grid, so a Three.js scene replaces the `.mark` element and nothing else has to move. Needs the
-  model out of Blender first, exported as glTF/GLB.
-- **Rethink the stack section.** The icon grid is faithful to the spec but flat. Ideas so far:
-  animation, no colour, a mask, softened edges. Wants designing before it gets built.
-- **Give contact more weight** as the end of the page, and consider a simple form instead of only
-  a mailto. A form needs somewhere to send it — Web3Forms is already proven on CreandoMientras.
-- **Real testimonials.** The section is switched off in `config.js` until the quotes I am asking
-  for arrive. Placeholders were never going to ship.
-- **Bing Webmaster Tools.** Google Search Console is already set up and the sitemap submitted.
-  Bing is the same five minutes and also feeds DuckDuckGo.
-- **Turn Limonacho into something that answers.** A small chat backed by a model and given the
-  contents of `src/data/` as its context, so a visitor can ask about a project instead of reading
-  for it — with a bit of Murcian in the voice, because a mascot that talks like documentation is
-  not a mascot. Needs a server-side endpoint: an API key cannot live in a static bundle. The
-  speech bubble and its timers are already built and would become the chat surface.
+### Mobile
+
+Seen on a real phone after launch. The first three are one problem wearing three hats.
+
+- **Rework the hero on a phone.** Below 900px the hero grid collapses to a single column, so the
+  text and the square stage stack and the section needs roughly two viewports. Everything else
+  follows from that: `.hero-wrap` gives up its fixed `100svh` and switches to `height: auto`, so
+  **the marquee is pushed below the fold** instead of landing on it the way it does on desktop,
+  and the stage is what gets cut. The fix is not a nudge to the marquee — it is making the hero
+  fit a phone screen, at which point the wrapper can keep its one-viewport height and the band
+  lands at the fold on its own. Wants designing: what the hero shows on a narrow screen, and
+  whether the stage belongs there at all.
+- **Decide whether the 3D scene runs on a phone.** Related but separate, and it is a budget
+  question rather than a layout one: a WebGL canvas on a mid-range phone costs battery and main
+  thread, and mobile performance is already the weaker of the two Lighthouse scores. Options are
+  render it, drop to the flat mark below some width, or gate it behind
+  `prefers-reduced-motion` and a device check. Decide before the scene is built, not after.
+- **The footer should slide in on a phone too.** It is currently present from the first frame
+  below 900px — a deliberate call, on the reasoning that a phone is always near the bottom of
+  something and the slide would read as a glitch. On a real device that turned out wrong: it
+  takes fixed space before the visitor has scrolled anything, and it arrives before the lemon,
+  which does animate in. Both should appear together, and the trigger should be **the end of the
+  hero wrapper** rather than today's `0.55 × innerHeight` — the marquee is the line the visitor
+  reads as "the page has started". `HomeView.vue` already carries a `data-hero-wrap` attribute
+  with nothing reading it; that is the handle.
+
+### Content
+
+Nothing here is a code problem. The switches and the layout are already built and waiting.
+
+- **Rewrite the CV.** ATS-friendly, in both languages, without the phone number and home address
+  the original carried. Drop it in `public/uploads/` and set `showCv: true`.
+- **Real testimonials.** Switched off in `config.js` until the quotes I am asking for arrive.
+  Placeholders were never going to ship.
+- **Reread my own prose.** All of it is in `src/data/`, in both languages, one file per kind of
+  content. It was always going to be iterated after launch rather than written once.
+- **Bing Webmaster Tools.** Google Search Console is done and the sitemap submitted. Bing is the
+  same five minutes and also feeds DuckDuckGo.
+
+### Technical
+
 - **Self-host the two fonts.** Lighthouse on production: 98 desktop, 88 mobile, and the whole
   gap is the Google Fonts stylesheet — it blocks the first paint for 834 ms and makes a chain
   three hops deep, since the browser has to fetch the stylesheet before it learns which `.woff2`
@@ -193,7 +217,30 @@ Not needed to get the site live. Written down so they do not evaporate.
 - **A real 404 page.** Right now an unknown path falls through to Vercel's plain text. It should
   be the site's own: the grid, the type, the cursor, and a way back to the top of the page. A
   second route also puts the router to the use it was wired up for.
+- **Audit the documentation against the code.** Every `.md` here plus the README. It has drifted
+  once already — four claims in the README were untrue and two files described components and
+  composables that do not exist. Worth doing while the build is still fresh in mind, because the
+  cost of checking a claim rises the longer it has been since it was written.
+- **Vercel's newer DNS records.** The domain answers on the legacy ones and Vercel says they will
+  keep working; the dashboard shows an amber "DNS Change Recommended". Optional, five minutes.
 
-The site is live, so anything here goes on a `dev` branch and `main` keeps matching what is
-published. Several of these are design decisions rather than implementation, and want deciding
-before they get built.
+### Design and features
+
+Each of these wants deciding before it gets built.
+
+- **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
+  carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the inner
+  grid, so a Three.js scene replaces the `.mark` element and nothing else has to move. Needs the
+  model out of Blender first, exported as glTF/GLB. See the mobile note above before starting.
+- **Rethink the stack section.** The icon grid is faithful to the spec but flat. Ideas so far:
+  animation, no colour, a mask, softened edges.
+- **Give contact more weight** as the end of the page, and consider a simple form instead of only
+  a mailto. A form needs somewhere to send it — Web3Forms is already proven on CreandoMientras.
+- **Turn Limonacho into something that answers.** A small chat backed by a model and given the
+  contents of `src/data/` as its context, so a visitor can ask about a project instead of reading
+  for it — with a bit of Murcian in the voice, because a mascot that talks like documentation is
+  not a mascot. Needs a server-side endpoint: an API key cannot live in a static bundle. The
+  speech bubble and its timers are already built and would become the chat surface.
+
+The site is live, so anything that touches code goes on a `dev` branch and `main` keeps matching
+what is published.
