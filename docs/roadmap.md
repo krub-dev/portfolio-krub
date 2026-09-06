@@ -152,9 +152,15 @@ advanced. A real browser runs all three.
 
 **Check:** `npm run test` and `npm run test:e2e` both green from a clean checkout.
 
-## Step 12 — Publish
+## Step 12 — Publish ✅
 
-`npm run build`, GitHub repository, deploy to Vercel or Netlify, `krub.dev` pointing at it.
+Live at [krub.dev](https://krub.dev), on Vercel, deployed from `main`. `www` 308s to the apex,
+which is the canonical address. Verified against production rather than against localhost: the
+Playwright suite passes over the real domain, and Lighthouse scores 98 desktop / 88 mobile with
+100 in accessibility, best practices and SEO.
+
+The CV was pulled from the deployment first — it carried a phone number and a home address — and
+the blob was purged from the git history before the repository went anywhere.
 
 ---
 
@@ -188,5 +194,6 @@ Not needed to get the site live. Written down so they do not evaporate.
   be the site's own: the grid, the type, the cursor, and a way back to the top of the page. A
   second route also puts the router to the use it was wired up for.
 
-These are design decisions, not implementation. Best done on a `dev` branch once the site is
-live, so `main` always matches what is published.
+The site is live, so anything here goes on a `dev` branch and `main` keeps matching what is
+published. Several of these are design decisions rather than implementation, and want deciding
+before they get built.
