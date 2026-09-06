@@ -665,3 +665,24 @@ Two of the three initial E2E failures were bugs in the tests rather than the app
 `scrollIntoViewIfNeeded` does not scroll when an element is already partly visible, so sections
 never crossed the spy's threshold; and a `.icon-btn` locator was matching the desktop control,
 which exists in the DOM but is hidden at mobile widths.
+
+---
+
+### 36. `.vscode/` is ignored, including `extensions.json`
+
+The Vite scaffold ships a `.gitignore` that ignores `.vscode/*` with one exception:
+`extensions.json` stays versioned, so that anyone cloning the repository is offered the Volar
+extension when they open it and gets Vue language support instead of a plain text file.
+
+That exception is written for a team. On a repository with one developer it buys nothing: I
+already have Volar, and VS Code suggests it by itself the first time it opens a `.vue` file.
+What it costs is an editor's configuration folder sitting in the tree of a project that has
+nothing to do with which editor anyone uses — and the folder is a directory entry on GitHub, so
+it is the first thing above `docs/` in the listing.
+
+So the exception is dropped and `.vscode/` is ignored whole. The file still exists locally and
+still does its job; it is simply not versioned.
+
+The general rule this follows: a file belongs in the repository when it changes what the
+*project* is or how it *builds*. `vercel.json` and `playwright.config.js` qualify. An editor
+hint does not.

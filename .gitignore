@@ -12,9 +12,17 @@ dist
 dist-ssr
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# Editor directories and files.
+#
+# The whole of .vscode/, including extensions.json — which the Vite scaffold
+# deliberately keeps versioned so a clone gets the Volar recommendation. That
+# trade only pays off on a repository with more than one developer on it. Here
+# it put an editor's folder in the tree in exchange for a suggestion VS Code
+# already makes on its own the moment it opens a .vue file.
+#
+# The file is still on disk and still works. It is simply not this project's
+# business to carry it.
+.vscode/
 .idea
 .DS_Store
 *.suo
