@@ -719,3 +719,30 @@ places.
 Verified across ten viewports from 320x600 to 1280x800. Everything from 360x640 up lands the
 marquee on the fold with the name clear of the bar. A 320x600 viewport still overflows; that is
 an iPhone 5 and it is not worth further compromise.
+
+---
+
+### 38. `viewport-fit=cover` and safe-area insets
+
+The fixed footer was being cut in half on an iPhone. It is `position: fixed; bottom: 0`, and
+when the browser collapses its own toolbar the viewport reaches past the home indicator — so
+"the bottom of the viewport" and "the bottom of what you can see" stop being the same place.
+
+iOS exposes that strip as `env(safe-area-inset-bottom)`, but the values are all zero unless the
+page opts in with `viewport-fit=cover`. Adding that solves the footer and creates a second
+problem: opting in also lets ordinary content run under the notch in landscape, which iOS was
+handling by itself before. So the insets are put back explicitly — horizontally on `body`, and
+on the two fixed bars, which position against the viewport and are not affected by the body's
+padding.
+
+Everything reads `env(..., 0px)`, so on a device without insets this is the same box it was.
+
+Measuring pays off again here: because the footer publishes its real height, growing it by the
+inset also moves the page's reserved bottom padding and the lemon's resting position. Neither
+had to be told.
+
+Separately, `App.vue` was the last `100vh` in a codebase that otherwise uses `100svh`. On iOS
+those are different numbers — `vh` is the height with the toolbar hidden, `svh` with it visible
+— so half the page was measuring against one and half against the other, and they stopped
+moving together when the toolbar collapsed. That collapse cannot be prevented; making every
+measurement agree is the part that was ours to fix.

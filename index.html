@@ -7,7 +7,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      viewport-fit=cover is what makes env(safe-area-inset-*) report real
+      numbers on iOS. Without it they are all zero, and the fixed footer sits
+      underneath the home indicator whenever the browser collapses its own
+      toolbar. Anything pinned to an edge pads itself with those values.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <title>krub — Fullstack Developer</title>
     <meta

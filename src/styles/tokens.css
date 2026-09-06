@@ -85,8 +85,19 @@ html {
   color-scheme: light;
 }
 
+/*
+  The horizontal insets restore what iOS does by default. viewport-fit=cover
+  turns that off for the whole page so the footer can reach the bottom edge,
+  which in landscape would otherwise let text run under the notch. Both are 0
+  in portrait and on every device without one.
+
+  Fixed elements are not affected by this, since they position against the
+  viewport rather than the body: the navbar and the footer pad themselves.
+*/
 body {
   margin: 0;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
   background: var(--ink);
   color: var(--fg);
   font-family: var(--font-sans);

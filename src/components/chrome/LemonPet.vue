@@ -110,8 +110,8 @@ onUnmounted(() => {
 <style scoped>
 .pet {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  right: calc(24px + env(safe-area-inset-right, 0px));
   z-index: 120;
   display: flex;
   flex-direction: column;
@@ -212,8 +212,8 @@ onUnmounted(() => {
 
 @media (max-width: 900px) {
   .pet {
-    bottom: 16px;
-    right: 18px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    right: calc(18px + env(safe-area-inset-right, 0px));
   }
 }
 

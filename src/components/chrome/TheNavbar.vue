@@ -161,7 +161,9 @@ watch(lang, async () => {
   z-index: 100;
   display: flex;
   justify-content: center;
-  padding: 14px clamp(14px, 4vw, 40px);
+  /* The side insets are the notch in landscape; 0 everywhere else. */
+  padding: 14px calc(clamp(14px, 4vw, 40px) + env(safe-area-inset-right, 0px)) 14px
+    calc(clamp(14px, 4vw, 40px) + env(safe-area-inset-left, 0px));
 }
 
 .capsule {

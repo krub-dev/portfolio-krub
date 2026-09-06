@@ -76,7 +76,11 @@ function goTop() {
 <style scoped>
 .app {
   position: relative;
-  min-height: 100vh;
+  /* svh, not vh: on iOS vh is the height with the browser toolbar hidden, so
+     mixing the two makes half the page measure against one number and half
+     against the other, and they stop moving together when the toolbar
+     collapses. The rest of the site is already on svh. */
+  min-height: 100svh;
   overflow-x: hidden;
   padding-bottom: var(--footer-h, 52px);
 }

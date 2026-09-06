@@ -79,7 +79,20 @@ const shown = usePastHero()
   border-top: 1px solid var(--line);
   transform: translateY(102%);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 9px clamp(20px, 5vw, 64px);
+  /*
+    The bottom inset is the home indicator on an iPhone. With the browser's
+    toolbar collapsed the viewport reaches past it, and without this the second
+    line of the credit is cut in half by it.
+
+    The sides matter in landscape, where the notch takes a strip off one edge.
+    Every inset is 0 on a device that has none, so this is the same box
+    everywhere else.
+
+    useFooterHeight measures the result, so the page's reserved room and the
+    lemon's resting position both follow on their own.
+  */
+  padding: 9px calc(clamp(20px, 5vw, 64px) + env(safe-area-inset-right, 0px)) calc(9px + env(safe-area-inset-bottom, 0px))
+    calc(clamp(20px, 5vw, 64px) + env(safe-area-inset-left, 0px));
   display: flex;
   align-items: center;
   justify-content: space-between;
