@@ -1,5 +1,7 @@
 # krub.dev
 
+Live at **[krub.dev](https://krub.dev)**.
+
 My personal portfolio. One page, bilingual (English / Spanish), dark and light themes, built
 with Vue 3 and Vite.
 

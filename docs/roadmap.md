@@ -170,6 +170,11 @@ Not needed to get the site live. Written down so they do not evaporate.
   animation, no colour, a mask, softened edges. Wants designing before it gets built.
 - **Give contact more weight** as the end of the page, and consider a simple form instead of only
   a mailto. A form needs somewhere to send it — Web3Forms is already proven on CreandoMientras.
+- **Self-host the two fonts.** Lighthouse on production: 98 desktop, 88 mobile, and the whole
+  gap is the Google Fonts stylesheet — it blocks the first paint for 834 ms and makes a chain
+  three hops deep, since the browser has to fetch the stylesheet before it learns which `.woff2`
+  files to ask for. The server itself answers in 38 ms and blocking time is 0. Two `.woff2` in
+  `public/` and an `@font-face` block in `tokens.css` collapse the chain to one hop.
 - **A real 404 page.** Right now an unknown path falls through to Vercel's plain text. It should
   be the site's own: the grid, the type, the cursor, and a way back to the top of the page. A
   second route also puts the router to the use it was wired up for.
