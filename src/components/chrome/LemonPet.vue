@@ -110,8 +110,15 @@ onUnmounted(() => {
 <style scoped>
 .pet {
   position: fixed;
-  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-  right: calc(24px + env(safe-area-inset-right, 0px));
+  /*
+    No safe-area insets here, deliberately. The bottom one is already in
+    --footer-h, which .shown translates up by, so adding it again lifts him off
+    the footer. And the right one moves the resting position inward without
+    moving the parked one, so translateX(160%) stops being far enough to hide
+    him and he hangs off the edge in landscape. The footer owns the insets.
+  */
+  bottom: 24px;
+  right: 24px;
   z-index: 120;
   display: flex;
   flex-direction: column;
@@ -212,8 +219,8 @@ onUnmounted(() => {
 
 @media (max-width: 900px) {
   .pet {
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    right: calc(18px + env(safe-area-inset-right, 0px));
+    bottom: 16px;
+    right: 18px;
   }
 }
 

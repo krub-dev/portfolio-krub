@@ -81,18 +81,22 @@ const shown = usePastHero()
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   /*
     The bottom inset is the home indicator on an iPhone. With the browser's
-    toolbar collapsed the viewport reaches past it, and without this the second
-    line of the credit is cut in half by it.
+    toolbar collapsed the viewport reaches past it, and without this the credit
+    line is cut in half by it. The side insets are the notch in landscape.
+    Every one is 0 on a device that has none.
 
-    The sides matter in landscape, where the notch takes a strip off one edge.
-    Every inset is 0 on a device that has none, so this is the same box
-    everywhere else.
+    Longhand rather than the four-value shorthand, and repeated in the phone
+    block below rather than reset there — a shorthand is a single declaration,
+    so `padding: 9px 20px` in a media query silently throws all four of these
+    away. It did exactly that, and the fix looked like it had no effect at all.
 
-    useFooterHeight measures the result, so the page's reserved room and the
+    useFooterHeight measures the result, so the room the page reserves and the
     lemon's resting position both follow on their own.
   */
-  padding: 9px calc(clamp(20px, 5vw, 64px) + env(safe-area-inset-right, 0px)) calc(9px + env(safe-area-inset-bottom, 0px))
-    calc(clamp(20px, 5vw, 64px) + env(safe-area-inset-left, 0px));
+  padding-top: 9px;
+  padding-right: calc(clamp(20px, 5vw, 64px) + env(safe-area-inset-right, 0px));
+  padding-bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+  padding-left: calc(clamp(20px, 5vw, 64px) + env(safe-area-inset-left, 0px));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -175,7 +179,8 @@ const shown = usePastHero()
 
 @media (max-width: 900px) {
   .footer {
-    padding: 9px 20px;
+    padding-right: calc(20px + env(safe-area-inset-right, 0px));
+    padding-left: calc(20px + env(safe-area-inset-left, 0px));
     gap: 6px;
     justify-content: center;
     text-align: center;

@@ -91,6 +91,22 @@ onUnmounted(() => {
   right: 16px;
   z-index: 150;
   width: min(300px, calc(100vw - 40px));
+  /*
+    A phone in landscape is about 390px tall, and the panel is taller than that
+    with nowhere to go — the socials and the back-to-top link were simply cut
+    off the bottom of the screen, unreachable.
+
+    svh so the height does not change when the browser's toolbar collapses, and
+    the bottom inset so the last row clears the home indicator.
+  */
+  /* border-box so max-height means the whole panel. There is no global
+     border-box in this project by design, so the 16px of padding and the
+     border would otherwise be added outside the limit and the panel would
+     still hang 18px off the bottom. */
+  box-sizing: border-box;
+  max-height: calc(100svh - 74px - 16px - env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border-radius: 20px;
   background: var(--surface);
   border: 1px solid var(--line);

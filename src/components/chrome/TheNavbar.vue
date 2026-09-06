@@ -162,8 +162,12 @@ watch(lang, async () => {
   display: flex;
   justify-content: center;
   /* The side insets are the notch in landscape; 0 everywhere else. */
-  padding: 14px calc(clamp(14px, 4vw, 40px) + env(safe-area-inset-right, 0px)) 14px
-    calc(clamp(14px, 4vw, 40px) + env(safe-area-inset-left, 0px));
+  /* Longhand for the same reason as the footer: a shorthand that fails to
+     parse takes the vertical padding down with it. */
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-right: calc(clamp(14px, 4vw, 40px) + env(safe-area-inset-right, 0px));
+  padding-left: calc(clamp(14px, 4vw, 40px) + env(safe-area-inset-left, 0px));
 }
 
 .capsule {

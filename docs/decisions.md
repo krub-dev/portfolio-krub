@@ -741,8 +741,35 @@ Measuring pays off again here: because the footer publishes its real height, gro
 inset also moves the page's reserved bottom padding and the lemon's resting position. Neither
 had to be told.
 
+It did not work on the first attempt, and the reason is worth keeping. The phone block further
+down the same file set `padding: 9px 20px`. A shorthand is one declaration, so that quietly threw
+away all four inset paddings — on phones, the only place they matter. The change was in the file
+and had no effect on the device, which is the most expensive kind of wrong. The insets are now
+longhand, and the phone block overrides only the two sides it means to.
+
 Separately, `App.vue` was the last `100vh` in a codebase that otherwise uses `100svh`. On iOS
 those are different numbers — `vh` is the height with the toolbar hidden, `svh` with it visible
 — so half the page was measuring against one and half against the other, and they stopped
 moving together when the toolbar collapsed. That collapse cannot be prevented; making every
 measurement agree is the part that was ours to fix.
+
+---
+
+### 39. Landscape on a phone: fix what is broken, do not design for it
+
+A phone held sideways is about 390px tall. The site is not laid out for that and will not be:
+a one-page portfolio read in landscape is a rounding error, and designing a third layout for it
+would cost more than it returns.
+
+Broken is a different thing from unoptimised, though, and two things were actually broken:
+
+The mobile menu is a fixed panel with no height limit, so in landscape its lower half — the
+social links and the back-to-top — was simply off the bottom of the screen with no way to reach
+it. It now has a `max-height` in `svh` and scrolls. `box-sizing: border-box` on that panel too,
+since this project has no global one and the padding was landing outside the limit.
+
+And Limonacho, from a mistake made an hour earlier: adding `env(safe-area-inset-right)` to his
+resting position moved it inward without moving the parked position, so `translateX(160%)` was
+no longer far enough to hide him and he hung off the right edge from the first frame. The bottom
+inset was double-counted for the same reason — it is already inside `--footer-h`, which is what
+he stands on. He takes no insets at all now; the footer owns them.
