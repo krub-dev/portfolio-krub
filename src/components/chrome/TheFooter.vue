@@ -3,32 +3,35 @@
   The fixed footer.
 
   It starts translated 102% down — just off-screen, the extra 2% covering the
-  border — and slides in once you have scrolled past 55% of a viewport. On
-  mobile it is there from the start: on a phone you are always near the bottom
-  of something, and the slide reads as a glitch.
+  border — and slides in once the visitor has left the hero behind, at the same
+  moment as Limonacho. usePastHero owns that threshold and explains it.
+
+  It used to be present from the first frame on a phone, on the reasoning that
+  a phone is always near the bottom of something. On a real device that was
+  wrong: it took fixed space before anything had been scrolled, and it arrived
+  before the lemon, which does animate in.
 
   useFooterHeight publishes the real height as --footer-h so the page can
   reserve room for it. See that composable for why it is measured and not
   hardcoded.
 */
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BrandLogo from '../base/BrandLogo.vue'
 import { useFooterHeight } from '../../composables/useFooterHeight'
-import { useScroll } from '../../composables/useScroll'
+import { usePastHero } from '../../composables/usePastHero'
 import { config } from '../../data'
 import LiveClock from './LiveClock.vue'
 
 defineEmits(['go-top'])
 
 const { t } = useI18n()
-const { y } = useScroll()
 
 const footer = ref(null)
 useFooterHeight(footer)
 
-const shown = computed(() => y.value > window.innerHeight * 0.55)
+const shown = usePastHero()
 </script>
 
 <template>
@@ -159,8 +162,6 @@ const shown = computed(() => y.value > window.innerHeight * 0.55)
 
 @media (max-width: 900px) {
   .footer {
-    /* Present from the start on mobile, centred, no slide. */
-    transform: none;
     padding: 9px 20px;
     gap: 6px;
     justify-content: center;

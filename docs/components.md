@@ -25,7 +25,7 @@ App
 ├─ main (HomeView)
 │   ├─ HeroSection
 │   │   ├─ BrandName     (the animated KIKO / RUBIO reveal)
-│   │   ├─ LogoStage     (3D logo parallax; slot holds the badge)
+│   │   ├─ LogoStage     (3D logo parallax; slot holds the badge — desktop only)
 │   │   │   └─ AvailabilityBadge
 │   │   └─ BaseButton ×2
 │   ├─ MarqueeBar
@@ -141,7 +141,7 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 ## Chrome components (these carry behaviour)
 
 ### TheNavbar
-Props: `activeId` (string), `menuOpen` (boolean). Emits `toggle-menu`; theme and language are
+Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
 handled directly through their composables. Sections come from `src/data/sections.js`, labels
 from the dictionary. Owns the compact scroll state and the natural-width measurement.
 
@@ -182,7 +182,9 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
 | `useMagnetic()` | registers the magnetic hover loop for `[data-magnetic]` |
 | `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) |
-| `useFooterHeight()` | measures the footer and maintains `--footer-h` |
+| `useFooterHeight(el)` | measures the footer and maintains `--footer-h` |
+| `useElementHeight(el, prop)` | the mechanism behind that, shared with the navbar's `--navbar-h` |
+| `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it |
 | `useBodyScrollLock(active)` | locks scrolling while the modal is open |
 
 One single `requestAnimationFrame` drives everything that follows the mouse (cursor, lemon

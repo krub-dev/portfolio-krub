@@ -19,14 +19,13 @@ import { computed, onUnmounted, ref } from 'vue'
 
 import { useLang } from '../../composables/useLang'
 import { usePointer } from '../../composables/usePointer'
-import { useScroll } from '../../composables/useScroll'
+import { usePastHero } from '../../composables/usePastHero'
 import { copy } from '../../data'
 import SpeechBubble from '../base/SpeechBubble.vue'
 
 const PUPIL_TRAVEL = 4 // px the pupils can drift inside the eye
 
 const { lang } = useLang()
-const { y } = useScroll()
 
 const body = ref(null)
 const leftPupil = ref(null)
@@ -40,7 +39,7 @@ let shakeTimer = null
 
 const text = computed(() => copy.lemon[lang.value].bubble)
 // Same trigger as the footer, so the two arrive together.
-const shown = computed(() => y.value > window.innerHeight * 0.55)
+const shown = usePastHero()
 
 /*
   The pupils look at the cursor. Each eye works out the direction from its own

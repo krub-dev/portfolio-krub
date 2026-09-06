@@ -104,10 +104,12 @@ a:hover {
   color: var(--acc-text-2);
 }
 
-/* The fixed navbar is 96px tall at its largest, so anchored sections need that
-   much breathing room or the heading lands underneath it. */
+/* Anchored sections need the navbar's height of breathing room or the heading
+   lands underneath it. TheNavbar measures itself and publishes --navbar-h; the
+   96px here is the value it settles on at its largest, and covers the frames
+   before the component has mounted. */
 section[id] {
-  scroll-margin-top: 96px;
+  scroll-margin-top: var(--navbar-h, 96px);
 }
 
 /* ---------------------------------------------------------------------------

@@ -1,57 +1,13 @@
-import { onUnmounted, watch } from 'vue'
+import { useElementHeight } from './useElementHeight'
 
 /*
-  Publishes the footer's real height as the CSS variable --footer-h on <html>.
+  Publishes the footer's real height as --footer-h.
 
-  The footer is position:fixed, so it is out of the document flow and would sit
-  on top of the last section. The page reserves room for it with
-  `padding-bottom: var(--footer-h)`. Hardcoding a height would break the moment
-  the text wraps to two lines — which it does on narrow screens, and can do on
-  a language change, since the Spanish strings are longer.
-
-  A ResizeObserver is the right tool: it fires whenever the element's box
-  changes, whatever the cause — window resize, font load, wrapping, a language
-  switch. No polling, no guessing which events to listen to.
+  The footer is position:fixed, so the page reserves room for it with
+  `padding-bottom: var(--footer-h)`. The measuring itself, and the reason it
+  has to be measured rather than hardcoded, live in useElementHeight — the
+  navbar has exactly the same problem and used to have the same bug.
 */
 export function useFooterHeight(elementRef) {
-  let observer = null
-
-  function publish(height) {
-    document.documentElement.style.setProperty('--footer-h', `${Math.ceil(height)}px`)
-  }
-
-  // The ref is null until the component mounts, so watch it rather than
-  // reading it once.
-  const stop = watch(
-    elementRef,
-    (el) => {
-      observer?.disconnect()
-      if (!el) return
-
-      /*
-        getBoundingClientRect(), not entry.contentRect.
-
-        contentRect is the CONTENT box: it excludes padding and border. The
-        footer has 9px of vertical padding and a 1px top border, so measuring
-        it that way reported 31px for an element that occupies 49 — and the
-        page reserved 18px too little, letting the footer sit on top of the
-        end of the contact section.
-
-        It hid well. The initial measurement below was already correct; the
-        observer then overwrote it with the wrong number, so the bug only
-        appeared once something triggered a resize. An end-to-end test in a
-        real browser is what surfaced it.
-      */
-      observer = new ResizeObserver(() => publish(el.getBoundingClientRect().height))
-      observer.observe(el)
-      publish(el.getBoundingClientRect().height)
-    },
-    { immediate: true },
-  )
-
-  onUnmounted(() => {
-    stop()
-    observer?.disconnect()
-    document.documentElement.style.removeProperty('--footer-h')
-  })
+  useElementHeight(elementRef, '--footer-h')
 }

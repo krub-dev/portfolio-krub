@@ -18,6 +18,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BrandLogo from '../base/BrandLogo.vue'
+import { useElementHeight } from '../../composables/useElementHeight'
 import { useLang } from '../../composables/useLang'
 import { useScroll } from '../../composables/useScroll'
 import { useTheme } from '../../composables/useTheme'
@@ -37,6 +38,15 @@ const { y } = useScroll()
 
 const capsule = ref(null)
 const naturalWidth = ref(null)
+
+/*
+  The bar is fixed, so the hero has to pad itself past it or the name lands
+  underneath — which is exactly what happened on a phone, where the padding was
+  a hardcoded number two pixels short of the bar's real height and the compact
+  state changes that height as you scroll.
+*/
+const bar = ref(null)
+useElementHeight(bar, '--navbar-h')
 
 const compact = computed(() => y.value > 60)
 const maxWidth = computed(() =>
@@ -80,7 +90,7 @@ watch(lang, async () => {
 </script>
 
 <template>
-  <header class="bar">
+  <header ref="bar" class="bar">
     <div ref="capsule" class="capsule" :class="{ compact }" :style="{ maxWidth }" data-motion="decorative">
       <a class="brand" href="#top" aria-label="krub.dev">
         <BrandLogo :height="compact ? 18 : 22" class="brand-logo" />

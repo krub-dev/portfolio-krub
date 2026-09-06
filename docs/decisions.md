@@ -686,3 +686,36 @@ still does its job; it is simply not versioned.
 The general rule this follows: a file belongs in the repository when it changes what the
 *project* is or how it *builds*. `vercel.json` and `playwright.config.js` qualify. An editor
 hint does not.
+
+---
+
+### 37. No stage on a phone, and the navbar publishes its own height
+
+Two mobile bugs, found on a real device and not in an emulator, which is the same lesson as
+decision 35 and worth repeating: below 900px the hero grid becomes one column, so the text and
+the square stage stack. At 375x667 that is 883px of content in a 667px viewport. The wrapper
+gives up its fixed height, and the marquee — which on desktop sits exactly on the fold, and is
+the first thing the page does — ends up 216px below it.
+
+The stage is what does not fit, and it is not rendered below 900px. Every way of keeping it was
+worse: sized to fit, it became a ~130px square framing a logo that is already in the navbar
+directly above it, with the availability badge wrapping onto two lines inside it. The empty box
+earns its space on a desktop, where it is half the composition and reserved for a scene worth
+looking at. On a phone it was taking the marquee's place to show a smaller copy of the logo.
+
+Two consequences, both good. The badge moves into the text column under the buttons, which is
+where the desktop reading order puts it anyway. And `LogoStage` never mounts on a phone, so the
+parallax never subscribes — which settles the open question of what a WebGL scene would cost on
+a mid-range device.
+
+The second bug was underneath the first. The hero cleared the fixed navbar with a hardcoded
+88px, and the bar is 90px tall — so the name was already touching it in production, and
+tightening the padding to fit the stage turned that into a visible overlap. The fix is the one
+this codebase already uses for the footer: the element measures itself and publishes the number.
+`useFooterHeight` was generalised into `useElementHeight`, the navbar publishes `--navbar-h`, and
+the hero and `scroll-margin-top` both read it instead of repeating a guess that was wrong in two
+places.
+
+Verified across ten viewports from 320x600 to 1280x800. Everything from 360x640 up lands the
+marquee on the fold with the name clear of the bar. A 320x600 viewport still overflows; that is
+an iPhone 5 and it is not worth further compromise.
