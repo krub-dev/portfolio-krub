@@ -170,6 +170,9 @@ Not needed to get the site live. Written down so they do not evaporate.
   animation, no colour, a mask, softened edges. Wants designing before it gets built.
 - **Give contact more weight** as the end of the page, and consider a simple form instead of only
   a mailto. A form needs somewhere to send it — Web3Forms is already proven on CreandoMientras.
+- **A real 404 page.** Right now an unknown path falls through to Vercel's plain text. It should
+  be the site's own: the grid, the type, the cursor, and a way back to the top of the page. A
+  second route also puts the router to the use it was wired up for.
 
 These are design decisions, not implementation. Best done on a `dev` branch once the site is
 live, so `main` always matches what is published.

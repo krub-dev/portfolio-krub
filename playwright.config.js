@@ -14,6 +14,13 @@ import { defineConfig, devices } from '@playwright/test'
   afterwards. Testing the dev server would test hot-reload plumbing that no
   visitor ever sees.
 */
+/*
+  Set E2E_BASE_URL to run the same suite against a deployment instead of a
+  local build — useful for checking a Vercel preview or production before
+  pointing a domain at it. Without it, the local production build is used.
+*/
+const remote = process.env.E2E_BASE_URL
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -22,7 +29,7 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'list',
 
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: remote ?? 'http://localhost:4173',
     // Only kept for failures, so a green run leaves nothing behind.
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
@@ -33,10 +40,13 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
   ],
 
-  webServer: {
-    command: 'npm run build && npm run preview',
-    url: 'http://localhost:4173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  // No local server when the target is a deployment that is already running.
+  webServer: remote
+    ? undefined
+    : {
+        command: 'npm run build && npm run preview',
+        url: 'http://localhost:4173',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 })

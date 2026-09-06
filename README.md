@@ -49,6 +49,13 @@ It earned its keep on the first run by finding a real bug: the footer was measur
 content box instead of the border box, so the page reserved 18px too little and the fixed
 footer sat on top of the end of the contact section.
 
+The same suite can be pointed at a deployment instead of the local build, which is how a
+release gets checked before a domain is moved onto it:
+
+```bash
+E2E_BASE_URL=https://example.vercel.app npx playwright test
+```
+
 ## Layout
 
 ```
