@@ -40,7 +40,7 @@ These live in one global stylesheet and are the only source of colour in the pro
 --line:      rgba(255,255,255,.11);/* every border */
 --fg:        #F2F0EA;              /* primary text */
 --fg-2:      #A3A29D;              /* secondary text */
---fg-3:      #6E6D69;              /* tertiary text, mono labels */
+--fg-3:      #868580;              /* tertiary text, mono labels — raised for contrast */
 --acc:       #FFC800;              /* brand yellow — FILLS only */
 --acc-2:     #E6B400;              /* yellow on filled-button hover */
 --acc-text:  #FFC800;              /* accent TEXT on --ink | --surface */
@@ -60,7 +60,7 @@ These live in one global stylesheet and are the only source of colour in the pro
 --line:      rgba(12,12,13,.13);
 --fg:        #141416;
 --fg-2:      #5A5955;
---fg-3:      #8A8985;
+--fg-3:      #706F6B;   /* the spec's #8A8985 scored 3.16:1 — see decisions.md */
 --acc:       #FFC800;   /* the fill yellow does NOT change between themes */
 --acc-2:     #B98C00;
 --acc-text:  #8A6A00;   /* accent text darkens: #FFC800 scores 1.40:1 here */

@@ -1,18 +1,20 @@
 # krub.dev
 
-My personal portfolio. A single-page site, bilingual (English / Spanish), with a dark and a
-light theme, built with Vue 3 and Vite.
+My personal portfolio. One page, bilingual (English / Spanish), dark and light themes, built
+with Vue 3 and Vite.
 
-Live at [krub.dev](https://krub.dev) · Kiko Rubio, fullstack developer in Barcelona.
+Kiko Rubio — fullstack developer in Barcelona, moving toward backend.
 
 ## Stack
 
-- **Vue 3** with `<script setup>`, plain JavaScript
-- **Vite** for dev server and build
-- **vue-router** — one route today, wired up so a second one does not mean restructuring
-- **vue-i18n** — flat-key dictionaries, English by default
-- No CSS framework. Design tokens are CSS custom properties in a single global stylesheet;
-  everything else is `<style scoped>`.
+- **Vue 3** with `<script setup>`. Plain JavaScript, no TypeScript.
+- **Vite** for the dev server and the build.
+- **vue-router** — one route today, but wired up from the start so adding a second one is not a
+  restructure.
+- **vue-i18n** — nested dictionaries, English by default.
+- **Vitest** and **Playwright** for tests.
+- No CSS framework and no preprocessor. Design tokens are CSS custom properties in one global
+  stylesheet; everything else is `<style scoped>`.
 
 ## Running it
 
@@ -21,40 +23,87 @@ npm install
 npm run dev
 ```
 
-Then `npm run build` for a production bundle and `npm run preview` to serve it locally.
+| | |
+|---|---|
+| `npm run dev` | dev server, hot reload |
+| `npm run build` | production bundle into `dist/` |
+| `npm run preview` | serve that bundle locally |
+| `npm run test` | unit tests (Vitest) |
+| `npm run test:e2e` | end-to-end tests (Playwright, real Chromium) |
+
+## Tests
+
+Twenty unit tests and five end-to-end flows across two viewports.
+
+Vitest covers the pure logic and the composables that touch storage: how a timeline period is
+formatted, how the carousel index wraps, and that the theme and language survive a reload,
+reject junk values and cope with `localStorage` throwing.
+
+Playwright exists for a narrower reason. Scroll events, animation frames and CSS transitions
+cannot be verified by reading the DOM — you need a browser that actually paints. So it covers
+the navbar going compact and shrinking to its contents, the footer sliding in without covering
+the last section, exactly one nav link being highlighted, the modal trapping focus and handing
+it back, and theme and language surviving a reload. It runs against the production build.
+
+It earned its keep on the first run by finding a real bug: the footer was measured with the
+content box instead of the border box, so the page reserved 18px too little and the fixed
+footer sat on top of the end of the contact section.
 
 ## Layout
 
 ```
-public/            static assets served as-is (logo, photo, stack icons, CV)
+public/            served as-is: logo, photo, stack icons, favicon, robots, sitemap
+brand/             brand assets that are NOT served — uploaded by hand elsewhere
+docs/              the spec, the component contracts, the roadmap, the decision log
+tests/
+├─ unit/           Vitest
+└─ e2e/            Playwright
 src/
 ├─ components/
-│  ├─ base/        stateless, reusable (BaseButton, SectionHeading, TechIcon…)
-│  ├─ chrome/      fixed UI that owns behaviour (navbar, footer, cursor, mobile menu)
-│  ├─ content/     project cards, modal, testimonials, marquee
-│  └─ sections/    one component per page section
-├─ composables/    shared logic, no markup (theme, language, scroll spy, pointer)
-├─ data/           projects, experience, education, stack, socials, testimonials
-├─ locales/        en.json / es.json
+│  ├─ base/        stateless and reusable (BaseButton, SectionHeading, TechIcon…)
+│  ├─ chrome/      fixed UI that owns behaviour (navbar, footer, cursor, background grid)
+│  ├─ content/     project card and modal, carousel, spec list, testimonials
+│  └─ sections/    one component per page section, plus the hero's logo stage and marquee
+├─ composables/    shared logic, no markup (theme, language, scroll, pointer, focus trap)
+├─ data/           every sentence and every project — start at src/data/index.js
+├─ locales/        en.json / es.json — interface strings only
 ├─ router/
-├─ styles/         tokens.css — the only source of colour in the project
+├─ styles/         tokens.css — the only file allowed to declare a colour
+├─ utils/          small pure functions
 └─ views/
 ```
 
-Two rules the whole codebase follows: **no visible string lives inside a component** (it comes
-from a prop or from the dictionary), and **no component declares a literal colour** (always
-`var(--token)`).
+## Rules the whole codebase follows
+
+- **No visible string inside a component.** It comes from a prop, from `src/locales/`, or from
+  `src/data/`.
+- **No literal colours.** Always `var(--token)`. The documented exceptions are colours that
+  belong to a specific element rather than to the theme — the availability dot's green and
+  Limonacho's palette — and the design spec names each one.
+- **One `requestAnimationFrame`** for everything that follows the mouse: the custom cursor, the
+  magnetic hover, the logo parallax and the lemon's pupils all subscribe to a single loop.
+- **Content and interface are separate.** Sentences I wrote live in `src/data/`, with both
+  languages side by side in one file. Strings the interface needs live in `src/locales/`.
 
 ## Documentation
 
-- [`docs/design-spec.md`](docs/design-spec.md) — the visual contract. Every colour, size,
-  easing curve and behaviour, section by section.
-- [`docs/components.md`](docs/components.md) — component tree and the props of each one.
-- [`docs/roadmap.md`](docs/roadmap.md) — the build order, with an acceptance check per step.
-- [`docs/decisions.md`](docs/decisions.md) — decisions that are not obvious from the code, and
-  why I made them.
+- [`docs/design-spec.md`](docs/design-spec.md) — the visual contract. Every colour, size, easing
+  curve and behaviour, section by section.
+- [`docs/components.md`](docs/components.md) — the component tree and the props of each one.
+- [`docs/roadmap.md`](docs/roadmap.md) — the build order, with an acceptance check per step, and
+  what is still to come.
+- [`docs/decisions.md`](docs/decisions.md) — every choice that is not obvious from reading the
+  code, and the reasoning behind it. Including the ones where I went against the original spec,
+  and why.
+
+## Deployment
+
+Vercel, from `main`. `vercel.json` sets the cache headers: fingerprinted bundles are immutable
+for a year, files served straight out of `public/` keep their names across deploys so they get a
+day, and `index.html` is never cached hard — it is what points at the current bundle.
 
 ## Licence
 
-The code is mine to reuse; the content, the brand and the images are not. If something in here
-is useful to you, take it.
+No licence, which means default copyright: the code is here to be read, not reused wholesale.
+The content, the brand, the logo and the photographs are mine and are not reusable at all. If a
+particular piece is useful to you, ask me.

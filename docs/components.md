@@ -8,31 +8,32 @@ Conventions that apply to every component:
 - Props declare a type and a default. Events go upward through `emit`.
 - A component that only paints does not own state; state lives in the parent or in a composable.
 
+This started as a proposal before anything was built and is kept in step with the code. Where
+the two disagree, the code is right and this file is the bug.
+
 ```
 App
+├─ BackgroundGrid  ×2  (hero / global, crossfading)
 ├─ TheNavbar
-│   ├─ BrandLogo
-│   ├─ NavLinks
-│   ├─ ThemeToggle
-│   ├─ LangToggle
-│   └─ BaseButton (the "Let's talk" CTA)
+│   └─ BrandLogo         (theme and language buttons are inline, not components)
 ├─ TheMobileMenu
-├─ BackgroundGrid  ×2  (hero / global variants)
-├─ CursorFx
+│   └─ SocialLink ×n
 ├─ ScrollProgress
+├─ CursorFx
 ├─ LemonPet
 │   └─ SpeechBubble
-├─ main
+├─ main (HomeView)
 │   ├─ HeroSection
-│   │   ├─ AvailabilityBadge
-│   │   ├─ LogoStage        (3D logo parallax)
+│   │   ├─ BrandName     (the animated KIKO / RUBIO reveal)
+│   │   ├─ LogoStage     (3D logo parallax; slot holds the badge)
+│   │   │   └─ AvailabilityBadge
 │   │   └─ BaseButton ×2
 │   ├─ MarqueeBar
 │   ├─ AboutSection
 │   │   ├─ SectionHeading
 │   │   ├─ TabSwitch
-│   │   ├─ TimelineList → TimelineItem
-│   │   └─ BaseButton (CV)
+│   │   ├─ TimelineItem ×n
+│   │   └─ BaseButton (CV, behind config.showCv)
 │   ├─ ProjectsSection
 │   │   ├─ SectionHeading
 │   │   └─ ProjectCard ×n
@@ -130,38 +131,43 @@ Emits `close`. Locks body scroll while open. Contains `MediaCarousel` (props `sl
 
 ### MarqueeBar
 `items` (array of strings), `separator` (defaults to `//`), `duration` (defaults to `26s`).
-Duplicates the list internally so the loop is seamless.
+
+Repeats the list enough times to be at least as wide as the viewport, then renders that twice —
+the keyframe translates -50%, so one copy has to fill the screen or a gap scrolls past. The
+repeat count is measured, since it depends on the viewport, the font and the language.
 
 ---
 
 ## Chrome components (these carry behaviour)
 
 ### TheNavbar
-Props: `sections` (array of `{ id, labelKey }`), `activeId` (string). No text props: labels
-come from the dictionary. Emits `toggle-theme`, `toggle-lang`, `toggle-menu`. Owns the compact
-scroll state and the natural-width measurement of the capsule.
+Props: `activeId` (string), `menuOpen` (boolean). Emits `toggle-menu`; theme and language are
+handled directly through their composables. Sections come from `src/data/sections.js`, labels
+from the dictionary. Owns the compact scroll state and the natural-width measurement.
 
 ### TheMobileMenu
-Props: `open`, `sections`, `activeId`, `socials`. Emits `close`, `go-top`.
+Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come from `src/data`.
+Closes on Escape and on a click outside as well as on any link.
 
 ### TheFooter
-Props: `place` (translated string), `timezone` (defaults to `Europe/Madrid`), `showTopButton`.
-Emits `go-top`. Publishes its own height in `--footer-h` (observing its size) and controls its
-scroll entrance.
+No props. Emits `go-top`. Reads the timezone from `config.js`, publishes its own height in
+`--footer-h` by observing its size, and owns its scroll entrance. Contains `LiveClock`.
 
 ### CursorFx
-Props: `dotSize` (10), `ringSize` (40), `interactiveSelector` (the "hot" element selector).
-No dependency on the rest of the app; mount it and forget it.
+Props: `interactiveSelector` (the "hot" element selector). Sizes are in its own stylesheet, not
+props. Subscribes to `usePointer()` and refuses to mount on touch or below 900px. No dependency
+on the rest of the app.
 
 ### LemonPet
-Props: `bubbleText`, `offsetBottom` (24). Emits `poke`. Needs the footer height (or reads
-`--footer-h`) to sit above it.
+No props: the bubble text comes from `copy.lemon`, and it reads `--footer-h` from CSS to sit on
+top of the footer. Owns its own shake and bubble timers.
 
 ### BackgroundGrid
 Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the crossfade).
 
 ### ScrollProgress
-Props: `label` (defaults to "Scroll"), `progress` (0–1).
+Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress from
+`useScroll()` rather than taking it as a prop.
 
 ---
 
@@ -172,7 +178,8 @@ Props: `label` (defaults to "Scroll"), `progress` (0–1).
 | `useTheme()` | `theme`, `toggle()`; writes `data-theme` on `<html>` and persists |
 | `useLang()` | `lang`, `toggle()`; persists in `localStorage["krub-lang"]` |
 | `useScrollSpy(ids, threshold = 0.35)` | reactive `activeId` |
-| `useScrollProgress()` | `progress` 0–1 and `atEnd` |
+| `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener |
+| `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
 | `useMagnetic()` | registers the magnetic hover loop for `[data-magnetic]` |
 | `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) |
 | `useFooterHeight()` | measures the footer and maintains `--footer-h` |
@@ -194,14 +201,17 @@ src/
 │   ├─ experience.js
 │   ├─ education.js
 │   ├─ stack.js
-│   ├─ socials.js        + email + cvPath
+│   ├─ socials.js        + email, cvPath, photoPath
+│   ├─ sections.js       the scrollable sections: id, label key, index
 │   ├─ testimonials.js
 │   └─ config.js         on/off switches for the optional sections
 ├─ locales/            strings the interface needs, not prose
 │   ├─ en.json
 │   └─ es.json
-└─ styles/
-    └─ tokens.css        (:root + [data-theme="light"] + @keyframes + resets)
+├─ styles/
+│   └─ tokens.css        (:root + [data-theme="light"] + @keyframes + resets)
+└─ utils/
+    └─ format.js         pure helpers, unit-tested: formatPeriod, wrapIndex
 ```
 
 The split is deliberate and it is the rule to keep:
