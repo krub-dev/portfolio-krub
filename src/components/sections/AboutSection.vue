@@ -82,7 +82,7 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
 .about {
   position: relative;
   z-index: 1;
-  padding: clamp(56px, 8vw, 110px) clamp(20px, 5vw, 64px);
+  padding: clamp(56px, 8vw, 110px) var(--gutter-r) clamp(56px, 8vw, 110px) var(--gutter-l);
   max-width: 1180px;
   margin: 0 auto;
   display: flex;

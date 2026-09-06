@@ -773,3 +773,38 @@ resting position moved it inward without moving the parked position, so `transla
 no longer far enough to hide him and he hung off the right edge from the first frame. The bottom
 inset was double-counted for the same reason — it is already inside `--footer-h`, which is what
 he stands on. He takes no insets at all now; the footer owns them.
+
+---
+
+### 40. The gutter is a token, and the safe area does not belong on `body`
+
+Putting `padding-left/right: env(safe-area-inset-*)` on `body` looked like the tidy way to keep
+text clear of the notch after `viewport-fit=cover`. It is not: it insets *everything*, and some
+things are full-bleed by design. In landscape the marquee — a band that has to touch both edges
+— became a stripe with black margins either side.
+
+The inset belongs where the page's own gutter is, so the gutter became a token:
+
+    --gutter-l: max(clamp(20px, 5vw, 64px), env(safe-area-inset-left, 0px))
+    --gutter-r: max(clamp(20px, 5vw, 64px), env(safe-area-inset-right, 0px))
+
+`max()` rather than a sum, so a device with no notch gets exactly the gutter it always had.
+Two of them because in landscape the notch is on one side only and which side depends on which
+way the phone was turned. Every section now uses these instead of repeating the same `clamp` —
+which it did in six files — and the marquee, which never had a gutter, is untouched and reaches
+the edges again.
+
+The footer's bottom padding is `max(9px, env(...))` for the same reason: added on top, the inset
+pushed the credit further from the edge than it needs to be.
+
+### 41. Limonacho: position on `bottom`, animate on `transform`
+
+He stands on the footer and slides in from the right, and both used to be one `transform` with a
+0.55s transition on it. That was fine until the footer started changing height on its own: when
+iOS collapses its toolbar the safe-area inset appears and the footer grows ~34px in a single
+frame, while the lemon took half a second to catch up — overlapping it the whole way down.
+
+A transition cannot animate one axis of a transform and not the other. So the two jobs are split
+by property: the vertical offset is `bottom: calc(24px + var(--footer-h))`, which is layout and
+lands in the same frame as the footer it follows, and the transform only ever moves him
+sideways. The entrance is unchanged.

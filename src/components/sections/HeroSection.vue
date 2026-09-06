@@ -97,7 +97,7 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
   min-height: 0;
   display: flex;
   align-items: center;
-  padding: clamp(88px, 11vh, 116px) clamp(20px, 5vw, 64px) clamp(20px, 4vh, 40px);
+  padding: clamp(88px, 11vh, 116px) var(--gutter-r) clamp(20px, 4vh, 40px) var(--gutter-l);
 }
 
 .grid {
@@ -195,7 +195,7 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
       above was two pixels short of the bar's real 90, so the name was already
       touching it in production. --navbar-h comes from TheNavbar.
     */
-    padding: calc(var(--navbar-h, 96px) + 20px) 20px 24px;
+    padding: calc(var(--navbar-h, 96px) + 20px) var(--gutter-r) 24px var(--gutter-l);
   }
 
   .grid {

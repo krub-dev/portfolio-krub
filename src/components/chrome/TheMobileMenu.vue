@@ -88,7 +88,11 @@ onUnmounted(() => {
 .menu {
   position: fixed;
   top: 74px;
-  right: 16px;
+  /* Centred rather than pinned under the button it opens from: owner
+     decision. On a phone the panel is most of the width anyway, and hanging
+     off one corner read as lopsided. */
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 150;
   width: min(300px, calc(100vw - 40px));
   /*
@@ -115,6 +119,13 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 12px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* The panel is a scrolling flex column, so its children would otherwise be
+   squeezed to fit rather than overflowing into the scroll — in landscape the
+   back-to-top button was rendering 15px tall instead of 28. */
+.menu > * {
+  flex-shrink: 0;
 }
 
 .head {
@@ -197,16 +208,17 @@ onUnmounted(() => {
 }
 
 .to-top {
-  width: 100%;
-  height: 38px;
-  border-radius: 10px;
+  align-self: center;
+  height: 28px;
+  padding: 0 16px;
+  border-radius: 999px;
   background: transparent;
   border: 1px solid var(--line);
-  color: var(--fg-2);
+  color: var(--fg-3);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
+  font-size: 10px;
+  letter-spacing: 0.16em;
   transition:
     border-color 0.16s ease,
     color 0.16s ease;

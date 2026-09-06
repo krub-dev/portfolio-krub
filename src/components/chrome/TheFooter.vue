@@ -85,18 +85,22 @@ const shown = usePastHero()
     line is cut in half by it. The side insets are the notch in landscape.
     Every one is 0 on a device that has none.
 
+    max() for the bottom, not a sum: the inset already leaves enough room on
+    its own, and adding the 9px on top of it pushed the credit line further
+    from the edge than it needs to be.
+
     Longhand rather than the four-value shorthand, and repeated in the phone
     block below rather than reset there — a shorthand is a single declaration,
-    so `padding: 9px 20px` in a media query silently throws all four of these
+    so `padding: 9px 20px` in a media query silently threw all four of these
     away. It did exactly that, and the fix looked like it had no effect at all.
 
     useFooterHeight measures the result, so the room the page reserves and the
     lemon's resting position both follow on their own.
   */
   padding-top: 9px;
-  padding-right: calc(clamp(20px, 5vw, 64px) + env(safe-area-inset-right, 0px));
-  padding-bottom: calc(9px + env(safe-area-inset-bottom, 0px));
-  padding-left: calc(clamp(20px, 5vw, 64px) + env(safe-area-inset-left, 0px));
+  padding-right: var(--gutter-r);
+  padding-bottom: max(9px, env(safe-area-inset-bottom, 0px));
+  padding-left: var(--gutter-l);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -179,8 +183,8 @@ const shown = usePastHero()
 
 @media (max-width: 900px) {
   .footer {
-    padding-right: calc(20px + env(safe-area-inset-right, 0px));
-    padding-left: calc(20px + env(safe-area-inset-left, 0px));
+    padding-right: var(--gutter-r);
+    padding-left: var(--gutter-l);
     gap: 6px;
     justify-content: center;
     text-align: center;

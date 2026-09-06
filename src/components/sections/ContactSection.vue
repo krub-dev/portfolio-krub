@@ -42,7 +42,7 @@ const contact = computed(() => copy.contact[lang.value])
 .contact {
   position: relative;
   z-index: 1;
-  padding: clamp(56px, 8vw, 110px) clamp(20px, 5vw, 64px) clamp(48px, 6vw, 90px);
+  padding: clamp(56px, 8vw, 110px) var(--gutter-r) clamp(48px, 6vw, 90px) var(--gutter-l);
   max-width: 1180px;
   margin: 0 auto;
   border-top: 1px solid var(--line);

@@ -111,13 +111,24 @@ onUnmounted(() => {
 .pet {
   position: fixed;
   /*
-    No safe-area insets here, deliberately. The bottom one is already in
-    --footer-h, which .shown translates up by, so adding it again lifts him off
-    the footer. And the right one moves the resting position inward without
-    moving the parked one, so translateX(160%) stops being far enough to hide
-    him and he hangs off the edge in landscape. The footer owns the insets.
+    Two things position him, and they must not share a property.
+
+    Vertically he stands on the footer, so his offset tracks --footer-h. That
+    number changes the instant iOS collapses its toolbar and the safe-area
+    inset appears, growing the footer by ~34px. Horizontally he slides in from
+    the right over 0.55s, which is the entrance the spec asks for.
+
+    Both used to be one transform, so the transition applied to both — the
+    footer grew immediately and he took half a second to catch up, overlapping
+    it the whole way. Now the vertical offset is `bottom`, which is layout and
+    updates in the same frame, and the transform only ever moves him sideways.
+
+    No safe-area insets of his own: the bottom one is already inside
+    --footer-h, and a right inset would move his resting position without
+    moving the parked one, so translateX(160%) would stop being far enough to
+    hide him.
   */
-  bottom: 24px;
+  bottom: calc(24px + var(--footer-h, 0px));
   right: 24px;
   z-index: 120;
   display: flex;
@@ -129,10 +140,10 @@ onUnmounted(() => {
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Straight in from the right, then up by the footer's height so he stands on
-   it rather than behind it. No rotation — settled decision. */
+/* Straight in from the right. No rotation — settled decision. The height he
+   stands at is `bottom`, not part of this. */
 .pet.shown {
-  transform: translate(0, calc(-1 * var(--footer-h, 0px)));
+  transform: translateX(0);
 }
 
 .lemon {
@@ -219,7 +230,7 @@ onUnmounted(() => {
 
 @media (max-width: 900px) {
   .pet {
-    bottom: 16px;
+    bottom: calc(16px + var(--footer-h, 0px));
     right: 18px;
   }
 }

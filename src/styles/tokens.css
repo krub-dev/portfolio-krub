@@ -27,6 +27,24 @@
   /* Font stacks. The two families are loaded from Google Fonts in index.html. */
   --font-sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+
+  /*
+    The page gutter, in one place instead of repeated in every section.
+
+    max() rather than a sum: on a device with no notch the inset is 0 and the
+    gutter is exactly what it always was, and where there is one the content
+    clears it without the gutter growing on top. viewport-fit=cover means the
+    page owns this now; iOS is no longer insetting it for us.
+
+    Two of them because a phone in landscape has the notch on one side only,
+    and which side depends on which way it was turned.
+
+    Not applied to the body: full-bleed elements exist. The marquee is meant to
+    touch both edges, and padding on the body inset it into a stripe with black
+    margins in landscape.
+  */
+  --gutter-l: max(clamp(20px, 5vw, 64px), env(safe-area-inset-left, 0px));
+  --gutter-r: max(clamp(20px, 5vw, 64px), env(safe-area-inset-right, 0px));
 }
 
 /* Light theme.
@@ -85,19 +103,8 @@ html {
   color-scheme: light;
 }
 
-/*
-  The horizontal insets restore what iOS does by default. viewport-fit=cover
-  turns that off for the whole page so the footer can reach the bottom edge,
-  which in landscape would otherwise let text run under the notch. Both are 0
-  in portrait and on every device without one.
-
-  Fixed elements are not affected by this, since they position against the
-  viewport rather than the body: the navbar and the footer pad themselves.
-*/
 body {
   margin: 0;
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
   background: var(--ink);
   color: var(--fg);
   font-family: var(--font-sans);
