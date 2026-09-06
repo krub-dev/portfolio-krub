@@ -7,26 +7,26 @@
   "trailingSlash": false,
   "headers": [
     {
-      "//": "Vite fingerprints the bundle, so these filenames change whenever their contents do. A year of immutable caching is safe precisely because a new build produces a new name. Matched by extension rather than by folder: dist/assets also holds the unhashed copies of public/assets, and caching og-banner.png for a year would mean a redesigned banner staying stale in every social crawler until 2027.",
-      "source": "/assets/(.*).(js|css)",
+      "source": "/assets/(.*).js",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     },
     {
-      "//": "Everything served straight out of public/ keeps its name across deploys, so it gets a day. Long enough to be worth caching, short enough that replacing an icon or the banner takes effect the same afternoon.",
-      "source": "/(assets/img|icons|uploads)/(.*)",
+      "source": "/assets/(.*).css",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/assets/img/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
     },
     {
-      "source": "/(favicon.svg|apple-touch-icon.png|robots.txt|sitemap.xml)",
+      "source": "/icons/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
     },
     {
-      "//": "index.html must never be cached hard: it is what points at the current hashed bundle, so a stale copy pins a visitor to an old build.",
       "source": "/",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
     },
     {
-      "//": "nosniff stops a browser second-guessing a declared content type. SAMEORIGIN stops the site being framed by someone else's page.",
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },

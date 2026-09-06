@@ -98,9 +98,20 @@ src/
 
 ## Deployment
 
-Vercel, from `main`. `vercel.json` sets the cache headers: fingerprinted bundles are immutable
-for a year, files served straight out of `public/` keep their names across deploys so they get a
-day, and `index.html` is never cached hard — it is what points at the current bundle.
+Vercel, from `main`. The reasoning behind `vercel.json` lives here because JSON has no comments
+and Vercel validates the file against a strict schema — an unrecognised key fails the deploy.
+
+Cache headers are split by one question: **does the filename change when the contents do?**
+
+- `/assets/*.js` and `*.css` are fingerprinted by Vite, so a new build produces a new name.
+  Immutable for a year, safely.
+- `/assets/img/*` and `/icons/*` come straight out of `public/` and keep their names across
+  deploys. One day — long enough to be worth caching, short enough that replacing the banner
+  takes effect the same afternoon rather than in 2027.
+- `/` is never cached hard. `index.html` is what points at the current bundle; a stale copy pins
+  a visitor to an old build.
+
+Plus `nosniff`, `Referrer-Policy` and `X-Frame-Options` on everything.
 
 ## Licence
 
