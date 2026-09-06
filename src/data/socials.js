@@ -23,7 +23,17 @@ export const socials = [
 // The email behind every "Let's talk ↗" button on the page.
 export const email = 'krubioillan@gmail.com'
 
-// Linked from the About section. Lives in public/, so this is a literal path.
+/*
+  Paths to files in public/, kept here rather than written into a template.
+
+  Beyond the no-hardcoded-URLs rule, there is a concrete reason for the photo:
+  Vite's SFC compiler rewrites a literal `<img src="...">` into an import and
+  emits a hashed copy — even when the path is absolute. The photo was being
+  shipped twice, once hashed by the bundler and once copied from public/. A
+  bound `:src` is not statically analysable, so the bundler leaves it alone and
+  the public copy is the only one.
+*/
 export const cvPath = '/uploads/cv-es.pdf'
+export const photoPath = '/assets/img/krub-pfp.jpeg'
 
 export default socials

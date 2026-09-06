@@ -15,7 +15,7 @@ import SectionHeading from '../base/SectionHeading.vue'
 import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
 import { useLang } from '../../composables/useLang'
-import { copy, cvPath, education, experience } from '../../data'
+import { config, copy, cvPath, education, experience, photoPath } from '../../data'
 import { formatPeriod } from '../../utils/format'
 
 const { lang } = useLang()
@@ -59,6 +59,7 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
         </ol>
 
         <BaseButton
+          v-if="config.showCv"
           variant="outline"
           size="md"
           magnetic
@@ -71,7 +72,7 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
       </div>
 
       <div class="photo-wrap" data-pfp-wrap>
-        <img class="photo" src="/assets/img/krub-pfp.jpeg" alt="Kiko Rubio" data-pfp />
+        <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
       </div>
     </div>
   </section>

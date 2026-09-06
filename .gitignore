@@ -27,15 +27,18 @@ dist-ssr
 .claude/
 CLAUDE.md
 
-# Design reference prototypes. Kept locally to measure exact values against,
-# not part of the build and not shipped.
+# Design reference material — the .dc.html prototypes, their runtime, and the
+# asset folders they load from. All of it now lives outside the project, in
+# `krub brand/reference/`, since the spec is written and nothing needs
+# measuring against them any more.
+#
+# These rules stay as a guard: if a copy is ever dragged back in to check a
+# value, it will not end up in a commit. The leading slashes matter — they
+# anchor to the repository root so `public/assets` and `public/icons` are
+# unaffected.
 Home.dc.html
 Design System.dc.html
 support.js
-
-# Source copies of the prototypes' assets. The shipped copies live in
-# `public/`; these only exist so the reference prototypes above still open
-# straight from disk. Leading slash keeps `public/assets` etc. tracked.
 /assets/
 /icons/
 /uploads/

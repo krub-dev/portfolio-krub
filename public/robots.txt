@@ -1,5 +1,10 @@
-# krub.dev — a one-page portfolio. Everything is public and crawlable.
+# krub.dev — a one-page portfolio.
 User-agent: *
 Allow: /
+
+# The CV is linked from the page and meant to be downloaded, but it does not
+# belong in a search index: it carries personal details that have no reason to
+# be findable by searching for them.
+Disallow: /uploads/
 
 Sitemap: https://krub.dev/sitemap.xml
