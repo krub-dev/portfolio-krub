@@ -25,6 +25,14 @@
       icon. It is a square rather than a circle on purpose: iOS applies its own
       rounded-corner mask, and a circle would leave transparent corners.
     -->
+    <!--
+      One page, one address. www.krub.dev already 308s to the apex at the edge,
+      so this is belt and braces — but a crawler can also arrive with a tracking
+      query string appended, and without this it may treat that as a separate
+      page and split the ranking between the two.
+    -->
+    <link rel="canonical" href="https://krub.dev/" />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
@@ -65,6 +73,37 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@krub_dev" />
     <meta name="twitter:creator" content="@krub_dev" />
+
+    <!--
+      Structured data. The page says who I am in prose; this says the same thing
+      in the vocabulary a search engine actually parses, so that a search for my
+      name can resolve to a person rather than to a string of words that happen
+      to appear on a page. sameAs is the part that does the work: it ties this
+      domain to the profiles that already carry my name elsewhere.
+
+      Kept in sync by hand with src/data/socials.js. It cannot import from it —
+      this file is static HTML served before any JavaScript runs, and a crawler
+      that does not execute the bundle has to find it here.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Kiko Rubio",
+        "alternateName": "krub",
+        "url": "https://krub.dev/",
+        "image": "https://krub.dev/assets/img/krub-pfp.jpeg",
+        "jobTitle": "Fullstack Developer",
+        "address": { "@type": "PostalAddress", "addressLocality": "Barcelona", "addressCountry": "ES" },
+        "email": "mailto:krubioillan@gmail.com",
+        "knowsLanguage": ["es", "en"],
+        "sameAs": [
+          "https://github.com/krub-dev",
+          "https://linkedin.com/in/krub",
+          "https://x.com/krub_dev"
+        ]
+      }
+    </script>
 
     <!-- Space Grotesk 400/500/600/700 + JetBrains Mono 400/500/700 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
