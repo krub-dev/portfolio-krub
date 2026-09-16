@@ -20,7 +20,7 @@ import { useRoute } from 'vue-router'
 import BackgroundGrid from './components/chrome/BackgroundGrid.vue'
 import CursorFx from './components/chrome/CursorFx.vue'
 import LemonPet from './components/chrome/LemonPet.vue'
-import ScrollProgress from './components/chrome/ScrollProgress.vue'
+import RightRail from './components/chrome/RightRail.vue'
 import TheFooter from './components/chrome/TheFooter.vue'
 import TheMobileMenu from './components/chrome/TheMobileMenu.vue'
 import TheNavbar from './components/chrome/TheNavbar.vue'
@@ -66,11 +66,12 @@ function goTop() {
     />
 
     <!--
-      The scroll indicator, like Limonacho further down, belongs to a page you
-      scroll. On the 404 there is nothing to scroll and no scrollbar, so a rail
-      and a "Scroll" label would be pointing at something that is not there.
+      The right rail holds the accent picker, and the scroll indicator only
+      where the route has a hero: on the 404 there is nothing to scroll, so a
+      rail and a "Scroll" label would point at something that is not there. The
+      picker is a global setting and stays on every route.
     -->
-    <ScrollProgress v-if="route.meta.hero" />
+    <RightRail :show-scroll="route.meta.hero" />
     <CursorFx />
 
     <RouterView />

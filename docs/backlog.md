@@ -66,12 +66,11 @@ section, folded together where they overlapped.
 
 ## Design and sections
 
-- [ ] **An accent theme switcher.** A control that swaps the accent colour — sky blue, pink,
-  red… — instead of the fixed yellow. Reference: the `THEME #FFC97A` readout in the footer of
-  [mauriciojuba.com](https://mauriciojuba.com/). Where it lives is not decided yet (the footer
-  is one option). Note the cost: `--acc` stops being a constant, so every palette has to clear
-  the contrast work already done for `--acc-text` (decisions 11 and 27) — a theme that looks
-  good but reads at 1.4:1 is not shippable.
+- [x] **An accent theme switcher.** Five palettes chosen with `data-accent` — the brand yellow plus
+  aqua, rose, mint and pink from the reference — in the right rail on desktop and in the mobile
+  menu. The rail sits above the scroll indicator. Each palette swaps the accent tokens and nothing
+  else, and each needed a light-theme counterpart because the pastels are invisible as fills on
+  cream. Built on 2026-09-16; see decision 48.
 - [ ] **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
   carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the
   inner grid, so a Three.js scene replaces the `.mark` element and nothing else has to move.

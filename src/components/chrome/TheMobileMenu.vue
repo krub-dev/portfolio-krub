@@ -13,6 +13,7 @@ import { onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SocialLink from '../base/SocialLink.vue'
+import AccentSwitcher from './AccentSwitcher.vue'
 import { email, sections, socials } from '../../data'
 
 const props = defineProps({
@@ -79,6 +80,9 @@ onUnmounted(() => {
         <span class="row-label">{{ t(section.labelKey) }}</span>
       </a>
     </nav>
+
+    <!-- The accent picker's mobile home; on desktop it lives in the right rail. -->
+    <AccentSwitcher layout="row" class="theme" />
 
     <button class="to-top" type="button" @click="emit('go-top'); emit('close')">
       ↑ {{ t('menu.top') }}
@@ -207,6 +211,13 @@ onUnmounted(() => {
 
 .row-index.active {
   color: var(--acc-text);
+}
+
+/* The accent row, above the back-to-top, separated like the nav rows. */
+.theme {
+  justify-content: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
 }
 
 .to-top {

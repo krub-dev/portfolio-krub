@@ -963,3 +963,45 @@ centre, which the spec does not mention, where no pull is applied: without it th
 vector goes to zero at the exact centre and a pixel of mouse movement swings it 180°.
 
 The spec was corrected to match the code rather than the other way round.
+
+### 48. The accent is a separate axis from the theme
+
+**Date:** 2026-09-16 · **Status:** active
+
+Five accent palettes, chosen with `data-accent` on `<html>`: the brand yellow (default) plus four
+from the reference site — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, pink `#FFB3D1`. The
+dark/light theme is untouched and orthogonal: two themes times five accents.
+
+They are token swaps and nothing else. `useAccent()` is a copy of `useTheme()` — module-scope ref,
+`localStorage["krub-accent"]`, the attribute applied by an `initAccent()` called from `main.js` —
+and the inline script in `index.html` restores the accent alongside the theme and the language, or
+a visitor who chose pink would see a yellow flash on every load (decision 10). Yellow has no
+`[data-accent='yellow']` block: with that value nothing matches and the `:root` tokens are the
+palette, which is also what gives the switcher a value to mark as selected.
+
+**The two-tier structure is the interesting part.** The reference colours are pastels made for a
+black background. As text on `--ink` they read straight away (aqua 17.7:1, mint 16.3:1), so
+`--acc-text` is the pastel itself. On the light theme they are nearly invisible *as fills*:
+`#C3FFFC` is **1.00:1** against the cream page and `#9AFFC9` is 1.08:1. The yellow survived light
+because it is saturated; pastels have no chroma to fall back on, so no opacity tweak would save
+them. Each palette therefore gets a more saturated light-theme fill (aqua `#2DD4BF`, rose
+`#F43F5E`, mint `#34D399`, pink `#F472B6`) that still takes near-black `--on-acc` text, and the
+accent text darkens in light exactly as the yellow's does (aqua `#0E7490`, rose `#BE123C`, mint
+`#047857`, pink `#BE185D`). Specificity keeps the light overrides on top: `[data-theme='light']
+[data-accent='x']` is two attributes against one, whatever the order.
+
+**The logo follows the accent in dark and inverts to black in light.** `--mark` is the fill in
+dark and `#0C0C0D` in light for every palette, so the yellow default does not change and the
+favicon and og-banner (baked yellow) stay coherent with the logo in the theme that matches them.
+
+**The switcher lives in the right rail and in the mobile menu.** On desktop it sits at the top of
+the same fixed column as the scroll indicator; they are siblings rather than one element because
+the indicator fades out at the end of the page and a control must not vanish as you reach the
+bottom. The rail hides below 900px, so the picker's mobile home is the menu, using the same
+component with a `row` layout. Selecting is direct — five swatches, a click each — and the button
+is a 44px touch target with the visible circle inside it.
+
+One trap, caught by the e2e rather than by eye: `RightRail` was given `showScroll` with a default
+of `true` and called as `:show-scroll="route.meta.hero"`. On the 404 that prop is `undefined`, and
+Vue applies the default for an undefined prop — so the scroll indicator came back on the page
+that had just removed it. The default is `false` now; the comment in the component says why.

@@ -55,6 +55,14 @@
     "title": "/not-found",
     "code": "404"
   },
+  "accent": {
+    "label": "Tema",
+    "yellow": "Amarillo",
+    "aqua": "Aguamarina",
+    "rose": "Coral",
+    "mint": "Menta",
+    "pink": "Rosa"
+  },
   "a11y": {
     "toggleTheme": "Cambiar de tema",
     "toggleLang": "Cambiar de idioma",

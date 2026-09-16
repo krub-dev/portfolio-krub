@@ -124,14 +124,18 @@
     <link rel="preload" href="/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
     <!--
-      Restore the saved theme and language before the page paints.
+      Restore the saved theme, accent and language before the page paints.
 
       This has to be a blocking inline script in <head>, not part of the app:
       the bundle loads as a module, which is deferred, so by the time Vue runs
-      the browser has already painted one frame. A visitor who chose light
-      would see a dark flash first. Six lines here buy that away.
+      the browser has already painted one frame. A visitor who chose light, or a
+      non-yellow accent, would see a dark yellow flash first. Six lines here buy
+      that away.
 
-      main.js reads the same keys and takes over from whatever this leaves.
+      main.js reads the same keys and takes over from whatever this leaves. The
+      accent is not validated here — an unknown value matches no palette and
+      falls back to yellow, and initAccent() corrects the attribute a moment
+      later.
     -->
     <script>
       (function () {
@@ -140,6 +144,8 @@
           if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light')
           var lang = localStorage.getItem('krub-lang')
           if (lang === 'en' || lang === 'es') document.documentElement.setAttribute('lang', lang)
+          var accent = localStorage.getItem('krub-accent')
+          if (accent) document.documentElement.setAttribute('data-accent', accent)
         } catch (e) {
           // Blocked site data. The defaults in the markup already cover this.
         }

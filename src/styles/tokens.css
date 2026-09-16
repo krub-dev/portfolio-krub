@@ -56,6 +56,18 @@
   --grid: rgba(255, 255, 255, 0.045); /* background grid lines */
   --sec-idx: 0.16;                    /* opacity of the giant section number */
 
+  /*
+    The accent palette's identity colours, declared once. Each palette below
+    points its --acc at one of these, and the switcher paints its swatches with
+    them, so each hex lives in exactly one place. Yellow is the default, and it
+    is what the accent tokens above already hold.
+  */
+  --pal-yellow: #ffc800;
+  --pal-aqua: #c3fffc;
+  --pal-rose: #fb7185;
+  --pal-mint: #9affc9;
+  --pal-pink: #ffb3d1;
+
   /* Font stacks. The faces are declared above; these are the fallbacks. */
   --font-sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
@@ -115,6 +127,111 @@
   --mark: #0c0c0d;
   --grid: rgba(12, 12, 13, 0.05);
   --sec-idx: 0.62;
+}
+
+/* ---------------------------------------------------------------------------
+   Accent palettes
+
+   The accent is chosen independently of the theme, and it is written on <html>
+   as data-accent. Yellow is the default and has no block of its own: with
+   data-accent="yellow" nothing here matches and the :root values above apply.
+
+   The rules for a palette are the same ones the yellow already follows, which
+   is why this is a set of token swaps and not a redesign:
+
+     --acc        the fill, with --on-acc text on top
+     --acc-2      the fill on hover
+     --acc-text   the accent as TEXT on the page background
+     --acc-text-2 that, on hover
+     --on-acc     the text painted on the fill
+     --mark       the logo, the footer heart and the cursor ring
+
+   Two differences from the yellow worth stating, because they are the whole
+   reason for the two-tier structure below:
+
+   - The reference colours are pastels made for a black background. On the dark
+     theme they read straight away as text (aqua 17.7:1, mint 16.3:1), so
+     --acc-text is the pastel itself.
+   - On the light theme those same pastels are nearly invisible AS FILLS
+     (#C3FFFC is 1.00:1 against the cream page; #9AFFC9 is 1.08:1). The yellow
+     survived because it is saturated; pastels have no chroma to fall back on,
+     so in light the fill becomes a more saturated tone of the same hue. The
+     text darkens as the yellow's does. Measured with dark text on the fill and
+     against #F5F3EE, all four clear 4.5:1 for the text and 3:1 for rose as a
+     boundary; --on-acc stays near-black because every fill is light enough.
+
+   Specificity is what keeps the light overrides on top: [data-theme='light']
+   [data-accent='x'] is two attributes against one, so it wins whatever the
+   order. --on-acc is never re-declared in light, so the palette's dark value
+   carries over.
+   --------------------------------------------------------------------------- */
+
+[data-accent='aqua'] {
+  --acc: var(--pal-aqua);
+  --acc-2: #a8f0ea;
+  --acc-text: var(--pal-aqua);
+  --acc-text-2: #a8f0ea;
+  --on-acc: #0c0c0d;
+  --mark: var(--pal-aqua);
+}
+
+[data-accent='rose'] {
+  --acc: var(--pal-rose);
+  --acc-2: #f43f5e;
+  --acc-text: var(--pal-rose);
+  --acc-text-2: #f43f5e;
+  --on-acc: #0c0c0d;
+  --mark: var(--pal-rose);
+}
+
+[data-accent='mint'] {
+  --acc: var(--pal-mint);
+  --acc-2: #7df0b8;
+  --acc-text: var(--pal-mint);
+  --acc-text-2: #7df0b8;
+  --on-acc: #0c0c0d;
+  --mark: var(--pal-mint);
+}
+
+[data-accent='pink'] {
+  --acc: var(--pal-pink);
+  --acc-2: #ff8fbb;
+  --acc-text: var(--pal-pink);
+  --acc-text-2: #ff8fbb;
+  --on-acc: #0c0c0d;
+  --mark: var(--pal-pink);
+}
+
+[data-theme='light'][data-accent='aqua'] {
+  --acc: #2dd4bf;
+  --acc-2: #5eead4;
+  --acc-text: #0e7490;
+  --acc-text-2: #155e75;
+  --mark: #0c0c0d;
+}
+
+[data-theme='light'][data-accent='rose'] {
+  --acc: #f43f5e;
+  --acc-2: #fb7185;
+  --acc-text: #be123c;
+  --acc-text-2: #9f1239;
+  --mark: #0c0c0d;
+}
+
+[data-theme='light'][data-accent='mint'] {
+  --acc: #34d399;
+  --acc-2: #6ee7b7;
+  --acc-text: #047857;
+  --acc-text-2: #065f46;
+  --mark: #0c0c0d;
+}
+
+[data-theme='light'][data-accent='pink'] {
+  --acc: #f472b6;
+  --acc-2: #f9a8d4;
+  --acc-text: #be185d;
+  --acc-text-2: #9d174d;
+  --mark: #0c0c0d;
 }
 
 /* ---------------------------------------------------------------------------

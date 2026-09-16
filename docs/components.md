@@ -17,8 +17,11 @@ App
 ├─ TheNavbar
 │   └─ BrandLogo         (theme and language buttons are inline, not components)
 ├─ TheMobileMenu
-│   └─ SocialLink ×n
-├─ ScrollProgress       (only where the route has a hero)
+│   ├─ SocialLink ×n
+│   └─ AccentSwitcher   (row layout)
+├─ RightRail            (hidden below 900px)
+│   ├─ AccentSwitcher   (rail layout)
+│   └─ ScrollProgress   (only where the route has a hero)
 ├─ CursorFx
 ├─ LemonPet             (only where the route has a hero)
 │   └─ SpeechBubble
@@ -173,7 +176,20 @@ Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the
 
 ### ScrollProgress
 Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress from
-`useScroll()` rather than taking it as a prop.
+`useScroll()` rather than taking it as a prop. Positioned and hidden by `RightRail`.
+
+### RightRail
+Props: `showScroll` (boolean, default `false` — the caller passes `route.meta.hero`, which is
+undefined elsewhere, and an undefined prop takes the default). The fixed right-edge column: the
+accent picker, and the scroll indicator only where the route has a hero. They are siblings rather
+than one element because the indicator fades out at the end of the page and a control must not.
+Hidden below 900px.
+
+### AccentSwitcher
+Props: `layout` (`'rail' | 'row'`). One swatch per palette from `src/data/accents.js`, painted
+with `var(--pal-<id>)`, the current one ringed; selecting calls `useAccent().set()` directly. The
+button is the touch target and the dot inside is the visible circle. The rail on desktop, the row
+in the mobile menu.
 
 ---
 
@@ -183,6 +199,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 |---|---|
 | `useTheme()` | `theme`, `toggle()`; writes `data-theme` on `<html>` and persists |
 | `useLang()` | `lang`, `toggle()`; persists in `localStorage["krub-lang"]` |
+| `useAccent()` | `accent`, `set(id)`; writes `data-accent` on `<html>` and persists |
 | `useScrollSpy(ids, threshold = 0.35)` | reactive `activeId` |
 | `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener |
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
@@ -204,6 +221,7 @@ pupils, logo parallax, magnetic hover). No per-component loops.
 src/
 ├─ data/               everything I wrote — both languages per file
 │   ├─ index.js          re-exports, and the "start here" explanation
+│   ├─ accents.js        the accent palette ids the switcher offers
 │   ├─ copy.js           hero headline, About paragraphs, marquee, contact, lemon, 404
 │   ├─ projects.js
 │   ├─ experience.js

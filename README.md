@@ -2,8 +2,8 @@
 
 Live at **[krub.dev](https://krub.dev)**.
 
-My personal portfolio. One page plus a 404, bilingual (English / Spanish), dark and light themes,
-built with Vue 3 and Vite.
+My personal portfolio. One page plus a 404, bilingual (English / Spanish), dark and light themes
+with five accent palettes, built with Vue 3 and Vite.
 
 Kiko Rubio — fullstack developer in Barcelona, moving toward backend.
 

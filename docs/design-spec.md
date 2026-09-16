@@ -22,9 +22,10 @@ vertical order:
 | 03 | `contact` | Contact | Large headline, email CTA, three social icons |
 | — | — | Footer | Pinned to the bottom: credit, copyright, TOP button, city and Madrid clock |
 
-Floating above all of the above: the fixed navigation bar, the custom cursor, the vertical
-scroll indicator, the "Limonacho" mascot (a lemon with eyes) and the mobile menu. The last two
-of those only where the route has a hero — not on the 404.
+Floating above all of the above: the fixed navigation bar, the custom cursor, the right rail
+(the accent picker and, on routes with a hero, the vertical scroll indicator), the "Limonacho"
+mascot (a lemon with eyes) and the mobile menu. The mascot and the scroll indicator only appear
+where the route has a hero — not on the 404.
 
 ---
 
@@ -94,6 +95,31 @@ link, the current-period years in the timeline, the `[0N]` indices and the proje
 all use `var(--acc-text)` — they are text, and several of them are 10–12px, where the 3:1
 large-text allowance does not apply. The giant section number keeps `--acc`, since it is
 decorative, `aria-hidden` and already governed by `--sec-idx`.
+
+### Accent palettes
+
+`data-accent` on `<html>` chooses which colour paints the accent, independently of the theme.
+The default is the brand yellow, which is what the tokens above already hold; the others live in
+the same stylesheet. A palette swaps the accent tokens and nothing else:
+
+| Token | Job |
+|---|---|
+| `--acc` | the fill, with `--on-acc` on top |
+| `--acc-2` | the fill on hover |
+| `--acc-text` | the accent as text on the page background |
+| `--acc-text-2` | that, on hover |
+| `--on-acc` | the text painted on the fill |
+| `--mark` | the logo, footer heart and cursor ring |
+
+Each palette's identity colour is a `--pal-*` token declared once: the palette points `--acc` at
+it, and the switcher paints its swatches with it, so the hex exists in one place.
+
+The four non-default palettes — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, pink `#FFB3D1` —
+are reference pastels made for a dark background: as text they read straight away (aqua 17.7:1,
+mint 16.3:1 on `--ink`). On the light theme those pastels are nearly invisible **as fills**
+(`#C3FFFC` is 1.00:1 on the cream page), so each has a more saturated light-theme counterpart for
+`--acc`, and every palette's accent text darkens in light exactly as the yellow's does. See
+decisions.md.
 
 ### Typography
 
@@ -412,10 +438,13 @@ and icons, and the TOP button.
 
 ### 3.15 Scroll indicator
 
-A fixed column on the right (`right:20px`, vertically centred, `z-index:95`): the word
-"Scroll" set vertically (mono 10px, `letter-spacing:.28em`, `--fg-3`) above a 1px line 96px
-tall in `--line`, filled with yellow in proportion to the scroll. It fades out at 98% of the
-page. Hidden on mobile.
+The word "Scroll" set vertically (mono 10px, `letter-spacing:.28em`, `--fg-3`) above a 1px line
+96px tall in `--line`, filled with the accent in proportion to the scroll. It fades out at 98%
+of the page.
+
+It is one of the two children of the right rail (3.18), which owns the fixed position
+(`right:20px`, vertically centred, `z-index:95`) and hides the whole column below 900px. It is
+only rendered on a route with a hero: on the 404 there is nothing to scroll.
 
 ### 3.16 Limonacho (mascot)
 
@@ -446,6 +475,21 @@ one in yellow); a list of four navigation links, each with its `[00]`…`[03]` m
 active section's in yellow) and its path; and a full-width "↑ back to top" button. Every link
 closes the menu when pressed.
 
+### 3.18 Accent switcher (right rail + mobile menu)
+
+A row of swatches, one per palette, the current one ringed. Selecting is direct, not cycling.
+The visible circle is 14px in the rail and 22px in the menu, each inside a 44px button so the
+touch target is right, with a 1px `--line` border to keep a pastel swatch visible on the light
+theme.
+
+- **Desktop:** at the top of the right rail, above the scroll indicator, with a vertical "Theme"
+  label matching the "Scroll" one. The rail hides below 900px.
+- **Mobile:** a centred row inside the mobile menu, above the back-to-top button, separated by a
+  `border-top` like the nav rows.
+
+It is a global setting and stays on every route, the 404 included — only the scroll indicator is
+dropped there.
+
 ---
 
 ## 4. Application state
@@ -454,6 +498,7 @@ closes the menu when pressed.
 |---|---|---|---|
 | Theme | `dark` \| `light` | `data-theme` attribute on `<html>` | absent = dark |
 | Language | `en` \| `es` | global + `localStorage["krub-lang"]` | restored on load; sets `<html lang>` |
+| Accent | a palette id | `data-accent` attribute on `<html>` | absent = yellow |
 | About tab | `exp` \| `edu` | local to the section | defaults to `exp` |
 | Open project | index \| `null` | global or local to projects | `null` = modal closed |
 | Carousel image | integer | local to the modal | resets to 0 on open |
@@ -532,9 +577,10 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
 ## 8. Responsive
 
 A single breakpoint: **900px**. Below it: one column in every two-column grid, navigation
-replaced by the menu, custom cursor and scroll indicator disabled, the hero stage dropped (the
-badge moves into the text column), the footer centred with the TOP button hidden, a smaller 4/5
-photo, and the lemon at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
+replaced by the menu, the custom cursor and the right rail (accent picker and scroll indicator)
+disabled — the picker moves into the menu —, the hero stage dropped (the badge moves into the
+text column), the footer centred with the TOP button hidden, a smaller 4/5 photo, and the lemon
+at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
 
 ---
 
