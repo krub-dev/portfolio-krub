@@ -511,10 +511,10 @@ is a separate control and is unchanged.
 ### 3.19 Settings button (compact navbar)
 
 On desktop, once the capsule compacts, the appearance and language controls are replaced by one
-36×36 button with a sliders icon, beside the CTA. It opens a small panel underneath it
-(`--surface`, radius 12, the shadow the lemon bubble uses) holding the appearance control and the
-language button. It closes on the trigger, on a click outside, on Escape, and when the bar expands
-again — so it is never left open behind a hidden trigger.
+36×36 button with a cog icon, beside the CTA. It opens a small panel underneath it — `--surface`,
+radius 12, a 1px `--line` border and no shadow — holding the appearance control and the language
+button. It closes on the trigger, on a click outside, on Escape, and when the bar expands again,
+so it is never left open behind a hidden trigger.
 
 ---
 

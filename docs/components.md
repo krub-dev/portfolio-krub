@@ -167,9 +167,9 @@ are absolute (`/#id`, `/#top`), so the shared chrome works from the 404, where t
 exist; on the home page the path is unchanged and the jump stays in-page.
 
 ### SettingsMenu
-Prop: `visible` (boolean — the compact state; the panel closes when it goes false). The 36×36
-sliders button the compact desktop bar shows in place of the appearance and language controls. It
-opens a panel holding both. Closes on the trigger, on a click outside and on Escape.
+Prop: `visible` (boolean — the compact state; the panel closes when it goes false). The 36×36 cog
+button the compact desktop bar shows in place of the appearance and language controls. It opens a
+panel holding both. Closes on the trigger, on a click outside and on Escape.
 
 ### TheMobileMenu
 Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come from `src/data`.
