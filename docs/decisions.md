@@ -990,15 +990,19 @@ accent text darkens in light exactly as the yellow's does (aqua `#0E7490`, rose 
 `#047857`, pink `#BE185D`). Specificity keeps the light overrides on top: `[data-theme='light']
 [data-accent='x']` is two attributes against one, whatever the order.
 
-**The logo follows the accent in dark and inverts to black in light.** `--mark` is the fill in
-dark and `#0C0C0D` in light for every palette, so the yellow default does not change and the
-favicon and og-banner (baked yellow) stay coherent with the logo in the theme that matches them.
+**The logo follows the accent in both themes.** `--mark` is the palette's fill on dark and its
+denser `--acc-text` value on light, so the logo, the footer heart and the cursor ring track the
+accent wherever they appear — including the footer in light mode, which first shipped black and
+was changed after seeing it. The favicon and og-banner are baked yellow, so they stay coherent
+with the yellow default rather than with every palette; that is accepted, since they are images
+rendered outside the page.
 
-**The switcher is one button in the navbar, and it cycles.** The first version put a row of
-swatches in the right rail with the scroll indicator, and the same row in the mobile menu. On a
-real screen both read wrong: five dots exposed at once look like a settings panel, and the rail
-put a control in the middle of the page's edge. It is now a single 36×36 button beside the theme
-and language controls, in both the desktop and the mobile group, that advances one palette per
-press. Its face is a 16px disc split diagonally between `--acc` and `--acc-2`, so it shows the
-colour and its variation without listing them all. The `aria-label` names the current palette,
-since the button has no visible text.
+**The switcher is one button, and it cycles.** The first version put a row of swatches in the
+right rail with the scroll indicator, and the same row in the mobile menu. On a real screen both
+read wrong: five dots exposed at once look like a settings panel, and the rail put a control in
+the middle of the page's edge. The second version was one 36×36 square in the navbar, but in the
+cramped mobile control bar it read badly, so it moved into the menu there. It is now a single
+button that advances one palette per press: the square in the desktop navbar, and a full-width
+row in the mobile menu. Its face is a 16px disc split diagonally between `--acc` and `--acc-2`,
+so it shows the colour and its variation without listing them all. The `aria-label` names the
+current palette, since there is no visible text.

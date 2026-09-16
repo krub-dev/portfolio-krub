@@ -67,12 +67,12 @@ These live in one global stylesheet and are the only source of colour in the pro
 --acc-text:  #8A6A00;   /* accent text darkens: #FFC800 scores 1.40:1 here */
 --acc-text-2:#6B5200;
 --on-acc:    #0C0C0D;
---mark:      #0C0C0D;   /* in light mode the logo and the heart are black */
+--mark:      #8A6A00;   /* logo, heart and cursor ring follow the accent, denser here */
 --grid:      rgba(12,12,13,.05);
 --sec-idx:   .62;       /* the section number needs more opacity in light mode */
 ```
 
-`--mark`, `--acc-text` and `--sec-idx` all exist for the same reason: `#FFC800` does not have
+`--acc-text`, `--mark` and `--sec-idx` all exist for the same reason: `#FFC800` does not have
 enough contrast on the light background. Three different answers, because there are three
 different jobs:
 
@@ -80,7 +80,10 @@ different jobs:
 |---|---|---|
 | `--acc` | **Fills** — a yellow surface with `--on-acc` text on it | stays `#FFC800` |
 | `--acc-text` | **Accent text** sitting on `--ink` or `--surface` | darkens to `#8A6A00` |
-| `--mark` | Things that must simply invert (logo, footer heart) | becomes `#0C0C0D` |
+| `--mark` | The logo, footer heart and cursor ring — graphic, not text | takes `--acc-text`'s dense value |
+
+With an accent palette chosen, both `--acc-text` and `--mark` take that palette's light-theme
+value instead of the yellow's (see Accent palettes below).
 
 Contrast against `--ink`, measured:
 
@@ -472,18 +475,22 @@ one in yellow); a list of four navigation links, each with its `[00]`…`[03]` m
 active section's in yellow) and its path; and a full-width "↑ back to top" button. Every link
 closes the menu when pressed.
 
-### 3.18 Accent switcher (navbar)
+### 3.18 Accent switcher
 
-One 36×36 button in the navbar, beside the theme and language controls, in both the desktop and
-the mobile group. One press cycles to the next palette — it is a button, not a row of swatches,
-because five dots on screen read as a settings panel and this is a one-line control.
+One press moves to the next palette. It is a button, not a row of swatches — five dots on screen
+read as a settings panel — and the face is a 16px disc split diagonally, `--acc` above the line
+and `--acc-2` below, so it shows the current colour and its variation at a glance.
 
-Its face is a 16px disc split diagonally, `--acc` above the line and `--acc-2` below, so it shows
-the current colour and its variation at a glance. It shares the theme button's frame (radius 10,
-1px `--line`, transparent) and its hover turns the border to `--acc-text`.
+Two layouts:
 
-There is no visible text, so the `aria-label` and `title` name the current palette ("Theme:
-Aqua"). It is a global setting and stays on every route, the 404 included.
+- **Desktop (navbar):** a 36×36 square beside the theme and language controls, sharing their
+  frame (radius 10, 1px `--line`, transparent, hover border `--acc-text`). The `aria-label` and
+  `title` name the current palette ("Theme: Aqua"), since the button has no visible text.
+- **Mobile (menu):** a full-width row at the bottom of the menu panel, above the back-to-top,
+  with a `border-top` like the navigation rows: a mono label, the palette name, and the disc on
+  the right. A square in the cramped mobile control bar read badly, so it moved in here.
+
+It is a global setting and stays on every route, the 404 included.
 
 ---
 

@@ -16,9 +16,10 @@ App
 ├─ BackgroundGrid  ×2  (hero / global, crossfading)
 ├─ TheNavbar
 │   ├─ BrandLogo         (theme and language buttons are inline, not components)
-│   └─ AccentButton
+│   └─ AccentButton     (icon, desktop only)
 ├─ TheMobileMenu
-│   └─ SocialLink ×n
+│   ├─ SocialLink ×n
+│   └─ AccentButton     (row)
 ├─ ScrollProgress       (only where the route has a hero)
 ├─ CursorFx
 ├─ LemonPet             (only where the route has a hero)
@@ -106,9 +107,10 @@ border).
 `text`. Presentation only.
 
 ### AccentButton
-No props. Reads `useAccent()` and cycles to the next palette on click. The face is a 16px disc
-split diagonally between `--acc` and `--acc-2`; the `aria-label` and `title` name the current
-palette, since there is no visible text.
+Prop: `layout` (`'icon' | 'row'`, default `'icon'`). Reads `useAccent()` and cycles to the next
+palette on click. The face is a 16px disc split diagonally between `--acc` and `--acc-2`; the
+`aria-label` and `title` name the current palette, since there is no visible text. `icon` is the
+navbar square (desktop), `row` the full-width row in the mobile menu.
 
 ---
 
@@ -152,8 +154,8 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 
 ### TheNavbar
 Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
-handled directly through their composables, and the `AccentButton` sits beside them in both the
-desktop and the mobile group. Sections come from `src/data/sections.js`, labels
+handled directly through their composables, and the `AccentButton` sits beside them on desktop;
+the mobile menu carries its `row` layout. Sections come from `src/data/sections.js`, labels
 from the dictionary. Owns the compact scroll state and the natural-width measurement. Its links
 are absolute (`/#id`, `/#top`), so the shared chrome works from the 404, where the sections do not
 exist; on the home page the path is unchanged and the jump stays in-page.

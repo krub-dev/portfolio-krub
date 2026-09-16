@@ -166,13 +166,14 @@ test('theme and language survive a reload', async ({ page }) => {
   expect(painted).toBe('rgb(245, 243, 238)')
 })
 
-test('the accent cycles and survives a reload', async ({ page }) => {
+test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
   await page.goto('/')
   const html = page.locator('html')
   await expect(html).toHaveAttribute('data-accent', 'yellow')
 
-  // One button next to the theme and language controls; both control groups are
-  // in the DOM, so scope to the visible one.
+  // Desktop: the button in the navbar. Mobile: the row inside the menu.
+  if (isMobile) await page.locator('.menu-btn').click()
+
   const button = page.locator('.accent-btn:visible')
   await expect(button).toHaveAttribute('aria-label', 'Theme: Yellow')
   await button.click()

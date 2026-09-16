@@ -92,21 +92,17 @@
 }
 
 /* Light theme.
-   Note that --acc does NOT change: the yellow is identical in both themes.
-   What changes is --mark, because #FFC800 has too little contrast on a light
-   background. Anything yellow-in-dark that must be black-in-light uses
-   var(--mark), never var(--acc). Same reasoning for --sec-idx: the giant
-   section number needs far more opacity to read on light.
+   --acc keeps the palette's fill. --acc-text and --mark both take the darker,
+   legible variant of the accent, because on the cream page #FFC800 is 1.40:1 as
+   text and the reference pastels are worse (aqua #C3FFFC is 1.00:1) — and the
+   same value is near-invisible as a logo. The logo, the heart and the cursor
+   ring follow the accent in both themes, so --mark is no longer "whatever must
+   turn black". --sec-idx still rises, for the same reason as before: the giant
+   section number reads at .16 on dark and needs .62 here.
 
-   --acc-text is the third case. #FFC800 as *text* on #F5F3EE scores 1.40:1,
-   which is unreadable, not merely tight — so accent text darkens to #8A6A00
-   (4.57:1, AA at any size) while accent FILLS stay #FFC800 with --on-acc on
-   top. Splitting fills from text is what lets the brand yellow survive the
-   light theme without the small mono labels becoming illegible.
-
-   --fg-3 is the fourth. The spec's values (#6E6D69 dark, #8A8985 light) scored
-   3.55 and 3.16 against the surfaces they sit on — below the 4.5:1 that text
-   under 18pt needs, and --fg-3 is used almost exclusively at 10-12px: the
+   --fg-3 is the other case. The spec's values (#6E6D69 dark, #8A8985 light)
+   scored 3.55 and 3.16 against the surfaces they sit on — below the 4.5:1 that
+   text under 18pt needs, and --fg-3 is used almost exclusively at 10-12px: the
    timeline years, the stack group labels, the card technology line, the whole
    footer. Raised to #868580 and #706F6B, the least change that clears AA on
    both --ink and --surface. Still clearly the quietest text on the page.
@@ -124,7 +120,7 @@
   --acc-text: #8a6a00;
   --acc-text-2: #6b5200;
   --on-acc: #0c0c0d;
-  --mark: #0c0c0d;
+  --mark: var(--acc-text);
   --grid: rgba(12, 12, 13, 0.05);
   --sec-idx: 0.62;
 }
@@ -156,7 +152,7 @@
      (#C3FFFC is 1.00:1 against the cream page; #9AFFC9 is 1.08:1). The yellow
      survived because it is saturated; pastels have no chroma to fall back on,
      so in light the fill becomes a more saturated tone of the same hue. The
-     text darkens as the yellow's does. Measured with dark text on the fill and
+     text and --mark darken as the yellow's does. Measured with dark text on the fill and
      against #F5F3EE, all four clear 4.5:1 for the text and 3:1 for rose as a
      boundary; --on-acc stays near-black because every fill is light enough.
 
@@ -207,7 +203,7 @@
   --acc-2: #5eead4;
   --acc-text: #0e7490;
   --acc-text-2: #155e75;
-  --mark: #0c0c0d;
+  --mark: var(--acc-text);
 }
 
 [data-theme='light'][data-accent='rose'] {
@@ -215,7 +211,7 @@
   --acc-2: #fb7185;
   --acc-text: #be123c;
   --acc-text-2: #9f1239;
-  --mark: #0c0c0d;
+  --mark: var(--acc-text);
 }
 
 [data-theme='light'][data-accent='mint'] {
@@ -223,7 +219,7 @@
   --acc-2: #6ee7b7;
   --acc-text: #047857;
   --acc-text-2: #065f46;
-  --mark: #0c0c0d;
+  --mark: var(--acc-text);
 }
 
 [data-theme='light'][data-accent='pink'] {
@@ -231,7 +227,7 @@
   --acc-2: #f9a8d4;
   --acc-text: #be185d;
   --acc-text-2: #9d174d;
-  --mark: #0c0c0d;
+  --mark: var(--acc-text);
 }
 
 /* ---------------------------------------------------------------------------

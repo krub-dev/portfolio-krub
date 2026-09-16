@@ -162,7 +162,6 @@ watch(lang, async () => {
         <button class="icon-btn" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
           ◐
         </button>
-        <AccentButton />
         <button class="lang-btn" type="button" :aria-label="`${lang.toUpperCase()} — ${t('a11y.toggleLang')}`" @click="toggleLang">
           {{ lang.toUpperCase() }}
         </button>
