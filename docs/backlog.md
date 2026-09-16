@@ -35,10 +35,17 @@ section, folded together where they overlapped.
 - [ ] **Bing Webmaster Tools.** The same five minutes as Google Search Console, which is done and
   has the sitemap submitted. Bing also feeds DuckDuckGo. **(owner)**
 - [ ] **Make the repository public.** When the pending work is done. **(owner)**
-- [ ] **Audit the documentation against the code.** Every `.md` here plus the README. It has
+- [x] **Audit the documentation against the code.** Every `.md` here plus the README. It has
   drifted once already — four claims in the README were untrue and two files described
   components and composables that do not exist. Worth doing while the build is still fresh in
   mind, because the cost of checking a claim rises the longer it has been since it was written.
+  Done on 2026-09-16: the README, `components.md` and `design-spec.md` were checked against the
+  code and corrected, and the one deliberate divergence that had no record (the magnetic pull)
+  went into `decisions.md` as 47.
+- [ ] **Review the documentation once more before the repo goes public.** The same sweep, as the
+  last step before the repository is made public, because the code moves between now and then
+  and this file is only as good as its last check. It is not a first reading: the 2026-09-16
+  pass is the baseline it starts from.
 
 ## Config, performance and deployment
 
@@ -93,21 +100,22 @@ section, folded together where they overlapped.
 
 ## Mobile and responsive
 
-- [ ] **Rework the hero on a phone.** Below 900px the stage is no longer rendered (decision 37)
-  and the wrapper gives up its fixed height, so the marquee is pushed below the fold instead
-  of landing on it. The fix is making the hero fit a phone screen, at which point the wrapper
-  keeps its one-viewport height and the band lands at the fold on its own. Wants designing:
-  what the hero shows on a narrow screen.
-- [ ] **Decide whether the 3D scene runs on a phone.** A budget question rather than a layout one:
-  a WebGL canvas on a mid-range phone costs battery and main thread, and mobile performance is
-  already the weaker of the two Lighthouse scores. Options are render it, drop to the flat
-  mark below some width, or gate it behind `prefers-reduced-motion` and a device check. Decide
-  before the scene is built, not after.
-- [ ] **The footer slides in on a phone too.** It is present from the first frame below 900px — a
-  deliberate call that turned out wrong on a real device: it takes fixed space before the
-  visitor has scrolled anything, and it arrives before the lemon, which does animate in. Both
-  should appear together, triggered by the end of the hero wrapper. `HomeView.vue` already
-  carries a `data-hero-wrap` attribute with nothing reading it.
+- [x] **Rework the hero on a phone.** Settled by decision 37 and verified on 2026-09-16: the stage
+  is not rendered below 900px, the badge moves into the text column, and the marquee lands on the
+  fold in both languages from 360x640 up — 412x915, 390x844, 375x667 and 360x640 all measure a
+  one-viewport wrapper with the band flush to the bottom. A 320x568 window still overflows; that
+  is an iPhone 5 and decision 37 accepted it rather than compromise. Reopen this only if the
+  mobile hero is redesigned as a whole, because the functional symptom is gone.
+- [x] **Decide whether the 3D scene runs on a phone.** Answered by decision 37: `LogoStage` does
+  not mount below 900px, so the parallax never subscribes and a WebGL scene would cost nothing
+  because it would not be there. The scene itself is still the 3D logo task above.
+- [x] **The footer slides in on a phone too.** Fixed in `9df04e8` (decision 37), before this was
+  ever written down as pending: the footer no longer sits in the layout from the first frame
+  below 900px, and it shares `usePastHero` with the lemon, so the two arrive together at the end
+  of the hero wrapper.
+
+All three were real when the roadmap's "Later" list was written and are closed now; the group is
+kept as the record rather than deleted.
 
 ## Ideas (future)
 
