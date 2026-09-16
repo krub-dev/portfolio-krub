@@ -73,6 +73,16 @@ function measureNatural() {
 onMounted(() => {
   measureNatural()
   window.addEventListener('resize', measureNatural)
+
+  /*
+    The compact capsule's width is the number measured above, so a measurement
+    taken before the webfont has swapped in is too small: the labels widen when
+    the real font lands, the row overflows the capsule and "Let's talk" is what
+    gets cut. It is intermittent because it depends on whether the font was
+    already loaded when the component mounted. document.fonts.ready resolves
+    once the swap is done, and the measurement is redone then.
+  */
+  if (document.fonts) document.fonts.ready.then(measureNatural)
 })
 
 onUnmounted(() => window.removeEventListener('resize', measureNatural))

@@ -852,3 +852,29 @@ is the part that has been the subject of GDPR rulings in the EU.
 **What is left:** measure again. Every number in decision 30 came from localhost, where the
 Google request looked disproportionately expensive next to assets served with zero latency, so
 the real improvement has to be read off the deployed build.
+
+### 44. The navbar measured itself before the webfont swapped in
+
+**Date:** 2026-09-16 · **Status:** active · **Bug**
+
+The compact capsule's `max-width` is the number `measureNatural()` reads **once, at mount**, and
+that number was taken with whichever font happened to be applied at that instant. With
+`font-display: swap` the first layout uses the fallback family, which is narrower than Space
+Grotesk and JetBrains Mono — so the measurement could come out short. When the real font landed
+the labels widened, the row no longer fitted the capsule, and because the right-hand controls
+are `flex: 0 0 auto` the overflow went right: "Let's talk" stuck out past the capsule's edge and
+read as cut off.
+
+It is intermittent by nature, which is what made it hard to pin down: it only shows when the
+font has not finished loading by the time the component mounts, and whether that happens depends
+on the load. A scroll was required to see it too — while the capsule is not compact its
+`max-width` is `1180px`, so the stale number is not in play yet.
+
+The fix is to measure again once the fonts are ready: `document.fonts.ready.then(measureNatural)`,
+next to the existing resize listener and the language watcher. `measureNatural` already returns
+early if the element is gone, so a late resolution after unmount is harmless.
+
+`MarqueeBar` measures a repeat count for the same reason — its own comment says "the font once it
+loads" — and has the same gap in its triggers: it re-measures on resize and on a language change,
+but not on a font load. Left alone for now; the symptom there would be a short gap at the seam
+rather than a clipped control.
