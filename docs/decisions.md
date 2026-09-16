@@ -372,6 +372,11 @@ dialog would be trapped in, and a clipping box that a fixed overlay has no busin
 Teleport keeps the component's logic and props where they belong while putting its DOM at the
 top level.
 
+**Follow-up (2026-09-16):** the same teleport is what let the native cursor back in. The
+`cursor: none` rule is scoped to `[data-hide-cursor]` on `.app`, and teleporting the dialog to
+`<body>` puts it outside that subtree — so the browser's own cursor appeared over the modal
+alongside the custom one. The backdrop carries `data-hide-cursor` too now.
+
 ---
 
 ### 22. Escape and the focus trap were added; the prototype has neither

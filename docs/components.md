@@ -109,8 +109,8 @@ border).
 ### AccentButton
 Prop: `layout` (`'icon' | 'row'`, default `'icon'`). Reads `useAccent()` and cycles to the next
 palette on click. The face is a 16px disc split diagonally between `--acc` and `--acc-2`; the
-`aria-label` and `title` name the current palette, since there is no visible text. `icon` is the
-navbar square (desktop), `row` the full-width row in the mobile menu.
+`aria-label` and `title` name the current palette. `icon` is the navbar square (desktop), where
+there is no visible text; `row` is the full-width pill in the mobile menu, disc and name together.
 
 ---
 

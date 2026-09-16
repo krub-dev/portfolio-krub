@@ -74,6 +74,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
     <div
       v-if="open"
       class="backdrop"
+      data-hide-cursor
       @click="onBackdrop"
     >
       <div

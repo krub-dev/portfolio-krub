@@ -322,7 +322,10 @@ Opens on card click. Backdrop `color-mix(in srgb, var(--ink) 82%, transparent)` 
 `backdrop-filter: blur(10px)`, `z-index:250`, vertical scroll,
 `padding: clamp(12px,4vw,48px)`. Closes on backdrop click (only when the click is on the
 backdrop itself), on the ✕ button, and on the Escape key. While open,
-`body { overflow: hidden }` and focus is trapped inside the panel.
+`body { overflow: hidden }` and focus is trapped inside the panel. The backdrop carries
+`data-hide-cursor`, so the custom cursor replaces the native one inside the dialog as it does
+everywhere else — without it the browser's own cursor shows there, since the teleport puts the
+dialog outside `.app`.
 
 Panel: `width: min(1000px,100%)`, `max-height: calc(100svh - clamp(24px,8vw,96px))`,
 radius 22, background `--surface`, border `--line`.
@@ -381,7 +384,8 @@ Links: `mailto:krubioillan@gmail.com`, `github.com/krub-dev`, `linkedin.com/in/k
 1. `DESIGNED & BUILT WITH ♥ BY` + logo (mono 10px, `letter-spacing:.12em`, `--fg-3`; the heart
    is an 11px SVG filled with **`var(--mark)`** so it turns black in light theme) · `·`
    separator · `©2026 KRUB.DEV`.
-2. A "TOP" button with an up arrow (30px-tall pill, mono 10px, `letter-spacing:.16em`).
+2. A "TOP" button with an up arrow (30px-tall pill, mono 10px, `letter-spacing:.16em`), filled
+   with `--acc` and `--on-acc` on top so it does not disappear into the footer's own background.
    Hidden on mobile.
 3. `BARCELONA, SPAIN · hh:mm:ss CET (UTC+1)` — a live clock, `Europe/Madrid`, updated every
    second; the label alternates between `CET (UTC+1)` and `CEST (UTC+2)` with daylight saving.
@@ -486,9 +490,10 @@ Two layouts:
 - **Desktop (navbar):** a 36×36 square beside the theme and language controls, sharing their
   frame (radius 10, 1px `--line`, transparent, hover border `--acc-text`). The `aria-label` and
   `title` name the current palette ("Theme: Aqua"), since the button has no visible text.
-- **Mobile (menu):** a full-width row at the bottom of the menu panel, above the back-to-top,
-  with a `border-top` like the navigation rows: a mono label, the palette name, and the disc on
-  the right. A square in the cramped mobile control bar read badly, so it moved in here.
+- **Mobile (menu):** a full-width pill at the bottom of the menu panel, above the back-to-top,
+  holding the disc and the palette name together and centred. The first version spread a label
+  and the disc across the row and it was not clear what was clickable. A square in the cramped
+  mobile control bar read badly, which is why it moved into the menu at all.
 
 It is a global setting and stays on every route, the 404 included.
 

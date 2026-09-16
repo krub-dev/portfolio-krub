@@ -8,9 +8,10 @@
   at a glance.
 
   Two layouts. 'icon' is the 36×36 square in the navbar, beside the theme and
-  language controls, on desktop only. 'row' is the full-width row in the mobile
-  menu, where another square in the bar read badly and a row matches the
-  navigation rows around it.
+  language controls, on desktop only. 'row' is a pill in the mobile menu: the
+  first attempt spread a label and the disc across the full width and it was not
+  clear what was clickable, so the disc and the palette name now sit together
+  inside one pill.
 */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -36,11 +37,8 @@ const name = computed(() => t(`accent.${accent.value}`))
     :title="`${t('accent.label')}: ${name}`"
     @click="cycle"
   >
-    <template v-if="layout === 'row'">
-      <span class="label">{{ t('accent.label') }}</span>
-      <span class="name">{{ name }}</span>
-    </template>
     <span class="disc" aria-hidden="true" />
+    <span v-if="layout === 'row'" class="name">{{ name }}</span>
   </button>
 </template>
 
@@ -71,42 +69,29 @@ const name = computed(() => t(`accent.${accent.value}`))
   border-color: var(--acc-text);
 }
 
-/* Mobile menu: a full-width row, like the navigation rows around it. */
+/* Mobile menu: one pill, disc and name together, so the target is obvious. */
 .accent-btn.row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
   min-height: 44px;
-  padding: 10px 0;
+  padding: 10px 16px;
+  border-radius: 999px;
   background: transparent;
-  border: 0;
-  border-top: 1px solid var(--line);
+  border: 1px solid var(--line);
   color: var(--fg-2);
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 13px;
-  text-align: left;
-  transition: color 0.16s ease;
+  transition:
+    border-color 0.16s ease,
+    color 0.16s ease;
 }
 
 .accent-btn.row:hover {
-  color: var(--acc-text);
-}
-
-.accent-btn.row .label {
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--fg-3);
-}
-
-/* Pushes the disc to the far right of the row. */
-.accent-btn.row .name {
-  margin-right: auto;
-}
-
-.accent-btn.row:hover .label {
+  border-color: var(--acc-text);
   color: var(--acc-text);
 }
 </style>
