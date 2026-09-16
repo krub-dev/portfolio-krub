@@ -101,7 +101,11 @@ section, folded together where they overlapped.
   where something genuinely arrives late; project images are the obvious candidate.
 - [ ] **A simulated entry loader — or not.** An open decision. If it happens it must not become a
   fake delay over content that is already there.
-- [ ] **Easter egg: the "Acho" audio.** A hidden clip somewhere on the page. Detail still open.
+- [x] **Easter egg: the "Acho" audio.** Built on 2026-09-17: it plays on the first poke of Limonacho
+  in a visit — he was already a button, so it costs nothing in accessibility, and the hidden
+  "Murcia" word was dropped (decision 51). Once per visit from module state, fetched on the click,
+  never preloaded, and covered by an e2e test that counts the `play()` calls. Re-encoded to MP3
+  (128 kbps, 17 KB, down from a 177 KB WAV that now sits in `assets/sound/`, unserved).
 
 ## Mobile and responsive
 

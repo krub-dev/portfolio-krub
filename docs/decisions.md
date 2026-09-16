@@ -1098,3 +1098,42 @@ Two changes, in `useElementHeight`:
 Measured after: the footer goes 46 → 71px with the inset, `--footer-h` follows it, and the lemon's
 16px clearance comes back. The same composable publishes `--navbar-h`; the navbar's own insets are
 horizontal, so nothing there was affected.
+
+### 51. The "acho" plays on the lemon, once a visit
+
+**Date:** 2026-09-17 · **Status:** active
+
+The easter egg is the clip in `public/assets/sound/` — one second, stereo, and 17 KB as MP3. It
+arrived as a 177 KB WAV and was re-encoded at 128 kbps with a pure-JS encoder (there is no ffmpeg on
+this machine); the original is kept in `assets/sound/`, outside `public/`, so it is on disk but
+never served. Two things were open: what triggers it and how often it fires.
+
+**What triggers it.** The candidates were Limonacho's own click and the word "Murcia" in the About
+paragraph. The lemon won and the word was dropped:
+
+- the lemon is already a `<button>` with an `aria-label`, so the sound adds nothing to the
+  accessibility surface. A clickable "Murcia" mid-sentence would be either a `<span>` that a
+  keyboard and a screen reader never reach, or a real button that gives the joke away the moment it
+  takes focus — and this project scores 100 on accessibility;
+- it would also mean splitting `copy.about.p3` into three parts in both languages, the way the hero
+  headline already is, to hide a one-line joke in it;
+- and the joke is his. The mascot saying "acho" when you poke him is the character doing its job.
+
+**How often.** "The first time" means the first poke of a visit, not of a lifetime. The flag is
+module scope in `useAcho`, not `localStorage`: Limonacho unmounts and remounts as routes change, and
+a `localStorage` key would make the joke a permanent one-off instead. Nothing is written down, so
+nothing can go stale.
+
+Two smaller calls:
+
+- the clip is built and fetched on the first click, never preloaded. Audio behind a clip most visits
+  never ask for is not worth a byte of the critical path, and the half-second shake covers its
+  arrival. If it ever feels late on a phone, the knob is to warm it once the lemon is on screen — a
+  documented option, not a bug;
+- the flag flips on the click rather than on the playback succeeding, so a blocked `play()` or a
+  missing file does not retry on every click. The cost is that a blocked first click spends the
+  visit's one play, which is the cheap direction to fail in.
+
+Measured on the encoded file: 1.045s in both engines, peak 0.35 and RMS 0.020, against 0.367 and
+0.022 for the WAV — the conversion is faithful. It also confirms the recording itself is quiet, so a
+gain pass is the obvious follow-up if it ever sounds thin next to other audio.

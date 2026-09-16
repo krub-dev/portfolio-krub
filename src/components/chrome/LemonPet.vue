@@ -17,6 +17,7 @@
 */
 import { computed, onUnmounted, ref } from 'vue'
 
+import { useAcho } from '../../composables/useAcho'
 import { useLang } from '../../composables/useLang'
 import { usePointer } from '../../composables/usePointer'
 import { usePastHero } from '../../composables/usePastHero'
@@ -41,6 +42,8 @@ const text = computed(() => copy.lemon[lang.value].bubble)
 // Same trigger as the footer, so the two arrive together.
 const shown = usePastHero()
 
+const { playOnce } = useAcho()
+
 /*
   The pupils look at the cursor. Each eye works out the direction from its own
   centre to the pointer and slides its pupil that way, capped at 4px — the
@@ -61,6 +64,11 @@ usePointer((pointer) => {
 })
 
 function poke() {
+  // The first poke of a visit is the one with a voice. Called before the shake
+  // and before the rAF below, because the audio has to be asked for inside the
+  // click itself.
+  playOnce()
+
   // Restart the shake even mid-shake: removing the class and forcing a reflow
   // before adding it back is what makes a CSS animation replay.
   shaking.value = false

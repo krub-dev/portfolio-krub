@@ -11,6 +11,7 @@
     education.js     the /education tab
     stack.js         the four technology groups
     socials.js       social links, email address, CV path
+    sound.js         the audio clip behind the easter egg
     testimonials.js  quotes (placeholder for now, section off by default)
     config.js        on/off switches for the optional bits
 
@@ -40,5 +41,6 @@ export { experience } from './experience.js'
 export { projects } from './projects.js'
 export { sections } from './sections.js'
 export { socials, email, cvPath, photoPath } from './socials.js'
+export { achoSound } from './sound.js'
 export { stack } from './stack.js'
 export { testimonials } from './testimonials.js'

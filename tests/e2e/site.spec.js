@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 /*
-  Five flows. Each one is here because it could not be verified any other way —
+  These flows. Each one is here because it could not be verified any other way —
   they all depend on scroll events, animation frames or CSS transitions
   actually advancing.
 */
@@ -210,4 +210,46 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
 
   await page.reload()
   await expect(html).toHaveAttribute('data-accent', 'aqua')
+})
+
+test('Limonacho says "acho" on the first poke of a visit, and only on that one', async ({ page }) => {
+  // Counting calls to play() is the only way to see the sound without a
+  // speaker, and stubbing it also keeps the run silent.
+  await page.addInitScript(() => {
+    window.__acho = 0
+    HTMLMediaElement.prototype.play = function play() {
+      if (this.src.endsWith('/assets/sound/acho.mp3')) window.__acho += 1
+      return Promise.resolve()
+    }
+  })
+
+  await page.goto('/')
+
+  // He is parked off-screen until the hero is behind you.
+  const bringHimIn = () => page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  const lemon = page.locator('.lemon')
+  const plays = () => page.evaluate(() => window.__acho)
+
+  await bringHimIn()
+  await expect(page.locator('.pet')).toHaveClass(/shown/)
+
+  await lemon.click()
+  expect(await plays()).toBe(1)
+
+  // The shake and the bubble replay on every poke; the voice does not.
+  await lemon.click()
+  expect(await plays()).toBe(1)
+
+  // A reload is a new visit: the flag is module state, not anything written
+  // down, so the joke starts over. The stub resets too, which is what makes
+  // the second 1 below mean "played again".
+  await page.reload()
+  await bringHimIn()
+  await lemon.click()
+  expect(await plays()).toBe(1)
+
+  // And the clip it asks for is really there, and really audio.
+  const clip = await page.request.get('/assets/sound/acho.mp3')
+  expect(clip.ok()).toBe(true)
+  expect(clip.headers()['content-type']).toContain('audio')
 })
