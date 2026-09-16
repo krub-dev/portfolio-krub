@@ -148,7 +148,7 @@ test('theme and language survive a reload', async ({ page }) => {
 
   // Both control sets exist in the DOM; only one is displayed at a given
   // breakpoint, so scope to the visible one rather than taking first().
-  await page.locator('.seg-light:visible').click()
+  await page.locator('.seg-theme:visible').click()
   await page.locator('.lang-btn:visible').first().click()
   await expect(html).toHaveAttribute('data-theme', 'light')
   await expect(html).toHaveAttribute('lang', 'es')
@@ -171,9 +171,9 @@ test('the accent is picked from the dropdown and survives a reload', async ({ pa
   const html = page.locator('html')
   await expect(html).toHaveAttribute('data-accent', 'yellow')
 
-  // The palette segment opens the dropdown; a swatch is what picks a colour.
+  // The accent disc opens the dropdown; a swatch is what picks a colour.
   // Both control groups are in the DOM, so scope to the visible one.
-  await page.locator('.seg-palette:visible').click()
+  await page.locator('.seg-accent:visible').click()
   await page.getByRole('button', { name: 'Aqua' }).click()
 
   await expect(html).toHaveAttribute('data-accent', 'aqua')

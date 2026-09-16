@@ -158,9 +158,9 @@ Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come fr
 Closes on Escape and on a click outside as well as on any link.
 
 ### AppearanceControl
-No props. The segmented dark / light / accent control in the navbar, in both control groups. Dark
-and light call `useTheme().set()`; the palette segment toggles a dropdown of the palettes from
-`src/data/accents.js`, painted with `var(--pal-<id>)`, and picking one calls `useAccent().set()`.
+No props. The two-segment appearance control in the navbar, in both control groups: the ◐ button
+calls `useTheme().toggle()`, and the accent disc toggles a dropdown of the palettes from
+`src/data/accents.js`, painted with `var(--pal-<id>)`; picking one calls `useAccent().set()`.
 Closes on Escape, on a click outside and on a choice.
 
 ### TheFooter

@@ -479,17 +479,15 @@ one in yellow); a list of four navigation links, each with its `[00]`…`[03]` m
 active section's in yellow) and its path; and a full-width "↑ back to top" button. Every link
 closes the menu when pressed.
 
-### 3.18 Appearance control (dark / light / accent)
+### 3.18 Appearance control (theme + accent)
 
-One segmented control in the navbar, in both the desktop and the mobile group, where the old
-dark/light button was. Three segments in a 36px-tall rounded box (radius 10, 1px `--line`),
-separated by 1px dividers:
+One control in the navbar, in both the desktop and the mobile group, where the old dark/light
+button was. A 36px-tall rounded box (radius 10, 1px `--line`) with two segments and a 1px divider:
 
-- **Dark** and **light** set the theme directly. They are the state, not a toggle: the active one
-  is painted with `--acc-text` and carries a `drop-shadow` glow in the accent, so the current
-  theme reads at a glance.
-- **Accent** (a palette icon) opens a small dropdown — a `--surface` panel, radius 12, one swatch
-  per palette, the active one ringed. Picking a colour sets it and closes.
+- **◐** is the theme toggle it always was: one click alternates dark and light.
+- **The accent disc** — 16px, split diagonally between `--acc` and `--acc-2`, so the current
+  colour and its variation share one face — opens a small dropdown: a `--surface` panel, radius
+  12, one swatch per palette, the active one ringed. Picking a colour sets it and closes.
 
 The dropdown hangs under the control (`right:0`) and closes on a click outside, on Escape and on a
 choice; its listeners exist only while it is open. Swatches are 32px on desktop and 44px on a

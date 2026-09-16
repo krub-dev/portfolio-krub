@@ -1,16 +1,12 @@
 <script setup>
 /*
-  The appearance control: dark, light and the accent palette, in one segmented
-  pill.
+  The appearance control: the theme toggle and the accent picker, side by side.
 
-  The first two segments set the theme directly — they are the state, not a
-  toggle button, so the active one is painted with the accent and carries a soft
-  glow. The third opens a small dropdown with the accent swatches, which is where
-  the accent lives now: showing the colours beats pressing a button until the
-  right one comes round.
-
-  It replaces both the old single dark/light button and the cycling accent
-  button, on desktop and in the mobile control bar.
+  One rounded box, two segments and a divider. The first is the ◐ button — one
+  click alternates dark and light, as it always did. The second is a disc split
+  between the accent and its hover tone, which opens a small dropdown with the
+  palette swatches: that is where the accent lives now, because picking the
+  colour you want beats pressing a button until it comes round.
 
   The dropdown closes on Escape, on a click outside and on a choice, and its two
   listeners only exist while it is open.
@@ -23,7 +19,7 @@ import { useAccent } from '../../composables/useAccent'
 import { useTheme } from '../../composables/useTheme'
 
 const { t } = useI18n()
-const { theme, set: setTheme } = useTheme()
+const { toggle: toggleTheme } = useTheme()
 const { accent, set: setAccent } = useAccent()
 
 const open = ref(false)
@@ -61,61 +57,27 @@ function pick(id) {
   <div class="appearance" data-appearance>
     <div class="segments">
       <button
-        class="seg seg-dark"
+        class="seg seg-theme"
         type="button"
-        :class="{ on: theme === 'dark' }"
-        :aria-pressed="theme === 'dark'"
-        :aria-label="t('a11y.themeDark')"
-        :title="t('a11y.themeDark')"
-        @click="setTheme('dark')"
+        :aria-label="t('a11y.toggleTheme')"
+        :title="t('a11y.toggleTheme')"
+        @click="toggleTheme"
       >
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M20.4 14.6A8.6 8.6 0 0 1 9.4 3.6a7.2 7.2 0 1 0 11 11Z" />
-        </svg>
+        ◐
       </button>
 
       <span class="divider" aria-hidden="true" />
 
       <button
-        class="seg seg-light"
+        class="seg seg-accent"
         type="button"
-        :class="{ on: theme === 'light' }"
-        :aria-pressed="theme === 'light'"
-        :aria-label="t('a11y.themeLight')"
-        :title="t('a11y.themeLight')"
-        @click="setTheme('light')"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="4.1" fill="currentColor" />
-          <path
-            d="M12 2.4v2.3M12 19.3v2.3M2.4 12h2.3M19.3 12h2.3M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.9"
-            stroke-linecap="round"
-          />
-        </svg>
-      </button>
-
-      <span class="divider" aria-hidden="true" />
-
-      <button
-        class="seg seg-palette"
-        type="button"
-        :class="{ on: open }"
         aria-haspopup="true"
         :aria-expanded="open"
         :aria-label="t('accent.label')"
         :title="t('accent.label')"
         @click="open = !open"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 3.2a8.8 8.8 0 0 0 0 17.6c1.1 0 1.9-.85 1.9-1.85 0-.5-.2-.95-.5-1.27-.29-.33-.46-.75-.46-1.19 0-.95.78-1.72 1.72-1.72h1.4A4.94 4.94 0 0 0 21 9.8c0-3.9-4.03-6.6-9-6.6Z" />
-          <circle cx="7.6" cy="11.7" r="1.05" fill="currentColor" stroke="none" />
-          <circle cx="10.1" cy="7.7" r="1.05" fill="currentColor" stroke="none" />
-          <circle cx="14.4" cy="7.7" r="1.05" fill="currentColor" stroke="none" />
-          <circle cx="17" cy="11.3" r="1.05" fill="currentColor" stroke="none" />
-        </svg>
+        <span class="disc" aria-hidden="true" />
       </button>
     </div>
 
@@ -161,30 +123,23 @@ function pick(id) {
   border: 0;
   cursor: pointer;
   color: var(--fg-2);
-  transition:
-    color 0.16s ease,
-    filter 0.16s ease;
-}
-
-.seg svg {
-  width: 17px;
-  height: 17px;
+  transition: color 0.16s ease;
 }
 
 .seg:hover {
   color: var(--fg);
 }
 
-/* The active theme segment is the state, so it is painted with the accent and
-   carries a soft glow. --acc is a fill, but here it is a light source, which is
-   what the glow needs. */
-.seg.on {
-  color: var(--acc-text);
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--acc) 75%, transparent));
+.seg-theme {
+  font-size: 15px;
 }
 
-.seg.on:hover {
-  color: var(--acc-text);
+/* The accent and its hover tone, in one face. */
+.disc {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--acc) 0 50%, var(--acc-2) 50% 100%);
 }
 
 .divider {

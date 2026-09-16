@@ -1003,12 +1003,13 @@ was changed after seeing it. The favicon and og-banner are baked yellow, so they
 with the yellow default rather than with every palette; that is accepted, since they are images
 rendered outside the page.
 
-**The switcher is a segmented appearance control with a dropdown.** The first version put a row of
-swatches in the right rail with the scroll indicator, and the same row in the mobile menu; five
-dots exposed at once read as a settings panel, and the rail put a control in the middle of the
-page's edge. The second was one cycling square in the navbar, which then read badly on a phone. It
-is now a single segmented control — dark, light, accent — in the navbar on every screen, in the
-place of the old dark/light button. Dark and light set the theme directly (the active segment is
-the state, painted with the accent and carrying a soft glow), and the palette segment opens a
-small dropdown with one swatch per palette. That dropdown is the part the cycling button was
-missing: you pick the colour you want instead of pressing until it comes round.
+**The switcher is one control with a theme toggle and an accent dropdown.** The first version put
+a row of swatches in the right rail with the scroll indicator, and the same row in the mobile
+menu; five dots exposed at once read as a settings panel, and the rail put a control in the
+middle of the page's edge. The second was one cycling square in the navbar, which then read badly
+on a phone. It is now a small two-segment box in the navbar on every screen, in the place of the
+old dark/light button: the ◐ toggle it always was, beside a disc split between the accent and its
+hover tone. The disc opens a dropdown with one swatch per palette — the part the cycling button
+was missing, because you pick the colour you want instead of pressing until it comes round. A
+moon-and-sun version with a glow on the active segment came and went: the icon is the ◐ as before,
+and nothing else in the site glows, so the drop-shadow was removed.

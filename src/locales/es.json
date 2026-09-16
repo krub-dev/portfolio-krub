@@ -65,8 +65,6 @@
   },
   "a11y": {
     "toggleTheme": "Cambiar de tema",
-    "themeDark": "Tema oscuro",
-    "themeLight": "Tema claro",
     "toggleLang": "Cambiar de idioma",
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",
