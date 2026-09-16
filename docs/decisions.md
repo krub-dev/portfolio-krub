@@ -1072,3 +1072,28 @@ device showed was the ragged wrap, not an overlap.
 
 The speech bubble lost its shadow in the same pass: the mobile menu is now the only shadow in the
 project, which is what the spec's list says.
+
+### 50. The iOS toolbar collapsed and the footer grew without telling anyone
+
+**Date:** 2026-09-16 · **Status:** active · **Bug**
+
+On an iPhone 12 the footer is `position: fixed; bottom: 0` with
+`padding-bottom: max(9px, env(safe-area-inset-bottom))`. When the browser toolbar collapses, the
+bottom inset changes and the footer grows about 25px — and that growth lands in its **padding**, not
+its content.
+
+`useElementHeight` published `--footer-h` from a `ResizeObserver`, and a ResizeObserver watches the
+**content** box by default, so a padding-only change did not fire it. `--footer-h` kept the old
+number, the page reserved too little, and the lemon — which stands on the footer — ended up
+**overlapping it by 9px**. Reproduced in both WebKit and Chromium by forcing the padding, so it is
+not engine-specific; it is just that only a phone makes it happen in the wild.
+
+Two changes, in `useElementHeight`:
+
+- the observer asks for `box: 'border-box'`, which is the box this has always meant;
+- and the height is **re-read when `visualViewport` moves** — resize and scroll. That is what the
+  iOS toolbar actually fires when it collapses, and it is the part that reproduced the fix.
+
+Measured after: the footer goes 46 → 71px with the inset, `--footer-h` follows it, and the lemon's
+16px clearance comes back. The same composable publishes `--navbar-h`; the navbar's own insets are
+horizontal, so nothing there was affected.

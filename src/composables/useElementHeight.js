@@ -1,4 +1,4 @@
-import { onUnmounted, watch } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 
 /*
   Publishes an element's real height as a CSS custom property on <html>, so
@@ -13,46 +13,60 @@ import { onUnmounted, watch } from 'vue'
   A ResizeObserver is the right tool: it fires whenever the element's box
   changes, whatever the cause — window resize, font load, wrapping, a language
   switch. No polling, and no guessing which events to listen to.
+
+  With one exception, see the visualViewport listener below.
 */
 export function useElementHeight(elementRef, cssVariable) {
   let observer = null
+  let el = null
 
-  function publish(height) {
-    document.documentElement.style.setProperty(cssVariable, `${Math.ceil(height)}px`)
+  // getBoundingClientRect(), not entry.contentRect: contentRect is the CONTENT
+  // box, so an element with padding would be reported short by exactly that
+  // padding — 18px, for the footer, which is why the page used to reserve too
+  // little and the fixed footer sat on top of the contact section.
+  function publish() {
+    if (!el) return
+    document.documentElement.style.setProperty(cssVariable, `${Math.ceil(el.getBoundingClientRect().height)}px`)
   }
 
   // The ref is null until the component mounts, so watch it rather than
   // reading it once.
   const stop = watch(
     elementRef,
-    (el) => {
+    (element) => {
       observer?.disconnect()
+      el = element
       if (!el) return
 
-      /*
-        getBoundingClientRect(), not entry.contentRect.
-
-        contentRect is the CONTENT box: it excludes padding and border. The
-        footer has 9px of vertical padding and a 1px top border, so measuring
-        it that way reported 31px for an element that occupies 49 — and the
-        page reserved 18px too little, letting the footer sit on top of the
-        end of the contact section.
-
-        It hid well. The initial measurement below was already correct; the
-        observer then overwrote it with the wrong number, so the bug only
-        appeared once something triggered a resize. An end-to-end test in a
-        real browser is what surfaced it.
-      */
-      observer = new ResizeObserver(() => publish(el.getBoundingClientRect().height))
+      // box: 'border-box', not the default content box: a height that changes
+      // because of padding (the footer's safe-area inset) has to be reported.
+      observer = new ResizeObserver(publish, { box: 'border-box' })
       observer.observe(el)
-      publish(el.getBoundingClientRect().height)
+      publish()
     },
     { immediate: true },
   )
 
+  /*
+    The iOS toolbar collapsing is the case a ResizeObserver can miss. It changes
+    the bottom safe-area inset, and that lands in the footer's padding: on a real
+    iPhone the footer grows about 25px and the observer does not report it, so
+    --footer-h kept the old number and the lemon, which stands on the footer,
+    ended up overlapping it. visualViewport fires when the toolbar moves, which
+    is exactly when the number has to be read again.
+  */
+  const viewport = typeof window === 'undefined' ? null : window.visualViewport
+
+  onMounted(() => {
+    viewport?.addEventListener('resize', publish)
+    viewport?.addEventListener('scroll', publish)
+  })
+
   onUnmounted(() => {
     stop()
     observer?.disconnect()
+    viewport?.removeEventListener('resize', publish)
+    viewport?.removeEventListener('scroll', publish)
     // Not removed from the element: the fallback in tokens.css takes over, and
     // a property that disappears mid-session would collapse the layout that
     // depends on it.

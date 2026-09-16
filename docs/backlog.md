@@ -105,6 +105,10 @@ section, folded together where they overlapped.
 
 ## Mobile and responsive
 
+- [x] **The footer grew when the iOS toolbar collapsed, and the lemon overlapped it.** The inset
+  lands in the footer's padding, and the ResizeObserver watched the content box, so `--footer-h`
+  went stale. `useElementHeight` observes the border box now and re-reads on a `visualViewport`
+  move. Reproduced and fixed in WebKit; see decision 50.
 - [x] **The footer credit wrapped in Spanish.** On an iPhone 12 the Spanish credit is a few pixels
   wider than the English one at 390px, so it broke mid-phrase and the footer grew to three lines.
   Below 900px the footer is now a centred column and the tracking is halved to `.06em`, so both
