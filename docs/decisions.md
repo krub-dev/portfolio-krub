@@ -1015,11 +1015,22 @@ short enough to reach in a few presses, and a panel for it was more machinery th
 deserves. Nothing in the site glows either, so the glow went with the moon-and-sun segments.
 
 On desktop the box takes the language button's hover — the frame and the glyphs turn to the
-accent, and the circle grows a little (reduced motion keeps the colour and drops the growth). On a
-phone the appearance and language controls ride in the bar until the capsule compacts and live in
-the menu header from then on: at the top the bar would otherwise be just a brand and a menu
-button, and once it compacts it wants to be exactly that. `measureNatural()` hides the controls
-while it measures, or the compact width would come out as the wide one.
+accent, and the circle grows a little (reduced motion keeps the colour and drops the growth).
+
+The controls are handed over when the capsule compacts. At the top they sit in the bar, which is
+what keeps it from being just a logo; once it compacts they move out of it — to a settings button
+on desktop, to the menu on a phone — and moving back up brings them back.
+
+On desktop the compact bar folds them into one 36×36 sliders button that opens them in a panel
+(3.19); on a phone it keeps only the brand and the menu button, and the menu's header carries them
+from then on.
+
+The measurement changed twice for this. It now applies the compact layout for one frame instead of
+hiding one element, so it measures the whole handed-over strip; and it measures a second number,
+the capsule's full width (the viewport minus the gutters, capped at 1180), because on a narrow
+screen `max-width:1180px` never binds — `width:100%` is already smaller — so the return to the top
+was jumping instead of animating. A language change re-measures; a resize re-measures with the
+transition off for one frame, so dragging the window does not animate the capsule.
 
 Two palette notes from the same round. Violet's dark value is the solid `#8B5CF6`, not a pastel —
 the pastel washed out, and light and dark now share the fill. And Limonacho paints himself with

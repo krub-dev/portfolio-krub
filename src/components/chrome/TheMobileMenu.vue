@@ -9,12 +9,13 @@
   The listeners are attached only while the menu is open and removed when it
   closes, so nothing stays wired up in the background.
 */
-import { onUnmounted, watch } from 'vue'
+import { computed, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SocialLink from '../base/SocialLink.vue'
 import LangButton from '../base/LangButton.vue'
 import AppearanceControl from './AppearanceControl.vue'
+import { useScroll } from '../../composables/useScroll'
 import { email, sections, socials } from '../../data'
 
 const props = defineProps({
@@ -25,6 +26,10 @@ const props = defineProps({
 const emit = defineEmits(['close', 'go-top'])
 
 const { t } = useI18n()
+const { y } = useScroll()
+
+// The bar hands its controls over once it compacts, so they are only here then.
+const compact = computed(() => y.value > 60)
 
 function onKeydown(event) {
   if (event.key === 'Escape') emit('close')
@@ -60,9 +65,9 @@ onUnmounted(() => {
     <div class="head">
       <span class="title">{{ t('menu.label') }}</span>
       <span class="sub">{{ t('menu.sub') }}</span>
-      <!-- The theme, accent and language controls live here on a phone: the
-           navbar keeps only the menu button when it is narrow. -->
-      <div class="settings">
+      <!-- The bar hands its controls over once it compacts; until then they are
+           still in the navbar, so they are not here twice. -->
+      <div v-if="compact" class="settings">
         <AppearanceControl />
         <LangButton />
       </div>

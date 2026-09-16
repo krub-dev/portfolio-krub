@@ -65,6 +65,7 @@
   },
   "a11y": {
     "toggleTheme": "Switch colour theme",
+    "settings": "Appearance and language",
     "toggleLang": "Switch language",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",

@@ -185,10 +185,25 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
   expect(fill).toBe('#c3fffc')
 
   if (isMobile) {
-    // The bar carries the controls until it compacts, and then the menu does.
-    await page.evaluate(() => window.scrollTo(0, 400))
-    await expect(page.locator('.capsule')).toHaveClass(/compact/)
-    await expect(page.locator('.extra')).toBeHidden()
+    // Before the bar compacts the menu has no controls: they are in the bar.
+    await page.locator('.menu-btn').click()
+    await expect(page.locator('.menu .settings')).toHaveCount(0)
+    await page.locator('.menu-btn').click()
+  }
+
+  // Compact: the bar hands the controls over — to the settings button on
+  // desktop, to the menu on a phone.
+  await page.evaluate(() => window.scrollTo(0, 400))
+  await expect(page.locator('.capsule')).toHaveClass(/compact/)
+  if (isMobile) {
+    await expect(page.locator('.controls.mobile .full')).toBeHidden()
+    await page.locator('.menu-btn').click()
+    await expect(page.locator('.menu .settings .lang-btn')).toBeVisible()
+  } else {
+    await expect(page.locator('.controls.desktop .full')).toBeHidden()
+    const settings = page.locator('.settings')
+    await settings.locator('.trigger').click()
+    await expect(settings.locator('.lang-btn')).toBeVisible()
   }
 
   await page.reload()

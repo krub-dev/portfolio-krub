@@ -17,11 +17,14 @@ App
 ├─ TheNavbar
 │   ├─ BrandLogo
 │   ├─ AppearanceControl
-│   └─ LangButton
+│   ├─ LangButton
+│   └─ SettingsMenu      (compact only)
+│       ├─ AppearanceControl
+│       └─ LangButton
 ├─ TheMobileMenu
 │   ├─ SocialLink ×n
-│   ├─ AppearanceControl
-│   └─ LangButton
+│   ├─ AppearanceControl (compact only)
+│   └─ LangButton        (compact only)
 ├─ ScrollProgress       (only where the route has a hero)
 ├─ CursorFx
 ├─ LemonPet             (only where the route has a hero)
@@ -155,18 +158,24 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 ### TheNavbar
 Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
 handled directly through their composables, and the `AppearanceControl` and `LangButton` sit beside
-it. Below 900px they are in the bar until the capsule compacts, and in the menu from then on, so
-the compact capsule is only the brand and the menu button. Sections come from
+it. The measurement is taken with the compact layout applied for one frame, so the hand-over is
+accounted for: once the capsule compacts those two give way to a `SettingsMenu`, and below 900px
+they give way to nothing — the menu carries them from then on. Sections come from
 `src/data/sections.js`, labels
 from the dictionary. Owns the compact scroll state and the natural-width measurement. Its links
 are absolute (`/#id`, `/#top`), so the shared chrome works from the 404, where the sections do not
 exist; on the home page the path is unchanged and the jump stays in-page.
 
+### SettingsMenu
+Prop: `visible` (boolean — the compact state; the panel closes when it goes false). The 36×36
+sliders button the compact desktop bar shows in place of the appearance and language controls. It
+opens a panel holding both. Closes on the trigger, on a click outside and on Escape.
+
 ### TheMobileMenu
 Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come from `src/data`.
 Closes on Escape and on a click outside as well as on any link. Its header carries the
-`AppearanceControl` and `LangButton`: the compact navbar hands them over, and they are here even
-before it compacts, so they are always reachable.
+`AppearanceControl` and `LangButton`, but only once the navbar has compacted — before that they
+are still in the bar.
 
 ### AppearanceControl
 No props. The two-segment appearance control in the navbar, in both control groups: the ◐ button

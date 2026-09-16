@@ -65,6 +65,7 @@
   },
   "a11y": {
     "toggleTheme": "Cambiar de tema",
+    "settings": "Apariencia e idioma",
     "toggleLang": "Cambiar de idioma",
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",

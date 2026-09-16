@@ -20,6 +20,7 @@ import { useI18n } from 'vue-i18n'
 import AppearanceControl from './AppearanceControl.vue'
 import BrandLogo from '../base/BrandLogo.vue'
 import LangButton from '../base/LangButton.vue'
+import SettingsMenu from './SettingsMenu.vue'
 import { useElementHeight } from '../../composables/useElementHeight'
 import { useLang } from '../../composables/useLang'
 import { useScroll } from '../../composables/useScroll'
@@ -37,10 +38,8 @@ const { lang } = useLang()
 const { y } = useScroll()
 
 const capsule = ref(null)
-const naturalWidth = ref(null)
-// The accent and language controls in the mobile group. Hidden in the compact
-// state, and hidden for the measurement below.
-const extra = ref(null)
+const narrowWidth = ref(null)
+const wideWidth = ref(null)
 
 /*
   The bar is fixed, so the hero has to pad itself past it or the name lands
@@ -52,42 +51,69 @@ const bar = ref(null)
 useElementHeight(bar, '--navbar-h')
 
 const compact = computed(() => y.value > 60)
-const maxWidth = computed(() =>
-  compact.value && naturalWidth.value ? `${naturalWidth.value}px` : '1180px',
-)
+const maxWidth = computed(() => {
+  if (compact.value && narrowWidth.value) return `${narrowWidth.value}px`
+  return wideWidth.value ? `${wideWidth.value}px` : '1180px'
+})
 
+/*
+  The compact capsule is a different strip of DOM: the controls are handed over
+  — to the settings button on desktop, to nothing but the menu on a phone — so
+  the measurement has to be taken with the capsule in its compact state. That is
+  why it adds the class for one frame, with transitions off.
+
+  It measures two numbers. The narrow one is the compact capsule's content
+  width. The wide one is what the capsule occupies when it is not compact: the
+  viewport minus the gutters, capped at 1180. The wide number is what makes the
+  return to the top animate on a narrow screen — there `width:100%` sits below
+  1180, so `max-width:1180px` never binds and the change would otherwise jump.
+*/
 function measureNatural() {
   const el = capsule.value
   if (!el) return
 
   const previous = el.getAttribute('style') ?? ''
-
-  /*
-    The compact capsule hides the accent and language controls — they live in
-    the menu then — so they are hidden for the measurement too. Without this the
-    number would be the wide, unscrolled width and the capsule would never
-    shrink.
-  */
-  const extraEl = extra.value
-  const previousExtra = extraEl?.style.display ?? null
-  if (extraEl) extraEl.style.display = 'none'
+  const wasCompact = el.classList.contains('compact')
 
   el.style.transition = 'none'
+
+  // Wide: no compact class, width 100%, the bar's own padding.
+  if (wasCompact) el.classList.remove('compact')
+  el.style.maxWidth = '1180px'
+  el.style.width = '100%'
+  el.style.padding = ''
+  const wide = el.getBoundingClientRect().width
+
+  // Narrow: the class swaps the controls, and the width is the content's.
+  el.classList.add('compact')
   el.style.maxWidth = 'none'
   el.style.width = 'auto'
   el.style.padding = '8px 12px'
-
-  const width = el.getBoundingClientRect().width
+  const narrow = el.getBoundingClientRect().width
 
   el.setAttribute('style', previous)
-  if (extraEl) extraEl.style.display = previousExtra ?? ''
+  if (!wasCompact) el.classList.remove('compact')
   void el.offsetWidth // flush the restore before transitions come back
-  naturalWidth.value = Math.ceil(width)
+  narrowWidth.value = Math.ceil(narrow)
+  wideWidth.value = Math.ceil(wide)
+}
+
+/*
+  A resize changes the wide width, and with a transition on max-width that would
+  animate the capsule while the window is dragged. The class turns the
+  transition off for the one frame the new value lands in.
+*/
+function onResize() {
+  const el = capsule.value
+  if (!el) return
+  el.classList.add('no-transition')
+  measureNatural()
+  requestAnimationFrame(() => el.classList.remove('no-transition'))
 }
 
 onMounted(() => {
   measureNatural()
-  window.addEventListener('resize', measureNatural)
+  window.addEventListener('resize', onResize)
 
   /*
     The compact capsule's width is the number measured above, so a measurement
@@ -100,7 +126,7 @@ onMounted(() => {
   if (document.fonts) document.fonts.ready.then(measureNatural)
 })
 
-onUnmounted(() => window.removeEventListener('resize', measureNatural))
+onUnmounted(() => window.removeEventListener('resize', onResize))
 
 /*
   Labels change width with the language, so the measurement is stale the moment
@@ -145,8 +171,11 @@ watch(lang, async () => {
       <span class="divider" aria-hidden="true" />
 
       <div class="controls desktop">
-        <AppearanceControl />
-        <LangButton />
+        <div class="full">
+          <AppearanceControl />
+          <LangButton />
+        </div>
+        <SettingsMenu class="settings" :visible="compact" />
         <a class="cta" :href="`mailto:${email}`">{{ t('actions.talk') }}</a>
       </div>
 
@@ -169,10 +198,10 @@ watch(lang, async () => {
           </svg>
         </button>
         <!-- Hidden once the capsule compacts; the menu carries them then. -->
-        <span ref="extra" class="extra">
+        <div class="full">
           <AppearanceControl />
           <LangButton />
-        </span>
+        </div>
       </div>
     </div>
   </header>
@@ -301,16 +330,30 @@ watch(lang, async () => {
   gap: 8px;
 }
 
-.extra {
+.full {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
 }
 
-/* Compact: the appearance and language controls leave the bar and live in the
-   menu instead, so the capsule can shrink to the brand and the menu button. */
-.capsule.compact .extra {
+/* Compact: the controls are handed over — to the settings button on desktop, to
+   the menu on a phone — so the capsule can shrink to the brand and the rest. */
+.capsule.compact .full {
   display: none;
+}
+
+.settings {
+  display: none;
+}
+
+.capsule.compact .settings {
+  display: block;
+}
+
+/* A resize changes the measured widths; the transition is off for that one
+   frame so the capsule does not animate while the window is dragged. */
+.capsule.no-transition {
+  transition: none !important;
 }
 
 .menu-btn {

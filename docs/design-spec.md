@@ -209,13 +209,20 @@ language button (36px tall, `padding:0 12px`) · CTA "Let's talk ↗" (backgroun
 **Compact state** — triggered at `scrollY > 60`:
 
 - `padding` becomes `8px 12px`; the logo height becomes 18px.
-- `max-width` becomes the **natural width of the content** (measured once on mount and on
-  every resize: the compact state is cloned with `width:auto` and the resulting width is
-  read), so the capsule shrinks around its own elements.
+- `max-width` becomes the **natural width of the content** (measured on mount, on every resize
+  and on a language change: the compact layout is applied for one frame with `width:auto` and the
+  resulting width is read), so the capsule shrinks around its own elements. A second number is
+  measured too — the capsule's full width, the viewport minus the gutters capped at 1180 — because
+  on a narrow screen `width:100%` sits below 1180 and the return to the top would otherwise jump
+  instead of animating.
 - Background `color-mix(in srgb, var(--surface) 84%, transparent)`,
   `backdrop-filter: blur(14px)`, border `var(--line)`. No shadow — the compact capsule's was
   removed, and the border is what separates it (see decisions.md).
 - The two vertical separators go from `opacity:0` to `1`.
+- The controls are handed over. On desktop the appearance and language controls give way to a
+  single settings button (3.19) beside the CTA; below 900px the bar keeps only the brand and the
+  menu button, and the menu panel (3.17) carries the controls from then on. At the top nothing is
+  hidden, so the bar is never just a logo.
 
 **Active section (scroll spy).** Walk `["top","me","projects","stack","contact"]` and treat
 as active the last one whose top edge is at `<= 35%` of the viewport height. That link is
@@ -223,9 +230,9 @@ painted `var(--acc-text)`; the rest, `--fg-2`. Note: the inactive colour has to 
 explicitly rather than cleared, because the global link rule is yellow.
 
 Below 900px the desktop navigation and controls hide, and the capsule holds the brand, the
-appearance and language controls, and a menu button (36×36, background `--acc`). Once the capsule
-compacts — past 60px of scroll — those controls leave the bar and live in the menu panel (3.17),
-so the compact capsule is only the brand and the menu button and the bar is not empty at the top.
+appearance and language controls, and a menu button (36×36, background `--acc`). Those controls
+stay in the bar until it compacts, and from then on the menu panel (3.17) carries them, so the
+compact capsule is only the brand and the menu button.
 
 ### 3.2 Hero
 
@@ -478,10 +485,10 @@ Limonacho", which hides itself after 4 seconds.
 A panel below the menu button (`top:74px; right:16px`, `z-index:150`),
 `width: min(300px, calc(100vw - 40px))`, radius 20, background `--surface`, `padding:16px`,
 `gap:12px`, shadow `0 24px 60px rgba(0,0,0,.45)`. It holds: a header with "Menu", a mono subtitle
-and — on the right of that same row — the appearance and language controls, which the bar hands
-over when it compacts (they are always here, so they are reachable either way); a 2×2 grid with
-Github, LinkedIn, X and "Let's talk ↗" (this last one in yellow); a list of four navigation links,
-each with its `[00]`…`[03]` mono index (the active section's in yellow) and its path; and a centred
+and — on the right of that same row — the appearance and language controls, which appear here only
+once the bar has compacted (before that they are still in the navbar); a 2×2 grid with Github,
+LinkedIn, X and "Let's talk ↗" (this last one in yellow); a list of four navigation links, each
+with its `[00]`…`[03]` mono index (the active section's in yellow) and its path; and a centred
 "↑ back to top" pill filled with the accent. Every link closes the menu when pressed.
 
 ### 3.18 Appearance control (theme + accent)
@@ -500,6 +507,14 @@ and the growth does not.
 
 It is a global setting and stays on every route, the 404 included. The language button beside it
 is a separate control and is unchanged.
+
+### 3.19 Settings button (compact navbar)
+
+On desktop, once the capsule compacts, the appearance and language controls are replaced by one
+36×36 button with a sliders icon, beside the CTA. It opens a small panel underneath it
+(`--surface`, radius 12, the shadow the lemon bubble uses) holding the appearance control and the
+language button. It closes on the trigger, on a click outside, on Escape, and when the bar expands
+again — so it is never left open behind a hidden trigger.
 
 ---
 
