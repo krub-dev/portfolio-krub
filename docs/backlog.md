@@ -105,7 +105,8 @@ section, folded together where they overlapped.
   in a visit — he was already a button, so it costs nothing in accessibility, and the hidden
   "Murcia" word was dropped (decision 51). Once per visit from module state, fetched on the click,
   never preloaded, and covered by an e2e test that counts the `play()` calls. Re-encoded to MP3
-  (128 kbps, 17 KB, down from a 177 KB WAV that now sits in `assets/sound/`, unserved).
+  (128 kbps, 17 KB, down from a 177 KB WAV that stays outside the repository, with the reference
+  material).
 
 ## Mobile and responsive
 

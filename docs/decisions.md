@@ -1105,8 +1105,8 @@ horizontal, so nothing there was affected.
 
 The easter egg is the clip in `public/assets/sound/` — one second, stereo, and 17 KB as MP3. It
 arrived as a 177 KB WAV and was re-encoded at 128 kbps with a pure-JS encoder (there is no ffmpeg on
-this machine); the original is kept in `assets/sound/`, outside `public/`, so it is on disk but
-never served. Two things were open: what triggers it and how often it fires.
+this machine); the original is kept with the brand reference material, outside the repository
+(`krub brand/reference/assets/sound/`), so it is on disk but neither versioned nor served. Two things were open: what triggers it and how often it fires.
 
 **What triggers it.** The candidates were Limonacho's own click and the word "Murcia" in the About
 paragraph. The lemon won and the word was dropped:
