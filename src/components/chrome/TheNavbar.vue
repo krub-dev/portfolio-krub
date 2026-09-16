@@ -19,6 +19,7 @@ import { useI18n } from 'vue-i18n'
 
 import AppearanceControl from './AppearanceControl.vue'
 import BrandLogo from '../base/BrandLogo.vue'
+import LangButton from '../base/LangButton.vue'
 import { useElementHeight } from '../../composables/useElementHeight'
 import { useLang } from '../../composables/useLang'
 import { useScroll } from '../../composables/useScroll'
@@ -32,7 +33,7 @@ const props = defineProps({
 defineEmits(['toggle-menu'])
 
 const { t } = useI18n()
-const { lang, toggle: toggleLang } = useLang()
+const { lang } = useLang()
 const { y } = useScroll()
 
 const capsule = ref(null)
@@ -130,9 +131,7 @@ watch(lang, async () => {
 
       <div class="controls desktop">
         <AppearanceControl />
-        <button class="lang-btn" type="button" :aria-label="`${lang.toUpperCase()} — ${t('a11y.toggleLang')}`" @click="toggleLang">
-          {{ lang.toUpperCase() }}
-        </button>
+        <LangButton />
         <a class="cta" :href="`mailto:${email}`">{{ t('actions.talk') }}</a>
       </div>
 
@@ -153,10 +152,6 @@ watch(lang, async () => {
             <circle cx="8" cy="16" r="2.5" />
             <circle cx="16" cy="16" r="2.5" />
           </svg>
-        </button>
-        <AppearanceControl />
-        <button class="lang-btn" type="button" :aria-label="`${lang.toUpperCase()} — ${t('a11y.toggleLang')}`" @click="toggleLang">
-          {{ lang.toUpperCase() }}
         </button>
       </div>
     </div>
@@ -286,41 +281,22 @@ watch(lang, async () => {
   gap: 8px;
 }
 
-.lang-btn,
-.menu-btn {
-  height: 36px;
-  border-radius: 10px;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--fg);
-  cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    color 0.16s ease;
-}
-
-.lang-btn {
-  padding: 0 12px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.1em;
-}
-
-.lang-btn:hover {
-  border-color: var(--acc-text);
-  color: var(--acc-text);
-}
-
 .menu-btn {
   width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: var(--acc);
   color: var(--on-acc);
-  border-color: var(--acc);
+  border: 1px solid var(--acc);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
 }
 
 .menu-btn svg {

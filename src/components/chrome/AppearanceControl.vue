@@ -33,7 +33,7 @@ const name = computed(() => t(`accent.${accent.value}`))
         :title="t('a11y.toggleTheme')"
         @click="toggleTheme"
       >
-        ◐
+        <span class="glyph" aria-hidden="true">◐</span>
       </button>
 
       <span class="divider" aria-hidden="true" />
@@ -58,6 +58,13 @@ const name = computed(() => t(`accent.${accent.value}`))
   height: 36px;
   border: 1px solid var(--line);
   border-radius: 10px;
+  transition: border-color 0.16s ease;
+}
+
+/* The hover the language button has: the frame and the glyphs turn to the
+   accent, and the circle grows a little. */
+.segments:hover {
+  border-color: var(--acc-text);
 }
 
 .seg {
@@ -75,11 +82,22 @@ const name = computed(() => t(`accent.${accent.value}`))
 }
 
 .seg:hover {
-  color: var(--fg);
+  color: var(--acc-text);
 }
 
 .seg-theme {
   font-size: 15px;
+}
+
+.glyph,
+.disc {
+  display: block;
+  transition: transform 0.16s ease;
+}
+
+.seg-theme:hover .glyph,
+.seg-accent:hover .disc {
+  transform: scale(1.18);
 }
 
 /* The accent and its hover tone, in one face. It changes as the palette does. */
@@ -95,5 +113,19 @@ const name = computed(() => t(`accent.${accent.value}`))
   height: 18px;
   flex: 0 0 auto;
   background: var(--line);
+}
+
+/* Hover colours stay under reduced motion (decision 25); the circle simply does
+   not grow. */
+@media (prefers-reduced-motion: reduce) {
+  .glyph,
+  .disc {
+    transition: none;
+  }
+
+  .seg-theme:hover .glyph,
+  .seg-accent:hover .disc {
+    transform: none;
+  }
 }
 </style>

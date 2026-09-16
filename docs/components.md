@@ -15,10 +15,13 @@ the two disagree, the code is right and this file is the bug.
 App
 ├─ BackgroundGrid  ×2  (hero / global, crossfading)
 ├─ TheNavbar
-│   ├─ BrandLogo         (the language button is inline, not a component)
-│   └─ AppearanceControl
+│   ├─ BrandLogo
+│   ├─ AppearanceControl
+│   └─ LangButton        (desktop only)
 ├─ TheMobileMenu
-│   └─ SocialLink ×n
+│   ├─ SocialLink ×n
+│   ├─ AppearanceControl
+│   └─ LangButton
 ├─ ScrollProgress       (only where the route has a hero)
 ├─ CursorFx
 ├─ LemonPet             (only where the route has a hero)
@@ -105,6 +108,10 @@ border).
 ### SpeechBubble
 `text`. Presentation only.
 
+### LangButton
+No props. The ES / EN button; calls `useLang().toggle()`. Used in the navbar on desktop and in the
+mobile menu header, so it is a component rather than inline markup.
+
 ---
 
 ## Content components
@@ -147,21 +154,24 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 
 ### TheNavbar
 Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
-handled directly through their composables, and the `AppearanceControl` sits beside it (dark /
-light / accent). Sections come from `src/data/sections.js`, labels
+handled directly through their composables, and the `AppearanceControl` and `LangButton` sit beside
+it on desktop. Below 900px the capsule keeps only the brand and the menu button, and both controls
+move into the menu header. Sections come from `src/data/sections.js`, labels
 from the dictionary. Owns the compact scroll state and the natural-width measurement. Its links
 are absolute (`/#id`, `/#top`), so the shared chrome works from the 404, where the sections do not
 exist; on the home page the path is unchanged and the jump stays in-page.
 
 ### TheMobileMenu
 Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come from `src/data`.
-Closes on Escape and on a click outside as well as on any link.
+Closes on Escape and on a click outside as well as on any link. Its header carries the
+`AppearanceControl` and `LangButton`, which on a phone have no room in the navbar.
 
 ### AppearanceControl
 No props. The two-segment appearance control in the navbar, in both control groups: the ◐ button
 calls `useTheme().toggle()`, and the accent disc calls `useAccent().cycle()`, advancing one palette
 per click. The `aria-label` and `title` name the current palette, since the disc has no visible
-text.
+text. On desktop the box takes the language button's hover — frame and glyphs to the accent, the
+circle growing a little.
 
 ### TheFooter
 No props. Emits `go-top`. Reads the timezone from `config.js`, publishes its own height in

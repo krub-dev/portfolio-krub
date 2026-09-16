@@ -13,6 +13,8 @@ import { onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SocialLink from '../base/SocialLink.vue'
+import LangButton from '../base/LangButton.vue'
+import AppearanceControl from './AppearanceControl.vue'
 import { email, sections, socials } from '../../data'
 
 const props = defineProps({
@@ -58,6 +60,12 @@ onUnmounted(() => {
     <div class="head">
       <span class="title">{{ t('menu.label') }}</span>
       <span class="sub">{{ t('menu.sub') }}</span>
+      <!-- The theme, accent and language controls live here on a phone: the
+           navbar keeps only the menu button when it is narrow. -->
+      <div class="settings">
+        <AppearanceControl />
+        <LangButton />
+      </div>
     </div>
 
     <div class="quick">
@@ -132,8 +140,15 @@ onUnmounted(() => {
 
 .head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
+}
+
+.settings {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .title {

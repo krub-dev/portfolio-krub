@@ -220,8 +220,9 @@ as active the last one whose top edge is at `<= 35%` of the viewport height. Tha
 painted `var(--acc-text)`; the rest, `--fg-2`. Note: the inactive colour has to be set
 explicitly rather than cleared, because the global link rule is yellow.
 
-Below 900px the desktop navigation and controls hide, and a menu button appears (36×36,
-background `--acc`) next to the appearance control and the language button.
+Below 900px the desktop navigation and controls hide, and the capsule keeps only the brand and a
+menu button (36×36, background `--acc`). The appearance and language controls move into the menu
+panel (3.17) rather than crowding the narrow bar.
 
 ### 3.2 Hero
 
@@ -472,10 +473,11 @@ Limonacho", which hides itself after 4 seconds.
 
 A panel below the menu button (`top:74px; right:16px`, `z-index:150`),
 `width: min(300px, calc(100vw - 40px))`, radius 20, background `--surface`, `padding:16px`,
-`gap:12px`, shadow `0 24px 60px rgba(0,0,0,.45)`. It holds: a header with "Menu" + a mono
-subtitle and a "DIR" label; a 2×2 grid with Github, LinkedIn, X and "Let's talk ↗" (this last
-one in yellow); a list of four navigation links, each with its `[00]`…`[03]` mono index (the
-active section's in yellow) and its path; and a full-width "↑ back to top" button. Every link
+`gap:12px`, shadow `0 24px 60px rgba(0,0,0,.45)`. It holds: a header with "Menu", a mono subtitle
+and — on the right of that same row — the appearance and language controls, which are here because
+the narrow navbar has no room for them; a 2×2 grid with Github, LinkedIn, X and "Let's talk ↗"
+(this last one in yellow); a list of four navigation links, each with its `[00]`…`[03]` mono index
+(the active section's in yellow) and its path; and a full-width "↑ back to top" button. Every link
 closes the menu when pressed.
 
 ### 3.18 Appearance control (theme + accent)
@@ -487,6 +489,10 @@ button was. A 36px-tall rounded box (radius 10, 1px `--line`) with two segments 
 - **The accent disc** — 16px, split diagonally between `--acc` and `--acc-2`, so the current
   colour and its variation share one face — advances one palette per click, wrapping at the end.
   The `aria-label` and `title` name the current palette ("Accent colour: Aqua").
+
+On desktop the whole box takes the language button's hover: the frame and the glyphs turn to
+`--acc-text`, and the circle grows to 1.18. Under `prefers-reduced-motion` the colour hover stays
+and the growth does not.
 
 It is a global setting and stays on every route, the 404 included. The language button beside it
 is a separate control and is unchanged.
@@ -578,9 +584,10 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
 ## 8. Responsive
 
 A single breakpoint: **900px**. Below it: one column in every two-column grid, navigation
-replaced by the menu, the custom cursor and scroll indicator disabled, the hero stage dropped
-(the badge moves into the text column), the footer centred with the TOP button hidden, a smaller
-4/5 photo, and the lemon at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
+replaced by the menu, the custom cursor and scroll indicator disabled, the appearance and language
+controls moved from the navbar into the menu header, the hero stage dropped (the badge moves into
+the text column), the footer centred with the TOP button hidden, a smaller 4/5 photo, and the
+lemon at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
 
 ---
 

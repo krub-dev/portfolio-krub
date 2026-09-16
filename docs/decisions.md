@@ -1013,3 +1013,9 @@ place of the old dark/light button: the ◐ toggle it always was, beside a disc 
 accent and its hover tone that advances one palette per click. No dropdown — five palettes is
 short enough to reach in a few presses, and a panel for it was more machinery than the choice
 deserves. Nothing in the site glows either, so the glow went with the moon-and-sun segments.
+
+On desktop the box takes the language button's hover — the frame and the glyphs turn to the
+accent, and the circle grows a little (reduced motion keeps the colour and drops the growth). On a
+phone the appearance and language controls leave the navbar for the menu header, beside the title:
+the narrow bar has no room for them, and the capsule there keeps only the brand and the menu
+button.
