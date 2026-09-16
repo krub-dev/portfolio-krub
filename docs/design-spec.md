@@ -156,8 +156,9 @@ about, 60ch in the timeline, 22ch in the contact headline) and `text-wrap: prett
   lemon speech bubble · **18px** cards and images · **20–22px** panels and modal · **999px**
   pill buttons.
 - Borders: always `1px solid var(--line)`. No coloured shadows anywhere.
-- Shadows (two in the whole site — the compact navbar's was removed, see decisions.md): lemon
-  bubble `0 14px 34px rgba(0,0,0,.32)`, mobile menu `0 24px 60px rgba(0,0,0,.45)`.
+- Shadows (three in the whole site — the compact navbar's was removed, see decisions.md): lemon
+  bubble and the appearance dropdown `0 14px 34px rgba(0,0,0,.32)`, mobile menu
+  `0 24px 60px rgba(0,0,0,.45)`.
 - Background grid: a 72×72px pattern with 1px lines in `var(--grid)`.
 
 ### Motion
@@ -200,9 +201,9 @@ transparent background and `border-radius:16px`.
 Contents, left to right: logo (the logo image applied as a mask over
 `background: var(--mark)`, height 22px, `aspect-ratio:1.682`) + the text `.dev` (mono 15px,
 weight 500) · 1px vertical separator · links `/about` `/projects` `/stack` `/contact`
-(mono 13px, `gap:24px`) · separator · theme button (36×36, radius 10) · language button
-(36px tall, `padding:0 12px`) · CTA "Let's talk ↗" (background `--acc`, radius 10, 14px,
-weight 600).
+(mono 13px, `gap:24px`) · separator · the appearance control, dark / light / accent (3.18) ·
+language button (36px tall, `padding:0 12px`) · CTA "Let's talk ↗" (background `--acc`, radius 10,
+14px, weight 600).
 
 **Compact state** — triggered at `scrollY > 60`:
 
@@ -217,11 +218,11 @@ weight 600).
 
 **Active section (scroll spy).** Walk `["top","me","projects","stack","contact"]` and treat
 as active the last one whose top edge is at `<= 35%` of the viewport height. That link is
-painted `var(--acc)`; the rest, `var(--fg-2)`. Note: the inactive colour has to be set
+painted `var(--acc-text)`; the rest, `--fg-2`. Note: the inactive colour has to be set
 explicitly rather than cleared, because the global link rule is yellow.
 
 Below 900px the desktop navigation and controls hide, and a menu button appears (36×36,
-background `--acc`) next to the theme and language buttons.
+background `--acc`) next to the appearance control and the language button.
 
 ### 3.2 Hero
 
@@ -478,23 +479,24 @@ one in yellow); a list of four navigation links, each with its `[00]`…`[03]` m
 active section's in yellow) and its path; and a full-width "↑ back to top" button. Every link
 closes the menu when pressed.
 
-### 3.18 Accent switcher
+### 3.18 Appearance control (dark / light / accent)
 
-One press moves to the next palette. It is a button, not a row of swatches — five dots on screen
-read as a settings panel — and the face is a 16px disc split diagonally, `--acc` above the line
-and `--acc-2` below, so it shows the current colour and its variation at a glance.
+One segmented control in the navbar, in both the desktop and the mobile group, where the old
+dark/light button was. Three segments in a 36px-tall rounded box (radius 10, 1px `--line`),
+separated by 1px dividers:
 
-Two layouts:
+- **Dark** and **light** set the theme directly. They are the state, not a toggle: the active one
+  is painted with `--acc-text` and carries a `drop-shadow` glow in the accent, so the current
+  theme reads at a glance.
+- **Accent** (a palette icon) opens a small dropdown — a `--surface` panel, radius 12, one swatch
+  per palette, the active one ringed. Picking a colour sets it and closes.
 
-- **Desktop (navbar):** a 36×36 square beside the theme and language controls, sharing their
-  frame (radius 10, 1px `--line`, transparent, hover border `--acc-text`). The `aria-label` and
-  `title` name the current palette ("Theme: Aqua"), since the button has no visible text.
-- **Mobile (menu):** a small centred pill at the bottom of the menu panel, above the back-to-top,
-  holding the disc and the palette name together. Full width read as a giant bar, so it is only as
-  wide as its contents now. A square in the cramped mobile control bar read badly, which is why
-  it lives in the menu at all.
+The dropdown hangs under the control (`right:0`) and closes on a click outside, on Escape and on a
+choice; its listeners exist only while it is open. Swatches are 32px on desktop and 44px on a
+phone, where the panel is still narrower than the viewport. It is a global setting and stays on
+every route, the 404 included.
 
-It is a global setting and stays on every route, the 404 included.
+The language button beside it is a separate control and is unchanged.
 
 ---
 

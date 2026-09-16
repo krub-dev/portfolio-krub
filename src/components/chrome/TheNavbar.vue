@@ -17,12 +17,11 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import AccentButton from '../base/AccentButton.vue'
+import AppearanceControl from './AppearanceControl.vue'
 import BrandLogo from '../base/BrandLogo.vue'
 import { useElementHeight } from '../../composables/useElementHeight'
 import { useLang } from '../../composables/useLang'
 import { useScroll } from '../../composables/useScroll'
-import { useTheme } from '../../composables/useTheme'
 import { email, sections } from '../../data'
 
 const props = defineProps({
@@ -34,7 +33,6 @@ defineEmits(['toggle-menu'])
 
 const { t } = useI18n()
 const { lang, toggle: toggleLang } = useLang()
-const { toggle: toggleTheme } = useTheme()
 const { y } = useScroll()
 
 const capsule = ref(null)
@@ -131,10 +129,7 @@ watch(lang, async () => {
       <span class="divider" aria-hidden="true" />
 
       <div class="controls desktop">
-        <button class="icon-btn" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
-          ◐
-        </button>
-        <AccentButton />
+        <AppearanceControl />
         <button class="lang-btn" type="button" :aria-label="`${lang.toUpperCase()} — ${t('a11y.toggleLang')}`" @click="toggleLang">
           {{ lang.toUpperCase() }}
         </button>
@@ -159,9 +154,7 @@ watch(lang, async () => {
             <circle cx="16" cy="16" r="2.5" />
           </svg>
         </button>
-        <button class="icon-btn" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
-          ◐
-        </button>
+        <AppearanceControl />
         <button class="lang-btn" type="button" :aria-label="`${lang.toUpperCase()} — ${t('a11y.toggleLang')}`" @click="toggleLang">
           {{ lang.toUpperCase() }}
         </button>
@@ -293,7 +286,6 @@ watch(lang, async () => {
   gap: 8px;
 }
 
-.icon-btn,
 .lang-btn,
 .menu-btn {
   height: 36px;
@@ -308,11 +300,6 @@ watch(lang, async () => {
     color 0.16s ease;
 }
 
-.icon-btn {
-  width: 36px;
-  font-size: 13px;
-}
-
 .lang-btn {
   padding: 0 12px;
   font-family: var(--font-mono);
@@ -320,7 +307,6 @@ watch(lang, async () => {
   letter-spacing: 0.1em;
 }
 
-.icon-btn:hover,
 .lang-btn:hover {
   border-color: var(--acc-text);
   color: var(--acc-text);

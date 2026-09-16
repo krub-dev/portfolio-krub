@@ -1003,12 +1003,12 @@ was changed after seeing it. The favicon and og-banner are baked yellow, so they
 with the yellow default rather than with every palette; that is accepted, since they are images
 rendered outside the page.
 
-**The switcher is one button, and it cycles.** The first version put a row of swatches in the
-right rail with the scroll indicator, and the same row in the mobile menu. On a real screen both
-read wrong: five dots exposed at once look like a settings panel, and the rail put a control in
-the middle of the page's edge. The second version was one 36×36 square in the navbar, but in the
-cramped mobile control bar it read badly, so it moved into the menu there. It is now a single
-button that advances one palette per press: the square in the desktop navbar, and a full-width
-row in the mobile menu. Its face is a 16px disc split diagonally between `--acc` and `--acc-2`,
-so it shows the colour and its variation without listing them all. The `aria-label` names the
-current palette, since there is no visible text.
+**The switcher is a segmented appearance control with a dropdown.** The first version put a row of
+swatches in the right rail with the scroll indicator, and the same row in the mobile menu; five
+dots exposed at once read as a settings panel, and the rail put a control in the middle of the
+page's edge. The second was one cycling square in the navbar, which then read badly on a phone. It
+is now a single segmented control — dark, light, accent — in the navbar on every screen, in the
+place of the old dark/light button. Dark and light set the theme directly (the active segment is
+the state, painted with the accent and carrying a soft glow), and the palette segment opens a
+small dropdown with one swatch per palette. That dropdown is the part the cycling button was
+missing: you pick the colour you want instead of pressing until it comes round.

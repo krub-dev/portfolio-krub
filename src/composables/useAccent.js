@@ -54,15 +54,6 @@ function set(next) {
   persist(accent.value)
 }
 
-/*
-  The switcher's button cycles rather than showing every palette: one press, the
-  next accent. The list is short and ordered, so wrapping at the end is enough.
-*/
-function cycle() {
-  const at = IDS.indexOf(accent.value)
-  set(IDS[(at + 1) % IDS.length])
-}
-
 export function initAccent() {
   accent.value = readStored() ?? DEFAULT_ACCENT
   apply(accent.value)
@@ -71,9 +62,8 @@ export function initAccent() {
 export function useAccent() {
   return {
     // readonly so a component cannot assign to it and skip the side effects
-    // (writing the attribute, saving the choice). Go through set() or cycle().
+    // (writing the attribute, saving the choice). Go through set().
     accent: readonly(accent),
     set,
-    cycle,
   }
 }

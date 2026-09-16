@@ -67,10 +67,10 @@ section, folded together where they overlapped.
 ## Design and sections
 
 - [x] **An accent theme switcher.** Five palettes chosen with `data-accent` — the brand yellow plus
-  aqua, rose, mint and violet — switched with one cycling button: the square in the desktop
-  navbar beside the theme and language controls, a pill in the mobile menu. Each
-  palette swaps the accent tokens and nothing else, and each needed a light-theme counterpart
-  because the pastels are invisible as fills on cream. Built on 2026-09-16; see decision 48.
+  aqua, rose, mint and violet — picked from a dropdown in the navbar's segmented appearance
+  control (dark / light / accent), on every screen. Each palette swaps the accent tokens and
+  nothing else, and each needed a light-theme counterpart because the pastels are invisible as
+  fills on cream. Built on 2026-09-16; see decision 48.
 - [ ] **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
   carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the
   inner grid, so a Three.js scene replaces the `.mark` element and nothing else has to move.

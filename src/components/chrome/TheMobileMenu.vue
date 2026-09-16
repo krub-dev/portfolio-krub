@@ -13,7 +13,6 @@ import { onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SocialLink from '../base/SocialLink.vue'
-import AccentButton from '../base/AccentButton.vue'
 import { email, sections, socials } from '../../data'
 
 const props = defineProps({
@@ -80,9 +79,6 @@ onUnmounted(() => {
         <span class="row-label">{{ t(section.labelKey) }}</span>
       </a>
     </nav>
-
-    <!-- The accent switcher's mobile home; in the navbar a square read badly. -->
-    <AccentButton layout="row" />
 
     <button class="to-top" type="button" @click="emit('go-top'); emit('close')">
       ↑ {{ t('menu.top') }}

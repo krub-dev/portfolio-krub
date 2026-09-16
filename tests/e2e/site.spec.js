@@ -148,7 +148,7 @@ test('theme and language survive a reload', async ({ page }) => {
 
   // Both control sets exist in the DOM; only one is displayed at a given
   // breakpoint, so scope to the visible one rather than taking first().
-  await page.locator('.icon-btn:visible').first().click()
+  await page.locator('.seg-light:visible').click()
   await page.locator('.lang-btn:visible').first().click()
   await expect(html).toHaveAttribute('data-theme', 'light')
   await expect(html).toHaveAttribute('lang', 'es')
@@ -166,20 +166,17 @@ test('theme and language survive a reload', async ({ page }) => {
   expect(painted).toBe('rgb(245, 243, 238)')
 })
 
-test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
+test('the accent is picked from the dropdown and survives a reload', async ({ page }) => {
   await page.goto('/')
   const html = page.locator('html')
   await expect(html).toHaveAttribute('data-accent', 'yellow')
 
-  // Desktop: the button in the navbar. Mobile: the row inside the menu.
-  if (isMobile) await page.locator('.menu-btn').click()
-
-  const button = page.locator('.accent-btn:visible')
-  await expect(button).toHaveAttribute('aria-label', 'Theme: Yellow')
-  await button.click()
+  // The palette segment opens the dropdown; a swatch is what picks a colour.
+  // Both control groups are in the DOM, so scope to the visible one.
+  await page.locator('.seg-palette:visible').click()
+  await page.getByRole('button', { name: 'Aqua' }).click()
 
   await expect(html).toHaveAttribute('data-accent', 'aqua')
-  await expect(button).toHaveAttribute('aria-label', 'Theme: Aqua')
   // The dark theme's aqua fill, straight off the token.
   const fill = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(),

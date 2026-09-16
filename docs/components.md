@@ -15,11 +15,10 @@ the two disagree, the code is right and this file is the bug.
 App
 ├─ BackgroundGrid  ×2  (hero / global, crossfading)
 ├─ TheNavbar
-│   ├─ BrandLogo         (theme and language buttons are inline, not components)
-│   └─ AccentButton     (icon, desktop only)
+│   ├─ BrandLogo         (the language button is inline, not a component)
+│   └─ AppearanceControl
 ├─ TheMobileMenu
-│   ├─ SocialLink ×n
-│   └─ AccentButton     (row)
+│   └─ SocialLink ×n
 ├─ ScrollProgress       (only where the route has a hero)
 ├─ CursorFx
 ├─ LemonPet             (only where the route has a hero)
@@ -106,13 +105,6 @@ border).
 ### SpeechBubble
 `text`. Presentation only.
 
-### AccentButton
-Prop: `layout` (`'icon' | 'row'`, default `'icon'`). Reads `useAccent()` and cycles to the next
-palette on click. The face is a 16px disc split diagonally between `--acc` and `--acc-2`; the
-`aria-label` and `title` name the current palette. `icon` is the navbar square (desktop), where
-there is no visible text; `row` is the small centred pill in the mobile menu, disc and name
-together.
-
 ---
 
 ## Content components
@@ -155,8 +147,8 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 
 ### TheNavbar
 Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
-handled directly through their composables, and the `AccentButton` sits beside them on desktop;
-the mobile menu carries its `row` layout. Sections come from `src/data/sections.js`, labels
+handled directly through their composables, and the `AppearanceControl` sits beside it (dark /
+light / accent). Sections come from `src/data/sections.js`, labels
 from the dictionary. Owns the compact scroll state and the natural-width measurement. Its links
 are absolute (`/#id`, `/#top`), so the shared chrome works from the 404, where the sections do not
 exist; on the home page the path is unchanged and the jump stays in-page.
@@ -164,6 +156,12 @@ exist; on the home page the path is unchanged and the jump stays in-page.
 ### TheMobileMenu
 Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come from `src/data`.
 Closes on Escape and on a click outside as well as on any link.
+
+### AppearanceControl
+No props. The segmented dark / light / accent control in the navbar, in both control groups. Dark
+and light call `useTheme().set()`; the palette segment toggles a dropdown of the palettes from
+`src/data/accents.js`, painted with `var(--pal-<id>)`, and picking one calls `useAccent().set()`.
+Closes on Escape, on a click outside and on a choice.
 
 ### TheFooter
 No props. Emits `go-top`. Reads the timezone from `config.js`, publishes its own height in
@@ -193,7 +191,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 |---|---|
 | `useTheme()` | `theme`, `toggle()`; writes `data-theme` on `<html>` and persists |
 | `useLang()` | `lang`, `toggle()`; persists in `localStorage["krub-lang"]` |
-| `useAccent()` | `accent`, `set(id)`, `cycle()`; writes `data-accent` on `<html>` and persists |
+| `useAccent()` | `accent`, `set(id)`; writes `data-accent` on `<html>` and persists |
 | `useScrollSpy(ids, threshold = 0.35)` | reactive `activeId` |
 | `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener |
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
