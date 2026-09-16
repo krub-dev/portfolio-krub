@@ -1091,8 +1091,9 @@ not engine-specific; it is just that only a phone makes it happen in the wild.
 Two changes, in `useElementHeight`:
 
 - the observer asks for `box: 'border-box'`, which is the box this has always meant;
-- and the height is **re-read when `visualViewport` moves** — resize and scroll. That is what the
-  iOS toolbar actually fires when it collapses, and it is the part that reproduced the fix.
+- and the height is **re-read when `visualViewport` resizes** — `resize` only, not `scroll`: the
+  toolbar collapsing is a resize, and `scroll` fires continuously while the page is scrolled on
+  iOS, which would mean reading layout once per frame to publish a number that has not moved.
 
 Measured after: the footer goes 46 → 71px with the inset, `--footer-h` follows it, and the lemon's
 16px clearance comes back. The same composable publishes `--navbar-h`; the navbar's own insets are

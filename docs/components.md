@@ -229,7 +229,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useMagnetic()` | registers the magnetic hover loop for `[data-magnetic]` |
 | `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) |
 | `useFooterHeight(el)` | thin wrapper that publishes the footer's `--footer-h` |
-| `useElementHeight(el, prop)` | the mechanism behind it, shared with the navbar's `--navbar-h`. Observes the border box and re-reads on a `visualViewport` move, because the iOS toolbar changes the footer's padding and a ResizeObserver can miss that |
+| `useElementHeight(el, prop)` | the mechanism behind it, shared with the navbar's `--navbar-h`. Observes the border box and re-reads on a `visualViewport` resize, because the iOS toolbar changes the footer's padding and a ResizeObserver can miss that |
 | `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it, and it is true from the start on a route with no hero (the 404) |
 | `useBodyScrollLock(active)` | locks scrolling while the modal is open |
 

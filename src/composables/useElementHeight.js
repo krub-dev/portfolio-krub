@@ -19,14 +19,22 @@ import { onMounted, onUnmounted, watch } from 'vue'
 export function useElementHeight(elementRef, cssVariable) {
   let observer = null
   let el = null
+  let last = null
 
   // getBoundingClientRect(), not entry.contentRect: contentRect is the CONTENT
   // box, so an element with padding would be reported short by exactly that
   // padding — 18px, for the footer, which is why the page used to reserve too
   // little and the fixed footer sat on top of the contact section.
+  //
+  // The last-value check is what keeps an extra firing free: the observer may
+  // report a change the number does not actually move for, and writing the same
+  // value again is a style recalculation on <html> for nothing.
   function publish() {
     if (!el) return
-    document.documentElement.style.setProperty(cssVariable, `${Math.ceil(el.getBoundingClientRect().height)}px`)
+    const height = Math.ceil(el.getBoundingClientRect().height)
+    if (height === last) return
+    last = height
+    document.documentElement.style.setProperty(cssVariable, `${height}px`)
   }
 
   // The ref is null until the component mounts, so watch it rather than
@@ -52,21 +60,23 @@ export function useElementHeight(elementRef, cssVariable) {
     the bottom safe-area inset, and that lands in the footer's padding: on a real
     iPhone the footer grows about 25px and the observer does not report it, so
     --footer-h kept the old number and the lemon, which stands on the footer,
-    ended up overlapping it. visualViewport fires when the toolbar moves, which
-    is exactly when the number has to be read again.
+    ended up overlapping it.
+
+    visualViewport fires `resize` when the toolbar collapses, which is exactly
+    when the number has to be read again. Only `resize` — `scroll` fires
+    continuously while the page is scrolled on iOS, and reading layout once per
+    frame to publish a number that has not moved is a cost with no return.
   */
   const viewport = typeof window === 'undefined' ? null : window.visualViewport
 
   onMounted(() => {
     viewport?.addEventListener('resize', publish)
-    viewport?.addEventListener('scroll', publish)
   })
 
   onUnmounted(() => {
     stop()
     observer?.disconnect()
     viewport?.removeEventListener('resize', publish)
-    viewport?.removeEventListener('scroll', publish)
     // Not removed from the element: the fallback in tokens.css takes over, and
     // a property that disappears mid-session would collapse the layout that
     // depends on it.
