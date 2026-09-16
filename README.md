@@ -61,7 +61,7 @@ E2E_BASE_URL=https://example.vercel.app npx playwright test
 ## Layout
 
 ```
-public/            served as-is: logo, photo, stack icons, favicon, robots, sitemap
+public/            served as-is: logo, photo, stack icons, fonts, favicon, robots, sitemap
 brand/             brand assets that are NOT served — uploaded by hand elsewhere
 docs/              the spec, the component contracts, the roadmap, the decision log
 tests/
@@ -114,9 +114,9 @@ Cache headers are split by one question: **does the filename change when the con
 
 - `/assets/*.js` and `*.css` are fingerprinted by Vite, so a new build produces a new name.
   Immutable for a year, safely.
-- `/assets/img/*` and `/icons/*` come straight out of `public/` and keep their names across
-  deploys. One day — long enough to be worth caching, short enough that replacing the banner
-  takes effect the same afternoon rather than in 2027.
+- `/assets/img/*`, `/icons/*` and `/fonts/*` come straight out of `public/` and keep their names
+  across deploys. One day — long enough to be worth caching, short enough that replacing the
+  banner (or a font) takes effect the same afternoon rather than in 2027.
 - `/` is never cached hard. `index.html` is what points at the current bundle; a stale copy pins
   a visitor to an old build.
 

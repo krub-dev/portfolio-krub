@@ -808,3 +808,47 @@ A transition cannot animate one axis of a transform and not the other. So the tw
 by property: the vertical offset is `bottom: calc(24px + var(--footer-h))`, which is layout and
 lands in the same frame as the footer it follows, and the transform only ever moves him
 sideways. The entrance is unchanged.
+
+### 42. The compact navbar shadow was removed
+
+**Date:** 2026-09-16 · **Status:** active · **Overrides the design spec**
+
+The spec's shadow list has three entries, and the compact navbar's `0 14px 40px rgba(0,0,0,.28)`
+was one of them. It is gone.
+
+Nothing replaces it: the compact capsule is now a translucent blurred surface with a `1px solid
+var(--line)` border and no shadow at all. The border is what separates it from the page. The
+now-dead `box-shadow` entry was also dropped from the capsule's `transition` list, since there
+is nothing left to animate.
+
+The design spec was updated in the same pass — its shadow list is down to two, and the motion
+table no longer names a shadow transition.
+
+### 43. The fonts are self-hosted
+
+**Date:** 2026-09-16 · **Status:** active · **Closes the font half of decision 30**
+
+Decision 30 measured the mobile Lighthouse gap and named self-hosting as the better of two ways
+to close it, deferred until after deployment. Done:
+
+- `Space Grotesk` and `JetBrains Mono` load from `public/fonts/`, one **variable** `.woff2` per
+  family (300–700 and 100–800), declared with `@font-face` in `tokens.css`. One file per family
+  replaces the six static weights the site used, so the whole typeface is two requests of
+  ~22 KB and ~40 KB.
+- The Google Fonts `<link>` and both `preconnect` hints are out of `index.html`. Two
+  `<link rel="preload">` take their place, so the download starts before the stylesheet is
+  parsed; the fallback still paints first and swaps, which is what `display=swap` already did.
+- Only the **latin** subset is downloaded. It covers Spanish and English — the accents, `ñ`, `¿`
+  and `¡` are all inside `U+0000–00FF` — and the cyrillic, greek and vietnamese subsets would
+  have tripled the payload for characters this site never renders.
+- The files keep their names across deploys, so they take the same **one-day** cache as the
+  icons in `vercel.json`, not the year that fingerprinted assets get. Replacing a font should
+  take effect the same day.
+- Licence and copyright: OFL 1.1, one file per family in `public/fonts/OFL-*.txt`.
+
+The point is not only speed. It also stops a visit from making a request to a third party, which
+is the part that has been the subject of GDPR rulings in the EU.
+
+**What is left:** measure again. Every number in decision 30 came from localhost, where the
+Google request looked disproportionately expensive next to assets served with zero latency, so
+the real improvement has to be read off the deployed build.

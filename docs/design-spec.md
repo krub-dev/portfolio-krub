@@ -128,8 +128,8 @@ about, 60ch in the timeline, 22ch in the contact headline) and `text-wrap: prett
   lemon speech bubble · **18px** cards and images · **20–22px** panels and modal · **999px**
   pill buttons.
 - Borders: always `1px solid var(--line)`. No coloured shadows anywhere.
-- Shadows (only three in the whole site): compact navbar `0 14px 40px rgba(0,0,0,.28)`,
-  lemon bubble `0 14px 34px rgba(0,0,0,.32)`, mobile menu `0 24px 60px rgba(0,0,0,.45)`.
+- Shadows (two in the whole site — the compact navbar's was removed, see decisions.md): lemon
+  bubble `0 14px 34px rgba(0,0,0,.32)`, mobile menu `0 24px 60px rgba(0,0,0,.45)`.
 - Background grid: a 72×72px pattern with 1px lines in `var(--grid)`.
 
 ### Motion
@@ -139,7 +139,7 @@ about, 60ch in the timeline, 22ch in the contact headline) and `text-wrap: prett
 | Colour and border hover | `.16s ease` |
 | Footer TOP button | `.18s ease` |
 | Navbar capsule (width, padding, gap) | `.55s cubic-bezier(.22,1,.36,1)` |
-| Navbar background/border/shadow | `.45s ease` |
+| Navbar background/border | `.45s ease` |
 | Footer entrance | `.4s cubic-bezier(.4,0,.2,1)` |
 | Lemon entrance | `.55s cubic-bezier(.22,1,.36,1)` |
 | Grid crossfade | `.35s ease` |
@@ -485,8 +485,11 @@ None of this belongs inside a template.
 - `public/assets/img/krub-pfp.jpeg` — profile photo.
 - `public/icons/<technology>/<file>.svg` — technology icons (Devicon).
 - `public/uploads/cv-es.pdf` — the CV linked from About.
+- `public/fonts/<family>-latin.woff2` — the two self-hosted variable fonts, with their OFL
+  licences beside them.
 
-Fonts from Google Fonts: Space Grotesk (400,500,600,700) and JetBrains Mono (400,500,700).
+Fonts, self-hosted rather than loaded from Google: Space Grotesk (variable, 300–700) and
+JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
 
 ---
 

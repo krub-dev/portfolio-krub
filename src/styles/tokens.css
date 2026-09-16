@@ -6,6 +6,38 @@
    See docs/design-spec.md §2.
    --------------------------------------------------------------------------- */
 
+/*
+  The two typefaces, self-hosted.
+
+  Both are variable fonts covering the whole weight axis, so one file each
+  replaces the six static weights the site uses. The Google Fonts stylesheet is
+  gone from the critical path: it blocked the first paint for 834 ms on mobile
+  and made every visit fetch from a third party, and a request for the fonts now
+  goes to the same origin instead of fonts.gstatic.com. Only the latin subset is
+  downloaded — it covers Spanish and English, and the cyrillic, greek and
+  vietnamese subsets would triple the weight for characters this site never
+  shows.
+
+  font-display: swap is the behaviour the Google stylesheet asked for too: text
+  paints in the fallback immediately and swaps when the file lands. The files and
+  their OFL licences live in public/fonts/.
+*/
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/space-grotesk-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-latin.woff2') format('woff2');
+}
+
 /* Dark theme. This is the default: no attribute on <html> means dark. */
 :root {
   --ink: #0c0c0d;                     /* page background */
@@ -24,7 +56,7 @@
   --grid: rgba(255, 255, 255, 0.045); /* background grid lines */
   --sec-idx: 0.16;                    /* opacity of the giant section number */
 
-  /* Font stacks. The two families are loaded from Google Fonts in index.html. */
+  /* Font stacks. The faces are declared above; these are the fallbacks. */
   --font-sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
 

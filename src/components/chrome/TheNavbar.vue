@@ -186,8 +186,7 @@ watch(lang, async () => {
     padding 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     gap 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     background-color 0.45s ease,
-    border-color 0.45s ease,
-    box-shadow 0.45s ease;
+    border-color 0.45s ease;
 }
 
 .capsule.compact {
@@ -195,7 +194,6 @@ watch(lang, async () => {
   background: color-mix(in srgb, var(--surface) 84%, transparent);
   backdrop-filter: blur(14px);
   border-color: var(--line);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
 }
 
 .brand {
