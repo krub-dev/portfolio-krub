@@ -5,11 +5,17 @@
 
   On desktop the bar keeps the appearance and language controls while it is
   full, and folds them in here once it compacts — the same idea as the mobile
-  menu, but for those controls only. It closes on Escape, on a click outside and
-  on the trigger, and the listeners only exist while it is open.
+  menu, but for those controls only.
 
-  `visible` is the compact state: when the bar expands again the panel closes, so
-  it is not left open behind a hidden trigger.
+  The panel is teleported to <body> instead of rendering inside the capsule. The
+  capsule has a `backdrop-filter`, and an element with one becomes a backdrop
+  root: a descendant's own blur would then only see the capsule's content, not
+  the page, and the panel would not match the bar's translucent blur. At the top
+  level it blurs the page exactly as the bar does, and it is positioned from the
+  trigger's own rectangle.
+
+  It closes on the trigger, on Escape, on a click outside, on a scroll and when
+  the bar expands again, and its listeners only exist while it is open.
 */
 import { onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -17,13 +23,27 @@ import { useI18n } from 'vue-i18n'
 import AppearanceControl from './AppearanceControl.vue'
 import DotsIcon from '../base/DotsIcon.vue'
 import LangButton from '../base/LangButton.vue'
+import { useScroll } from '../../composables/useScroll'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
 })
 
 const { t } = useI18n()
+const { y } = useScroll()
+
+const trigger = ref(null)
 const open = ref(false)
+const top = ref(0)
+const right = ref(0)
+
+function place() {
+  const el = trigger.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  top.value = Math.round(rect.bottom + 16)
+  right.value = Math.round(window.innerWidth - rect.right)
+}
 
 function onKeydown(event) {
   if (event.key === 'Escape') open.value = false
@@ -35,12 +55,20 @@ function onPointerDown(event) {
 
 watch(open, (isOpen) => {
   if (isOpen) {
+    place()
     document.addEventListener('keydown', onKeydown)
     document.addEventListener('pointerdown', onPointerDown)
+    window.addEventListener('resize', place)
   } else {
     document.removeEventListener('keydown', onKeydown)
     document.removeEventListener('pointerdown', onPointerDown)
+    window.removeEventListener('resize', place)
   }
+})
+
+// A scroll closes it, as it does the mobile menu.
+watch(y, () => {
+  open.value = false
 })
 
 watch(
@@ -53,12 +81,14 @@ watch(
 onUnmounted(() => {
   document.removeEventListener('keydown', onKeydown)
   document.removeEventListener('pointerdown', onPointerDown)
+  window.removeEventListener('resize', place)
 })
 </script>
 
 <template>
-  <div class="settings" data-settings :class="{ open }">
+  <div class="settings" :class="{ open }" data-settings>
     <button
+      ref="trigger"
       class="trigger"
       type="button"
       aria-haspopup="true"
@@ -70,10 +100,17 @@ onUnmounted(() => {
       <DotsIcon :open="open" />
     </button>
 
-    <div v-if="open" class="panel">
-      <AppearanceControl />
-      <LangButton />
-    </div>
+    <Teleport to="body">
+      <div
+        v-if="open"
+        class="settings-panel"
+        data-settings
+        :style="{ top: `${top}px`, right: `${right}px` }"
+      >
+        <AppearanceControl />
+        <LangButton />
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -110,13 +147,11 @@ onUnmounted(() => {
   color: var(--acc-text);
 }
 
-/* Hangs under the trigger, right-aligned, with a gap that clears the compact
-   capsule's padding so it does not read as glued to the bar. Same translucent
-   surface and blur as the capsule, no shadow. */
-.panel {
-  position: absolute;
-  top: calc(100% + 16px);
-  right: 0;
+/* Teleported to <body>, so it is positioned from the trigger's rectangle with
+   `position: fixed`. The background and blur are the capsule's own, so the two
+   read as the same surface. No shadow. */
+.settings-panel {
+  position: fixed;
   z-index: 160;
   display: flex;
   align-items: center;

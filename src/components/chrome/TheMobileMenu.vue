@@ -31,6 +31,11 @@ const { y } = useScroll()
 // The bar hands its controls over once it compacts, so they are only here then.
 const compact = computed(() => y.value > 60)
 
+// A scroll closes the menu, the same as the desktop settings panel.
+watch(y, () => {
+  if (props.open) emit('close')
+})
+
 function onKeydown(event) {
   if (event.key === 'Escape') emit('close')
 }

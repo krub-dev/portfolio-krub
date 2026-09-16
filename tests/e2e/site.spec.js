@@ -201,9 +201,11 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
     await expect(page.locator('.menu .settings .lang-btn')).toBeVisible()
   } else {
     await expect(page.locator('.controls.desktop .full')).toBeHidden()
-    const settings = page.locator('.settings')
-    await settings.locator('.trigger').click()
-    await expect(settings.locator('.lang-btn')).toBeVisible()
+    await page.locator('.settings .trigger').click()
+    await expect(page.locator('.settings-panel .lang-btn')).toBeVisible()
+    // A scroll closes it, as it does the mobile menu.
+    await page.evaluate(() => window.scrollTo(0, 800))
+    await expect(page.locator('.settings-panel')).toHaveCount(0)
   }
 
   await page.reload()

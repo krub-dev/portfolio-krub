@@ -3,11 +3,9 @@
   The four dots the two menu buttons share: the mobile menu and the desktop
   settings button.
 
-  They are rounded squares rather than circles — halfway between the two, which
-  reads a little firmer at small sizes. On open they spread apart instead of
-  turning into an X: each moves out along both axes, so the group opens and
-  leaves a gap in the middle. The move is a CSS transform on the squares, which
-  is what lets it transition.
+  On open they spread apart instead of turning into an X: each moves out along
+  both axes, so the group opens and leaves a gap in the middle. The move is a CSS
+  transform on the dots, which is what lets it transition.
 */
 defineProps({
   open: { type: Boolean, default: false },
@@ -16,10 +14,10 @@ defineProps({
 
 <template>
   <svg class="dots" :class="{ open }" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <rect class="dot tl" x="3.5" y="3.5" width="7" height="7" rx="2" />
-    <rect class="dot tr" x="13.5" y="3.5" width="7" height="7" rx="2" />
-    <rect class="dot bl" x="3.5" y="13.5" width="7" height="7" rx="2" />
-    <rect class="dot br" x="13.5" y="13.5" width="7" height="7" rx="2" />
+    <circle class="dot tl" cx="8" cy="8" r="2.8" />
+    <circle class="dot tr" cx="16" cy="8" r="2.8" />
+    <circle class="dot bl" cx="8" cy="16" r="2.8" />
+    <circle class="dot br" cx="16" cy="16" r="2.8" />
   </svg>
 </template>
 

@@ -118,10 +118,9 @@ No props. The ES / EN button; calls `useLang().toggle()`. Used in the navbar on 
 mobile menu header, so it is a component rather than inline markup.
 
 ### DotsIcon
-Prop: `open` (boolean). The four rounded squares — halfway between a circle and a square — the
-mobile menu button and the desktop settings button share. On open they spread apart, each moving
-out along both axes to leave a gap in the middle, instead of becoming a cross; the move is a CSS
-transform so it transitions. Reduced motion drops the spread.
+Prop: `open` (boolean). The four dots the mobile menu button and the desktop settings button share.
+On open they spread apart, each moving out along both axes to leave a gap in the middle, instead of
+becoming a cross; the move is a CSS transform so it transitions. Reduced motion drops the spread.
 
 ---
 
@@ -176,14 +175,15 @@ exist; on the home page the path is unchanged and the jump stays in-page.
 
 ### SettingsMenu
 Prop: `visible` (boolean — the compact state; the panel closes when it goes false). The 36×36
-four-square button (`DotsIcon`) the compact desktop bar shows in place of the appearance and
-language controls — the same icon as the mobile menu button, which spreads on open. It opens a
-panel holding both, with the capsule's translucent blur and `padding: 5px 8px`. Closes on the
-trigger, on a click outside and on Escape.
+four-dot button (`DotsIcon`) the compact desktop bar shows in place of the appearance and language
+controls — the same icon as the mobile menu button, which spreads on open. It opens a panel holding
+both, with the capsule's translucent blur and `padding: 5px 8px`; the panel is teleported to
+`<body>` and positioned from the trigger, so its blur sees the page and not the capsule. Closes on
+the trigger, on a click outside, on Escape and on a scroll.
 
 ### TheMobileMenu
 Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come from `src/data`.
-Closes on Escape and on a click outside as well as on any link. Its header carries the
+Closes on Escape, on a click outside, on a scroll and on any link. Its header carries the
 `AppearanceControl` and `LangButton`, but only once the navbar has compacted — before that they
 are still in the bar.
 

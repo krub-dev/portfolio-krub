@@ -373,8 +373,8 @@ watch(lang, async () => {
 }
 
 .menu-btn svg {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
 }
 
 .cta {

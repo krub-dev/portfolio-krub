@@ -231,9 +231,8 @@ explicitly rather than cleared, because the global link rule is yellow.
 
 Below 900px the desktop navigation and controls hide, and the capsule holds the brand, the
 appearance and language controls, and a menu button (36×36, background `--acc`). The menu button
-shows four rounded squares — halfway between a circle and a square — and when the menu opens they
-spread apart (each moves out along both axes, leaving a gap in the middle) instead of switching to
-a cross. Those controls
+shows four dots, and when the menu opens they spread apart — each moves out along both axes,
+leaving a gap in the middle — instead of switching to a cross. Those controls
 stay in the bar until it compacts, and from then on the menu panel (3.17) carries them, so the
 compact capsule is only the brand and the menu button.
 
@@ -514,13 +513,15 @@ is a separate control and is unchanged.
 ### 3.19 Settings button (compact navbar)
 
 On desktop, once the capsule compacts, the appearance and language controls are replaced by one
-36×36 button with the same four squares as the mobile menu button, beside the CTA — and they spread
-apart on open the same way. It opens a small panel underneath it: the capsule's own translucent
-surface and blur (`color-mix(in srgb, var(--surface) 84%, transparent)` with
-`backdrop-filter: blur(14px)`), radius 12, a 1px `--line` border, no shadow, `padding: 5px 8px`,
-and 16px below the button so it clears the compact capsule's padding. The panel holds the
-appearance control and the language button; it closes on the trigger, on a click outside, on
-Escape, and when the bar expands again, so it is never left open behind a hidden trigger.
+36×36 button with the same four dots as the mobile menu button, beside the CTA — and they spread
+apart on open the same way. It opens a small panel: the capsule's own translucent surface and blur
+(`color-mix(in srgb, var(--surface) 84%, transparent)` with `backdrop-filter: blur(14px)`), radius
+12, a 1px `--line` border, no shadow, `padding: 5px 8px`, 16px below the trigger. The panel is
+teleported to `<body>` and given `position: fixed` coordinates from the trigger's rectangle: the
+capsule's own `backdrop-filter` makes it a backdrop root, and a blur inside it would see the
+capsule's content rather than the page, so it would not match the bar. It holds the appearance
+control and the language button, and closes on the trigger, on Escape, on a click outside, on a
+scroll and when the bar expands again.
 
 ---
 
