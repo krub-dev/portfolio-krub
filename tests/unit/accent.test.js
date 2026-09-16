@@ -64,6 +64,25 @@ describe('useAccent', () => {
     expect(menu.accent.value).toBe('mint')
   })
 
+  it('cycles to the next palette and wraps at the end', async () => {
+    const { initAccent, useAccent } = await freshAccent()
+    initAccent()
+    const { accent, cycle } = useAccent()
+
+    cycle()
+    expect(accent.value).toBe('aqua')
+
+    cycle()
+    cycle()
+    cycle()
+    expect(accent.value).toBe('pink')
+
+    // The list is yellow, aqua, rose, mint, pink — so one more wraps to yellow.
+    cycle()
+    expect(accent.value).toBe('yellow')
+    expect(document.documentElement.getAttribute('data-accent')).toBe('yellow')
+  })
+
   it('still works when localStorage throws, as in a locked-down browser', async () => {
     const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('SecurityError')

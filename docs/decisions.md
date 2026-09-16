@@ -977,7 +977,7 @@ They are token swaps and nothing else. `useAccent()` is a copy of `useTheme()` �
 and the inline script in `index.html` restores the accent alongside the theme and the language, or
 a visitor who chose pink would see a yellow flash on every load (decision 10). Yellow has no
 `[data-accent='yellow']` block: with that value nothing matches and the `:root` tokens are the
-palette, which is also what gives the switcher a value to mark as selected.
+palette, and the attribute still carries a value the button can name.
 
 **The two-tier structure is the interesting part.** The reference colours are pastels made for a
 black background. As text on `--ink` they read straight away (aqua 17.7:1, mint 16.3:1), so
@@ -994,14 +994,11 @@ accent text darkens in light exactly as the yellow's does (aqua `#0E7490`, rose 
 dark and `#0C0C0D` in light for every palette, so the yellow default does not change and the
 favicon and og-banner (baked yellow) stay coherent with the logo in the theme that matches them.
 
-**The switcher lives in the right rail and in the mobile menu.** On desktop it sits at the top of
-the same fixed column as the scroll indicator; they are siblings rather than one element because
-the indicator fades out at the end of the page and a control must not vanish as you reach the
-bottom. The rail hides below 900px, so the picker's mobile home is the menu, using the same
-component with a `row` layout. Selecting is direct — five swatches, a click each — and the button
-is a 44px touch target with the visible circle inside it.
-
-One trap, caught by the e2e rather than by eye: `RightRail` was given `showScroll` with a default
-of `true` and called as `:show-scroll="route.meta.hero"`. On the 404 that prop is `undefined`, and
-Vue applies the default for an undefined prop — so the scroll indicator came back on the page
-that had just removed it. The default is `false` now; the comment in the component says why.
+**The switcher is one button in the navbar, and it cycles.** The first version put a row of
+swatches in the right rail with the scroll indicator, and the same row in the mobile menu. On a
+real screen both read wrong: five dots exposed at once look like a settings panel, and the rail
+put a control in the middle of the page's edge. It is now a single 36×36 button beside the theme
+and language controls, in both the desktop and the mobile group, that advances one palette per
+press. Its face is a 16px disc split diagonally between `--acc` and `--acc-2`, so it shows the
+colour and its variation without listing them all. The `aria-label` names the current palette,
+since the button has no visible text.

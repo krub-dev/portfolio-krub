@@ -2,9 +2,9 @@
   The accent palettes, in the order the switcher shows them. Yellow is first
   because it is the default and the site's identity colour.
 
-  Only the id lives here. Every colour is a token in tokens.css — the switcher
-  paints each swatch with var(--pal-<id>) — so adding a palette is an id in this
-  list plus its blocks in tokens.css, and no component has to change.
+  Only the id lives here. Every colour is a token in tokens.css, so adding a
+  palette is an id in this list plus its blocks in tokens.css — no component has
+  to change.
 */
 export const accents = [
   { id: 'yellow' },

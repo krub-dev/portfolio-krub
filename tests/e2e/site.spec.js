@@ -166,21 +166,19 @@ test('theme and language survive a reload', async ({ page }) => {
   expect(painted).toBe('rgb(245, 243, 238)')
 })
 
-test('the accent survives a reload', async ({ page, isMobile }) => {
+test('the accent cycles and survives a reload', async ({ page }) => {
   await page.goto('/')
   const html = page.locator('html')
   await expect(html).toHaveAttribute('data-accent', 'yellow')
 
-  // The picker lives in the right rail on desktop and in the menu on mobile;
-  // it is the same component, so only the way in differs.
-  if (isMobile) {
-    await page.locator('.menu-btn').click()
-    await page.locator('.menu').getByRole('button', { name: 'Aqua' }).click()
-  } else {
-    await page.locator('.rail').getByRole('button', { name: 'Aqua' }).click()
-  }
+  // One button next to the theme and language controls; both control groups are
+  // in the DOM, so scope to the visible one.
+  const button = page.locator('.accent-btn:visible')
+  await expect(button).toHaveAttribute('aria-label', 'Theme: Yellow')
+  await button.click()
 
   await expect(html).toHaveAttribute('data-accent', 'aqua')
+  await expect(button).toHaveAttribute('aria-label', 'Theme: Aqua')
   // The dark theme's aqua fill, straight off the token.
   const fill = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(),

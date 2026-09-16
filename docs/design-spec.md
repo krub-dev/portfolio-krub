@@ -22,10 +22,9 @@ vertical order:
 | 03 | `contact` | Contact | Large headline, email CTA, three social icons |
 | — | — | Footer | Pinned to the bottom: credit, copyright, TOP button, city and Madrid clock |
 
-Floating above all of the above: the fixed navigation bar, the custom cursor, the right rail
-(the accent picker and, on routes with a hero, the vertical scroll indicator), the "Limonacho"
-mascot (a lemon with eyes) and the mobile menu. The mascot and the scroll indicator only appear
-where the route has a hero — not on the 404.
+Floating above all of the above: the fixed navigation bar, the custom cursor, the vertical
+scroll indicator, the "Limonacho" mascot (a lemon with eyes) and the mobile menu. The mascot and
+the scroll indicator only appear where the route has a hero — not on the 404.
 
 ---
 
@@ -111,8 +110,8 @@ the same stylesheet. A palette swaps the accent tokens and nothing else:
 | `--on-acc` | the text painted on the fill |
 | `--mark` | the logo, footer heart and cursor ring |
 
-Each palette's identity colour is a `--pal-*` token declared once: the palette points `--acc` at
-it, and the switcher paints its swatches with it, so the hex exists in one place.
+Each palette's identity colour is a `--pal-*` token declared once — the palette points `--acc` at
+it — so the hex exists in one place.
 
 The four non-default palettes — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, pink `#FFB3D1` —
 are reference pastels made for a dark background: as text they read straight away (aqua 17.7:1,
@@ -439,12 +438,10 @@ and icons, and the TOP button.
 ### 3.15 Scroll indicator
 
 The word "Scroll" set vertically (mono 10px, `letter-spacing:.28em`, `--fg-3`) above a 1px line
-96px tall in `--line`, filled with the accent in proportion to the scroll. It fades out at 98%
-of the page.
-
-It is one of the two children of the right rail (3.18), which owns the fixed position
-(`right:20px`, vertically centred, `z-index:95`) and hides the whole column below 900px. It is
-only rendered on a route with a hero: on the 404 there is nothing to scroll.
+96px tall in `--line`, filled with the accent in proportion to the scroll. It is `position:fixed`
+on the right (`right:20px`, vertically centred, `z-index:95`), fades out at 98% of the page,
+hides below 900px, and is only rendered on a route with a hero — on the 404 there is nothing to
+scroll.
 
 ### 3.16 Limonacho (mascot)
 
@@ -475,20 +472,18 @@ one in yellow); a list of four navigation links, each with its `[00]`…`[03]` m
 active section's in yellow) and its path; and a full-width "↑ back to top" button. Every link
 closes the menu when pressed.
 
-### 3.18 Accent switcher (right rail + mobile menu)
+### 3.18 Accent switcher (navbar)
 
-A row of swatches, one per palette, the current one ringed. Selecting is direct, not cycling.
-The visible circle is 14px in the rail and 22px in the menu, each inside a 44px button so the
-touch target is right, with a 1px `--line` border to keep a pastel swatch visible on the light
-theme.
+One 36×36 button in the navbar, beside the theme and language controls, in both the desktop and
+the mobile group. One press cycles to the next palette — it is a button, not a row of swatches,
+because five dots on screen read as a settings panel and this is a one-line control.
 
-- **Desktop:** at the top of the right rail, above the scroll indicator, with a vertical "Theme"
-  label matching the "Scroll" one. The rail hides below 900px.
-- **Mobile:** a centred row inside the mobile menu, above the back-to-top button, separated by a
-  `border-top` like the nav rows.
+Its face is a 16px disc split diagonally, `--acc` above the line and `--acc-2` below, so it shows
+the current colour and its variation at a glance. It shares the theme button's frame (radius 10,
+1px `--line`, transparent) and its hover turns the border to `--acc-text`.
 
-It is a global setting and stays on every route, the 404 included — only the scroll indicator is
-dropped there.
+There is no visible text, so the `aria-label` and `title` name the current palette ("Theme:
+Aqua"). It is a global setting and stays on every route, the 404 included.
 
 ---
 
@@ -577,10 +572,9 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
 ## 8. Responsive
 
 A single breakpoint: **900px**. Below it: one column in every two-column grid, navigation
-replaced by the menu, the custom cursor and the right rail (accent picker and scroll indicator)
-disabled — the picker moves into the menu —, the hero stage dropped (the badge moves into the
-text column), the footer centred with the TOP button hidden, a smaller 4/5 photo, and the lemon
-at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
+replaced by the menu, the custom cursor and scroll indicator disabled, the hero stage dropped
+(the badge moves into the text column), the footer centred with the TOP button hidden, a smaller
+4/5 photo, and the lemon at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
 
 ---
 

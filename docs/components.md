@@ -15,13 +15,11 @@ the two disagree, the code is right and this file is the bug.
 App
 ├─ BackgroundGrid  ×2  (hero / global, crossfading)
 ├─ TheNavbar
-│   └─ BrandLogo         (theme and language buttons are inline, not components)
+│   ├─ BrandLogo         (theme and language buttons are inline, not components)
+│   └─ AccentButton
 ├─ TheMobileMenu
-│   ├─ SocialLink ×n
-│   └─ AccentSwitcher   (row layout)
-├─ RightRail            (hidden below 900px)
-│   ├─ AccentSwitcher   (rail layout)
-│   └─ ScrollProgress   (only where the route has a hero)
+│   └─ SocialLink ×n
+├─ ScrollProgress       (only where the route has a hero)
 ├─ CursorFx
 ├─ LemonPet             (only where the route has a hero)
 │   └─ SpeechBubble
@@ -107,6 +105,11 @@ border).
 ### SpeechBubble
 `text`. Presentation only.
 
+### AccentButton
+No props. Reads `useAccent()` and cycles to the next palette on click. The face is a 16px disc
+split diagonally between `--acc` and `--acc-2`; the `aria-label` and `title` name the current
+palette, since there is no visible text.
+
 ---
 
 ## Content components
@@ -149,7 +152,8 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 
 ### TheNavbar
 Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
-handled directly through their composables. Sections come from `src/data/sections.js`, labels
+handled directly through their composables, and the `AccentButton` sits beside them in both the
+desktop and the mobile group. Sections come from `src/data/sections.js`, labels
 from the dictionary. Owns the compact scroll state and the natural-width measurement. Its links
 are absolute (`/#id`, `/#top`), so the shared chrome works from the 404, where the sections do not
 exist; on the home page the path is unchanged and the jump stays in-page.
@@ -176,20 +180,7 @@ Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the
 
 ### ScrollProgress
 Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress from
-`useScroll()` rather than taking it as a prop. Positioned and hidden by `RightRail`.
-
-### RightRail
-Props: `showScroll` (boolean, default `false` — the caller passes `route.meta.hero`, which is
-undefined elsewhere, and an undefined prop takes the default). The fixed right-edge column: the
-accent picker, and the scroll indicator only where the route has a hero. They are siblings rather
-than one element because the indicator fades out at the end of the page and a control must not.
-Hidden below 900px.
-
-### AccentSwitcher
-Props: `layout` (`'rail' | 'row'`). One swatch per palette from `src/data/accents.js`, painted
-with `var(--pal-<id>)`, the current one ringed; selecting calls `useAccent().set()` directly. The
-button is the touch target and the dot inside is the visible circle. The rail on desktop, the row
-in the mobile menu.
+`useScroll()` rather than taking it as a prop.
 
 ---
 
@@ -199,7 +190,7 @@ in the mobile menu.
 |---|---|
 | `useTheme()` | `theme`, `toggle()`; writes `data-theme` on `<html>` and persists |
 | `useLang()` | `lang`, `toggle()`; persists in `localStorage["krub-lang"]` |
-| `useAccent()` | `accent`, `set(id)`; writes `data-accent` on `<html>` and persists |
+| `useAccent()` | `accent`, `set(id)`, `cycle()`; writes `data-accent` on `<html>` and persists |
 | `useScrollSpy(ids, threshold = 0.35)` | reactive `activeId` |
 | `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener |
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |

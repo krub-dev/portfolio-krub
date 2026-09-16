@@ -1,13 +1,11 @@
 <script setup>
 /*
-  The thin vertical progress indicator.
+  The thin vertical progress indicator on the right edge.
 
-  Purely decorative — aria-hidden, and it says nothing a scrollbar does not. It
-  fades out over the last 2% so it does not sit on top of the footer at the end
-  of the page.
-
-  It is placed, and hidden below 900px, by RightRail — the positioning is the
-  rail's job because the accent picker shares the same column.
+  Purely decorative — aria-hidden, and it says nothing a scrollbar does not.
+  Hidden below 900px, where there is no room and the native scrollbar is right
+  there anyway. It fades out over the last 2% so it does not sit on top of the
+  footer at the end of the page.
 */
 import { useScroll } from '../../composables/useScroll'
 
@@ -29,6 +27,11 @@ const { progress, atEnd } = useScroll()
 
 <style scoped>
 .indicator {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 95;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -65,5 +68,11 @@ const { progress, atEnd } = useScroll()
   top: 0;
   width: 1px;
   background: var(--acc);
+}
+
+@media (max-width: 900px) {
+  .indicator {
+    display: none;
+  }
 }
 </style>
