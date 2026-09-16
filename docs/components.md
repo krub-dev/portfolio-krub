@@ -8,6 +8,20 @@ Conventions that apply to every component:
 - Props declare a type and a default. Events go upward through `emit`.
 - A component that only paints does not own state; state lives in the parent or in a composable.
 
+The components live in four folders, split by the job they do rather than by the kind of file they
+are. The folder is what the component is allowed to be:
+
+| Folder | What belongs there |
+|---|---|
+| `base/` | dumb and reusable: it paints what it is handed and emits upward. No data, no routing, no state |
+| `content/` | paints one entity out of `src/data/` — a project, a quote — and could sit inside any section |
+| `sections/` | one per block of the page, plus what belongs to that block and nowhere else |
+| `chrome/` | the fixed furniture around the page (navbar, footer, menus, cursor, lemon) and the behaviour that comes with it |
+
+A component moves down that list the moment it stops being reusable: as soon as a "content" piece
+needs to know which section it is in, it is a section component. The routes that assemble them are a
+separate layer, in `src/views/`.
+
 This started as a proposal before anything was built and is kept in step with the code. Where
 the two disagree, the code is right and this file is the bug.
 
@@ -151,12 +165,56 @@ resolves its own Role / Year / Stack labels through i18n).
 ### TestimonialCard
 `quote`, `name`, `role`, `avatar`.
 
+---
+
+## Section components
+
+One per block of the page, in page order, plus the two pieces that only exist inside the hero. They
+take no props: each reads its own slice of `src/data/` and its own composables, which is why the page
+can be reordered by moving one line in `HomeView`. Every one that is a destination owns the `id` the
+nav links to.
+
+### HeroSection
+`id="top"`. The hero wrapper itself — the element `usePastHero` measures, and the reason a route
+either has a hero or does not. Holds the badge, the headline, the two buttons, `BrandName` and the
+stage. Below 900px the badge moves into the text column and `LogoStage` is not mounted at all
+(decision 37), which is also why nothing 3D ever runs on a phone.
+
 ### MarqueeBar
 `items` (array of strings), `separator` (defaults to `//`), `duration` (defaults to `26s`).
 
 Repeats the list enough times to be at least as wide as the viewport, then renders that twice —
 the keyframe translates -50%, so one copy has to fill the screen or a gap scrolls past. The
 repeat count is measured, since it depends on the viewport, the font and the language.
+
+No `id`: it is a band, not a destination.
+
+### AboutSection
+`id="me"`. Three paragraphs, the experience/education tabs with their timeline, the CV button behind
+`config.showCv`, and the photo.
+
+### ProjectsSection
+`id="projects"`. The grid of `ProjectCard`. Emits `open` with the project that was clicked — the
+modal itself lives in `HomeView`, so the section does not own it.
+
+### StackSection
+`id="stack"`. The four groups from `src/data/stack.js`: `StackGroup` → `TechIcon`.
+
+### TestimonialsSection
+`id="testimonials"`. Assumes it is wanted: `HomeView` is what checks `config.showTestimonials`, so
+this one can be written as if the section were always on.
+
+### ContactSection
+`id="contact"`. The closing line, the email button and the social icons.
+
+### BrandName
+The KIKO / RUBIO reveal at the top of the hero. A pure CSS animation — the letters are markup, not
+copy, because the animation depends on where the word splits, so they are not in `src/data/`.
+
+### LogoStage
+The reserved slot for the 3D scene, and the only thing on the page that tilts in 3D. It owns the
+mask, the inner grid and the parallax that follows the pointer; the `.mark` element inside it is
+where a Three.js scene would go. `HeroSection` is what decides not to mount it below 900px.
 
 ---
 
