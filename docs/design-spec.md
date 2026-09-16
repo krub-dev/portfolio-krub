@@ -158,8 +158,8 @@ about, 60ch in the timeline, 22ch in the contact headline) and `text-wrap: prett
   lemon speech bubble · **18px** cards and images · **20–22px** panels and modal · **999px**
   pill buttons.
 - Borders: always `1px solid var(--line)`. No coloured shadows anywhere.
-- Shadows (two in the whole site — the compact navbar's was removed, see decisions.md): lemon
-  bubble `0 14px 34px rgba(0,0,0,.32)`, mobile menu `0 24px 60px rgba(0,0,0,.45)`.
+- Shadow (one in the whole site — the compact navbar's and the lemon bubble's were removed, see
+  decisions.md): mobile menu `0 24px 60px rgba(0,0,0,.45)`.
 - Background grid: a 72×72px pattern with 1px lines in `var(--grid)`.
 
 ### Motion
@@ -408,8 +408,12 @@ same moment as Limonacho, owned by `usePastHero` (decisions.md). The marquee is 
 visitor reads as "the page has started", which is why the trigger is the wrapper and not a
 fraction of the viewport. Its real height is measured on mount, on resize and on language
 change, and written to the CSS variable `--footer-h`; the root container reserves that space
-with `padding-bottom: var(--footer-h)`. Below 900px it is centred with the TOP button hidden,
-using `var(--gutter-l)` / `var(--gutter-r)` and the bottom safe-area inset where one exists.
+with `padding-bottom: var(--footer-h)`. Below 900px it becomes a centred column with the TOP
+button hidden, using `var(--gutter-l)` / `var(--gutter-r)` and the bottom safe-area inset where one
+exists. The column stops the longer Spanish credit being squeezed until it breaks mid-phrase, and
+the tracking is halved to `.06em` there: at the spec's `.12em` the Spanish credit is a handful of
+pixels too wide for a 390px phone and wraps onto a second line. The lemon follows either way,
+because `--footer-h` is measured and not assumed.
 
 ### 3.12 Background grids
 

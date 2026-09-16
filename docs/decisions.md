@@ -1050,3 +1050,25 @@ Two palette notes from the same round. Violet's dark value is the solid `#8B5CF6
 the pastel washed out, and light and dark now share the fill. And Limonacho paints himself with
 `--acc-solid`, the accent's full-saturation form, in both themes: a lemon in the dark theme's pale
 pastel disappeared.
+
+### 49. The Spanish footer credit wrapped, and the footer grew with it
+
+**Date:** 2026-09-16 · **Status:** active · **Bug**
+
+Seen on a real iPhone 12 — WebKit — and not in Chromium. The credit is one flex row: `.made` (the
+"designed & built with ♥ by krub" run) plus `©2026 KRUB.DEV`, and Spanish is wider than English. At
+390px the built credit measures about 358px against 350px of room, so the browser broke it
+mid-phrase — "DISEÑADO Y CONSTRUIDO / CON", with the copyright wrapping too. The footer went from
+two lines to three and the block read as dislocated.
+
+Two changes, both below 900px. The footer is a **centred column** instead of a row, so the credit
+and the place are never squeezed side by side; and the **tracking is halved to `.06em`**, which is
+what actually makes the Spanish credit fit on one line at 390px. The wording is untouched, and the
+separator dot stays between the two blocks.
+
+The lemon was not really displaced. `--footer-h` is measured by a ResizeObserver, so it followed
+the taller footer and kept its 16px clearance — checked in both Chromium and WebKit. What the
+device showed was the ragged wrap, not an overlap.
+
+The speech bubble lost its shadow in the same pass: the mobile menu is now the only shadow in the
+project, which is what the spec's list says.

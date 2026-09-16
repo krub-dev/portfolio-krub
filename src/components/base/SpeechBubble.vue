@@ -22,7 +22,6 @@ defineProps({
   border-radius: 14px;
   background: var(--surface);
   border: 1px solid var(--line);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
   padding: 10px 14px;
   font-size: 13px;
   line-height: 1.45;

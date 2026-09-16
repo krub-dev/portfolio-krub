@@ -72,6 +72,11 @@ section, folded together where they overlapped.
   settings button and a phone moves them into the menu. Each palette swaps the accent tokens and
   nothing else, and each needed a light-theme counterpart because the pastels are invisible as
   fills on cream. Built on 2026-09-16; see decision 48.
+- [x] **The appearance control in the navbar, and the compact hand-over.** The dark/light button
+  and the accent are one control now: the ◐ toggle beside the accent disc, itself the survivor of
+  four shapes (circles at 24px on a phone, 20px on desktop). At the top it sits in the bar; once
+  the capsule compacts it moves out — into a four-dot settings panel on desktop, into the menu on
+  a phone. The panel is teleported so its blur matches the bar. See decisions 48 and 49.
 - [ ] **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
   carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the
   inner grid, so a Three.js scene replaces the `.mark` element and nothing else has to move.
@@ -100,6 +105,11 @@ section, folded together where they overlapped.
 
 ## Mobile and responsive
 
+- [x] **The footer credit wrapped in Spanish.** On an iPhone 12 the Spanish credit is a few pixels
+  wider than the English one at 390px, so it broke mid-phrase and the footer grew to three lines.
+  Below 900px the footer is now a centred column and the tracking is halved to `.06em`, so both
+  languages hold two lines. The lemon's clearance was already right — `--footer-h` is measured. See
+  decision 49.
 - [x] **Rework the hero on a phone.** Settled by decision 37 and verified on 2026-09-16: the stage
   is not rendered below 900px, the badge moves into the text column, and the marquee lands on the
   fold in both languages from 360x640 up — 412x915, 390x844, 375x667 and 360x640 all measure a

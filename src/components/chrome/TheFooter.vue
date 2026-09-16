@@ -194,9 +194,35 @@ const shown = usePastHero()
   .footer {
     padding-right: var(--gutter-r);
     padding-left: var(--gutter-l);
-    gap: 6px;
-    justify-content: center;
+    /*
+      A column, not a row. Side by side, the credit and the place squeeze the
+      credit until it breaks mid-phrase — which is what happened in Spanish,
+      where the words are longer: "DISEÑADO Y CONSTRUIDO / CON". Stacked and
+      centred, each block gets the full width.
+
+      The tracking is halved on a phone. At the spec's .12em the Spanish credit
+      is a handful of pixels wider than the English one at 390px, which is
+      enough to push it onto a second line; at .06em both fit on one, the
+      wording is untouched and the separator dot stays between them.
+    */
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
     text-align: center;
+    letter-spacing: 0.06em;
+  }
+
+  .credit {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .made {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    row-gap: 2px;
   }
 
   .top {
