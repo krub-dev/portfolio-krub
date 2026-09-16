@@ -2,8 +2,8 @@
 
 Live at **[krub.dev](https://krub.dev)**.
 
-My personal portfolio. One page, bilingual (English / Spanish), dark and light themes, built
-with Vue 3 and Vite.
+My personal portfolio. One page plus a 404, bilingual (English / Spanish), dark and light themes,
+built with Vue 3 and Vite.
 
 Kiko Rubio — fullstack developer in Barcelona, moving toward backend.
 
@@ -11,8 +11,8 @@ Kiko Rubio — fullstack developer in Barcelona, moving toward backend.
 
 - **Vue 3** with `<script setup>`. Plain JavaScript, no TypeScript.
 - **Vite** for the dev server and the build.
-- **vue-router** — one route today, but wired up from the start so adding a second one is not a
-  restructure.
+- **vue-router** — two routes: the page and a catch-all 404. There is also a dev-only preview
+  sheet, lazy-loaded and kept out of the production bundle.
 - **vue-i18n** — nested dictionaries, English by default.
 - **Vitest** and **Playwright** for tests.
 - No CSS framework and no preprocessor. Design tokens are CSS custom properties in one global
@@ -35,7 +35,7 @@ npm run dev
 
 ## Tests
 
-Twenty unit tests and five end-to-end flows across two viewports.
+Twenty unit tests and six end-to-end flows across two viewports.
 
 Vitest covers the pure logic and the composables that touch storage: how a timeline period is
 formatted, how the carousel index wraps, and that the theme and language survive a reload,
@@ -45,7 +45,8 @@ Playwright exists for a narrower reason. Scroll events, animation frames and CSS
 cannot be verified by reading the DOM — you need a browser that actually paints. So it covers
 the navbar going compact and shrinking to its contents, the footer sliding in without covering
 the last section, exactly one nav link being highlighted, the modal trapping focus and handing
-it back, and theme and language surviving a reload. It runs against the production build.
+it back, the 404 fitting one viewport with its chrome and a way back, and theme and language
+surviving a reload. It runs against the production build.
 
 It earned its keep on the first run by finding a real bug: the footer was measured with the
 content box instead of the border box, so the page reserved 18px too little and the fixed
@@ -61,9 +62,9 @@ E2E_BASE_URL=https://example.vercel.app npx playwright test
 ## Layout
 
 ```
-public/            served as-is: logo, photo, stack icons, fonts, favicon, robots, sitemap
-brand/             brand assets that are NOT served — uploaded by hand elsewhere
-docs/              the spec, the component contracts, the roadmap, the decision log
+public/            served as-is: logo, photo, og banner, stack icons, fonts, favicon,
+                   apple touch icon, robots, sitemap
+docs/              the spec, the component contracts, the roadmap, the decision log, the backlog
 tests/
 ├─ unit/           Vitest
 └─ e2e/            Playwright
@@ -99,8 +100,10 @@ src/
 - [`docs/design-spec.md`](docs/design-spec.md) — the visual contract. Every colour, size, easing
   curve and behaviour, section by section.
 - [`docs/components.md`](docs/components.md) — the component tree and the props of each one.
-- [`docs/roadmap.md`](docs/roadmap.md) — the build order, with an acceptance check per step, and
-  what is still to come.
+- [`docs/roadmap.md`](docs/roadmap.md) — the build order. Steps 1–12 are the record of what was
+  built, kept as it was.
+- [`docs/backlog.md`](docs/backlog.md) — what comes after the roadmap: the pending tasks and the
+  ideas that are not tasks yet.
 - [`docs/decisions.md`](docs/decisions.md) — every choice that is not obvious from reading the
   code, and the reasoning behind it. Including the ones where I went against the original spec,
   and why.

@@ -949,3 +949,17 @@ Four things only showed up once the route was opened on a phone and on a preview
 
 The last two are the kind of thing that only surfaces on a route that is not the one everything
 was built around.
+
+### 47. The magnetic pull is softer than the spec says
+
+**Date:** 2026-09-16 · **Status:** active · **Found in the documentation audit**
+
+The design spec §3.14 asks for a maximum pull of 16px and an easing factor of 0.14 per frame.
+The code has used **10px and 0.07** for a while — that is the note `useMagnetic.js` carries. At
+the spec's numbers the effect reads as too eager and too far: the element snaps at the cursor
+instead of drifting toward it. Halving the easing is what makes it feel slow, because each frame
+covers less of the remaining distance. There is also a **12px dead zone** around the resting
+centre, which the spec does not mention, where no pull is applied: without it the direction
+vector goes to zero at the exact centre and a pixel of mouse movement swings it 180°.
+
+The spec was corrected to match the code rather than the other way round.

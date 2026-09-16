@@ -18,9 +18,9 @@ App
 │   └─ BrandLogo         (theme and language buttons are inline, not components)
 ├─ TheMobileMenu
 │   └─ SocialLink ×n
-├─ ScrollProgress
+├─ ScrollProgress       (only where the route has a hero)
 ├─ CursorFx
-├─ LemonPet
+├─ LemonPet             (only where the route has a hero)
 │   └─ SpeechBubble
 ├─ main (HomeView)
 │   ├─ HeroSection
@@ -89,7 +89,7 @@ drops to 28px and inverts in dark theme only.
 `label` (string), `items` (array of TechIcon).
 
 ### SocialLink
-`label`, `href`, `icon` (icon component name or slot).
+`name` (becomes the aria-label), `href`, `icon` (key into its own inline SVG paths).
 
 ### TimelineItem
 `period`, `current` (boolean → years in yellow), `title`, `body`, `isLast` (adds the bottom
@@ -126,9 +126,9 @@ Emits `open`.
 | `project` | object \| null (`null` = closed) |
 | `index` | number (for the `[0N]` in the header) |
 
-Emits `close`. Locks body scroll while open. Contains `MediaCarousel` (props `slides`,
-`label`; owns its own index state, wrapping around) and `SpecList` (props `role`, `year`,
-`stack`, plus the translated labels).
+Emits `close`. Locks body scroll while open. Contains `MediaCarousel` (props `slides`, `slug`;
+owns its own index state, wrapping around) and `SpecList` (props `role`, `year`, `stack`; it
+resolves its own Role / Year / Stack labels through i18n).
 
 ### TestimonialCard
 `quote`, `name`, `role`, `avatar`.
@@ -188,8 +188,8 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
 | `useMagnetic()` | registers the magnetic hover loop for `[data-magnetic]` |
 | `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) |
-| `useFooterHeight(el)` | measures the footer and maintains `--footer-h` |
-| `useElementHeight(el, prop)` | the mechanism behind that, shared with the navbar's `--navbar-h` |
+| `useFooterHeight(el)` | thin wrapper that publishes the footer's `--footer-h` |
+| `useElementHeight(el, prop)` | the mechanism behind it, shared with the navbar's `--navbar-h` |
 | `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it, and it is true from the start on a route with no hero (the 404) |
 | `useBodyScrollLock(active)` | locks scrolling while the modal is open |
 
@@ -204,7 +204,7 @@ pupils, logo parallax, magnetic hover). No per-component loops.
 src/
 ├─ data/               everything I wrote — both languages per file
 │   ├─ index.js          re-exports, and the "start here" explanation
-│   ├─ copy.js           hero headline, About paragraphs, marquee, contact line
+│   ├─ copy.js           hero headline, About paragraphs, marquee, contact, lemon, 404
 │   ├─ projects.js
 │   ├─ experience.js
 │   ├─ education.js

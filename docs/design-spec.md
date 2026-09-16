@@ -23,7 +23,8 @@ vertical order:
 | — | — | Footer | Pinned to the bottom: credit, copyright, TOP button, city and Madrid clock |
 
 Floating above all of the above: the fixed navigation bar, the custom cursor, the vertical
-scroll indicator, the "Limonacho" mascot (a lemon with eyes) and the mobile menu.
+scroll indicator, the "Limonacho" mascot (a lemon with eyes) and the mobile menu. The last two
+of those only where the route has a hero — not on the 404.
 
 ---
 
@@ -183,7 +184,8 @@ weight 600).
   every resize: the compact state is cloned with `width:auto` and the resulting width is
   read), so the capsule shrinks around its own elements.
 - Background `color-mix(in srgb, var(--surface) 84%, transparent)`,
-  `backdrop-filter: blur(14px)`, border `var(--line)`, shadow `0 14px 40px rgba(0,0,0,.28)`.
+  `backdrop-filter: blur(14px)`, border `var(--line)`. No shadow — the compact capsule's was
+  removed, and the border is what separates it (see decisions.md).
 - The two vertical separators go from `opacity:0` to `1`.
 
 **Active section (scroll spy).** Walk `["top","me","projects","stack","contact"]` and treat
@@ -197,7 +199,9 @@ background `--acc`) next to the theme and language buttons.
 ### 3.2 Hero
 
 A wrapper with `height: 100svh` (minimum 640px) in a column: the hero section grows and the
-marquee sits flush at the bottom. At `max-height:700px` the wrapper switches to auto height.
+marquee sits flush at the bottom. At `max-width:900px` **or** `max-height:700px` the wrapper
+switches to auto height — width is the honest trigger, because below 900px the hero is one
+column and needs the room.
 
 Two-column grid `1.1fr .9fr`, `gap: clamp(32px,5vw,64px)`, vertically centred,
 `max-width:1180px`. One column on mobile.
@@ -208,7 +212,9 @@ Left column: top mono label, a three-line headline with the key word in `--acc`,
 `--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and text yellow).
 
 Right column, the **square stage**: `aspect-ratio:1/1`, `max-height:min(58vh,520px)`,
-`max-width:520px`, border `--line`, large radius, 72px background grid. Inside:
+`max-width:520px`, border `--line`, radius 24, a `radial-gradient` from `--surface` to `--ink`,
+and a **40px** inner grid — not the page's 72px, which reads as noise inside a 520px box. The
+whole stage is magnetic; only the logo inside it tilts. Inside:
 
 - The logo at 58% of the width, as a mask over `var(--mark)`, with **3D parallax**: it
   follows the mouse with `perspective(700px) rotateY(±14deg) rotateX(∓10deg)`, proportional
@@ -269,7 +275,7 @@ grid distributes itself according to how many projects there are: **no filler ca
 reserved gaps**, and no "click to open" hint (the card design says it already).
 
 Card (a clickable `<article>`, `cursor:pointer`): border `--line`, radius 18, background
-`--surface`, `overflow:hidden`, column. Hover: border `--acc`
+`--surface`, `overflow:hidden`, column. Hover: border `--acc-text`
 (`transition: border-color .16s ease`).
 
 1. Screenshot frame: `aspect-ratio:16/10`, diagonal stripe background
@@ -353,10 +359,13 @@ Links: `mailto:krubioillan@gmail.com`, `github.com/krub-dev`, `linkedin.com/in/k
    second; the label alternates between `CET (UTC+1)` and `CEST (UTC+2)` with daylight saving.
 
 **Key behaviour.** The footer slides in: it starts at `translateY(102%)` and moves to
-`translateY(0)` once `scrollY > 55%` of the viewport height. Its real height is measured on
-mount, on resize and on language change, and written to the CSS variable `--footer-h`; the
-root container reserves that space with `padding-bottom: var(--footer-h)`. On mobile the
-footer is visible from the start, centred, with `padding:9px 20px`.
+`translateY(0)` once the bottom of the hero wrapper has passed the top of the viewport — the
+same moment as Limonacho, owned by `usePastHero` (decisions.md). The marquee is the line the
+visitor reads as "the page has started", which is why the trigger is the wrapper and not a
+fraction of the viewport. Its real height is measured on mount, on resize and on language
+change, and written to the CSS variable `--footer-h`; the root container reserves that space
+with `padding-bottom: var(--footer-h)`. Below 900px it is centred with the TOP button hidden,
+using `var(--gutter-l)` / `var(--gutter-r)` and the bottom safe-area inset where one exists.
 
 ### 3.12 Background grids
 
@@ -393,8 +402,10 @@ updated every frame with `requestAnimationFrame`:
 Any element marked as magnetic drifts slightly towards the cursor. Every frame, for all
 visible marked elements, compute `reach = max(width,height)*0.75 + 70` and
 `score = distance / reach`; **only the lowest score below 1** gets pushed, with
-`pull = (1-score)^2 * 16` (16px maximum). The offset is interpolated with a `0.14` factor per
-frame and resets to zero on release, so it never jumps. On mobile the TOP button is excluded.
+`pull = (1-score)^2 * 10` (10px maximum). The offset is interpolated with a `0.07` factor per
+frame, inside a 12px dead zone around the resting centre, and resets to zero on release, so it
+never jumps. The pull and the easing are softer than the spec's original 16px and 0.14, which
+read as too eager; see decisions.md. On mobile the TOP button is excluded.
 
 Magnetic elements: hero CTAs, hero stage, CV button, project cards, modal links, contact CTA
 and icons, and the TOP button.
@@ -408,9 +419,11 @@ page. Hidden on mobile.
 
 ### 3.16 Limonacho (mascot)
 
-Optional by config. Fixed container `bottom:24px; right:24px`, `z-index:120`. It enters **in a
-straight line from the right** at the same time as the footer: from `translateX(160%)` to
-`translate(0, -footerHeight)` with `.55s cubic-bezier(.22,1,.36,1)`; no tilt.
+Optional by config, and only rendered on a route with a hero. Fixed container `right:24px`,
+`bottom: calc(24px + var(--footer-h))`, `z-index:120` — the vertical offset is layout so it
+tracks the footer in the same frame, and it is not part of the transform (decisions.md). It
+enters **in a straight line from the right** at the same time as the footer: from
+`translateX(160%)` to `translateX(0)` with `.55s cubic-bezier(.22,1,.36,1)`; no tilt.
 
 The lemon is drawn in CSS: a 58×48px body with
 `border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%` and a **flat `var(--acc)` fill, no
@@ -447,7 +460,8 @@ closes the menu when pressed.
 | Mobile menu | boolean | global | |
 | Lemon bubble | boolean | local to the lemon | turns itself off after 4s |
 | Show testimonials | boolean | config | |
-| Show lemon | boolean | config | |
+| Show lemon | boolean | config | only on a route with a hero |
+| Show CV | boolean | config | currently off — no file yet |
 
 Derived effects: while the modal is open, `body { overflow:hidden }`; on a language change the
 footer and the navbar capsule must be re-measured, because the text changes width.
@@ -459,21 +473,26 @@ Global listeners to register on mount and **remove on unmount**: `scroll` (passi
 
 ## 5. Content and data
 
-None of this belongs inside a template.
+None of this belongs inside a template, and there are two homes for it (decision 12):
 
-- **Copy**: one dictionary per language (`en`, `es`) with flat keys such as `hero.badge`,
-  `nav.projects`, `me.p1`, `exp.1.t`, `footer.made`, `mq.1`, in `src/locales/en.json` and
-  `es.json`.
-- **Projects**: a collection. Each entry has `slug`, `shot` (the image placeholder label),
-  `slides` (image count), `repo`, `live`, `stack` (array of strings) and a per-language object
-  with `name`, `tag`, `role`, `year`, `repoLabel`, `liveLabel`, `summary`, `lead`, `body`,
-  `body2`. There are currently three: `creandomientras`, `sideforge` and a third.
-- **Timelines** (experience and education): five entries with a year range, whether the period
-  is current, a title and a description.
-- **Stack**: four groups with a name and a list of technologies; each technology with a name,
-  an icon file and whether it needs inverting in dark theme.
-- **Socials**: name, URL and icon.
-- **Testimonials**: quote, name, company, avatar.
+- **Prose** — everything I wrote — lives in `src/data/`, both languages side by side in the
+  entry.
+- **Interface strings** — nav paths, button labels, aria-labels — live in `src/locales/en.json`
+  and `es.json`, nested rather than flat, so `t('hero.badge')` resolves as a path.
+
+- **Copy** (`copy.js`): `hero`, `about`, `marquee`, `contact`, `lemon`, `notFound`.
+- **Projects** (`projects.js`): each entry has `slug`, `shotLabel`, `image`, `slides` (image
+  count), `repo`, `live`, `stack`, and an `en` / `es` object with `name`, `tag`, `role`, `year`,
+  `repoLabel`, `liveLabel`, `summary`, `lead`, `body`, `body2`. Three today:
+  `creandomientras`, `showroom`, `sideforge`.
+- **Timelines** (`experience.js`, `education.js`): two and four entries. Each has `from`, `to`
+  (`null` for "still going"), a `current` flag that paints the years in `--acc-text`, and an
+  `en` / `es` object with `title` and `body`.
+- **Stack** (`stack.js`): four groups with a name and a list of technologies; each technology
+  with a name, an icon file and whether it needs inverting in dark theme.
+- **Socials** (`socials.js`): name, URL and icon, plus `email`, `cvPath` and `photoPath`.
+- **Testimonials** (`testimonials.js`): quote, name, role, avatar. Placeholders; the section is
+  off by default.
 
 ---
 
@@ -484,7 +503,8 @@ None of this belongs inside a template.
   Aspect ratio **1.682**.
 - `public/assets/img/krub-pfp.jpeg` — profile photo.
 - `public/icons/<technology>/<file>.svg` — technology icons (Devicon).
-- `public/uploads/cv-es.pdf` — the CV linked from About.
+- `public/uploads/cv-es.pdf` — the CV linked from About. Not shipped yet: `config.showCv` is off
+  until the ATS-friendly rewrite exists, so the file is absent and the button is hidden.
 - `public/fonts/<family>-latin.woff2` — the two self-hosted variable fonts, with their OFL
   licences beside them.
 
@@ -495,8 +515,9 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
 
 ## 7. Accessibility and details not to lose
 
-- `scroll-behavior: smooth` on `html`, and `scroll-margin-top: 96px` on sections with an `id`
-  so the fixed navbar does not cover headings on jump.
+- `scroll-behavior: smooth` on `html`, and `scroll-margin-top: var(--navbar-h, 96px)` on
+  sections with an `id` so the fixed navbar does not cover headings on jump. The navbar measures
+  itself; 96px is the fallback for the frames before it mounts.
 - Under `prefers-reduced-motion: reduce`, scrolling falls back to `auto`. This extends to the
   decorative animations too (dot halo, marquee, lemon).
 - Every decorative element carries `aria-hidden="true"`: grids, cursor, dot, marquee, lemon
@@ -511,8 +532,9 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
 ## 8. Responsive
 
 A single breakpoint: **900px**. Below it: one column in every two-column grid, navigation
-replaced by the menu, custom cursor and scroll indicator disabled, footer always visible and
-centred, TOP button hidden, smaller 4/5 photo, lemon at `bottom:16px; right:18px`.
+replaced by the menu, custom cursor and scroll indicator disabled, the hero stage dropped (the
+badge moves into the text column), the footer centred with the TOP button hidden, a smaller 4/5
+photo, and the lemon at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
 
 ---
 
