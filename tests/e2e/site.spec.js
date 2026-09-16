@@ -96,7 +96,7 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
   await expect(card).toBeFocused()
 })
 
-test('an unknown path shows the 404, chrome and all, and offers a way back', async ({ page }) => {
+test('an unknown path shows the 404, chrome and all, and offers a way back', async ({ page, isMobile }) => {
   await page.goto('/no-such-page')
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('[404]')
@@ -116,6 +116,17 @@ test('an unknown path shows the 404, chrome and all, and offers a way back', asy
   // The shared chrome points at the home page, not back at this route.
   await expect(page.locator('.brand')).toHaveAttribute('href', '/#top')
   await expect(page.locator('.link').first()).toHaveAttribute('href', /^\/#/)
+
+  // A wide but short window is the case that brought the scrollbar back: the
+  // display number is bounded by vh, not only by vw.
+  if (!isMobile) {
+    await page.setViewportSize({ width: 1280, height: 600 })
+    await page.waitForTimeout(200)
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollHeight - document.documentElement.clientHeight,
+    )
+    expect(overflow).toBeLessThanOrEqual(0)
+  }
 
   const back = page.getByRole('link', { name: 'Back home' })
   await back.click()

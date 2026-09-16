@@ -79,6 +79,14 @@ onUnmounted(() => {
   The label, then the code. `clamp` on the code takes it to a display size that
   fills the left of a wide screen; the 72px floor keeps it from shrinking to
   nothing on a phone and the 220px ceiling keeps it from overflowing a large one.
+
+  Bounded by HEIGHT as well as width: a width-only size grew on a wide but short
+  window and pushed the page past the viewport, which put the scrollbar back on a
+  page that is meant to fit. `min(16vw, 28vh)` does not bite until the window is
+  short enough for the width-only size to overflow — 1280x800 and 1280x768 are
+  untouched — and on a 650px-tall window it shrinks the number instead of
+  scrolling.
+
   --acc-text, not --acc: at this size it is read as text, and #FFC800 on the light
   background is unreadable (decisions 11 and 27).
 */
@@ -93,7 +101,7 @@ onUnmounted(() => {
 .code {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: clamp(72px, 16vw, 220px);
+  font-size: clamp(72px, min(16vw, 28vh), 220px);
   font-weight: 700;
   line-height: 0.9;
   letter-spacing: -0.05em;
@@ -106,5 +114,18 @@ onUnmounted(() => {
   font-size: clamp(17px, 1.6vw, 20px);
   line-height: 1.6;
   color: var(--fg-2);
+}
+
+/*
+  A short window gets less air, so the block still fits. Same 700px breakpoint
+  the hero uses for the same reason: below it, the vertical budget is what is
+  scarce, not the width.
+*/
+@media (max-height: 700px) {
+  .not-found {
+    gap: 16px;
+    padding-top: calc(var(--navbar-h, 88px) + 8px);
+    padding-bottom: 20px;
+  }
 }
 </style>
