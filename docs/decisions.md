@@ -1124,6 +1124,11 @@ module scope in `useAcho`, not `localStorage`: Limonacho unmounts and remounts a
 a `localStorage` key would make the joke a permanent one-off instead. Nothing is written down, so
 nothing can go stale.
 
+The same flag answers the caller's "is this the first time?", because the bubble belongs to the
+greeting too. "Welcome! I'm Limonacho" is a first introduction, not a line to repeat on every poke.
+So the first poke is voice and bubble and every later one is only the shake: one event, one flag,
+nothing to keep in step.
+
 Two smaller calls:
 
 - the clip is built and fetched on the first click, never preloaded. Audio behind a clip most visits

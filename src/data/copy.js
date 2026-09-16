@@ -77,8 +77,9 @@ export const copy = {
     },
   },
 
-  // What Limonacho says when you poke him. The bubble hides itself after a few
-  // seconds; turn the whole mascot off in config.js.
+  // What Limonacho says the first time you poke him in a visit — the bubble and
+  // the "acho" are one greeting. It hides itself after a few seconds; turn the
+  // whole mascot off in config.js.
   lemon: {
     en: { bubble: "Welcome! I'm Limonacho" },
     es: { bubble: '¡Bienvenido! Soy Limonacho' },

@@ -212,7 +212,7 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
   await expect(html).toHaveAttribute('data-accent', 'aqua')
 })
 
-test('Limonacho says "acho" on the first poke of a visit, and only on that one', async ({ page }) => {
+test('Limonacho greets you on the first poke of a visit, and only on that one', async ({ page }) => {
   // Counting calls to play() is the only way to see the sound without a
   // speaker, and stubbing it also keeps the run silent.
   await page.addInitScript(() => {
@@ -228,25 +228,51 @@ test('Limonacho says "acho" on the first poke of a visit, and only on that one',
   // He is parked off-screen until the hero is behind you.
   const bringHimIn = () => page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
   const lemon = page.locator('.lemon')
+  const bubble = page.locator('.bubble')
   const plays = () => page.evaluate(() => window.__acho)
 
   await bringHimIn()
   await expect(page.locator('.pet')).toHaveClass(/shown/)
 
-  await lemon.click()
-  expect(await plays()).toBe(1)
+  /*
+    Count the shake replays from the class itself instead of polling for it: the
+    class is only there for half a second, and under a loaded parallel run a
+    polling assertion can miss that window and go red for no reason. The counter
+    only ever goes up, so waiting for a number is race-free.
+  */
+  await page.evaluate(() => {
+    window.__shakes = 0
+    const lemon = document.querySelector('.lemon')
+    new MutationObserver(() => {
+      if (lemon.classList.contains('shaking')) window.__shakes += 1
+    }).observe(lemon, { attributes: true, attributeFilter: ['class'] })
+  })
+  const shakes = () => page.evaluate(() => window.__shakes)
 
-  // The shake and the bubble replay on every poke; the voice does not.
+  // The greeting: the voice, the bubble and one shake.
   await lemon.click()
   expect(await plays()).toBe(1)
+  await expect.poll(shakes).toBe(1)
+  await expect(bubble).toBeVisible()
+
+  // Let the bubble keep to its own four seconds, so the next poke starts from a
+  // clean slate and can be read as "and nothing came back".
+  await expect(bubble).toBeHidden({ timeout: 6000 })
+
+  // A later poke is only the shake: no second voice, and nothing to say.
+  await lemon.click()
+  expect(await plays()).toBe(1)
+  await expect.poll(shakes).toBe(2)
+  await expect(bubble).toBeHidden()
 
   // A reload is a new visit: the flag is module state, not anything written
-  // down, so the joke starts over. The stub resets too, which is what makes
+  // down, so the greeting comes back. The stub resets too, which is what makes
   // the second 1 below mean "played again".
   await page.reload()
   await bringHimIn()
   await lemon.click()
   expect(await plays()).toBe(1)
+  await expect(bubble).toBeVisible()
 
   // And the clip it asks for is really there, and really audio.
   const clip = await page.request.get('/assets/sound/acho.mp3')

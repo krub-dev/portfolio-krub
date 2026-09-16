@@ -64,10 +64,10 @@ usePointer((pointer) => {
 })
 
 function poke() {
-  // The first poke of a visit is the one with a voice. Called before the shake
-  // and before the rAF below, because the audio has to be asked for inside the
-  // click itself.
-  playOnce()
+  // The first poke of a visit is the greeting: the voice and the bubble. Every
+  // later one is just the shake. Asked for before the rAF below, because the
+  // audio has to be requested inside the click itself.
+  const first = playOnce()
 
   // Restart the shake even mid-shake: removing the class and forcing a reflow
   // before adding it back is what makes a CSS animation replay.
@@ -77,6 +77,8 @@ function poke() {
     shaking.value = true
     shakeTimer = setTimeout(() => (shaking.value = false), 500)
   })
+
+  if (!first) return
 
   bubbleVisible.value = true
   clearTimeout(bubbleTimer)

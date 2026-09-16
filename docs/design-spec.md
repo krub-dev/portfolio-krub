@@ -486,9 +486,9 @@ On click: a `lemonShake .5s ease` shake and a speech bubble above it (max 230px,
 background `--surface`, `bubbleIn .28s`) reading "Welcome! I'm Limonacho" / "¡Bienvenido! Soy
 Limonacho", which hides itself after 4 seconds.
 
-The **first** click of a visit says "acho": a one-second MP3 (`achoSound`, `src/data/sound.js`,
-17 KB), asked for inside the click handler so a phone lets it play, and not preloaded. The shake and
-the bubble replay on every poke; the voice does not.
+The **first** click of a visit is the greeting: he says "acho" — a one-second MP3 (`achoSound`,
+`src/data/sound.js`, 17 KB), asked for inside the click handler so a phone lets it play, and never
+preloaded — and the bubble appears. Every later poke is only the shake.
 
 ### 3.17 Mobile menu
 

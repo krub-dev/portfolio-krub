@@ -102,11 +102,12 @@ section, folded together where they overlapped.
 - [ ] **A simulated entry loader — or not.** An open decision. If it happens it must not become a
   fake delay over content that is already there.
 - [x] **Easter egg: the "Acho" audio.** Built on 2026-09-17: it plays on the first poke of Limonacho
-  in a visit — he was already a button, so it costs nothing in accessibility, and the hidden
-  "Murcia" word was dropped (decision 51). Once per visit from module state, fetched on the click,
-  never preloaded, and covered by an e2e test that counts the `play()` calls. Re-encoded to MP3
-  (128 kbps, 17 KB, down from a 177 KB WAV that stays outside the repository, with the reference
-  material).
+  in a visit, and the bubble appears with it — the greeting is voice and bubble together, and every
+  later poke is only the shake. He was already a button, so it costs nothing in accessibility, and
+  the hidden "Murcia" word was dropped (decision 51). Once per visit from module state, fetched on
+  the click, never preloaded, and covered by an e2e test that counts the `play()` calls and watches
+  the bubble come and go. Re-encoded to MP3 (128 kbps, 17 KB, down from a 177 KB WAV that stays
+  outside the repository, with the reference material).
 
 ## Mobile and responsive
 
