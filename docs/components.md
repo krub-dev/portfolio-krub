@@ -18,7 +18,9 @@ App
 │   ├─ BrandLogo
 │   ├─ AppearanceControl
 │   ├─ LangButton
+│   ├─ DotsIcon           (the menu button, below 900px)
 │   └─ SettingsMenu      (compact only)
+│       ├─ DotsIcon
 │       ├─ AppearanceControl
 │       └─ LangButton
 ├─ TheMobileMenu
@@ -115,6 +117,12 @@ border).
 No props. The ES / EN button; calls `useLang().toggle()`. Used in the navbar on desktop and in the
 mobile menu header, so it is a component rather than inline markup.
 
+### DotsIcon
+Prop: `open` (boolean). The four dots the mobile menu button and the desktop settings button
+share. On open they spread apart — each dot moves out along both axes, leaving a gap in the middle
+— instead of becoming a cross, and the move is a CSS transform so it transitions. Reduced motion
+drops the spread.
+
 ---
 
 ## Content components
@@ -168,9 +176,9 @@ exist; on the home page the path is unchanged and the jump stays in-page.
 
 ### SettingsMenu
 Prop: `visible` (boolean — the compact state; the panel closes when it goes false). The 36×36
-four-dot button the compact desktop bar shows in place of the appearance and language controls —
-the same icon as the mobile menu button. It opens a panel holding both. Closes on the trigger, on a
-click outside and on Escape.
+four-dot button (`DotsIcon`) the compact desktop bar shows in place of the appearance and language
+controls — the same icon as the mobile menu button, which spreads on open. It opens a panel
+holding both. Closes on the trigger, on a click outside and on Escape.
 
 ### TheMobileMenu
 Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come from `src/data`.

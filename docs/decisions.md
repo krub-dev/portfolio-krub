@@ -1025,6 +1025,11 @@ On desktop the compact bar folds them into one 36×36 four-dot button — the mo
 icon — that opens them in a panel (3.19); on a phone it keeps only the brand and the menu button,
 and the menu's header carries them from then on.
 
+Both those buttons show the same four dots, and on open the dots spread apart — each moves out
+along both axes, leaving a gap in the middle — instead of the menu button turning into a cross. A
+cross was a second icon to keep in step; spreading the one icon says "open" with the same shape,
+and the transform transitions. Reduced motion drops the spread.
+
 The measurement changed twice for this. It now applies the compact layout for one frame instead of
 hiding one element, so it measures the whole handed-over strip; and it measures a second number,
 the capsule's full width (the viewport minus the gutters, capped at 1180), because on a narrow

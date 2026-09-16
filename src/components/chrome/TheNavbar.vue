@@ -19,6 +19,7 @@ import { useI18n } from 'vue-i18n'
 
 import AppearanceControl from './AppearanceControl.vue'
 import BrandLogo from '../base/BrandLogo.vue'
+import DotsIcon from '../base/DotsIcon.vue'
 import LangButton from '../base/LangButton.vue'
 import SettingsMenu from './SettingsMenu.vue'
 import { useElementHeight } from '../../composables/useElementHeight'
@@ -187,15 +188,7 @@ watch(lang, async () => {
           :aria-expanded="props.menuOpen"
           @click="$emit('toggle-menu')"
         >
-          <svg v-if="props.menuOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18" />
-          </svg>
-          <svg v-else viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <circle cx="8" cy="8" r="2.5" />
-            <circle cx="16" cy="8" r="2.5" />
-            <circle cx="8" cy="16" r="2.5" />
-            <circle cx="16" cy="16" r="2.5" />
-          </svg>
+          <DotsIcon :open="props.menuOpen" />
         </button>
         <!-- Hidden once the capsule compacts; the menu carries them then. -->
         <div class="full">
@@ -375,8 +368,8 @@ watch(lang, async () => {
 }
 
 .menu-btn svg {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
 }
 
 .cta {

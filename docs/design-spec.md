@@ -230,7 +230,9 @@ painted `var(--acc-text)`; the rest, `--fg-2`. Note: the inactive colour has to 
 explicitly rather than cleared, because the global link rule is yellow.
 
 Below 900px the desktop navigation and controls hide, and the capsule holds the brand, the
-appearance and language controls, and a menu button (36×36, background `--acc`). Those controls
+appearance and language controls, and a menu button (36×36, background `--acc`). The menu button
+shows four dots, and when the menu opens they spread apart — each moves out along both axes,
+leaving a gap in the middle — instead of switching to a cross. Those controls
 stay in the bar until it compacts, and from then on the menu panel (3.17) carries them, so the
 compact capsule is only the brand and the menu button.
 
@@ -511,10 +513,12 @@ is a separate control and is unchanged.
 ### 3.19 Settings button (compact navbar)
 
 On desktop, once the capsule compacts, the appearance and language controls are replaced by one
-36×36 button with the same four-dot icon as the mobile menu button, beside the CTA. It opens a
-small panel underneath it — `--surface`, radius 12, a 1px `--line` border and no shadow — holding
-the appearance control and the language button. It closes on the trigger, on a click outside, on
-Escape, and when the bar expands again, so it is never left open behind a hidden trigger.
+36×36 button with the same four dots as the mobile menu button, beside the CTA — and they spread
+apart on open the same way. It opens a small panel underneath it — `--surface`, radius 12, a 1px
+`--line` border and no shadow, 16px below the button so it clears the compact capsule's padding —
+holding the appearance control and the language button. It closes on the trigger, on a click
+outside, on Escape, and when the bar expands again, so it is never left open behind a hidden
+trigger.
 
 ---
 

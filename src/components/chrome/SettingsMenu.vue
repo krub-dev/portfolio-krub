@@ -15,6 +15,7 @@ import { onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import AppearanceControl from './AppearanceControl.vue'
+import DotsIcon from '../base/DotsIcon.vue'
 import LangButton from '../base/LangButton.vue'
 
 const props = defineProps({
@@ -66,13 +67,7 @@ onUnmounted(() => {
       :title="t('a11y.settings')"
       @click="open = !open"
     >
-      <!-- The same four dots the mobile menu button uses. -->
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <circle cx="8" cy="8" r="2.5" />
-        <circle cx="16" cy="8" r="2.5" />
-        <circle cx="8" cy="16" r="2.5" />
-        <circle cx="16" cy="16" r="2.5" />
-      </svg>
+      <DotsIcon :open="open" />
     </button>
 
     <div v-if="open" class="panel">
@@ -105,8 +100,8 @@ onUnmounted(() => {
 }
 
 .trigger svg {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
 }
 
 .trigger:hover,
@@ -115,11 +110,12 @@ onUnmounted(() => {
   color: var(--acc-text);
 }
 
-/* Hangs under the trigger, right-aligned. No shadow — the border is enough, and
-   nothing around the bar has one. */
+/* Hangs under the trigger, right-aligned, with a gap that clears the compact
+   capsule's padding so it does not read as glued to the bar. No shadow — the
+   border is enough, and nothing around the bar has one. */
 .panel {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 16px);
   right: 0;
   z-index: 160;
   display: flex;
