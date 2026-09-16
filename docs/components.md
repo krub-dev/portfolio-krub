@@ -17,7 +17,7 @@ App
 ├─ TheNavbar
 │   ├─ BrandLogo
 │   ├─ AppearanceControl
-│   └─ LangButton        (desktop only)
+│   └─ LangButton
 ├─ TheMobileMenu
 │   ├─ SocialLink ×n
 │   ├─ AppearanceControl
@@ -155,8 +155,9 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 ### TheNavbar
 Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
 handled directly through their composables, and the `AppearanceControl` and `LangButton` sit beside
-it on desktop. Below 900px the capsule keeps only the brand and the menu button, and both controls
-move into the menu header. Sections come from `src/data/sections.js`, labels
+it. Below 900px they are in the bar until the capsule compacts, and in the menu from then on, so
+the compact capsule is only the brand and the menu button. Sections come from
+`src/data/sections.js`, labels
 from the dictionary. Owns the compact scroll state and the natural-width measurement. Its links
 are absolute (`/#id`, `/#top`), so the shared chrome works from the 404, where the sections do not
 exist; on the home page the path is unchanged and the jump stays in-page.
@@ -164,7 +165,8 @@ exist; on the home page the path is unchanged and the jump stays in-page.
 ### TheMobileMenu
 Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come from `src/data`.
 Closes on Escape and on a click outside as well as on any link. Its header carries the
-`AppearanceControl` and `LangButton`, which on a phone have no room in the navbar.
+`AppearanceControl` and `LangButton`: the compact navbar hands them over, and they are here even
+before it compacts, so they are always reachable.
 
 ### AppearanceControl
 No props. The two-segment appearance control in the navbar, in both control groups: the ◐ button

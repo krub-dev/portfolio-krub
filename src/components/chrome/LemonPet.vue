@@ -168,7 +168,7 @@ onUnmounted(() => {
   width: 11px;
   height: 12px;
   border-radius: 5px 5px 3px 3px;
-  background: var(--acc);
+  background: var(--acc-solid);
 }
 
 .leaf {
@@ -190,7 +190,7 @@ onUnmounted(() => {
   position: absolute;
   inset: 0;
   border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%;
-  background: var(--acc);
+  background: var(--acc-solid);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,7 +201,7 @@ onUnmounted(() => {
 .pore {
   position: absolute;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--acc) 62%, #000);
+  background: color-mix(in srgb, var(--acc-solid) 62%, #000);
 }
 
 .p1 { bottom: 9px; right: 11px; width: 4.4px; height: 4.4px; opacity: 0.55; }

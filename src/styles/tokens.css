@@ -57,16 +57,12 @@
   --sec-idx: 0.16;                    /* opacity of the giant section number */
 
   /*
-    The accent palette's identity colours, declared once. Each palette below
-    points its --acc at one of these, and the switcher paints its swatches with
-    them, so each hex lives in exactly one place. Yellow is the default, and it
-    is what the accent tokens above already hold.
+    The accent at its most saturated — the colour the light theme paints --acc
+    with — kept the same in both themes. Limonacho uses it: the pale pastel the
+    dark theme fills with washes him out, and he reads better as the theme's
+    solid colour. Yellow is both, so it is the only value defined here.
   */
-  --pal-yellow: #ffc800;
-  --pal-aqua: #c3fffc;
-  --pal-rose: #fb7185;
-  --pal-mint: #9affc9;
-  --pal-violet: #d8c7ff;
+  --acc-solid: #ffc800;
 
   /* Font stacks. The faces are declared above; these are the fallbacks. */
   --font-sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -163,39 +159,49 @@
    --------------------------------------------------------------------------- */
 
 [data-accent='aqua'] {
-  --acc: var(--pal-aqua);
+  --acc: #c3fffc;
   --acc-2: #a8f0ea;
-  --acc-text: var(--pal-aqua);
+  --acc-text: #c3fffc;
   --acc-text-2: #a8f0ea;
   --on-acc: #0c0c0d;
-  --mark: var(--pal-aqua);
+  --mark: #c3fffc;
+  --acc-solid: #2dd4bf;
 }
 
 [data-accent='rose'] {
-  --acc: var(--pal-rose);
+  --acc: #fb7185;
   --acc-2: #f43f5e;
-  --acc-text: var(--pal-rose);
+  --acc-text: #fb7185;
   --acc-text-2: #f43f5e;
   --on-acc: #0c0c0d;
-  --mark: var(--pal-rose);
+  --mark: #fb7185;
+  --acc-solid: #f43f5e;
 }
 
 [data-accent='mint'] {
-  --acc: var(--pal-mint);
+  --acc: #9affc9;
   --acc-2: #7df0b8;
-  --acc-text: var(--pal-mint);
+  --acc-text: #9affc9;
   --acc-text-2: #7df0b8;
   --on-acc: #0c0c0d;
-  --mark: var(--pal-mint);
+  --mark: #9affc9;
+  --acc-solid: #34d399;
 }
 
+/*
+  Violet is the one palette whose dark value is the solid one, not a pastel: the
+  pastel read washed out on the dark theme, and the solid violet is what the
+  owner wanted. So light and dark share the fill; only the text and --mark
+  change in light.
+*/
 [data-accent='violet'] {
-  --acc: var(--pal-violet);
-  --acc-2: #c9b8ff;
-  --acc-text: var(--pal-violet);
-  --acc-text-2: #c9b8ff;
+  --acc: #8b5cf6;
+  --acc-2: #a78bfa;
+  --acc-text: #8b5cf6;
+  --acc-text-2: #a78bfa;
   --on-acc: #0c0c0d;
-  --mark: var(--pal-violet);
+  --mark: #8b5cf6;
+  --acc-solid: #8b5cf6;
 }
 
 [data-theme='light'][data-accent='aqua'] {

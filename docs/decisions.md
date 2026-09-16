@@ -1016,6 +1016,12 @@ deserves. Nothing in the site glows either, so the glow went with the moon-and-s
 
 On desktop the box takes the language button's hover — the frame and the glyphs turn to the
 accent, and the circle grows a little (reduced motion keeps the colour and drops the growth). On a
-phone the appearance and language controls leave the navbar for the menu header, beside the title:
-the narrow bar has no room for them, and the capsule there keeps only the brand and the menu
-button.
+phone the appearance and language controls ride in the bar until the capsule compacts and live in
+the menu header from then on: at the top the bar would otherwise be just a brand and a menu
+button, and once it compacts it wants to be exactly that. `measureNatural()` hides the controls
+while it measures, or the compact width would come out as the wide one.
+
+Two palette notes from the same round. Violet's dark value is the solid `#8B5CF6`, not a pastel —
+the pastel washed out, and light and dark now share the fill. And Limonacho paints himself with
+`--acc-solid`, the accent's full-saturation form, in both themes: a lemon in the dark theme's pale
+pastel disappeared.

@@ -38,6 +38,9 @@ const { y } = useScroll()
 
 const capsule = ref(null)
 const naturalWidth = ref(null)
+// The accent and language controls in the mobile group. Hidden in the compact
+// state, and hidden for the measurement below.
+const extra = ref(null)
 
 /*
   The bar is fixed, so the hero has to pad itself past it or the name lands
@@ -58,6 +61,17 @@ function measureNatural() {
   if (!el) return
 
   const previous = el.getAttribute('style') ?? ''
+
+  /*
+    The compact capsule hides the accent and language controls — they live in
+    the menu then — so they are hidden for the measurement too. Without this the
+    number would be the wide, unscrolled width and the capsule would never
+    shrink.
+  */
+  const extraEl = extra.value
+  const previousExtra = extraEl?.style.display ?? null
+  if (extraEl) extraEl.style.display = 'none'
+
   el.style.transition = 'none'
   el.style.maxWidth = 'none'
   el.style.width = 'auto'
@@ -66,6 +80,7 @@ function measureNatural() {
   const width = el.getBoundingClientRect().width
 
   el.setAttribute('style', previous)
+  if (extraEl) extraEl.style.display = previousExtra ?? ''
   void el.offsetWidth // flush the restore before transitions come back
   naturalWidth.value = Math.ceil(width)
 }
@@ -153,6 +168,11 @@ watch(lang, async () => {
             <circle cx="16" cy="16" r="2.5" />
           </svg>
         </button>
+        <!-- Hidden once the capsule compacts; the menu carries them then. -->
+        <span ref="extra" class="extra">
+          <AppearanceControl />
+          <LangButton />
+        </span>
       </div>
     </div>
   </header>
@@ -279,6 +299,18 @@ watch(lang, async () => {
 .mobile {
   display: none;
   gap: 8px;
+}
+
+.extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Compact: the appearance and language controls leave the bar and live in the
+   menu instead, so the capsule can shrink to the brand and the menu button. */
+.capsule.compact .extra {
+  display: none;
 }
 
 .menu-btn {

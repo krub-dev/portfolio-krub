@@ -112,9 +112,11 @@ the same stylesheet. A palette swaps the accent tokens and nothing else:
 | `--acc-text-2` | that, on hover |
 | `--on-acc` | the text painted on the fill |
 | `--mark` | the logo, footer heart and cursor ring |
+| `--acc-solid` | the accent at full saturation, the same in both themes — Limonacho |
 
-Each palette's identity colour is a `--pal-*` token declared once — the palette points `--acc` at
-it — so the hex exists in one place.
+The four non-default palettes — aqua, rose, mint, violet — swap exactly these tokens. Violet is
+the exception among them: its dark value is the solid `#8B5CF6`, not a pastel, because the pastel
+read washed out, so light and dark share the fill and only the text and `--mark` change in light.
 
 The four non-default palettes — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, violet `#D8C7FF` —
 are pastels made for a dark background: as text they read straight away (aqua 17.7:1, mint 16.3:1
@@ -220,9 +222,10 @@ as active the last one whose top edge is at `<= 35%` of the viewport height. Tha
 painted `var(--acc-text)`; the rest, `--fg-2`. Note: the inactive colour has to be set
 explicitly rather than cleared, because the global link rule is yellow.
 
-Below 900px the desktop navigation and controls hide, and the capsule keeps only the brand and a
-menu button (36×36, background `--acc`). The appearance and language controls move into the menu
-panel (3.17) rather than crowding the narrow bar.
+Below 900px the desktop navigation and controls hide, and the capsule holds the brand, the
+appearance and language controls, and a menu button (36×36, background `--acc`). Once the capsule
+compacts — past 60px of scroll — those controls leave the bar and live in the menu panel (3.17),
+so the compact capsule is only the brand and the menu button and the bar is not empty at the top.
 
 ### 3.2 Hero
 
@@ -459,8 +462,9 @@ enters **in a straight line from the right** at the same time as the footer: fro
 `translateX(160%)` to `translateX(0)` with `.55s cubic-bezier(.22,1,.36,1)`; no tilt.
 
 The lemon is drawn in CSS: a 58×48px body with
-`border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%` and a **flat `var(--acc)` fill, no
-gradient**; an 11×12px nub centred on top; a 21×12px leaf in `#3EA34B` outlined `#2C7A36`,
+`border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%` and a **flat `var(--acc-solid)` fill, no
+gradient** — the accent at full saturation in both themes, so he does not wash out in the dark
+one; an 11×12px nub centred on top; a 21×12px leaf in `#3EA34B` outlined `#2C7A36`,
 rotated `-24deg`; four texture dots in a darkened yellow at opacities between .35 and .55; and
 two 16px white eyes with 7px `#0C0C0D` pupils that **follow the cursor**, shifting 4px in its
 direction.
@@ -474,11 +478,11 @@ Limonacho", which hides itself after 4 seconds.
 A panel below the menu button (`top:74px; right:16px`, `z-index:150`),
 `width: min(300px, calc(100vw - 40px))`, radius 20, background `--surface`, `padding:16px`,
 `gap:12px`, shadow `0 24px 60px rgba(0,0,0,.45)`. It holds: a header with "Menu", a mono subtitle
-and — on the right of that same row — the appearance and language controls, which are here because
-the narrow navbar has no room for them; a 2×2 grid with Github, LinkedIn, X and "Let's talk ↗"
-(this last one in yellow); a list of four navigation links, each with its `[00]`…`[03]` mono index
-(the active section's in yellow) and its path; and a full-width "↑ back to top" button. Every link
-closes the menu when pressed.
+and — on the right of that same row — the appearance and language controls, which the bar hands
+over when it compacts (they are always here, so they are reachable either way); a 2×2 grid with
+Github, LinkedIn, X and "Let's talk ↗" (this last one in yellow); a list of four navigation links,
+each with its `[00]`…`[03]` mono index (the active section's in yellow) and its path; and a centred
+"↑ back to top" pill filled with the accent. Every link closes the menu when pressed.
 
 ### 3.18 Appearance control (theme + accent)
 
@@ -585,9 +589,9 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
 
 A single breakpoint: **900px**. Below it: one column in every two-column grid, navigation
 replaced by the menu, the custom cursor and scroll indicator disabled, the appearance and language
-controls moved from the navbar into the menu header, the hero stage dropped (the badge moves into
-the text column), the footer centred with the TOP button hidden, a smaller 4/5 photo, and the
-lemon at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
+controls in the bar until it compacts and in the menu after, the hero stage dropped (the badge
+moves into the text column), the footer centred with the TOP button hidden, a smaller 4/5 photo,
+and the lemon at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
 
 ---
 

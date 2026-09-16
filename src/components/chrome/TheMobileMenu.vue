@@ -229,20 +229,29 @@ onUnmounted(() => {
   height: 28px;
   padding: 0 16px;
   border-radius: 999px;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--fg-3);
+  /* Filled with the accent, like the footer's TOP button, so it does not
+     disappear into the panel. */
+  background: var(--acc);
+  border: 1px solid var(--acc);
+  color: var(--on-acc);
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.16em;
   transition:
+    background-color 0.16s ease,
     border-color 0.16s ease,
     color 0.16s ease;
 }
 
 .to-top:hover {
-  border-color: var(--acc-text);
-  color: var(--acc-text);
+  background: var(--acc-2);
+  border-color: var(--acc-2);
+  color: var(--on-acc);
+}
+
+/* On a filled accent control the accent ring would vanish, as with the footer. */
+.to-top:focus-visible {
+  outline-color: var(--fg);
 }
 </style>

@@ -139,17 +139,15 @@ test('an unknown path shows the 404, chrome and all, and offers a way back', asy
   await expect(page.locator('meta[name="robots"]')).toHaveCount(0)
 })
 
-test('theme and language survive a reload', async ({ page, isMobile }) => {
+test('theme and language survive a reload', async ({ page }) => {
   await page.goto('/')
   const html = page.locator('html')
 
   await expect(html).not.toHaveAttribute('data-theme', 'light')
   await expect(html).toHaveAttribute('lang', 'en')
 
-  // On a phone these controls live in the menu, so it has to be open; on
-  // desktop they are in the navbar capsule.
-  if (isMobile) await page.locator('.menu-btn').click()
-
+  // Both control sets exist in the DOM; only one is displayed at a given
+  // breakpoint, so scope to the visible one rather than taking first().
   await page.locator('.seg-theme:visible').click()
   await page.locator('.lang-btn:visible').first().click()
   await expect(html).toHaveAttribute('data-theme', 'light')
@@ -173,9 +171,6 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
   const html = page.locator('html')
   await expect(html).toHaveAttribute('data-accent', 'yellow')
 
-  // On a phone the disc lives in the menu, so it has to be open.
-  if (isMobile) await page.locator('.menu-btn').click()
-
   // One press moves to the next palette (yellow -> aqua).
   const disc = page.locator('.seg-accent:visible')
   await expect(disc).toHaveAttribute('aria-label', 'Accent colour: Yellow')
@@ -188,6 +183,13 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
     getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(),
   )
   expect(fill).toBe('#c3fffc')
+
+  if (isMobile) {
+    // The bar carries the controls until it compacts, and then the menu does.
+    await page.evaluate(() => window.scrollTo(0, 400))
+    await expect(page.locator('.capsule')).toHaveClass(/compact/)
+    await expect(page.locator('.extra')).toBeHidden()
+  }
 
   await page.reload()
   await expect(html).toHaveAttribute('data-accent', 'aqua')
