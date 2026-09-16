@@ -83,9 +83,10 @@ function clamp(value) {
   as the bloom.
 
   Every stop comes from the accent tokens, so the ring follows the palette and
-  the theme like everything else on the page. It is the dim stop that gives the
-  gradient something to turn: --acc and --acc-solid are the same yellow by
-  default, and one colour rotating on the spot is no animation at all.
+  the theme like everything else on the page. The dim stop has to stay clearly
+  visible and not fade into the page: the light has to be seen travelling the
+  whole way round, and a border that disappears except for its bright arc does
+  not read as one.
 */
 .frame::before,
 .frame::after {
@@ -96,21 +97,32 @@ function clamp(value) {
   background: conic-gradient(
     from var(--glow-angle),
     var(--glow-dim),
-    var(--acc-solid) 28%,
-    var(--glow-dim) 56%
+    var(--acc-solid) 25%,
+    var(--glow-dim) 55%
   );
   animation: glowSpin 6s linear infinite;
 }
 
+/* The bloom, kept close to the edge: a wide halo reads as a lamp behind the
+   box, and the reference is a lit border. */
 .frame::after {
-  filter: blur(16px);
-  opacity: 0.65;
+  filter: blur(10px);
+  opacity: 0.35;
 }
 
 .stage {
   position: relative;
   /* Above the glow, which is behind it by design. */
   z-index: 1;
+  /*
+    border-box, which the project does not set globally on purpose (the spec's
+    measurements were taken content-box). Here it is not a preference: with
+    content-box the 1px border is added to 100% of the frame, so the stage came
+    out 2px wider and taller than the box it was supposed to fill, pushed out of
+    centre, and its overflow covered the glow on the right and bottom edges —
+    which is exactly what it looked like.
+  */
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   border: 1px solid var(--line);

@@ -1173,12 +1173,56 @@ the cream page a light touch reads as a border and a heavy one as a painted fram
 mixes toward `--on-acc`, which is near-black in both themes, so the dim stop is a dark version of the
 accent whatever the palette is — and the four palettes need no work of their own.
 
-**Two layers, one of them a blur.** The crisp copy is the border; an identical copy with `blur(16px)`
-at `opacity:.65` is the bloom. That blur is re-applied every frame, because the gradient underneath
+**Two layers, one of them a blur.** The crisp copy is the border; an identical copy with `blur(10px)`
+at `opacity:.35` is the bloom. That blur is re-applied every frame, because the gradient underneath
 it changes every frame, and it is the most expensive thing in the component. The knob, if it ever
 shows on a machine that matters, is to drop it for a static accent halo and lose the moving colour
 inside the halo.
 
+**The stage turned out to be 2px bigger than its frame.** The ring came out even on the left, top and
+bottom and missing on the right, which is the giveaway. `.stage` fills the frame with
+`width:100%; height:100%`, and this project deliberately has no global `box-sizing: border-box` (the
+spec's measurements were taken content-box), so the 1px border was added *on top of* that 100%: the
+stage overhung the frame by 2px on the right and the bottom and covered the glow there. It declares
+`box-sizing: border-box` itself now — one of the few elements that has to.
+
+**Tuned after seeing it on screen.** The first version had a dim stop that faded into the page and a
+wide, strong bloom. The border then vanished everywhere except its bright arc, which read as a smudge
+rather than a lit border, and the halo read as a lamp behind the box rather than a glowing edge. The
+dim stop went up, to 68% of the accent over `--on-acc`, so the whole ring stays visible and the light
+can be seen travelling the whole way round it, and the bloom came down to `blur(10px)` at
+`opacity:.35`, hugging the edge.
+
 Reduced motion is handled inside the component rather than through the global
 `[data-motion="decorative"]` rule, because that rule can only reach elements and this animation lives
 on a pseudo-element. The ring stays and stops turning.
+
+### 53. The dots get a wave, not a goo
+
+**Date:** 2026-09-17 · **Status:** active
+
+The menu button's four dots were asked to melt apart and back together with the gooey trick —
+`filter: blur() contrast()`, as in the reference clip. They did not get it, and the two reasons are
+worth writing down so the idea does not come round again:
+
+- **The geometry rules it out.** The dots are radius 2.8 with their centres 8px apart, so at rest
+  there is a 2.4px gap, and opening moves each one only 2.5px further out. The closed state is the
+  closest the group ever gets: a goo strong enough to bridge them while they move also bridges them
+  at rest, and the button stops reading as four dots. A threshold low enough to keep the closed state
+  crisp never merges anything while it opens. There is nothing in between to tune.
+- **The colour rules out the CSS version.** `contrast()` has to be high to threshold at all, and it
+  does not touch the alpha channel — the recipe only works over an opaque background whose colour
+  survives it. The mobile button is `--acc`, and measured, `contrast(30)` turns the accent into a
+  primary: `#FFC800` becomes `#FFFF00` and rose `#FB7185` becomes `#FF00FF`. The desktop trigger sits
+  on a translucent capsule, where the opaque patch the trick needs would break the backdrop blur. The
+  SVG-filter variant sharpens alpha instead and would survive the colours, but not the geometry.
+
+So the spread got the cheap version of "alive": an overshoot curve and a 20ms stagger, so the group
+ripples open clockwise. At 2.5px of travel the overshoot is a fraction of a pixel — the wave is what
+reads, not the bounce.
+
+One thing could not be verified: whether that transition runs in Safari at all. Headless WebKit does
+not advance its animation clock unless a paint is forced, so every measurement of it came back as a
+jump, real or not. The code path is the same one Chromium animates smoothly, but if the dots snap on
+a real iPhone the fix is to move them out of the `<svg>` and into HTML elements, which is the known
+weak spot for transitions on SVG children.

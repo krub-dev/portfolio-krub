@@ -77,7 +77,7 @@
     Mixed toward --on-acc here, which is near-black in both themes, so the dim
     stop is a dark version of the accent whatever the palette.
   */
-  --glow-dim: color-mix(in srgb, var(--acc-solid) 50%, var(--on-acc));
+  --glow-dim: color-mix(in srgb, var(--acc-solid) 68%, var(--on-acc));
 
   /* Font stacks. The faces are declared above; these are the fallbacks. */
   --font-sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -136,7 +136,7 @@
   --sec-idx: 0.62;
   /* Lighter than the dark theme's: the stage is near-white here, so the dim
      stop fades toward the page instead of darkening away from it. */
-  --glow-dim: color-mix(in srgb, var(--acc-solid) 58%, var(--ink));
+  --glow-dim: color-mix(in srgb, var(--acc-solid) 42%, var(--ink));
 }
 
 /* ---------------------------------------------------------------------------

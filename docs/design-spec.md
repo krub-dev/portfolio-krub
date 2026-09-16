@@ -233,7 +233,9 @@ explicitly rather than cleared, because the global link rule is yellow.
 Below 900px the desktop navigation and controls hide, and the capsule holds the brand, the
 appearance and language controls, and a menu button (36×36, background `--acc`). The menu button
 shows four dots, and when the menu opens they spread apart — each moves out along both axes,
-leaving a gap in the middle — instead of switching to a cross. Those controls
+leaving a gap in the middle — instead of switching to a cross. The move is `transform 0.3s
+cubic-bezier(.34,1.56,.64,1)` with a 20ms stagger between dots, clockwise from the top left, so the
+group ripples open. Those controls
 stay in the bar until it compacts, and from then on the menu panel (3.17) carries them, so the
 compact capsule is only the brand and the menu button.
 
@@ -261,8 +263,9 @@ and only the logo inside it tilts. Inside:
 - **Rotating glow** around the box: a conic gradient painted **2px larger** than the stage on every
   side, so what shows is a ring and its halo and the opaque stage covers the middle. The stops are
   `--glow-dim` and `--acc-solid`, and it turns with `glowSpin 6s linear infinite`. Drawn twice: the
-  crisp copy is the border, a `blur(16px)` copy at `opacity:.65` is the bloom. Decorative: reduced
-  motion stops the turn and leaves the ring.
+  crisp copy is the border, a `blur(10px)` copy at `opacity:.35` is the bloom. The stage itself is
+  `box-sizing: border-box`, so it fills its frame exactly and the ring is even on all four sides.
+  Decorative: reduced motion stops the turn and leaves the ring.
 - The logo at 58% of the width, as a mask over `var(--mark)`, with **3D parallax**: it
   follows the mouse with `perspective(700px) rotateY(±14deg) rotateX(∓10deg)`, proportional
   to the cursor's distance from the centre of the stage.
