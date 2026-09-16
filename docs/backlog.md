@@ -77,6 +77,11 @@ section, folded together where they overlapped.
   four shapes (circles at 24px on a phone, 20px on desktop). At the top it sits in the bar; once
   the capsule compacts it moves out — into a four-dot settings panel on desktop, into the menu on
   a phone. The panel is teleported so its blur matches the bar. See decisions 48 and 49.
+- [x] **A rotating glow border on the 3D slot.** Built on 2026-09-17: a conic gradient painted 2px
+  outside the stage, turning once every 6s and drawn twice — crisp for the border, blurred for the
+  bloom. It follows the accent and the theme through `--glow-dim`, and reduced motion stops the turn
+  and leaves the ring. It cost the stage a wrapper, because the glow has to paint behind it. See
+  decision 52.
 - [ ] **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
   carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the
   inner grid, so a Three.js scene replaces the `.mark` element and nothing else has to move.
@@ -152,5 +157,4 @@ Not tasks. No urgency and no order — written down so they do not evaporate.
 - A 3D business card with my details.
 - A blog?
 - A photo that follows the cursor, like Limonacho but my profile picture.
-- A rotating glow border on the 3D slot.
 - Frosted glass on the 3D slot, with the grid behind it.

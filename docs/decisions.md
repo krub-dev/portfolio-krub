@@ -1142,3 +1142,43 @@ Two smaller calls:
 Measured on the encoded file: 1.045s in both engines, peak 0.35 and RMS 0.020, against 0.367 and
 0.022 for the WAV — the conversion is faithful. It also confirms the recording itself is quiet, so a
 gain pass is the obvious follow-up if it ever sounds thin next to other audio.
+
+### 52. The glow around the stage, and the wrapper it needed
+
+**Date:** 2026-09-17 · **Status:** active
+
+The hero stage now has a rotating glow: a conic gradient painted 2px larger than the stage on every
+side, so what shows is a ring and its halo — the opaque stage covers the middle — turning once every
+6s.
+
+**A gradient cannot turn on its own, and that is what `@property` is for.** Registering
+`--glow-angle` as an `<angle>` is what lets the browser interpolate it, so `conic-gradient(from
+var(--glow-angle), …)` rotates. Unregistered, a custom property is a string: the animation has
+nothing to interpolate and jumps from 0deg to 360deg, which is to say it does nothing at all. Where
+`@property` is missing (Safari before 16.4, Firefox before 128) the ring paints at its initial
+angle and simply does not turn — the right way for a decoration to fail.
+
+**It needed a wrapper.** The glow has to paint *behind* the stage: a pseudo-element on the stage
+itself would land inside it, because the stage clips with `overflow:hidden`, and the stage's
+background is opaque, so it would hide the very thing it was meant to show. So `.stage` now lives
+inside a `.frame` that owns the box, and the magnetic pull moved up to the frame with it — the glow
+has to travel with the pull, not stay put while the box moves.
+
+**The colours are the accent's, with one new token.** The stops are `--acc-solid` and `--glow-dim`.
+That second one exists because a single colour rotating on the spot is no animation at all, and the
+default yellow has `--acc` and `--acc-solid` identical, so the gradient needs a darker stop to sweep
+from. How dark is not the same in both themes, which is why it is a token rather than a mix written
+into the component: on `--ink` the accent has to keep half of itself to stay visible at all, while on
+the cream page a light touch reads as a border and a heavy one as a painted frame. The dark value
+mixes toward `--on-acc`, which is near-black in both themes, so the dim stop is a dark version of the
+accent whatever the palette is — and the four palettes need no work of their own.
+
+**Two layers, one of them a blur.** The crisp copy is the border; an identical copy with `blur(16px)`
+at `opacity:.65` is the bloom. That blur is re-applied every frame, because the gradient underneath
+it changes every frame, and it is the most expensive thing in the component. The knob, if it ever
+shows on a machine that matters, is to drop it for a static accent halo and lose the moving colour
+inside the halo.
+
+Reduced motion is handled inside the component rather than through the global
+`[data-motion="decorative"]` rule, because that rule can only reach elements and this animation lives
+on a pseudo-element. The ring stays and stops turning.

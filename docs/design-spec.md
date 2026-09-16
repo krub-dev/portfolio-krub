@@ -113,6 +113,7 @@ the same stylesheet. A palette swaps the accent tokens and nothing else:
 | `--on-acc` | the text painted on the fill |
 | `--mark` | the logo, footer heart and cursor ring |
 | `--acc-solid` | the accent at full saturation, the same in both themes — Limonacho |
+| `--glow-dim` | the dim stop of the hero stage's glow. Derived from the accent, so it follows every palette, but its value differs by theme (see §3.14) |
 
 The four non-default palettes — aqua, rose, mint, violet — swap exactly these tokens. Violet is
 the exception among them: its dark value is the solid `#8B5CF6`, not a pastel, because the pastel
@@ -254,8 +255,14 @@ Left column: top mono label, a three-line headline with the key word in `--acc`,
 Right column, the **square stage**: `aspect-ratio:1/1`, `max-height:min(58vh,520px)`,
 `max-width:520px`, border `--line`, radius 24, a `radial-gradient` from `--surface` to `--ink`,
 and a **40px** inner grid — not the page's 72px, which reads as noise inside a 520px box. The
-whole stage is magnetic; only the logo inside it tilts. Inside:
+whole stage is magnetic — the pull is on the frame that holds it, so the glow travels with it —
+and only the logo inside it tilts. Inside:
 
+- **Rotating glow** around the box: a conic gradient painted **2px larger** than the stage on every
+  side, so what shows is a ring and its halo and the opaque stage covers the middle. The stops are
+  `--glow-dim` and `--acc-solid`, and it turns with `glowSpin 6s linear infinite`. Drawn twice: the
+  crisp copy is the border, a `blur(16px)` copy at `opacity:.65` is the bloom. Decorative: reduced
+  motion stops the turn and leaves the ring.
 - The logo at 58% of the width, as a mask over `var(--mark)`, with **3D parallax**: it
   follows the mouse with `perspective(700px) rotateY(±14deg) rotateX(∓10deg)`, proportional
   to the cursor's distance from the centre of the stage.

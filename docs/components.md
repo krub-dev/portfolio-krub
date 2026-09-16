@@ -213,8 +213,10 @@ copy, because the animation depends on where the word splits, so they are not in
 
 ### LogoStage
 The reserved slot for the 3D scene, and the only thing on the page that tilts in 3D. It owns the
-mask, the inner grid and the parallax that follows the pointer; the `.mark` element inside it is
-where a Three.js scene would go. `HeroSection` is what decides not to mount it below 900px.
+mask, the inner grid, the rotating glow and the parallax that follows the pointer; the `.mark`
+element inside it is where a Three.js scene would go. The box and the magnetic pull sit on the
+frame around the stage, because the glow has to paint behind it. `HeroSection` is what decides not
+to mount it below 900px.
 
 ---
 

@@ -64,6 +64,21 @@
   */
   --acc-solid: #ffc800;
 
+  /*
+    The dim end of the hero stage's rotating glow (design spec §3.14).
+
+    A single accent is one colour, and one colour turning on the spot is no
+    animation at all — the gradient needs a second, darker stop to sweep from.
+    How dark that stop has to be is not the same in both themes, which is why
+    this is a token and not a mix written into the component: against --ink the
+    accent has to keep most of itself to stay visible at all, while on the cream
+    page a light touch reads as a border and a heavy one as a painted frame.
+
+    Mixed toward --on-acc here, which is near-black in both themes, so the dim
+    stop is a dark version of the accent whatever the palette.
+  */
+  --glow-dim: color-mix(in srgb, var(--acc-solid) 50%, var(--on-acc));
+
   /* Font stacks. The faces are declared above; these are the fallbacks. */
   --font-sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
@@ -119,6 +134,9 @@
   --mark: var(--acc-text);
   --grid: rgba(12, 12, 13, 0.05);
   --sec-idx: 0.62;
+  /* Lighter than the dark theme's: the stage is near-white here, so the dim
+     stop fades toward the page instead of darkening away from it. */
+  --glow-dim: color-mix(in srgb, var(--acc-solid) 58%, var(--ink));
 }
 
 /* ---------------------------------------------------------------------------
@@ -378,6 +396,29 @@ section[id] {
   45% { transform: translate(-3px, 0) rotate(-5deg); }
   60% { transform: translate(2px, 1px) rotate(4deg); }
   80% { transform: translate(-1px, 0) rotate(-2deg); }
+}
+
+/*
+  The rotating glow around the hero stage.
+
+  @property is the whole trick, and it is not optional: without registering the
+  property the browser has no idea --glow-angle is an angle. It treats it as a
+  string, so the animation has nothing to interpolate and jumps straight from
+  0deg to 360deg — no movement at all. Registered with a syntax, it animates,
+  and the conic-gradient that reads it turns.
+
+  Where @property is not supported (Safari before 16.4, Firefox before 128) the
+  gradient still paints at its initial angle: the ring is there, it just does
+  not turn. Degrading to a still glow is the right failure for a decoration.
+*/
+@property --glow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes glowSpin {
+  to { --glow-angle: 360deg; }
 }
 
 /* Reduced motion turns off the decorative loops (marquee, dot halo, lemon)

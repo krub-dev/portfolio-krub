@@ -279,3 +279,33 @@ test('Limonacho greets you on the first poke of a visit, and only on that one', 
   expect(clip.ok()).toBe(true)
   expect(clip.headers()['content-type']).toContain('audio')
 })
+
+test('the hero glow turns, and stops turning under reduced motion', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'the stage is not rendered below 900px')
+
+  await page.goto('/')
+
+  /*
+    Reading the animated custom property is the only way to see the rotation
+    from outside, and it is also the point: the whole effect rests on
+    --glow-angle being registered with @property. Without that registration a
+    custom property is a string, the animation has nothing to interpolate and
+    the angle never moves — a still ring, and this test says so.
+  */
+  const angle = () =>
+    page.evaluate(() =>
+      getComputedStyle(document.querySelector('.frame'), '::before')
+        .getPropertyValue('--glow-angle')
+        .trim(),
+    )
+
+  const first = await angle()
+  await page.waitForTimeout(700)
+  expect(await angle()).not.toBe(first)
+
+  // Decorative: reduced motion leaves the ring where it is.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const still = await angle()
+  await page.waitForTimeout(700)
+  expect(await angle()).toBe(still)
+})
