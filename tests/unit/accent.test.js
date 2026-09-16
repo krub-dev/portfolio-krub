@@ -43,10 +43,10 @@ describe('useAccent', () => {
     initAccent()
     const { accent, set } = useAccent()
 
-    set('pink')
-    expect(accent.value).toBe('pink')
-    expect(document.documentElement.getAttribute('data-accent')).toBe('pink')
-    expect(localStorage.getItem('krub-accent')).toBe('pink')
+    set('violet')
+    expect(accent.value).toBe('violet')
+    expect(document.documentElement.getAttribute('data-accent')).toBe('violet')
+    expect(localStorage.getItem('krub-accent')).toBe('violet')
 
     // Junk falls back to the default rather than writing it through.
     set('banana')
@@ -75,9 +75,9 @@ describe('useAccent', () => {
     cycle()
     cycle()
     cycle()
-    expect(accent.value).toBe('pink')
+    expect(accent.value).toBe('violet')
 
-    // The list is yellow, aqua, rose, mint, pink — so one more wraps to yellow.
+    // The list is yellow, aqua, rose, mint, violet — so one more wraps to yellow.
     cycle()
     expect(accent.value).toBe('yellow')
     expect(document.documentElement.getAttribute('data-accent')).toBe('yellow')

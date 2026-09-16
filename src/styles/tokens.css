@@ -66,7 +66,7 @@
   --pal-aqua: #c3fffc;
   --pal-rose: #fb7185;
   --pal-mint: #9affc9;
-  --pal-pink: #ffb3d1;
+  --pal-violet: #d8c7ff;
 
   /* Font stacks. The faces are declared above; these are the fallbacks. */
   --font-sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -189,13 +189,13 @@
   --mark: var(--pal-mint);
 }
 
-[data-accent='pink'] {
-  --acc: var(--pal-pink);
-  --acc-2: #ff8fbb;
-  --acc-text: var(--pal-pink);
-  --acc-text-2: #ff8fbb;
+[data-accent='violet'] {
+  --acc: var(--pal-violet);
+  --acc-2: #c9b8ff;
+  --acc-text: var(--pal-violet);
+  --acc-text-2: #c9b8ff;
   --on-acc: #0c0c0d;
-  --mark: var(--pal-pink);
+  --mark: var(--pal-violet);
 }
 
 [data-theme='light'][data-accent='aqua'] {
@@ -222,11 +222,11 @@
   --mark: var(--acc-text);
 }
 
-[data-theme='light'][data-accent='pink'] {
-  --acc: #f472b6;
-  --acc-2: #f9a8d4;
-  --acc-text: #be185d;
-  --acc-text-2: #9d174d;
+[data-theme='light'][data-accent='violet'] {
+  --acc: #8b5cf6;
+  --acc-2: #a78bfa;
+  --acc-text: #6d28d9;
+  --acc-text-2: #5b21b6;
   --mark: var(--acc-text);
 }
 

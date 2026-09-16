@@ -11,7 +11,7 @@ export const accents = [
   { id: 'aqua' },
   { id: 'rose' },
   { id: 'mint' },
-  { id: 'pink' },
+  { id: 'violet' },
 ]
 
 export default accents

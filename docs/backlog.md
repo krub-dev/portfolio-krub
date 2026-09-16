@@ -67,8 +67,8 @@ section, folded together where they overlapped.
 ## Design and sections
 
 - [x] **An accent theme switcher.** Five palettes chosen with `data-accent` — the brand yellow plus
-  aqua, rose, mint and pink from the reference — switched with one cycling button: the square in
-  the desktop navbar beside the theme and language controls, a row in the mobile menu. Each
+  aqua, rose, mint and violet — switched with one cycling button: the square in the desktop
+  navbar beside the theme and language controls, a pill in the mobile menu. Each
   palette swaps the accent tokens and nothing else, and each needed a light-theme counterpart
   because the pastels are invisible as fills on cream. Built on 2026-09-16; see decision 48.
 - [ ] **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and

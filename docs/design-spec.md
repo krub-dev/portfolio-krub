@@ -116,12 +116,11 @@ the same stylesheet. A palette swaps the accent tokens and nothing else:
 Each palette's identity colour is a `--pal-*` token declared once — the palette points `--acc` at
 it — so the hex exists in one place.
 
-The four non-default palettes — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, pink `#FFB3D1` —
-are reference pastels made for a dark background: as text they read straight away (aqua 17.7:1,
-mint 16.3:1 on `--ink`). On the light theme those pastels are nearly invisible **as fills**
-(`#C3FFFC` is 1.00:1 on the cream page), so each has a more saturated light-theme counterpart for
-`--acc`, and every palette's accent text darkens in light exactly as the yellow's does. See
-decisions.md.
+The four non-default palettes — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, violet `#D8C7FF` —
+are pastels made for a dark background: as text they read straight away (aqua 17.7:1, mint 16.3:1
+on `--ink`). On the light theme those pastels are nearly invisible **as fills** (`#C3FFFC` is
+1.00:1 on the cream page), so each has a more saturated light-theme counterpart for `--acc`, and
+every palette's accent text darkens in light exactly as the yellow's does. See decisions.md.
 
 ### Typography
 
@@ -490,10 +489,10 @@ Two layouts:
 - **Desktop (navbar):** a 36×36 square beside the theme and language controls, sharing their
   frame (radius 10, 1px `--line`, transparent, hover border `--acc-text`). The `aria-label` and
   `title` name the current palette ("Theme: Aqua"), since the button has no visible text.
-- **Mobile (menu):** a full-width pill at the bottom of the menu panel, above the back-to-top,
-  holding the disc and the palette name together and centred. The first version spread a label
-  and the disc across the row and it was not clear what was clickable. A square in the cramped
-  mobile control bar read badly, which is why it moved into the menu at all.
+- **Mobile (menu):** a small centred pill at the bottom of the menu panel, above the back-to-top,
+  holding the disc and the palette name together. Full width read as a giant bar, so it is only as
+  wide as its contents now. A square in the cramped mobile control bar read badly, which is why
+  it lives in the menu at all.
 
 It is a global setting and stays on every route, the 404 included.
 

@@ -69,22 +69,23 @@ const name = computed(() => t(`accent.${accent.value}`))
   border-color: var(--acc-text);
 }
 
-/* Mobile menu: one pill, disc and name together, so the target is obvious. */
+/* Mobile menu: one small pill, disc and name together, centred — not full
+   width, which read as a giant bar in the panel. */
 .accent-btn.row {
+  align-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 16px;
+  min-height: 38px;
+  padding: 8px 16px;
   border-radius: 999px;
   background: transparent;
   border: 1px solid var(--line);
   color: var(--fg-2);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12px;
   transition:
     border-color 0.16s ease,
     color 0.16s ease;

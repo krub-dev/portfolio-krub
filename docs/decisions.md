@@ -974,13 +974,14 @@ The spec was corrected to match the code rather than the other way round.
 **Date:** 2026-09-16 · **Status:** active
 
 Five accent palettes, chosen with `data-accent` on `<html>`: the brand yellow (default) plus four
-from the reference site — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, pink `#FFB3D1`. The
-dark/light theme is untouched and orthogonal: two themes times five accents.
+pastels — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, violet `#D8C7FF`. The dark/light theme
+is untouched and orthogonal: two themes times five accents.
 
 They are token swaps and nothing else. `useAccent()` is a copy of `useTheme()` — module-scope ref,
 `localStorage["krub-accent"]`, the attribute applied by an `initAccent()` called from `main.js` —
 and the inline script in `index.html` restores the accent alongside the theme and the language, or
-a visitor who chose pink would see a yellow flash on every load (decision 10). Yellow has no
+a visitor who chose a non-yellow palette would see a yellow flash on every load (decision 10).
+Yellow has no
 `[data-accent='yellow']` block: with that value nothing matches and the `:root` tokens are the
 palette, and the attribute still carries a value the button can name.
 
@@ -990,9 +991,9 @@ black background. As text on `--ink` they read straight away (aqua 17.7:1, mint 
 `#C3FFFC` is **1.00:1** against the cream page and `#9AFFC9` is 1.08:1. The yellow survived light
 because it is saturated; pastels have no chroma to fall back on, so no opacity tweak would save
 them. Each palette therefore gets a more saturated light-theme fill (aqua `#2DD4BF`, rose
-`#F43F5E`, mint `#34D399`, pink `#F472B6`) that still takes near-black `--on-acc` text, and the
+`#F43F5E`, mint `#34D399`, violet `#8B5CF6`) that still takes near-black `--on-acc` text, and the
 accent text darkens in light exactly as the yellow's does (aqua `#0E7490`, rose `#BE123C`, mint
-`#047857`, pink `#BE185D`). Specificity keeps the light overrides on top: `[data-theme='light']
+`#047857`, violet `#6D28D9`). Specificity keeps the light overrides on top: `[data-theme='light']
 [data-accent='x']` is two attributes against one, whatever the order.
 
 **The logo follows the accent in both themes.** `--mark` is the palette's fill on dark and its
