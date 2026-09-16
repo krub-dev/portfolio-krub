@@ -156,9 +156,8 @@ about, 60ch in the timeline, 22ch in the contact headline) and `text-wrap: prett
   lemon speech bubble · **18px** cards and images · **20–22px** panels and modal · **999px**
   pill buttons.
 - Borders: always `1px solid var(--line)`. No coloured shadows anywhere.
-- Shadows (three in the whole site — the compact navbar's was removed, see decisions.md): lemon
-  bubble and the appearance dropdown `0 14px 34px rgba(0,0,0,.32)`, mobile menu
-  `0 24px 60px rgba(0,0,0,.45)`.
+- Shadows (two in the whole site — the compact navbar's was removed, see decisions.md): lemon
+  bubble `0 14px 34px rgba(0,0,0,.32)`, mobile menu `0 24px 60px rgba(0,0,0,.45)`.
 - Background grid: a 72×72px pattern with 1px lines in `var(--grid)`.
 
 ### Motion
@@ -486,15 +485,11 @@ button was. A 36px-tall rounded box (radius 10, 1px `--line`) with two segments 
 
 - **◐** is the theme toggle it always was: one click alternates dark and light.
 - **The accent disc** — 16px, split diagonally between `--acc` and `--acc-2`, so the current
-  colour and its variation share one face — opens a small dropdown: a `--surface` panel, radius
-  12, one swatch per palette, the active one ringed. Picking a colour sets it and closes.
+  colour and its variation share one face — advances one palette per click, wrapping at the end.
+  The `aria-label` and `title` name the current palette ("Accent colour: Aqua").
 
-The dropdown hangs under the control (`right:0`) and closes on a click outside, on Escape and on a
-choice; its listeners exist only while it is open. Swatches are 32px on desktop and 44px on a
-phone, where the panel is still narrower than the viewport. It is a global setting and stays on
-every route, the 404 included.
-
-The language button beside it is a separate control and is unchanged.
+It is a global setting and stays on every route, the 404 included. The language button beside it
+is a separate control and is unchanged.
 
 ---
 

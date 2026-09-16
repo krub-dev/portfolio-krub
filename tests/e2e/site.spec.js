@@ -166,17 +166,19 @@ test('theme and language survive a reload', async ({ page }) => {
   expect(painted).toBe('rgb(245, 243, 238)')
 })
 
-test('the accent is picked from the dropdown and survives a reload', async ({ page }) => {
+test('the accent cycles and survives a reload', async ({ page }) => {
   await page.goto('/')
   const html = page.locator('html')
   await expect(html).toHaveAttribute('data-accent', 'yellow')
 
-  // The accent disc opens the dropdown; a swatch is what picks a colour.
-  // Both control groups are in the DOM, so scope to the visible one.
-  await page.locator('.seg-accent:visible').click()
-  await page.getByRole('button', { name: 'Aqua' }).click()
+  // One press moves to the next palette (yellow -> aqua). Both control groups
+  // are in the DOM, so scope to the visible one.
+  const disc = page.locator('.seg-accent:visible')
+  await expect(disc).toHaveAttribute('aria-label', 'Accent colour: Yellow')
+  await disc.click()
 
   await expect(html).toHaveAttribute('data-accent', 'aqua')
+  await expect(disc).toHaveAttribute('aria-label', 'Accent colour: Aqua')
   // The dark theme's aqua fill, straight off the token.
   const fill = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(),

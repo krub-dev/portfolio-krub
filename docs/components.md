@@ -159,9 +159,9 @@ Closes on Escape and on a click outside as well as on any link.
 
 ### AppearanceControl
 No props. The two-segment appearance control in the navbar, in both control groups: the ◐ button
-calls `useTheme().toggle()`, and the accent disc toggles a dropdown of the palettes from
-`src/data/accents.js`, painted with `var(--pal-<id>)`; picking one calls `useAccent().set()`.
-Closes on Escape, on a click outside and on a choice.
+calls `useTheme().toggle()`, and the accent disc calls `useAccent().cycle()`, advancing one palette
+per click. The `aria-label` and `title` name the current palette, since the disc has no visible
+text.
 
 ### TheFooter
 No props. Emits `go-top`. Reads the timezone from `config.js`, publishes its own height in

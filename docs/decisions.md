@@ -1003,13 +1003,13 @@ was changed after seeing it. The favicon and og-banner are baked yellow, so they
 with the yellow default rather than with every palette; that is accepted, since they are images
 rendered outside the page.
 
-**The switcher is one control with a theme toggle and an accent dropdown.** The first version put
-a row of swatches in the right rail with the scroll indicator, and the same row in the mobile
-menu; five dots exposed at once read as a settings panel, and the rail put a control in the
-middle of the page's edge. The second was one cycling square in the navbar, which then read badly
-on a phone. It is now a small two-segment box in the navbar on every screen, in the place of the
-old dark/light button: the ◐ toggle it always was, beside a disc split between the accent and its
-hover tone. The disc opens a dropdown with one swatch per palette — the part the cycling button
-was missing, because you pick the colour you want instead of pressing until it comes round. A
-moon-and-sun version with a glow on the active segment came and went: the icon is the ◐ as before,
-and nothing else in the site glows, so the drop-shadow was removed.
+**The switcher is one control with a theme toggle and a cycling accent disc.** The first version
+put a row of swatches in the right rail with the scroll indicator, and the same row in the mobile
+menu; five dots exposed at once read as a settings panel, and the rail put a control in the middle
+of the page's edge. The second was one cycling square in the navbar, which then read badly on a
+phone. A third tried a segmented dark/light/accent control with a dropdown of swatches and a glow
+on the active segment. It settled on a small two-segment box in the navbar on every screen, in the
+place of the old dark/light button: the ◐ toggle it always was, beside a disc split between the
+accent and its hover tone that advances one palette per click. No dropdown — five palettes is
+short enough to reach in a few presses, and a panel for it was more machinery than the choice
+deserves. Nothing in the site glows either, so the glow went with the moon-and-sun segments.
