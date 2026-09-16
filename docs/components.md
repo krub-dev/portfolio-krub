@@ -50,7 +50,7 @@ App
 │   ├─ MediaCarousel
 │   └─ SpecList
 ├─ NotFoundView         (the 404 route)
-│   └─ SectionHeading
+│   └─ BaseButton
 └─ TheFooter
     └─ LiveClock
 ```
@@ -80,7 +80,6 @@ Renders a `<button>` when neither `to` nor `href` is given. Default slot: the co
 | `index` | string \| null | `'00'`…`'03'`; `null` draws no giant number |
 | `title` | string | already translated, e.g. `/projects` |
 | `count` | number \| null | yellow superscript (projects only) |
-| `level` | string | heading level, defaults to `'h2'`; the 404 passes `'h1'` |
 
 ### TechIcon
 `name`, `src`, `invertOnDark` (boolean). Paints the 44px tile; with `invertOnDark` the SVG

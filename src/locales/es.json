@@ -52,7 +52,8 @@
     "image": "IMAGEN"
   },
   "notFound": {
-    "title": "/not-found"
+    "title": "/not-found",
+    "code": "404"
   },
   "a11y": {
     "toggleTheme": "Cambiar de tema",

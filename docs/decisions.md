@@ -886,8 +886,12 @@ rather than a clipped control.
 The 404 is a real Vue route — `/:pathMatch(.*)*`, lazy-loaded so it stays out of the initial
 bundle — and not a static `404.html`. That way it inherits the whole chrome from `App.vue` (grid,
 navbar, menu, cursor, lemon, footer) and its text goes through `copy.js` and the dictionaries like
-every other string. `SectionHeading` gained a `level` prop so the 404's heading is the page's
-`h1`: a section sits under the hero's `h1`, and this page has no hero above it.
+every other string. Its heading is drawn in the view rather than with `SectionHeading`: the
+section pattern is a small mono title with a faint number behind it, and this page wants the
+opposite, so `[404]` is the page's `h1` at display size with `/not-found` as a quiet label above.
+The size is a value with no prototype behind it — `clamp(72px, 16vw, 220px)`, in `--acc-text`
+because at that size it is read as text and `#FFC800` is unreadable on the light background — and
+it is recorded here for that reason.
 
 Two consequences worth recording.
 

@@ -6,16 +6,19 @@
   grid, the navbar, the cursor, the mobile menu and the footer. Nothing here
   draws any of that.
 
-  The heading is the h1, not the h2 the sections use: a section sits under the
-  hero's h1, and this page has no hero above it. The sentence comes from
-  src/data/copy.js and the title and button label from src/locales/, like every
-  other string in the project.
+  It draws its own heading rather than SectionHeading. The section pattern is a
+  small mono title with a faint number behind it; this page wants the opposite —
+  the 404 is the protagonist, so it is the h1 at display size with /not-found as
+  a quiet label above it. The h1 is an h1, not the h2 a section uses, because
+  nothing sits above it.
+
+  The sentence comes from src/data/copy.js and the labels from src/locales/,
+  like every other string in the project.
 */
 import { computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../components/base/BaseButton.vue'
-import SectionHeading from '../components/base/SectionHeading.vue'
 import { useLang } from '../composables/useLang'
 import { copy } from '../data'
 
@@ -47,7 +50,8 @@ onUnmounted(() => {
 
 <template>
   <main class="not-found">
-    <SectionHeading index="404" :title="t('notFound.title')" level="h1" />
+    <p class="label">{{ t('notFound.title') }}</p>
+    <h1 class="code">[{{ t('notFound.code') }}]</h1>
     <p class="body">{{ body }}</p>
     <BaseButton variant="solid" to="/" magnetic>{{ t('actions.home') }}</BaseButton>
   </main>
@@ -69,6 +73,31 @@ onUnmounted(() => {
   justify-content: center;
   gap: 26px;
   padding: calc(var(--navbar-h, 88px) + 20px) var(--gutter-r) 40px var(--gutter-l);
+}
+
+/*
+  The label, then the code. `clamp` on the code takes it to a display size that
+  fills the left of a wide screen; the 72px floor keeps it from shrinking to
+  nothing on a phone and the 220px ceiling keeps it from overflowing a large one.
+  --acc-text, not --acc: at this size it is read as text, and #FFC800 on the light
+  background is unreadable (decisions 11 and 27).
+*/
+.label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 500;
+  color: var(--fg-3);
+}
+
+.code {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(72px, 16vw, 220px);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: var(--acc-text);
 }
 
 .body {

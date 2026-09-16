@@ -99,7 +99,7 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
 test('an unknown path shows the 404, chrome and all, and offers a way back', async ({ page }) => {
   await page.goto('/no-such-page')
 
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('/not-found')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('[404]')
   await expect(page.locator('meta[name="robots"][content="noindex"]')).toHaveCount(1)
 
   // Exactly one viewport tall, so nothing scrolls — which is also why the
