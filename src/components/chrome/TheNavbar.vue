@@ -352,6 +352,11 @@ watch(lang, async () => {
 .menu-btn {
   width: 36px;
   height: 36px;
+  /* A button ships a 1px 6px padding from the browser, and box-sizing:
+     border-box, which leaves a 22px content box — narrow enough that a 30px
+     icon gets shrunk by the flex layout. Zero it and the icon has the full
+     34px. */
+  padding: 0;
   border-radius: 10px;
   background: var(--acc);
   color: var(--on-acc);
