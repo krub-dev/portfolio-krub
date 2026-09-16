@@ -10,6 +10,9 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView,
+    // The route that owns the hero wrapper. usePastHero reads this to know
+    // whether there is a hero to scroll past at all.
+    meta: { hero: true },
   },
 ]
 
@@ -23,6 +26,14 @@ if (import.meta.env.DEV) {
     component: () => import('../views/PreviewView.vue'),
   })
 }
+
+// Last, so it only catches what nothing above matched. Lazy-loaded: the 404 is
+// rarely reached and has no business in the initial bundle.
+routes.push({
+  path: '/:pathMatch(.*)*',
+  name: 'not-found',
+  component: () => import('../views/NotFoundView.vue'),
+})
 
 export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

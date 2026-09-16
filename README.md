@@ -120,6 +120,12 @@ Cache headers are split by one question: **does the filename change when the con
 - `/` is never cached hard. `index.html` is what points at the current bundle; a stale copy pins
   a visitor to an old build.
 
+The one rewrite sends every unmatched path to `/`, so the SPA's own 404 route renders instead of
+Vercel's plain-text page. Vercel checks the filesystem **before** applying a rewrite, so
+`/assets`, `/icons` and `/fonts` are served normally. The catch-all answers HTTP 200 with the 404
+content — a soft 404 — which is the trade-off for keeping the site's chrome (grid, cursor,
+navbar, footer) around the message. A real 404 status would need edge middleware.
+
 Plus `nosniff`, `Referrer-Policy` and `X-Frame-Options` on everything.
 
 ## Licence

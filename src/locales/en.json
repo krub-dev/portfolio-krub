@@ -27,7 +27,8 @@
   "actions": {
     "cv": "Download CV (PDF)",
     "talk": "Let's talk ↗",
-    "projects": "/projects"
+    "projects": "/projects",
+    "home": "Back home"
   },
   "time": {
     "now": "now"
@@ -49,6 +50,9 @@
     "year": "Year",
     "stack": "Stack",
     "image": "IMAGE"
+  },
+  "notFound": {
+    "title": "/not-found"
   },
   "a11y": {
     "toggleTheme": "Switch colour theme",

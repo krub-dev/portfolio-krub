@@ -27,7 +27,8 @@
   "actions": {
     "cv": "Descargar CV (PDF)",
     "talk": "Let's talk ↗",
-    "projects": "/proyectos"
+    "projects": "/proyectos",
+    "home": "Volver al inicio"
   },
   "time": {
     "now": "hoy"
@@ -49,6 +50,9 @@
     "year": "Año",
     "stack": "Stack",
     "image": "IMAGEN"
+  },
+  "notFound": {
+    "title": "/no-encontrada"
   },
   "a11y": {
     "toggleTheme": "Cambiar de tema",

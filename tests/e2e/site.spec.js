@@ -96,6 +96,20 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
   await expect(card).toBeFocused()
 })
 
+test('an unknown path shows the 404, chrome and all, and offers a way back', async ({ page }) => {
+  await page.goto('/no-such-page')
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('/not-found')
+
+  // The footer and the lemon are on screen from the first frame on a route with
+  // no hero: there is no scroll to trigger their entrance (usePastHero).
+  await expect(page.locator('footer')).toHaveClass(/shown/)
+
+  const back = page.getByRole('link', { name: 'Back home' })
+  await back.click()
+  await expect(page).toHaveURL('/')
+})
+
 test('theme and language survive a reload', async ({ page }) => {
   await page.goto('/')
   const html = page.locator('html')

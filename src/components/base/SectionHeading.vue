@@ -12,15 +12,18 @@ defineProps({
   index: { type: String, default: null }, // '00'…'03', or null for no number
   title: { type: String, required: true }, // already translated
   count: { type: Number, default: null }, // yellow superscript, projects only
+  // Sections are h2 under the hero's h1. A page that has no hero — the 404 —
+  // has nothing above, so its heading is the h1.
+  level: { type: String, default: 'h2' },
 })
 </script>
 
 <template>
   <div class="heading">
     <span v-if="index" class="index" aria-hidden="true">[{{ index }}]</span>
-    <h2 class="title">
+    <component :is="level" class="title">
       {{ title }}<sup v-if="count !== null" class="count">{{ count }}</sup>
-    </h2>
+    </component>
   </div>
 </template>
 

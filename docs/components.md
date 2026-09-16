@@ -49,6 +49,8 @@ App
 ├─ ProjectModal
 │   ├─ MediaCarousel
 │   └─ SpecList
+├─ NotFoundView         (the 404 route)
+│   └─ SectionHeading
 └─ TheFooter
     └─ LiveClock
 ```
@@ -64,11 +66,13 @@ App
 | `shape` | `'pill' \| 'square'` | `'pill'` | radius 999 / radius 10–12 |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 14 / 15–16 / 18–19px |
 | `mono` | boolean | `false` | uses JetBrains Mono |
-| `href` | string | — | renders an `<a>` when present, a `<button>` otherwise |
+| `href` | string | — | external link; renders an `<a>` |
+| `to` | string | — | internal route; renders a `RouterLink`, so no reload |
 | `external` | boolean | `false` | adds `target="_blank" rel="noopener"` |
 | `magnetic` | boolean | `false` | opts into magnetic hover |
 
-Default slot: the content. Emits `click`.
+Renders a `<button>` when neither `to` nor `href` is given. Default slot: the content. Emits
+`click`.
 
 ### SectionHeading
 | Prop | Type | Notes |
@@ -76,6 +80,7 @@ Default slot: the content. Emits `click`.
 | `index` | string \| null | `'00'`…`'03'`; `null` draws no giant number |
 | `title` | string | already translated, e.g. `/projects` |
 | `count` | number \| null | yellow superscript (projects only) |
+| `level` | string | heading level, defaults to `'h2'`; the 404 passes `'h1'` |
 
 ### TechIcon
 `name`, `src`, `invertOnDark` (boolean). Paints the 44px tile; with `invertOnDark` the SVG
@@ -184,7 +189,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) |
 | `useFooterHeight(el)` | measures the footer and maintains `--footer-h` |
 | `useElementHeight(el, prop)` | the mechanism behind that, shared with the navbar's `--navbar-h` |
-| `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it |
+| `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it, and it is true from the start on a route with no hero (the 404) |
 | `useBodyScrollLock(active)` | locks scrolling while the modal is open |
 
 One single `requestAnimationFrame` drives everything that follows the mouse (cursor, lemon

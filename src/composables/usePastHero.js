@@ -1,4 +1,5 @@
 import { computed, onUnmounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { useScroll } from './useScroll'
 
@@ -37,6 +38,7 @@ function measure(el) {
 
 export function usePastHero() {
   const { y } = useScroll()
+  const route = useRoute()
 
   if (consumers === 0) {
     const el = document.querySelector('[data-hero-wrap]')
@@ -59,11 +61,19 @@ export function usePastHero() {
   })
 
   /*
-    The fallback matters: a route without a hero (the 404 page, when it exists)
-    has no wrapper to measure, and leaving the threshold at 0 would mean the
-    footer is in from the first frame there.
+    The route says whether there is a hero at all, rather than the measured
+    value: `heroBottom` is 0 both when the route has no wrapper (the 404) and
+    for the moment before the wrapper has been measured, and those two want
+    opposite answers. On the 404 the footer and the lemon are wanted on screen
+    from the first frame — the page is one viewport tall and does not scroll, so
+    waiting for a movement that never comes would leave both hidden and the
+    strip App.vue reserves for the footer empty. On a route with a hero, the
+    line is the wrapper's bottom, with a fraction of the viewport as the value
+    until the measurement lands.
   */
-  return computed(() =>
-    heroBottom.value > 0 ? y.value > heroBottom.value : y.value > window.innerHeight * 0.55,
-  )
+  return computed(() => {
+    if (!route.meta.hero) return true
+    const line = heroBottom.value > 0 ? heroBottom.value : window.innerHeight * 0.55
+    return y.value > line
+  })
 }

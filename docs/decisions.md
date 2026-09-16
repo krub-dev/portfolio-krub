@@ -878,3 +878,36 @@ early if the element is gone, so a late resolution after unmount is harmless.
 loads" — and has the same gap in its triggers: it re-measures on resize and on a language change,
 but not on a font load. Left alone for now; the symptom there would be a short gap at the seam
 rather than a clipped control.
+
+### 45. The 404 is a route, and a soft one
+
+**Date:** 2026-09-16 · **Status:** active
+
+The 404 is a real Vue route — `/:pathMatch(.*)*`, lazy-loaded so it stays out of the initial
+bundle — and not a static `404.html`. That way it inherits the whole chrome from `App.vue` (grid,
+navbar, menu, cursor, lemon, footer) and its text goes through `copy.js` and the dictionaries like
+every other string. `SectionHeading` gained a `level` prop so the 404's heading is the page's
+`h1`: a section sits under the hero's `h1`, and this page has no hero above it.
+
+Two consequences worth recording.
+
+**Production needed a rewrite.** Vite's dev server and `preview` fall back to the SPA on their
+own, so the route works locally without touching anything; Vercel does not, so an unknown path was
+answered by Vercel and the router never saw it. A catch-all `rewrites` to `/` sends it to the
+bundle, and it is safe because Vercel checks the filesystem **before** applying a rewrite — the
+assets, fonts and icons are served as files. The cost is the status code: the page is served
+**200 with the 404 content**, a soft 404. A real 404 status with this chrome would need edge
+middleware, more machinery than a portfolio 404 justifies.
+
+**The footer and the lemon arrive on a route with no hero.** `usePastHero` used to decide from
+the measured hero. But `heroBottom` is 0 both when the route has no wrapper and during the moment
+before the wrapper has been measured, and those two want opposite answers. The home route now
+carries `meta: { hero: true }` and the composable reads that: without a hero it returns true from
+the first frame. On the 404 the page is one viewport tall and does not scroll, so a
+scroll-triggered entrance would never fire and would leave the strip `App.vue` reserves for the
+footer empty.
+
+One trap, recorded because it cost time. `BaseButton` first rendered its RouterLink through a
+dynamic `<component :is>`, and `to` never reached the component: the anchor came out with no
+`href`, so it had no link role and no navigation. Explicit `v-if` branches fixed it and read
+better. The project had never used `RouterLink` before this page.

@@ -50,7 +50,7 @@ section, folded together where they overlapped.
   visitors' IPs to Google.
 - [x] **Remove the navbar shadow.** The compact capsule casts `0 14px 40px rgba(0,0,0,.28)`
   (`TheNavbar.vue`). A design call, not a bug.
-- [ ] **A real 404 page.** An unknown path falls through to Vercel's plain text. It should be the
+- [x] **A real 404 page.** An unknown path falls through to Vercel's plain text. It should be the
   site's own: the grid, the type, the cursor, and a way back to the top of the page.
   Responsive. A second route also puts the router to the use it was wired up for.
 - [ ] **Update Vercel's DNS records.** The domain answers on the legacy records and Vercel says

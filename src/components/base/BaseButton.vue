@@ -2,9 +2,10 @@
 /*
   Every button and button-shaped link on the site.
 
-  Renders an <a> when given `href`, a <button> otherwise, so a link stays a
-  link for keyboard and screen-reader users instead of being a div that
-  happens to be clickable.
+  Renders a <button> by default, an <a> when given `href`, and a RouterLink when
+  given `to` — so an internal link is a real SPA navigation, and a link is always
+  a real link for keyboard and screen-reader users rather than a div that happens
+  to be clickable.
 
   Sizes map to real instances in the design spec:
     sm  14px  navbar CTA
@@ -15,33 +16,72 @@
   sections override the padding in their own scoped styles rather than the
   scale growing a size for each one.
 */
-defineProps({
+import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
+
+const props = defineProps({
   variant: { type: String, default: 'outline' }, // 'solid' | 'outline'
   shape: { type: String, default: 'pill' }, //     'pill' | 'square'
   size: { type: String, default: 'md' }, //        'sm' | 'md' | 'lg'
   mono: { type: Boolean, default: false },
   href: { type: String, default: null },
+  to: { type: String, default: null }, // internal route, navigated without a reload
   external: { type: Boolean, default: false },
   magnetic: { type: Boolean, default: false },
 })
 
-defineEmits(['click'])
+const emit = defineEmits(['click'])
+
+const classes = computed(() => [
+  `v-${props.variant}`,
+  `s-${props.shape}`,
+  `z-${props.size}`,
+  { mono: props.mono },
+])
+
+const magneticAttr = computed(() => (props.magnetic ? '' : undefined))
 </script>
 
+<!--
+  Three elements rather than one `<component :is>`: the dynamic form rendered
+  the RouterLink without the `to` reaching it, and the explicit branches are
+  easier to read anyway. Order matters — `to` wins over `href` over a button.
+-->
 <template>
-  <component
-    :is="href ? 'a' : 'button'"
-    :href="href || undefined"
-    :type="href ? undefined : 'button'"
-    :target="href && external ? '_blank' : undefined"
-    :rel="href && external ? 'noopener' : undefined"
-    :data-magnetic="magnetic ? '' : undefined"
+  <RouterLink
+    v-if="to"
+    :to="to"
     class="btn"
-    :class="[`v-${variant}`, `s-${shape}`, `z-${size}`, { mono }]"
-    @click="$emit('click', $event)"
+    :class="classes"
+    :data-magnetic="magneticAttr"
+    @click="emit('click', $event)"
   >
     <slot />
-  </component>
+  </RouterLink>
+
+  <a
+    v-else-if="href"
+    :href="href"
+    :target="external ? '_blank' : undefined"
+    :rel="external ? 'noopener' : undefined"
+    class="btn"
+    :class="classes"
+    :data-magnetic="magneticAttr"
+    @click="emit('click', $event)"
+  >
+    <slot />
+  </a>
+
+  <button
+    v-else
+    type="button"
+    class="btn"
+    :class="classes"
+    :data-magnetic="magneticAttr"
+    @click="emit('click', $event)"
+  >
+    <slot />
+  </button>
 </template>
 
 <style scoped>

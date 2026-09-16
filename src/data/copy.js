@@ -66,6 +66,17 @@ export const copy = {
     },
   },
 
+  // The 404 page. The title and the button label are interface strings and live
+  // in src/locales/; this is the sentence under them.
+  notFound: {
+    en: {
+      body: 'That path leads nowhere — but the rest of the site is still there.',
+    },
+    es: {
+      body: 'Ese camino no lleva a ningún sitio, pero el resto de la web sigue en pie.',
+    },
+  },
+
   // What Limonacho says when you poke him. The bubble hides itself after a few
   // seconds; turn the whole mascot off in config.js.
   lemon: {
