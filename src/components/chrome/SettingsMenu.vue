@@ -100,8 +100,8 @@ onUnmounted(() => {
 }
 
 .trigger svg {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
 }
 
 .trigger:hover,
@@ -111,8 +111,8 @@ onUnmounted(() => {
 }
 
 /* Hangs under the trigger, right-aligned, with a gap that clears the compact
-   capsule's padding so it does not read as glued to the bar. No shadow — the
-   border is enough, and nothing around the bar has one. */
+   capsule's padding so it does not read as glued to the bar. Same translucent
+   surface and blur as the capsule, no shadow. */
 .panel {
   position: absolute;
   top: calc(100% + 16px);
@@ -121,9 +121,10 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 8px;
+  padding: 5px 8px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  backdrop-filter: blur(14px);
 }
 </style>
