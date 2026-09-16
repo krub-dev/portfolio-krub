@@ -942,6 +942,10 @@ Four things only showed up once the route was opened on a phone and on a preview
   removes it on unmount: the server answers 200, so without it a crawler would treat any unknown
   URL as a real page. It also inherits `index.html`'s `canonical`, which points at `/`; the
   noindex keeps the URL out of the index regardless.
+- **The scroll indicator pointed at a scroll that does not exist.** `ScrollProgress` — the rail
+  and the `Scroll` label on the right edge — is decorative and says nothing a scrollbar does not.
+  The 404 has neither scroll nor scrollbar, so it is gated on `route.meta.hero` too, alongside
+  the lemon.
 
 The last two are the kind of thing that only surfaces on a route that is not the one everything
 was built around.

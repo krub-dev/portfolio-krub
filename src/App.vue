@@ -65,7 +65,12 @@ function goTop() {
       @go-top="goTop"
     />
 
-    <ScrollProgress />
+    <!--
+      The scroll indicator, like Limonacho further down, belongs to a page you
+      scroll. On the 404 there is nothing to scroll and no scrollbar, so a rail
+      and a "Scroll" label would be pointing at something that is not there.
+    -->
+    <ScrollProgress v-if="route.meta.hero" />
     <CursorFx />
 
     <RouterView />

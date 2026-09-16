@@ -113,6 +113,9 @@ test('an unknown path shows the 404, chrome and all, and offers a way back', asy
   // Limonacho belongs to the hero, and this route has none.
   await expect(page.locator('.pet')).toHaveCount(0)
 
+  // Nor does it have the scroll rail: there is nothing to scroll here.
+  await expect(page.locator('.indicator')).toHaveCount(0)
+
   // The shared chrome points at the home page, not back at this route.
   await expect(page.locator('.brand')).toHaveAttribute('href', '/#top')
   await expect(page.locator('.link').first()).toHaveAttribute('href', /^\/#/)
