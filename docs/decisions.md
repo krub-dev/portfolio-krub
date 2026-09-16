@@ -1021,9 +1021,9 @@ The controls are handed over when the capsule compacts. At the top they sit in t
 what keeps it from being just a logo; once it compacts they move out of it — to a settings button
 on desktop, to the menu on a phone — and moving back up brings them back.
 
-On desktop the compact bar folds them into one 36×36 cog button that opens them in a panel
-(3.19); on a phone it keeps only the brand and the menu button, and the menu's header carries them
-from then on.
+On desktop the compact bar folds them into one 36×36 four-dot button — the mobile menu button's
+icon — that opens them in a panel (3.19); on a phone it keeps only the brand and the menu button,
+and the menu's header carries them from then on.
 
 The measurement changed twice for this. It now applies the compact layout for one frame instead of
 hiding one element, so it measures the whole handed-over strip; and it measures a second number,
