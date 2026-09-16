@@ -911,3 +911,31 @@ One trap, recorded because it cost time. `BaseButton` first rendered its RouterL
 dynamic `<component :is>`, and `to` never reached the component: the anchor came out with no
 `href`, so it had no link role and no navigation. Explicit `v-if` branches fixed it and read
 better. The project had never used `RouterLink` before this page.
+
+### 46. What the 404 needed once it was on a real deploy
+
+**Date:** 2026-09-16 · **Status:** active · **Follow-up to decision 45**
+
+Four things only showed up once the route was opened on a phone and on a preview deployment.
+
+- **The page scrolled, and that was enough to shrink the navbar.** `.app` had
+  `min-height: 100svh` on the *content* box **plus** `padding-bottom: var(--footer-h)`, so a page
+  meant to fit the viewport was one footer taller. The overflow — about 50px on desktop, more on
+  a phone with the safe-area inset — crossed the navbar's 60px compact threshold. `.app` now
+  declares `box-sizing: border-box`, so the reserved footer strip counts inside the `100svh` and
+  the 404 fits exactly. Nothing changes on the home page: its content is far taller than the
+  viewport, so `min-height` was never in play.
+- **Limonacho makes no sense on a route with no hero.** He is gated on `route.meta.hero` in
+  `App.vue` now. The footer stays, and `usePastHero` brings it in from the first frame.
+- **The chrome's links pointed at anchors that only exist on the home page.** From `/whatever`,
+  `#projects` simply appended the hash to the 404 URL. The brand and the links in the navbar and
+  the mobile menu now use absolute `/#top` and `/#id`. On the home page the path is unchanged, so
+  the browser still treats the click as an ordinary in-page jump — no reload. The e2e assertion on
+  the active link's `href` moved with it.
+- **A soft 404 has to say what it is.** `NotFoundView` adds a `robots: noindex` meta on mount and
+  removes it on unmount: the server answers 200, so without it a crawler would treat any unknown
+  URL as a real page. It also inherits `index.html`'s `canonical`, which points at `/`; the
+  noindex keeps the URL out of the index regardless.
+
+The last two are the kind of thing that only surfaces on a route that is not the one everything
+was built around.

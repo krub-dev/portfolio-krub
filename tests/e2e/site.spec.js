@@ -63,7 +63,7 @@ test.describe('chrome reacts to scrolling', () => {
         window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100)
       }, id)
       await expect(active).toHaveCount(1)
-      await expect(active).toHaveAttribute('href', `#${id}`)
+      await expect(active).toHaveAttribute('href', `/#${id}`)
     }
   })
 })
@@ -100,14 +100,29 @@ test('an unknown path shows the 404, chrome and all, and offers a way back', asy
   await page.goto('/no-such-page')
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('/not-found')
+  await expect(page.locator('meta[name="robots"][content="noindex"]')).toHaveCount(1)
 
-  // The footer and the lemon are on screen from the first frame on a route with
-  // no hero: there is no scroll to trigger their entrance (usePastHero).
+  // Exactly one viewport tall, so nothing scrolls — which is also why the
+  // navbar never goes compact and the footer is in from the first frame.
+  const viewport = page.viewportSize().height
+  const documentHeight = await page.evaluate(() => document.documentElement.scrollHeight)
+  expect(documentHeight).toBeLessThanOrEqual(viewport + 1)
+  await expect(page.locator('.capsule')).not.toHaveClass(/compact/)
   await expect(page.locator('footer')).toHaveClass(/shown/)
+
+  // Limonacho belongs to the hero, and this route has none.
+  await expect(page.locator('.pet')).toHaveCount(0)
+
+  // The shared chrome points at the home page, not back at this route.
+  await expect(page.locator('.brand')).toHaveAttribute('href', '/#top')
+  await expect(page.locator('.link').first()).toHaveAttribute('href', /^\/#/)
 
   const back = page.getByRole('link', { name: 'Back home' })
   await back.click()
   await expect(page).toHaveURL('/')
+
+  // The noindex tag is scoped to the view; leaving the route removes it.
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0)
 })
 
 test('theme and language survive a reload', async ({ page }) => {

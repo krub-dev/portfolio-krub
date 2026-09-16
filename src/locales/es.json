@@ -52,7 +52,7 @@
     "image": "IMAGEN"
   },
   "notFound": {
-    "title": "/no-encontrada"
+    "title": "/not-found"
   },
   "a11y": {
     "toggleTheme": "Cambiar de tema",

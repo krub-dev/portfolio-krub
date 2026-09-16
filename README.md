@@ -124,7 +124,8 @@ The one rewrite sends every unmatched path to `/`, so the SPA's own 404 route re
 Vercel's plain-text page. Vercel checks the filesystem **before** applying a rewrite, so
 `/assets`, `/icons` and `/fonts` are served normally. The catch-all answers HTTP 200 with the 404
 content — a soft 404 — which is the trade-off for keeping the site's chrome (grid, cursor,
-navbar, footer) around the message. A real 404 status would need edge middleware.
+navbar, footer) around the message. A real 404 status would need edge middleware, so the 404 view
+adds its own `robots: noindex` meta instead: an unknown URL is not indexed despite the 200.
 
 Plus `nosniff`, `Referrer-Policy` and `X-Frame-Options` on everything.
 

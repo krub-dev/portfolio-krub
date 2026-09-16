@@ -11,7 +11,7 @@
   src/data/copy.js and the title and button label from src/locales/, like every
   other string in the project.
 */
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../components/base/BaseButton.vue'
@@ -23,6 +23,26 @@ const { t } = useI18n()
 const { lang } = useLang()
 
 const body = computed(() => copy.notFound[lang.value].body)
+
+/*
+  The page is served with a 200 — a soft 404, see decisions.md — so it has to
+  say what it is: without this a crawler would treat any unknown URL as a real
+  page. The tag lives only while this view is mounted, since the head is shared
+  and it must not outlive the route.
+*/
+let robots = null
+
+onMounted(() => {
+  robots = document.createElement('meta')
+  robots.name = 'robots'
+  robots.content = 'noindex'
+  document.head.appendChild(robots)
+})
+
+onUnmounted(() => {
+  robots?.remove()
+  robots = null
+})
 </script>
 
 <template>

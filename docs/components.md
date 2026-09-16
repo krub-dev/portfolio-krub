@@ -148,7 +148,9 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 ### TheNavbar
 Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
 handled directly through their composables. Sections come from `src/data/sections.js`, labels
-from the dictionary. Owns the compact scroll state and the natural-width measurement.
+from the dictionary. Owns the compact scroll state and the natural-width measurement. Its links
+are absolute (`/#id`, `/#top`), so the shared chrome works from the 404, where the sections do not
+exist; on the home page the path is unchanged and the jump stays in-page.
 
 ### TheMobileMenu
 Props: `open`, `activeId`. Emits `close`, `go-top`. Sections and socials come from `src/data`.

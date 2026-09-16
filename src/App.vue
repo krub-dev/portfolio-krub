@@ -15,6 +15,7 @@
   element is nearest the cursor. One owner, one loop.
 */
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 import BackgroundGrid from './components/chrome/BackgroundGrid.vue'
 import CursorFx from './components/chrome/CursorFx.vue'
@@ -28,6 +29,7 @@ import { useScrollSpy, useSectionReached } from './composables/useScrollSpy'
 import { config, sections } from './data'
 
 const menuOpen = ref(false)
+const route = useRoute()
 
 useMagnetic()
 
@@ -68,7 +70,12 @@ function goTop() {
 
     <RouterView />
 
-    <LemonPet v-if="config.showLemon" />
+    <!--
+      Limonacho belongs to the hero, which only the home route has. On the 404
+      there is nothing for him to sit next to, so he is left out; the footer
+      stays, and usePastHero brings it in from the first frame there.
+    -->
+    <LemonPet v-if="config.showLemon && route.meta.hero" />
     <TheFooter @go-top="goTop" />
   </div>
 </template>
@@ -81,6 +88,13 @@ function goTop() {
      against the other, and they stop moving together when the toolbar
      collapses. The rest of the site is already on svh. */
   min-height: 100svh;
+  /*
+    border-box so the reserved footer strip counts inside that 100svh. Without
+    it the content box gets a full 100svh AND the padding is added on top, so a
+    page that is meant to fit the viewport — the 404 — is one footer taller and
+    scrolls. That scroll was enough to trip the navbar into its compact state.
+  */
+  box-sizing: border-box;
   overflow-x: hidden;
   padding-bottom: var(--footer-h, 52px);
 }

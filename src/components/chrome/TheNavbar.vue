@@ -102,7 +102,7 @@ watch(lang, async () => {
 <template>
   <header ref="bar" class="bar">
     <div ref="capsule" class="capsule" :class="{ compact }" :style="{ maxWidth }" data-motion="decorative">
-      <a class="brand" href="#top" aria-label="krub.dev">
+      <a class="brand" href="/#top" aria-label="krub.dev">
         <BrandLogo :height="compact ? 18 : 22" class="brand-logo" />
         <span class="brand-dev">.dev</span>
       </a>
@@ -110,12 +110,18 @@ watch(lang, async () => {
       <span class="divider" aria-hidden="true" />
 
       <nav class="links" :aria-label="t('menu.sub')">
+        <!--
+          Absolute `/#id`, not `#id`: the navbar is shared chrome and also
+          renders on the 404, where there are no sections to jump to. On the
+          home page the path is unchanged, so the browser still treats this as
+          a plain in-page jump — no reload.
+        -->
         <a
           v-for="section in sections"
           :key="section.id"
           class="link"
           :class="{ active: section.id === props.activeId }"
-          :href="`#${section.id}`"
+          :href="`/#${section.id}`"
         >
           {{ t(section.labelKey) }}
         </a>

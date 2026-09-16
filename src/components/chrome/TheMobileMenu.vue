@@ -66,11 +66,13 @@ onUnmounted(() => {
     </div>
 
     <nav class="list">
+      <!-- Absolute `/#id`: the panel is chrome and also opens on the 404, where
+           the sections do not exist. On the home page it is a plain jump. -->
       <a
         v-for="section in sections"
         :key="section.id"
         class="row"
-        :href="`#${section.id}`"
+        :href="`/#${section.id}`"
         @click="emit('close')"
       >
         <span class="row-index" :class="{ active: section.id === activeId }">[{{ section.index }}]</span>
