@@ -120,7 +120,7 @@ onUnmounted(() => window.removeEventListener('resize', measure))
   border: 0;
   background: none;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--acc-text);
@@ -132,27 +132,28 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 .who {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .avatar {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   box-sizing: border-box;
   border-radius: 50%;
   /* contain, not cover: the one avatar here is a mark rather than a photograph,
      and cropping a logo cuts away the part that says who it is. */
   object-fit: contain;
-  padding: 4px;
+  padding: 6px;
   background: var(--surface-2);
   border: 1px solid var(--line);
 }
 
-/* The same mono the site uses for every other piece of metadata. */
+/* The same mono the site uses for every other piece of metadata, a step larger
+   than the 10–11px labels: this one is read, not scanned. */
 .name {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--fg-2);
@@ -160,7 +161,7 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 
 .role {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--fg-3);
 }
 </style>

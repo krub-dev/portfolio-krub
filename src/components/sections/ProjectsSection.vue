@@ -66,6 +66,7 @@ const atStart = ref(true)
 const atEnd = ref(false)
 const parked = ref([]) // per card: fully out of the rail, so out of the tab order
 const current = ref(0) // the card the rail is parked on, which touch marks
+const moving = ref(false)
 
 /*
   Which edges to fade. The clip cuts a card off mid-way, and a hard vertical edge
@@ -74,6 +75,11 @@ const current = ref(0) // the card the rail is parked on, which touch marks
   sits on the edge and fading it would eat it.
 */
 const fade = computed(() => {
+  // Both, while it travels. Mid-flight there is a card hanging off each side,
+  // and the rule below only knows where the rail is going: it left one of them
+  // with a hard cut for the whole animation, which is what "it still cuts while
+  // it moves" was.
+  if (moving.value) return 'fade-both'
   if (atStart.value && atEnd.value) return 'none'
   if (atStart.value) return 'fade-right'
   if (atEnd.value) return 'fade-left'
@@ -94,6 +100,17 @@ let index = 0
 let startX = 0
 let startOffset = 0
 let travelled = 0
+let movingTimer = null
+
+/*
+  A little longer than the transition, so the fade covers the whole travel and
+  the settle, and no longer than that.
+*/
+function markMoving() {
+  moving.value = true
+  clearTimeout(movingTimer)
+  movingTimer = setTimeout(() => (moving.value = false), 700)
+}
 
 function paint() {
   if (track.value) track.value.style.transform = `translate3d(${-offset}px, 0, 0)`
@@ -134,6 +151,7 @@ function page(direction) {
   const next = Math.min(Math.max(index + direction, 0), last)
   if (next === index) return
   index = next
+  markMoving()
   sync()
 }
 
@@ -149,6 +167,7 @@ function onPointerDown(event) {
   travelled = 0
   startX = event.clientX
   startOffset = offset
+  markMoving()
   // No curve while the pointer is in charge, or the rail lags behind it.
   track.value.style.transition = 'none'
   viewport.value.style.userSelect = 'none'
@@ -160,12 +179,14 @@ function onPointerMove(event) {
   const delta = event.clientX - startX
   travelled = Math.max(travelled, Math.abs(delta))
   offset = Math.min(Math.max(startOffset - delta, 0), maxOffset)
+  markMoving()
   paint()
 }
 
 function onPointerUp(event) {
   if (!dragging.value) return
   dragging.value = false
+  markMoving()
 
   const rail = track.value
   if (rail) rail.style.transition = ''
@@ -203,7 +224,10 @@ onMounted(() => {
   window.addEventListener('resize', sync, { passive: true })
 })
 
-onUnmounted(() => window.removeEventListener('resize', sync))
+onUnmounted(() => {
+  window.removeEventListener('resize', sync)
+  clearTimeout(movingTimer)
+})
 </script>
 
 <template>

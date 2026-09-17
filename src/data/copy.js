@@ -39,7 +39,7 @@ export const copy = {
 
   about: {
     en: {
-      p1: 'I came from 3D and ended up programming — same thing, fewer twelve-hour renders.',
+      p1: 'I came from 3D and ended up programming: same thing, fewer twelve-hour renders.',
       p2: 'Six years modelling and texturing for games, apps and e-commerce taught me to ship on time and to sweat the details. Now I do the same with REST APIs in Java Spring Boot and Node, relational databases and Vue SPAs.',
       p3: 'From Murcia, living in Barcelona. Looking for a team where I can grow into backend while still poking at odd things in C on weekends.',
     },
@@ -61,7 +61,7 @@ export const copy = {
   // in src/locales/; this is the sentence under them.
   notFound: {
     en: {
-      body: 'That path leads nowhere — but the rest of the site is still there.',
+      body: 'That path leads nowhere, but the rest of the site is still there.',
     },
     es: {
       body: 'Ese camino no lleva a ningún sitio, pero el resto de la web sigue en pie.',

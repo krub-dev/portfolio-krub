@@ -10,18 +10,21 @@
 /**
  * A timeline entry's year range, as the design spec writes it.
  *
- *   { from: '2024', to: null }    -> "2024 — now"    (still going)
- *   { from: '2018', to: '2024' }  -> "2018 — 2024"
+ *   { from: '2024', to: null }    -> "2024 – now"    (still going)
+ *   { from: '2018', to: '2024' }  -> "2018 – 2024"
  *   { from: '2025', to: '2025' }  -> "2025"          (a single year, printed once)
+ *
+ * An en dash between the years, not an em dash: the longer one is a dash of
+ * prose and reads as punctuation inside a range, which is not what it is doing.
  *
  * `nowLabel` is passed in rather than imported so this stays free of i18n —
  * the caller already has `t`, and this file has no business knowing about
  * translations.
  */
 export function formatPeriod(entry, nowLabel) {
-  if (entry.to === null || entry.to === undefined) return `${entry.from} — ${nowLabel}`
+  if (entry.to === null || entry.to === undefined) return `${entry.from} – ${nowLabel}`
   if (entry.to === entry.from) return String(entry.from)
-  return `${entry.from} — ${entry.to}`
+  return `${entry.from} – ${entry.to}`
 }
 
 /**

@@ -38,13 +38,14 @@ This overrides the original spec, which assumed Spanish first.
 
 ---
 
-### 3. The site title is `krub — Fullstack Developer`
+### 3. The site title is `krub · Fullstack Developer`
 
 **Date:** 2026-09-05 · **Status:** active
 
 The design spec never fixed a `<title>`. This one uses the handle rather than the full name
 because the domain, the GitHub account and the logo all read `krub`, and the tab is one more
-place for that to be consistent.
+place for that to be consistent. The separator is a middle dot rather than a dash, the same one the
+footer uses — see decision 62.
 
 ---
 
@@ -1513,3 +1514,35 @@ and it is one line, but the failure mode is worth remembering because it does no
 nothing is visually wrong, the controls are right there, and they only stop working at the scroll
 positions where they overlap the bar. The e2e test reads `elementFromPoint` in the band but clear of
 the capsule, so it fails if the strip ever takes clicks again.
+
+### 62. No em dashes in the copy
+
+**Date:** 2026-09-17 — **Status:** active
+
+The owner reads the em dash as a tell — the thing that makes prose look machine-written — and asked
+for it out of the copy a visitor can see: the `<title>`, the meta and Open Graph descriptions, the
+project copy, the About paragraph, the 404 line, the testimonial and the year ranges in the timeline.
+
+- **Appositives and asides became a colon, a comma or parentheses**, whichever the sentence wanted:
+  "optimised in CI with Sharp: WebP and AVIF", "assets 3D (camisetas, tazas, alfombrillas) de cara a
+  visualizarlos en web". The `<title>` and `og:title` take the middle dot the footer already uses.
+- **The year ranges got an en dash instead.** `2018 – 2024` is a range, and the em dash was doing
+  punctuation work there that it was never meant for. The en dash is the correct character and half
+  the length, so it does not read as the same mark.
+- **The comments and the docs keep theirs.** Nobody visiting the site reads them, they are full of em
+  dashes, and rewriting them would be a diff of hundreds of lines with nothing to show for it. The
+  rule is about the copy.
+
+### 63. The projects rail fades both edges while it travels
+
+**Date:** 2026-09-17 — **Status:** active
+
+The fade on the cut edge was decided by where the rail *is* — right at the start, left at the end,
+both in the middle — and the owner still saw a card cut in half while it moved. The rule only knows
+the destination: mid-flight there is a card hanging off **each** side, and the side the rail is
+travelling towards is not faded yet, so it stayed cut for the whole 0.55s of the animation.
+
+Both edges now fade from the moment the rail starts moving until a little after it settles. The timer
+is a hair longer than the transition, and it is re-armed on every frame of a drag, so a long drag
+stays covered. It is the kind of thing only the animation shows: at rest, and in a screenshot, the
+position rule looks correct.

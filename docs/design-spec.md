@@ -349,7 +349,9 @@ they just dragged.
 
 **The edge the clip cuts gets a soft one.** The viewport carries a `mask-image` fade on whichever side
 the rail continues on — the right at the start, the left at the end, both in the middle, none when
-everything fits. A hard vertical edge where a card is cut reads as a mistake rather than as "there is
+everything fits — **and both while it is travelling**, because mid-flight there is a card hanging off
+each side and the position rule only knows the destination, so it left one of them cut for the length
+of the animation. A hard vertical edge where a card is cut reads as a mistake rather than as "there is
 more this way", and the side with nothing to continue is left alone: at the start the first card's
 rounded corner sits on the edge, and fading it would eat it. **The fade is the peek**, derived from the
 same two variables the card width is, so it stops exactly where the card you are reading begins. A flat
@@ -470,8 +472,9 @@ uppercase, `--fg-3`) instead of a heading. See decisions.md 56.
 No cards. As a box with a border the quotes read as another grid of projects sitting under the
 projects — the same shape twice, saying different things — so each entry is text: the quote
 (`clamp(18px,2vw,23px)`, `line-height:1.5`, `--fg`, 62ch, `text-wrap:pretty`) and, under it, a mono
-line — the name in `--fg-2` and the company in `--fg-3` (`11px`, tracked/uppercase), with a 28px
-avatar circle when there is one. Entries are separated by `--line` rules, like the timeline in About.
+line — the name in `--fg-2` and the company in `--fg-3` (`13px`, tracked/uppercase, a step larger
+than the 10–11px labels because this one is read rather than scanned), with a `40px` avatar circle when
+there is one. Entries are separated by `--line` rules, like the timeline in About.
 
 **A long quote is clamped to three lines**, with a mono uppercase "Read more" under it in `--acc-text`
 and underlined — the only inline action on the site, so it carries the affordance itself. The button

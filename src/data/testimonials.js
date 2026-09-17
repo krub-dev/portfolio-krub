@@ -18,13 +18,13 @@ export const testimonials = [
     avatar: '/assets/img/creandomientras.svg',
     en: {
       quote:
-        'I’m delighted with the site Kiko built for my macramé project: he put on screen what I had in my head. He also left me a simple guide so I can update it myself — photos, texts, the calendar. Thank you for your professionalism, your help and your patience.',
+        'I’m delighted with the site Kiko built for my macramé project: he put on screen what I had in my head. He also left me a simple guide so I can update it myself: photos, texts, the calendar. Thank you for your professionalism, your help and your patience.',
       name: 'Lourdes Campuzano',
       role: 'CREANDOMIENTRAS',
     },
     es: {
       quote:
-        'Estoy encantada con la web que hizo Kiko para mi proyecto de macramé: puso en pantalla lo que yo tenía en la cabeza. Además me dejó una guía sencilla para actualizarla yo misma — fotos, textos, el calendario. Gracias por tu profesionalidad, tu ayuda y tu paciencia.',
+        'Estoy encantada con la web que hizo Kiko para mi proyecto de macramé: puso en pantalla lo que yo tenía en la cabeza. Además me dejó una guía sencilla para actualizarla yo misma: fotos, textos, el calendario. Gracias por tu profesionalidad, tu ayuda y tu paciencia.',
       name: 'Lourdes Campuzano',
       role: 'CREANDOMIENTRAS',
     },

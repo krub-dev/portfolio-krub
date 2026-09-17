@@ -43,7 +43,7 @@ export const projects = [
       lead: "Public site and self-service admin panel for CreandoMientras, Lourdes Campuzano's handmade macramé business.",
       body: 'Vue 3 SPA with Vue Router and its own CSS design system. Content is edited at /admin through a self-hosted Sveltia CMS: every save commits JSON to the repo and Vercel ships in about a minute, so there’s history and rollback with no server to maintain.',
       body2:
-        'Events sort themselves by comparing dates, and images are optimised in CI with Sharp — WebP and AVIF at three widths, hash-skipping anything unchanged. Contact form on Web3Forms with honeypot, hCaptcha and GDPR consent. PageSpeed 99 on desktop, 100 on accessibility, best practices and SEO.',
+        'Events sort themselves by comparing dates, and images are optimised in CI with Sharp: WebP and AVIF at three widths, hash-skipping anything unchanged. Contact form on Web3Forms with honeypot, hCaptcha and GDPR consent. PageSpeed 99 on desktop, 100 on accessibility, best practices and SEO.',
     },
     es: {
       name: 'CreandoMientras',
@@ -57,7 +57,7 @@ export const projects = [
       lead: 'Web pública y panel de autogestión para CreandoMientras, el negocio de macramé artesanal de Lourdes Campuzano.',
       body: 'SPA en Vue 3 con Vue Router y un design system propio en CSS. Los contenidos se editan desde /admin con Sveltia CMS autoalojado: cada guardado hace commit de JSON al repositorio y Vercel despliega en un minuto, así que hay historial y rollback sin mantener servidor.',
       body2:
-        'Los eventos se clasifican solos comparando fechas, y las fotos se optimizan en CI con Sharp — WebP y AVIF en tres anchos, saltando por hash lo que no ha cambiado. Formulario con Web3Forms, honeypot, hCaptcha y consentimiento RGPD. PageSpeed 99 en escritorio y 100 en accesibilidad, best practices y SEO.',
+        'Los eventos se clasifican solos comparando fechas, y las fotos se optimizan en CI con Sharp: WebP y AVIF en tres anchos, saltando por hash lo que no ha cambiado. Formulario con Web3Forms, honeypot, hCaptcha y consentimiento RGPD. PageSpeed 99 en escritorio y 100 en accesibilidad, best practices y SEO.',
     },
   },
   {
@@ -85,7 +85,7 @@ export const projects = [
       repoLabel: '/repo',
       liveLabel: '/docs ↗',
       summary: 'Java Spring Boot REST API to manage and customise 3D assets for the web.',
-      lead: 'Java and Spring Boot REST API to manage and customise 3D assets — t-shirts, mugs, mouse pads — for web visualisation.',
+      lead: 'Java and Spring Boot REST API to manage and customise 3D assets (t-shirts, mugs, mouse pads) for web visualisation.',
       body: 'Domain model with users, admins, customers, assets, scenes and designs: an authenticated user creates scenes, links assets and defines designs on specific parts of a model, with colours, materials, logos and text. Spring Data JPA over MySQL, DTOs per entity, pagination and search, plus centralised error handling.',
       body2:
         'Spring Security with role-based access, hashed passwords, Swagger/OpenAPI docs and a Postman collection for the demo. Controller tests with MockMvc and service tests with Mockito. On the roadmap: JWT, cloud image storage, design versioning and the 3D integration on the front end.',
@@ -99,7 +99,7 @@ export const projects = [
       liveLabel: '/docs ↗',
       summary:
         'API REST en Java con Spring Boot para gestionar y personalizar assets 3D en la web.',
-      lead: 'API REST en Java y Spring Boot para gestionar y personalizar assets 3D — camisetas, tazas, alfombrillas — de cara a visualizarlos en web.',
+      lead: 'API REST en Java y Spring Boot para gestionar y personalizar assets 3D (camisetas, tazas, alfombrillas) de cara a visualizarlos en web.',
       body: 'Modelo de dominio con usuarios, admins, clientes, assets, escenas y diseños: un usuario autenticado crea escenas, asocia assets y define diseños por partes concretas del modelo, con colores, materiales, logos y textos. Spring Data JPA sobre MySQL, DTOs por entidad, paginación y búsqueda, y manejo de errores centralizado.',
       body2:
         'Spring Security con acceso por rol, contraseñas hasheadas, documentación en Swagger/OpenAPI y colección de Postman para la demo. Tests de controladores con MockMvc y de servicios con Mockito. En la hoja de ruta: JWT, almacenamiento de imágenes en la nube, versionado de diseños y la integración 3D en el front.',

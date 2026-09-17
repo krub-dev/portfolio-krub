@@ -4,12 +4,12 @@ import { formatPeriod, formatUrl, wrapIndex } from '../../src/utils/format'
 
 describe('formatPeriod', () => {
   it('uses the "now" label when the period is still open', () => {
-    expect(formatPeriod({ from: '2024', to: null }, 'now')).toBe('2024 — now')
-    expect(formatPeriod({ from: '2024', to: null }, 'hoy')).toBe('2024 — hoy')
+    expect(formatPeriod({ from: '2024', to: null }, 'now')).toBe('2024 – now')
+    expect(formatPeriod({ from: '2024', to: null }, 'hoy')).toBe('2024 – hoy')
   })
 
   it('prints a closed range with both years', () => {
-    expect(formatPeriod({ from: '2018', to: '2024' }, 'now')).toBe('2018 — 2024')
+    expect(formatPeriod({ from: '2018', to: '2024' }, 'now')).toBe('2018 – 2024')
   })
 
   it('prints a single year once, not as a range', () => {
@@ -17,7 +17,7 @@ describe('formatPeriod', () => {
   })
 
   it('treats a missing `to` the same as an explicit null', () => {
-    expect(formatPeriod({ from: '2026' }, 'now')).toBe('2026 — now')
+    expect(formatPeriod({ from: '2026' }, 'now')).toBe('2026 – now')
   })
 })
 
