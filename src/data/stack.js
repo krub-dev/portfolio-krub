@@ -1,18 +1,22 @@
 /*
-  The four technology groups of the Stack section, in display order.
+  The six technology groups of the Stack section, in display order. Six, in a
+  two-column grid, so the AI block can be a block of its own instead of three
+  letters buried in a title — it is the one thing a reader looks for first.
 
-  Group labels come from the dictionary (stack.g1…g4) because they are
+  Group labels come from the dictionary (stack.g1…g6) because they are
   interface words, not prose — they happen to be identical in both languages
   today, but going through i18n means that stays a one-line change.
 
   Per technology:
-    name          Shown in `alt` and `title`. The only text a screen reader gets.
+    name          Shown in `alt` and in the readout the pointer drives. The only
+                  text a screen reader gets.
     icon          Path under public/. Literal string, no bundler import —
                   see docs/decisions.md on why assets live in public/.
     invertOnDark  For dark monochrome logos (Express, Prisma, Three.js, GitHub,
-                  Linux) that would vanish against --surface-2. These render at
-                  28px inside the 44px tile and get inverted in dark theme only.
-                  Everything else is full-colour and renders at 44px.
+                  Linux, Framer, OpenCode) that would vanish against
+                  --surface-2. These render at 40px inside the 64px tile and get
+                  inverted in dark theme only. Everything else keeps its own
+                  colours, which is what the spotlight brings back.
 
   Adding a technology: drop the SVG in public/icons/<name>/ and add a line.
 */
@@ -46,10 +50,18 @@ export const stack = [
       { name: 'CSS3', icon: '/icons/css3/css3-original.svg', invertOnDark: false },
       { name: 'Vite', icon: '/icons/vitejs/vitejs-original.svg', invertOnDark: false },
       { name: 'Three.js', icon: '/icons/threejs/threejs-original.svg', invertOnDark: true },
+      { name: 'GSAP', icon: '/icons/gsap/gsap-original.svg', invertOnDark: false },
     ],
   },
   {
     labelKey: 'stack.g4',
+    items: [
+      { name: 'Figma', icon: '/icons/figma/figma-original.svg', invertOnDark: false },
+      { name: 'Framer', icon: '/icons/framer/framer-original.svg', invertOnDark: true },
+    ],
+  },
+  {
+    labelKey: 'stack.g5',
     items: [
       { name: 'Git', icon: '/icons/git/git-original.svg', invertOnDark: false },
       { name: 'GitHub', icon: '/icons/github/github-original.svg', invertOnDark: true },
@@ -59,6 +71,13 @@ export const stack = [
       { name: 'IntelliJ IDEA', icon: '/icons/intellij/intellij-original.svg', invertOnDark: false },
       { name: 'Vim', icon: '/icons/vim/vim-plain.svg', invertOnDark: false },
       { name: 'Linux', icon: '/icons/linux/linux-plain.svg', invertOnDark: true },
+    ],
+  },
+  {
+    labelKey: 'stack.g6',
+    items: [
+      { name: 'Claude', icon: '/icons/claude/claude-original.svg', invertOnDark: false },
+      { name: 'OpenCode', icon: '/icons/opencode/opencode-original.svg', invertOnDark: true },
     ],
   },
 ]

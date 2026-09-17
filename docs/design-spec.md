@@ -17,7 +17,7 @@ vertical order:
 | — | — | Marquee | Yellow band with two looping phrases |
 | 00 | `me` | About | Three paragraphs, experience/education tabs, CV button, photo |
 | 01 | `projects` | Projects | Card grid; clicking a card opens a detail modal |
-| 02 | `stack` | Stack | Four groups of technology icons |
+| 02 | `stack` | Stack | Six groups of technology icons, two per row |
 | — | `testimonials` | Testimonials | Two quotes. **Optional section**, toggled by config |
 | 03 | `contact` | Contact | Large headline, email CTA, three social icons |
 | — | — | Footer | Pinned to the bottom: credit, copyright, TOP button, city and Madrid clock |
@@ -366,28 +366,29 @@ radius 22, background `--surface`, border `--line`.
 
 ### 3.8 Stack
 
-`grid; repeat(auto-fit, minmax(240px,1fr)); gap:32px`. Four groups: Languages, Backend,
-Frontend, Tools & workflow. Each group: an uppercase mono 11px `--fg-3` label with a
-`border-bottom` and `padding-bottom:10px`, and the icons below in `flex-wrap` with `gap:10px`.
+`grid; repeat(2, minmax(0,1fr)); gap:44px 40px`, collapsing to one column at 900px. **Six** groups —
+Languages, Backend & data, Frontend & motion, Design, Tools & workflow, AI — two per row, so the AI
+block is a block of its own and not three letters buried in a title. Each group: an uppercase mono
+13px `--fg-3` label with a `border-bottom` and `padding-bottom:12px`, and the icons below in
+`flex-wrap` with `gap:12px`.
 
-Icon tile: 44×44, radius 10, background `--surface-2`, border `--line`,
-`box-sizing:border-box`. Every logo renders at 28×28, centred — which is what the full-colour ones
-already did (44px with 8px of padding is a 28px box) and what the monochrome ones always did. The
-dark monochrome logos (Express, Prisma, Three.js, GitHub, Linux) would vanish against `--surface-2`
-in the dark theme, so both of their copies carry `[data-invert-dark]`, inverted **in dark theme
-only** with `filter: invert(1) hue-rotate(180deg)`; no filter in light.
+Icon tile: 60×60, radius 13, background `--surface-2`, border `--line`,
+`box-sizing:border-box`. Every logo renders at 38×38, centred. The dark monochrome logos (Express,
+Prisma, Three.js, GitHub, Linux, Framer, OpenCode) would vanish against `--surface-2` in the dark
+theme, so both of their copies carry `[data-invert-dark]`, inverted **in dark theme only** with
+`filter: invert(1) hue-rotate(180deg)`; no filter in light.
 
 **The grid is monochrome at rest.** Each logo is drawn twice, one grey copy at `opacity:.6` (and
 `grayscale(1)` when the logo has colour of its own) and one in colour on top at `opacity:0`, and
-**the pointer lights what it passes near**: within `130px` of the cursor a tile's colour copy fades
+**the pointer lights what it passes near**: within `150px` of the cursor a tile's colour copy fades
 in on a `(1 - distance/reach)^1.6` falloff, the tile lifts `3px` and grows `6%`, all eased at `0.16`
 per frame. Two copies rather than an animated `filter: grayscale()` because a filter repaints the
 tile every frame and an opacity is composited — this runs at pointer speed.
 
 **The readout.** A mono 11px uppercase label in `--acc-text`, `position:fixed`, `16px` from the
-cursor, naming the nearest tile once it is within `64px`; it fades with the same easing and snaps to
+cursor, naming the nearest tile once it is within `80px`; it fades with the same easing and snaps to
 the cursor on the first frame of each appearance. A name inside the tile is not possible — "IntelliJ
-IDEA" does not fit in 44px at a legible size — and a caption under every tile would either push the
+IDEA" does not fit in 60px at a legible size — and a caption under every tile would either push the
 grid apart or overlap the row below. It is `aria-hidden`: each icon already carries `alt` with its
 name, and no longer `title`, which would have shown a second, slower name over the readout.
 
@@ -658,7 +659,7 @@ None of this belongs inside a template, and there are two homes for it (decision
 - **Timelines** (`experience.js`, `education.js`): two and four entries. Each has `from`, `to`
   (`null` for "still going"), a `current` flag that paints the years in `--acc-text`, and an
   `en` / `es` object with `title` and `body`.
-- **Stack** (`stack.js`): four groups with a name and a list of technologies; each technology
+- **Stack** (`stack.js`): six groups with a name and a list of technologies; each technology
   with a name, an icon file and whether it needs inverting in dark theme.
 - **Socials** (`socials.js`): name, URL and icon, plus `email`, `cvPath` and `photoPath`.
 - **Testimonials** (`testimonials.js`): quote, name, role, avatar. Placeholders; the section is

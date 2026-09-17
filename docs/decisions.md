@@ -1368,9 +1368,15 @@ Three smaller calls:
 
 **Date:** 2026-09-17 — **Status:** active
 
-The section was faithful to the reference and flat: twenty-four full-colour logos in tiles, the only
+The section was faithful to the reference and flat: twenty-nine full-colour logos in tiles, the only
 place on the site with that much colour at once. The backlog had it as "monochrome, animation,
 interaction, a mask" and the mask never happened. What shipped is the first three.
+
+- **Six blocks, two per row.** Four groups spread across the width read as one continuous band of
+  logos, and the AI tools had nowhere to go that did not hide them — inside "Tools & workflow" they
+  are two entries in a list of eight. Six blocks in two columns gives AI its own, and the tiles went
+  from 44px to 60px and the labels from 11px to 13px so a group reads as a block rather than as a
+  swatch. Four groups would still fit the same grid if the AI block is ever merged back.
 
 - **Monochrome by drawing the logo twice.** Each icon renders a grey copy under a colour copy, and
   the spotlight fades the colour one in with `opacity`. The obvious version animates

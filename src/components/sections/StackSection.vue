@@ -1,6 +1,6 @@
 <script setup>
 /*
-  Section 02. Four groups of technology icons, straight from src/data/stack.js.
+  Section 02. Six groups of technology icons, straight from src/data/stack.js.
 */
 import { useI18n } from 'vue-i18n'
 
@@ -39,9 +39,18 @@ const { t } = useI18n()
   gap: 34px;
 }
 
+/* Two columns, not four across. At this tile size four columns read as one
+   continuous band of logos; two make each group a block you can take in. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 44px 40px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
 }
 </style>

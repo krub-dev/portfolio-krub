@@ -1,22 +1,20 @@
 <script setup>
 /*
-  One 44px tile in the Stack grid.
+  One 60px tile in the Stack grid.
 
   The logo is drawn twice, one copy grey and one in colour, and the group's
   spotlight fades the colour one in over the grey. Two copies instead of an
   animated `filter: grayscale()` because a filter repaints the tile on every
   frame, while an opacity is composited — and this runs at pointer speed.
 
-  Every logo renders at 28px inside the 44px tile, which is what the full-colour
-  ones already did (44px with 8px of padding is a 28px box) and what the
-  monochrome ones always did. box-sizing:border-box stays on the tile, since the
-  project has no global border-box.
+  Every logo renders at 38px inside the 60px tile. box-sizing:border-box stays on
+  the tile, since the project has no global border-box.
 
-  The dark monochrome logos (Express, Prisma, Three.js, GitHub, Linux) would
-  disappear against --surface-2 in the dark theme, so BOTH copies carry
-  [data-invert-dark] and the global rule switches it off again in the light
-  theme. The grey copy is the one that keeps the alt; the colour copy is the
-  same picture and is aria-hidden, so a screen reader hears each technology once.
+  The dark monochrome logos (Express, Prisma, Three.js, GitHub, Linux, Framer,
+  OpenCode) would disappear against --surface-2 in the dark theme, so BOTH copies
+  carry [data-invert-dark] and the global rule switches it off again in the light
+  theme. The grey copy is the one that keeps the alt; the colour copy is the same
+  picture and is aria-hidden, so a screen reader hears each technology once.
 */
 defineProps({
   name: { type: String, required: true },
@@ -33,8 +31,8 @@ defineProps({
       :src="src"
       :alt="name"
       :data-invert-dark="invertOnDark || undefined"
-      width="28"
-      height="28"
+      width="38"
+      height="38"
     />
     <img
       class="icon colour"
@@ -42,8 +40,8 @@ defineProps({
       alt=""
       aria-hidden="true"
       :data-invert-dark="invertOnDark || undefined"
-      width="28"
-      height="28"
+      width="38"
+      height="38"
     />
   </span>
 </template>
@@ -51,11 +49,11 @@ defineProps({
 <style scoped>
 .tile {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 60px;
+  height: 60px;
   flex: 0 0 auto;
   box-sizing: border-box;
-  border-radius: 10px;
+  border-radius: 13px;
   background: var(--surface-2);
   border: 1px solid var(--line);
   display: flex;
@@ -64,8 +62,8 @@ defineProps({
 }
 
 .icon {
-  width: 28px;
-  height: 28px;
+  width: 38px;
+  height: 38px;
   display: block;
 }
 

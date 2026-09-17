@@ -11,7 +11,7 @@
   or under reduced motion, where the group simply stays grey.
 
   Why a readout and not a name inside the tile: "IntelliJ IDEA" does not fit in
-  44px at any legible size, and a caption under every tile would either push the
+  64px at any legible size, and a caption under every tile would either push the
   grid apart or overlap the row below.
 */
 import { onMounted, onUnmounted, ref } from 'vue'
@@ -25,8 +25,8 @@ defineProps({
 })
 
 // How far the light carries, and how close a tile must be to be named.
-const REACH = 130
-const NAME_REACH = 64
+const REACH = 150
+const NAME_REACH = 80
 // The tile's reaction at full light: how far it lifts and how much it grows.
 const LIFT = 3
 const GROW = 0.06
@@ -187,15 +187,15 @@ onUnmounted(() => {
 .group {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .label {
   margin: 0;
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--fg-3);
@@ -204,7 +204,7 @@ onUnmounted(() => {
 .icons {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
 /* Fixed, so it follows the cursor in viewport coordinates with no scroll maths.
