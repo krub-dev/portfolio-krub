@@ -112,44 +112,82 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
 
 test('the project rail pages with its arrows, and stops at both ends', async ({ page }) => {
   /*
-    Instant scrolling, so the assertions do not race the animation. It also
-    covers the reduced-motion path, which is the same code with the easing off.
+    Reduced motion, so the transform lands instantly and the assertions do not
+    race the curve. It is the same code with the transition switched off.
   */
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
 
   const track = page.locator('#projects .track')
-  const scroll = () => track.evaluate((el) => Math.round(el.scrollLeft))
+  // The rail is moved by transform, so where it is is the matrix's translateX:
+  // zero at the start, negative as it moves on.
+  const shift = () =>
+    track.evaluate((el) => {
+      const value = getComputedStyle(el).transform
+      return value === 'none' ? 0 : Math.round(new DOMMatrixReadOnly(value).m41)
+    })
+
   const prev = page.getByRole('button', { name: 'Previous project' })
   const next = page.getByRole('button', { name: 'Next project' })
 
   // Nothing behind you at the start.
   await expect(prev).toBeDisabled()
   await expect(next).toBeEnabled()
+  expect(await shift()).toBe(0)
 
   await next.click()
-  await expect.poll(scroll).toBeGreaterThan(0)
+  await expect.poll(shift).toBeLessThan(0)
   await expect(prev).toBeEnabled()
 
   await prev.click()
-  await expect.poll(scroll).toBe(0)
+  await expect.poll(shift).toBe(0)
   await expect(prev).toBeDisabled()
 
   // Page to the end: the arrow says when there is nowhere left to go.
   for (let i = 0; i < 6; i += 1) {
     if (await next.isDisabled()) break
-    const before = await scroll()
+    const before = await shift()
     await next.click()
-    await expect
-      .poll(async () => (await scroll()) !== before || (await next.isDisabled()))
-      .toBe(true)
+    await expect.poll(shift).not.toBe(before)
   }
   await expect(next).toBeDisabled()
 
   // And the card it was hiding ended up inside the rail.
   const last = await page.locator('#projects .card').last().boundingBox()
-  const rail = await track.boundingBox()
+  const rail = await page.locator('#projects .viewport').boundingBox()
   expect(last.x + last.width).toBeLessThanOrEqual(rail.x + rail.width + 1)
+})
+
+test('the project rail drags with the mouse, and a drag does not open a card', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+
+  const viewport = page.locator('#projects .viewport')
+  const track = page.locator('#projects .track')
+  const shift = () =>
+    track.evaluate((el) => {
+      const value = getComputedStyle(el).transform
+      return value === 'none' ? 0 : Math.round(new DOMMatrixReadOnly(value).m41)
+    })
+
+  // Instant, because html { scroll-behavior: smooth } would still be travelling
+  // when the box is read and the mouse would land nowhere near the rail.
+  await viewport.evaluate((el) => el.scrollIntoView({ behavior: 'instant', block: 'center' }))
+
+  const box = await viewport.boundingBox()
+  const middle = box.y + box.height / 2
+
+  await page.mouse.move(box.x + box.width - 60, middle)
+  await page.mouse.down()
+  await page.mouse.move(box.x + 60, middle, { steps: 12 })
+  await page.mouse.up()
+
+  // The rail moved on...
+  await expect.poll(shift).toBeLessThan(0)
+
+  // ...and the card the drag ended over did not open. Without the click guard
+  // the whole card is a click target, so a drag would open whatever it lands on.
+  await expect(page.getByRole('dialog')).toBeHidden()
 })
 
 test('an unknown path shows the 404, chrome and all, and offers a way back', async ({ page, isMobile }) => {

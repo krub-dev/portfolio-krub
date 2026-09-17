@@ -320,28 +320,32 @@ Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`,
 
 ### 3.6 Projects
 
-A **horizontal rail**: `flex`, `gap:20px`, `overflow-x:auto`, `overflow-y:hidden` (the other axis
-computes to `auto` as soon as one is `auto`, so it is clipped on purpose — with `12px` of vertical
-padding, because the magnetic pull moves a card up to 10px), `scroll-snap-type:x mandatory` and a
-hidden scrollbar. **Three cards and the sliver of a fourth** on a desktop, **one and a sliver** below
-900px, which is the whole affordance: the sliver says there is more, without a dot or a counter. The
-card width is `calc((100% - 40px - 68px) / 3)` — two gaps and the sliver — and `82%` on a phone.
+A **horizontal rail**: a clipped viewport (`overflow:hidden`, `padding:12px 0` to leave the magnetic
+pull its 10px, `touch-action:pan-y`) holding a `flex` track with `gap:20px`, moved by
+`transform: translate3d(-offset, 0, 0)` on a `0.55s cubic-bezier(.22,1,.36,1)` transition — the same
+arrive-and-settle the lemon and the footer use — with `will-change:transform`. **Three cards and the
+sliver of a fourth** on a desktop, **one and a sliver** below 900px, which is the whole affordance: the
+sliver says there is more, without a dot or a counter. The card width is
+`calc((100% - 40px - 68px) / 3)` — two gaps and the sliver — and `82%` on a phone.
 
-It is a **native scroll container, not a transformed track**. That keeps every card in the DOM, so the
-keyboard reaches them all, there is no hidden focus to trap and no carousel ARIA to get wrong, and the
-phone gets its swipe for free. The rail is focusable (`tabindex="0"`, `role="group"` with a label) so
-the arrow keys scroll it, and the **arrows above it only call `scrollBy`** — one card at a time,
-`behavior:'auto'` under reduced motion. They disable at the ends, which is also how the reader learns
-how much is left. Measured before this: four stacked cards were `2319px` on a phone against an `839px`
-viewport; the rail is `1010px`.
+The rail travels one card per step and stops with the last card flush to the right edge, so the last
+position shows cards 2–4 rather than card 4 alone. **The two arrows above it disable at the ends**,
+which is also how the reader learns how much is left, and the transform is instant under
+`prefers-reduced-motion`.
 
-**Dragging with the mouse** is the same gesture for a pointer that has no horizontal one: pointer
-capture on the rail, `scrollLeft` written per move, and the snap switched off while dragging so the
-browser does not fight every frame. A drag that travels more than `6px` swallows the click in the
-capture phase, because nobody means to open a card they just dragged.
+**Dragging** covers every pointer type — a mouse has no horizontal gesture, and the rail is not a
+scroll container so the phone has no swipe either. `touch-action:pan-y` is what leaves the vertical
+swipe to the page, the transition is switched off while the pointer is in charge, and on release the
+rail settles on the nearest card in the next frame, once the curve is back. A drag that travels more
+than `6px` swallows the click in the capture phase, because nobody means to open a card they just
+dragged.
 
-The grid distributed itself according to how many projects there were: **no filler cards, no reserved
-gaps**, and no "click to open" hint (the card design says it already).
+**Cards that are fully out of the rail carry `inert`.** They stay in the DOM — the keyboard has to
+reach them — and `inert` is what keeps Tab from walking into a card nobody can see, which is the trap
+a transformed carousel normally sets.
+
+Measured: `2319px` on a phone against an `839px` viewport before this and `1010px` after; `1506px` to
+`1134px` on a desktop. No "click to open" hint: the card design says it already.
 
 Card (a clickable `<article>`, `cursor:pointer`): border `--line`, radius 18, background
 `--surface`, `overflow:hidden`, column. Hover: border `--acc-text`

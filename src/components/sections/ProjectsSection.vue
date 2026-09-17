@@ -2,17 +2,28 @@
 /*
   Section 01. The projects live in a horizontal rail: three cards and a sliver of
   the fourth on a desktop, one and a sliver on a phone, so a fifth project does
-  not push the section another screen down the page. Measured before this: four
-  stacked cards were 2319px on a phone against an 839px viewport.
+  not push the section another screen down the page. Measured with four stacked
+  cards: 2319px on a phone against an 839px viewport.
 
-  The rail is a native scroll container with snap, not a transformed track. That
-  keeps every card in the DOM — so the keyboard reaches them all, there is no
-  hidden focus to trap and no carousel ARIA to get wrong — and it gives the phone
-  its swipe for free. The arrows only call scrollBy, and the drag below is the
-  same thing for a mouse, which has no horizontal gesture of its own.
+  The rail is a track moved by transform. The native scroll version came first
+  and it was not smooth: `scroll-snap` fights a drag — it has to be switched off
+  while dragging and switching it back on snaps without animating — and the
+  easing of a programmatic scroll belongs to the browser, not to us. A transform
+  is composited, the curve is one line of CSS and it is the same arrive-and-settle
+  the lemon and the footer use, and a drag can follow the pointer exactly.
 
-  The sliver of the next card is the whole affordance: it says there is more
-  without a dot or a counter.
+  What that costs is the two things the scroll container gave away for free:
+
+  - The phone's swipe. The drag below covers every pointer type, and
+    `touch-action: pan-y` is what keeps a vertical swipe scrolling the page
+    instead of being swallowed by the rail.
+  - The off-screen cards being out of reach. They stay in the DOM — that is the
+    point, the keyboard must be able to reach them — so they are marked `inert`
+    while they are fully out of the rail, which takes them out of the tab order
+    without taking them out of the document.
+
+  The sliver of the next card is still the whole affordance: it says there is
+  more without a dot or a counter.
 
   The testimonials sit at the end of the rail: they are about this work, and they
   are a block rather than a section, so they add no destination and no number.
@@ -27,9 +38,9 @@ import Testimonials from '../content/Testimonials.vue'
 import { useLang } from '../../composables/useLang'
 import { config, projects } from '../../data'
 
-// How far a drag has to travel before it counts as one. Under this it is a
-// click and the card opens; over it the click is swallowed, because nobody
-// means to open a card they just dragged.
+// How far a drag has to travel before it counts as one. Under this it is a click
+// and the card opens; over it the click is swallowed, because nobody means to
+// open a card they just dragged.
 const DRAG_SLOP = 6
 
 const { lang } = useLang()
@@ -41,67 +52,116 @@ const items = computed(() =>
   projects.map((project) => ({ ...project, ...project[lang.value] })),
 )
 
+const viewport = ref(null)
 const track = ref(null)
+const dragging = ref(false)
 const atStart = ref(true)
 const atEnd = ref(false)
-const dragging = ref(false)
+const parked = ref([]) // per card: fully out of the rail, so out of the tab order
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 
 /*
-  The arrows disable at the ends, which is also how the reader learns how much
-  is left. One pixel of slack, because sub-pixel scroll positions are normal.
+  The animation state is deliberately plain and not reactive: it is written onto
+  the track, not rendered. A reactive offset would re-render the section on every
+  frame of a drag.
 */
-function update() {
-  const el = track.value
-  if (!el) return
-  atStart.value = el.scrollLeft <= 1
-  atEnd.value = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1
-}
+let step = 0 // one card plus one gap, in px
+let maxOffset = 0 // how far the rail can travel before the last card is in
+let offset = 0
+let index = 0
+let startX = 0
+let startOffset = 0
+let travelled = 0
 
-function step(direction) {
-  const el = track.value
-  if (!el) return
-  const gap = parseFloat(getComputedStyle(el).columnGap) || 0
-  const distance = (el.firstElementChild?.getBoundingClientRect().width ?? 0) + gap
-  el.scrollBy({
-    left: direction * distance,
-    behavior: reduced.matches ? 'auto' : 'smooth',
-  })
+function paint() {
+  if (track.value) track.value.style.transform = `translate3d(${-offset}px, 0, 0)`
 }
 
 /*
-  Dragging with the mouse. Touch already scrolls the rail on its own, so this is
-  only for a pointer with no horizontal gesture — and it is why the click is
-  watched in the capture phase: a drag that happens to end over a card must not
-  open it.
+  Re-measures the rail and puts the state back on it. Runs on mount, on resize,
+  and whenever the index moves.
 */
-let startX = 0
-let startScroll = 0
-let travelled = 0
+function sync() {
+  const rail = track.value
+  const view = viewport.value
+  if (!rail || !view) return
 
+  const gap = parseFloat(getComputedStyle(rail).columnGap) || 0
+  const card = rail.firstElementChild?.getBoundingClientRect().width ?? 0
+  step = card + gap
+  maxOffset = Math.max(0, rail.scrollWidth - view.clientWidth)
+
+  const last = step > 0 ? Math.ceil(maxOffset / step) : 0
+  index = Math.min(Math.max(index, 0), last)
+  offset = Math.min(index * step, maxOffset)
+
+  atStart.value = index <= 0
+  atEnd.value = offset >= maxOffset - 1
+
+  parked.value = items.value.map((_, i) => {
+    const left = i * step - offset
+    return left + card <= 0 || left >= view.clientWidth
+  })
+
+  paint()
+}
+
+function page(direction) {
+  const last = step > 0 ? Math.ceil(maxOffset / step) : 0
+  const next = Math.min(Math.max(index + direction, 0), last)
+  if (next === index) return
+  index = next
+  sync()
+}
+
+/*
+  Dragging. One set of handlers for every pointer type: a mouse has no horizontal
+  gesture of its own, and a phone's swipe is no longer free now that the rail is
+  not a scroll container. `touch-action: pan-y` is what leaves the vertical swipe
+  to the page.
+*/
 function onPointerDown(event) {
-  if (event.pointerType !== 'mouse') return
+  if (!track.value || !viewport.value) return
   dragging.value = true
   travelled = 0
   startX = event.clientX
-  startScroll = track.value.scrollLeft
-  track.value.setPointerCapture(event.pointerId)
+  startOffset = offset
+  // No curve while the pointer is in charge, or the rail lags behind it.
+  track.value.style.transition = 'none'
+  viewport.value.style.userSelect = 'none'
+  viewport.value.setPointerCapture(event.pointerId)
 }
 
 function onPointerMove(event) {
   if (!dragging.value) return
   const delta = event.clientX - startX
   travelled = Math.max(travelled, Math.abs(delta))
-  track.value.scrollLeft = startScroll - delta
+  offset = Math.min(Math.max(startOffset - delta, 0), maxOffset)
+  paint()
 }
 
 function onPointerUp(event) {
   if (!dragging.value) return
   dragging.value = false
-  if (track.value.hasPointerCapture(event.pointerId)) {
-    track.value.releasePointerCapture(event.pointerId)
+
+  const rail = track.value
+  if (rail) rail.style.transition = ''
+  if (viewport.value) {
+    viewport.value.style.userSelect = ''
+    if (viewport.value.hasPointerCapture(event.pointerId)) {
+      viewport.value.releasePointerCapture(event.pointerId)
+    }
   }
+
+  /*
+    Settle on the nearest card, in the next frame: the transform has to change
+    once the curve is back in place, or it lands with a jump instead of gliding.
+  */
+  requestAnimationFrame(() => {
+    index = step > 0 ? Math.round(offset / step) : 0
+    sync()
+  })
 }
 
 function onClickCapture(event) {
@@ -112,13 +172,12 @@ function onClickCapture(event) {
 }
 
 onMounted(() => {
-  update()
-  // How much rail there is to scroll changes with the viewport, and the arrows
-  // read that.
-  window.addEventListener('resize', update, { passive: true })
+  // A frame, so the cards are laid out and there is something to measure.
+  requestAnimationFrame(sync)
+  window.addEventListener('resize', sync, { passive: true })
 })
 
-onUnmounted(() => window.removeEventListener('resize', update))
+onUnmounted(() => window.removeEventListener('resize', sync))
 </script>
 
 <template>
@@ -132,7 +191,7 @@ onUnmounted(() => window.removeEventListener('resize', update))
           type="button"
           :aria-label="t('a11y.prevProject')"
           :disabled="atStart"
-          @click="step(-1)"
+          @click="page(-1)"
         >
           ←
         </button>
@@ -141,37 +200,38 @@ onUnmounted(() => window.removeEventListener('resize', update))
           type="button"
           :aria-label="t('a11y.nextProject')"
           :disabled="atEnd"
-          @click="step(1)"
+          @click="page(1)"
         >
           →
         </button>
       </div>
 
       <div
-        ref="track"
-        class="track"
+        ref="viewport"
+        class="viewport"
         :class="{ dragging }"
         role="group"
         :aria-label="t('a11y.projectsRail')"
-        tabindex="0"
-        @scroll.passive="update"
         @pointerdown="onPointerDown"
         @pointermove="onPointerMove"
         @pointerup="onPointerUp"
         @pointercancel="onPointerUp"
         @click.capture="onClickCapture"
       >
-        <ProjectCard
-          v-for="(project, i) in items"
-          :key="project.slug"
-          :name="project.name"
-          :tag="project.tag"
-          :summary="project.summary"
-          :shot-label="project.shotLabel"
-          :image="project.image"
-          :stack="project.stack"
-          @open="$emit('open', i)"
-        />
+        <div ref="track" class="track">
+          <ProjectCard
+            v-for="(project, i) in items"
+            :key="project.slug"
+            :name="project.name"
+            :tag="project.tag"
+            :summary="project.summary"
+            :shot-label="project.shotLabel"
+            :image="project.image"
+            :stack="project.stack"
+            :inert="parked[i] || undefined"
+            @open="$emit('open', i)"
+          />
+        </div>
       </div>
     </div>
 
@@ -229,44 +289,45 @@ onUnmounted(() => window.removeEventListener('resize', update))
 }
 
 /*
-  overflow-x: auto makes the other axis compute to auto as well, so it is clipped
-  on purpose — with vertical padding, because the magnetic pull moves a card up
-  to 10px and would otherwise be cut off. The scrollbar is hidden: the arrows and
-  the sliver are the affordance, and a grey bar across the row is not.
+  Clipped, with vertical room for the magnetic pull, which moves a card up to
+  10px. touch-action: pan-y is what lets a horizontal swipe drag the rail while a
+  vertical one still scrolls the page.
 */
-.track {
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  overflow-y: hidden;
+.viewport {
+  overflow: hidden;
   padding: 12px 0;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
+  touch-action: pan-y;
   cursor: grab;
 }
 
-.track::-webkit-scrollbar {
-  display: none;
+.viewport.dragging {
+  cursor: grabbing;
 }
 
-/* No snapping while a mouse drags it: the browser would fight every frame.
-   Taking the class off at the end is what lets it settle onto the nearest card. */
-.track.dragging {
-  cursor: grabbing;
-  user-select: none;
-  scroll-snap-type: none;
+.track {
+  display: flex;
+  gap: 20px;
+  /* Composited, and the curve is ours: the same arrive-and-settle the lemon and
+     the footer use. */
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 
 /* Three cards and the sliver of a fourth. The 40px is the two gaps, the 68px the
    sliver. A phone shows one and a sliver of the next. */
 .track > * {
   flex: 0 0 calc((100% - 40px - 68px) / 3);
-  scroll-snap-align: start;
 }
 
 @media (max-width: 900px) {
   .track > * {
     flex: 0 0 82%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    transition: none;
   }
 }
 </style>

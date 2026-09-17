@@ -1453,15 +1453,23 @@ Four projects in a grid meant a second row holding one card beside an empty colu
 **2319px against an 839px viewport**, nearly three screens for the part of the page a reader is most
 likely to be skimming.
 
-- **A native scroll container, not a transformed carousel.** The obvious version is the modal's: an
-  index, a `transform`, dots. It also means the cards that are off-screen are still in the DOM and
-  still focusable, so a keyboard user tabs into a card they cannot see — and the ARIA pattern for a
-  carousel with interactive content inside is genuinely fiddly. A scroll container with snap keeps
-  every card reachable, gives the phone its swipe for nothing, and needs no index at all.
-- **The sliver is the affordance.** Three cards and 68px of the fourth says "there is more" without a
-  dot, a counter or a hint, which is the rule the rest of the site already follows.
-- **The drag needed a click guard.** A mouse has no horizontal gesture, so dragging the rail is the
-  natural move — but the whole card is a click target behind an overlay, so a drag that ends over one
-  would open it. The click is watched in the capture phase and swallowed once the drag has travelled
-  6px. The snap is switched off during the drag too, or the browser fights it on every frame.
+- **A rail, not a grid.** Three cards and the sliver of a fourth on a desktop, one and a sliver on a
+  phone. The sliver is the whole affordance: it says there is more without a dot or a counter, which
+  is the rule the rest of the site already follows.
+
+- **A native scroll container came first, and it was not smooth.** It is the version that gives the
+  most away for free: `scroll-snap` keeps the cards in the DOM, so the keyboard reaches them, and the
+  phone gets its swipe. But the snap fights a drag — it has to be switched off while dragging, and
+  switching it back on snaps without animating — and the easing of a programmatic scroll belongs to
+  the browser, not to us. The owner read it as steppy and asked for the other way round.
+- **So it is a track moved by `transform`.** Composited, with the same arrive-and-settle curve the
+  lemon and the footer use, and a drag that can follow the pointer exactly. What that costs is the
+  two things the scroll container gave away: the phone's swipe is no longer free, so the drag handles
+  every pointer type and `touch-action:pan-y` keeps a vertical swipe scrolling the page; and the
+  off-screen cards stay in the DOM — which is the point, the keyboard has to reach them — so they
+  carry `inert` while they are fully out of the rail. A transformed carousel without that is one
+  where Tab walks into the dark.
+- **The drag needed a click guard.** The whole card is a click target behind an overlay, so a drag
+  that ends over one would open it. The click is watched in the capture phase and swallowed once the
+  drag has travelled 6px.
 - **Measured after:** 1010px on a phone, 1134px on a desktop.

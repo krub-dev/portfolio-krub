@@ -207,11 +207,12 @@ No `id`: it is a band, not a destination.
 `config.showCv`, and the photo.
 
 ### ProjectsSection
-`id="projects"`. A horizontal rail of `ProjectCard`: a native scroll container with snap, three cards
-and a sliver on a desktop and one on a phone, with two arrow buttons that only call `scrollBy` and
-disable at the ends. The rail also drags with the mouse, and swallows the click when the drag passed
-6px so a drag does not open a card. Emits `open` with the project that was clicked — the modal itself
-lives in `HomeView`, so the section does not own it.
+`id="projects"`. A horizontal rail of `ProjectCard`: a clipped viewport holding a track moved by
+`transform`, three cards and a sliver on a desktop and one on a phone, with two arrow buttons that
+step one card and disable at the ends. It drags with any pointer type, and swallows the click when the
+drag passed 6px so a drag does not open a card. Cards fully out of the rail are `inert`, so Tab cannot
+walk into one nobody can see. Emits `open` with the project that was clicked — the modal itself lives
+in `HomeView`, so the section does not own it.
 
 ### StackSection
 `id="stack"`. The four groups from `src/data/stack.js` in a two-column grid: `StackGroup` →
