@@ -3,16 +3,22 @@
   Limonacho's speech bubble. Presentation only — the lemon owns the timer that
   shows and hides it.
 
-  role="status" makes a screen reader announce the text when it appears,
+  `role="status"` makes a screen reader announce the text when it appears,
   without stealing focus. The bubble is a friendly aside, not an alert.
+
+  That is right for the greeting and wrong for a technology name: those change
+  as the pointer sweeps the grid, and a live region would read out twenty of
+  them. They also say nothing a screen reader does not already have — every tile
+  carries its own alt. So the greeting is live and the names are not.
 */
 defineProps({
   text: { type: String, required: true },
+  live: { type: Boolean, default: true },
 })
 </script>
 
 <template>
-  <p class="bubble" role="status">{{ text }}</p>
+  <p class="bubble" :role="live ? 'status' : undefined">{{ text }}</p>
 </template>
 
 <style scoped>

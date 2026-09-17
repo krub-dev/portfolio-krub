@@ -345,10 +345,12 @@ test('the stack is monochrome until the pointer reaches a tile', async ({ page, 
 
   await expect.poll(opacity).toBeGreaterThan(0.5)
 
-  // And the readout names the tile, which is the only visible name there is.
-  const readout = page.locator('#stack .readout').first()
-  await expect(readout).toHaveText('Java')
-  await expect(readout).toHaveCSS('opacity', '1')
+  // And Limonacho names it, which is the only visible name there is.
+  await expect(page.locator('.pet .bubble')).toHaveText('Java')
+
+  // Out of the grid he stops saying it.
+  await page.mouse.move(5, 5)
+  await expect(page.locator('.pet .bubble')).toHaveCount(0)
 })
 
 test('on touch the stack lights with the scroll, and a tap names a tile', async ({ page, isMobile }) => {
@@ -374,13 +376,11 @@ test('on touch the stack lights with the scroll, and a tap names a tile', async 
     )
     .toBeGreaterThan(0)
 
-  // A tap names the tile where it sits, without moving anything.
+  // A tap names the tile, and Limonacho is the one who says it.
   const name = await tile.getAttribute('data-name')
   await tile.click()
 
-  const readout = page.locator('#stack .readout').first()
-  await expect(readout).toHaveText(name)
-  await expect(readout).toHaveCSS('opacity', '1')
+  await expect(page.locator('.pet .bubble')).toHaveText(name)
 })
 
 test('the contact form asks for what is missing, then sends', async ({ page }) => {

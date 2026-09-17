@@ -94,9 +94,10 @@ section, folded together where they overlapped.
 - [x] **Rethink the stack section.** Done on 2026-09-17: four blocks in two columns, tiles from 44px
   to 60px and labels from 11px to 13px (48px tiles on mobile, where 60px was eating the screen), the
   grid monochrome at rest — each logo drawn twice, a held-back grey copy under a colour one — and the
-  light following the cursor, or standing still while the tiles scroll through it on touch, with a tap
-  naming one. No mask, and no softened edges. It rides `usePointer` and `useScroll`, the app's single
-  loop and single scroll listener. See decision 58.
+  light following the cursor, or coming on a whole group at a time with the scroll on touch. Limonacho
+  is the one who names the tiles (a tap on touch), with the mono readout back as the fallback if he is
+  not on the page. No mask, and no softened edges. It rides `usePointer` and `useScroll`, the app's
+  single loop and single scroll listener. See decisions 58 and 59.
 - [x] **Give the contact section more weight.** Rebuilt on 2026-09-17: a full-bleed band on the
   accent background, its words alternating solid and outline over a second, fainter copy travelling
   the other way, and moving with the scroll and only with the scroll. One full-width row per contact

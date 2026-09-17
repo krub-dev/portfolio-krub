@@ -15,10 +15,11 @@
   the leaf's colours belong to the leaf, not to the theme, and stay the same in
   both.
 */
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import { useAcho } from '../../composables/useAcho'
 import { useLang } from '../../composables/useLang'
+import { useLemonVoice } from '../../composables/useLemonVoice'
 import { usePointer } from '../../composables/usePointer'
 import { usePastHero } from '../../composables/usePastHero'
 import { copy } from '../../data'
@@ -33,16 +34,25 @@ const leftPupil = ref(null)
 const rightPupil = ref(null)
 
 const shaking = ref(false)
-const bubbleVisible = ref(false)
+const greeting = ref(false)
 
 let bubbleTimer = null
 let shakeTimer = null
+let unlisten = null
 
 const text = computed(() => copy.lemon[lang.value].bubble)
 // Same trigger as the footer, so the two arrive together.
 const shown = usePastHero()
 
+const { message, listen } = useLemonVoice()
 const { playOnce } = useAcho()
+
+/*
+  He says one thing at a time: the name of the tile the pointer is on, or the
+  once-a-visit greeting. The name wins — it is the one being asked for — and the
+  greeting is still there when the pointer leaves the grid.
+*/
+const said = computed(() => message.value || (greeting.value ? text.value : ''))
 
 /*
   The pupils look at the cursor. Each eye works out the direction from its own
@@ -80,12 +90,22 @@ function poke() {
 
   if (!first) return
 
-  bubbleVisible.value = true
+  greeting.value = true
   clearTimeout(bubbleTimer)
-  bubbleTimer = setTimeout(() => (bubbleVisible.value = false), 4000)
+  bubbleTimer = setTimeout(() => (greeting.value = false), 4000)
 }
 
+/*
+  Registering is what tells the Stack there is a voice, so it hands the naming
+  over instead of running its own readout. The cleanup goes with the unmount,
+  and it takes the bubble down with it.
+*/
+onMounted(() => {
+  unlisten = listen()
+})
+
 onUnmounted(() => {
+  unlisten?.()
   clearTimeout(bubbleTimer)
   clearTimeout(shakeTimer)
 })
@@ -93,7 +113,9 @@ onUnmounted(() => {
 
 <template>
   <div class="pet" :class="{ shown }">
-    <SpeechBubble v-if="bubbleVisible" :text="text" />
+    <!-- Not live for a technology name: those change as the pointer sweeps the
+         grid, and every tile already carries its own alt. -->
+    <SpeechBubble v-if="said" :text="said" :live="!message" />
 
     <button
       ref="body"

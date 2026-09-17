@@ -1379,10 +1379,11 @@ interaction, a mask" and the mask never happened. What shipped is the first thre
   accident, and leading that group they are the first thing in it anyway. Blender, Figma, Framer,
   GSAP, Claude and OpenCode joined the grid on the way.
 - **Touch gets the light too.** No cursor means no hover, and a section that only comes alive under a
-  mouse is dead on the phone it is most likely to be read on. There the light stands still at 55% of
-  the viewport and the tiles scroll through it — no easing, because the scroll only calls it when it
-  moves and a half-finished ease would freeze on screen — and a tap names a tile where it sits, for a
-  moment. Both paths run the same falloff code; only the source of the light and the step differ.
+  mouse is dead on the phone it is most likely to be read on. There the scroll is the light, and it
+  comes on a whole group at a time — a group is fully lit once its top edge has climbed from 90% of
+  the viewport to 55%. Tile by tile was the first attempt and read as noise: the tiles of a group are
+  read together. They do not lift either, because a block of tiles rising as one reads as the page
+  jumping.
 
 - **Monochrome by drawing the logo twice.** Each icon renders a grey copy under a colour copy, and
   the spotlight fades the colour one in with `opacity`. The obvious version animates
@@ -1407,3 +1408,34 @@ interaction, a mask" and the mask never happened. What shipped is the first thre
   fifth chance to leave something running. On touch there is no pointer to subscribe with and under
   reduced motion the frame returns immediately, so there the grid is simply grey — which is the
   design, not a fallback.
+
+### 59. Limonacho says the technology names
+
+**Date:** 2026-09-17 — **Status:** active
+
+The Stack used to name its tiles itself: a mono readout that followed the cursor, and a static one
+placed next to a tapped tile on touch. The owner did not like the tap version, and asked for the
+lemon to say it instead — he is already there, in the corner, with a bubble and a voice.
+
+- **He does the naming, and the readout becomes the fallback.** He says the name of the tile the
+  cursor is on, and on touch a tap hands him one for a moment. The readout comes back on its own when
+  he is not on the page — `showLemon` off, a route with no hero, the lemon removed some day. The
+  Stack does not check `config` for that: the lemon **registers itself** with `useLemonVoice()` on
+  mount, and the Stack reads the count. One source of truth instead of the same condition written
+  twice, and it stays right if the reason he is missing changes.
+- **The cursor says clickable, but only in the fallback.** Without the lemon the only way to get a
+  name is to click a tile, so the tiles carry `data-interactive` and the custom cursor opens its ring
+  over them. With him the name arrives on hover and clicking does nothing, so there is nothing to
+  promise.
+- **The bubble is not a live region for names.** It is `role="status"` for the greeting, which a
+  screen reader should hear. Names change as the pointer sweeps the grid, and announcing twenty of
+  them is not help — and they say nothing the tiles' own `alt` does not.
+- **The four groups needed an owner.** Each group runs the same per-frame loop, so on any frame one
+  has the cursor and three do not: the first attempt had the three clear what the first had just
+  said, and the bubble never appeared. `say()` and `hush()` are now owner-aware and only the one who
+  spoke may take it back.
+- **And the owner had to be a `shallowRef`.** With a plain `ref`, Vue wraps whatever object it holds
+  in a reactive proxy, so `spoken.value.by` came back as a proxy of the caller's token rather than the
+  token itself. The ownership test is an identity test, so it silently never matched: the bubble
+  appeared and then could not be taken down. Nothing here needs deep reactivity — the object is
+  replaced whole, never mutated — so shallow is also the honest choice, not just the working one.

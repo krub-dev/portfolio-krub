@@ -390,18 +390,25 @@ in on a `(1 - distance/reach)^1.6` falloff, the tile lifts `3px` and grows `6%`,
 per frame. Two copies rather than an animated `filter: grayscale()` because a filter repaints the
 tile every frame and an opacity is composited — this runs at pointer speed.
 
-**The readout.** A mono 11px uppercase label in `--acc-text`, `position:fixed`, `16px` from the
-cursor, naming the nearest tile once it is within `80px`; it fades with the same easing and snaps to
-the cursor on the first frame of each appearance. A name inside the tile is not possible — "IntelliJ
-IDEA" does not fit in 60px at a legible size — and a caption under every tile would either push the
-grid apart or overlap the row below. It is `aria-hidden`: each icon already carries `alt` with its
-name, and no longer `title`, which would have shown a second, slower name over the readout.
+**Naming the tile is Limonacho's job.** He sits in the corner with his bubble, and the group hands him
+the name of the tile the cursor is on once it is within `80px`; the bubble goes when the pointer
+leaves the grid. A name inside the tile is not possible — "IntelliJ IDEA" does not fit in 60px at a
+legible size — and a caption under every tile would either push the grid apart or overlap the row
+below. The bubble is **not** a live region for these: they change as the pointer sweeps the grid, and
+every tile already carries its own `alt`.
 
-**On touch there is no cursor, so the light stands still and the tiles scroll through it**: the same
-falloff, measured from a point at `55%` of the viewport height, with no easing — the scroll only calls
-it when it moves, and a half-finished ease would freeze on screen. A tap names the tile under it where
-it sits, for `1.8s`, clamped inside the screen: a tooltip you can only get by hovering is a tooltip
-half the visitors never see.
+**If the lemon is not on the page** — `showLemon` off, no hero, no lemon — the name falls back to a
+mono 11px uppercase readout in `--acc-text`, `position:fixed`, `16px` from the cursor, that fades with
+the same easing and snaps to the cursor on the first frame of each appearance. The tiles mark
+themselves `data-interactive` in that case only, so the custom cursor opens its ring over them: with
+the lemon the name comes from hovering, and without him the only way to get it is to click, which is
+what the cursor has to say.
+
+**On touch there is no cursor, so the scroll is the light, and it comes on a whole group at a time**: a
+group is fully lit once its top edge has climbed from `90%` of the viewport height to `55%`. Tile by
+tile was noise — the tiles of a group are read together — and they do not lift either, because a block
+of tiles rising as one reads as the page jumping. A tap hands the tile's name to Limonacho, up for
+`1.8s`, or to the readout when there is no lemon.
 
 Either path hangs off machinery the site already owns — `usePointer` and `useScroll` each keep ONE
 listener for the whole app — so it costs no second `requestAnimationFrame` and no extra scroll
@@ -569,6 +576,12 @@ Optional by config, and only rendered on a route with a hero. Fixed container `r
 tracks the footer in the same frame, and it is not part of the transform (decisions.md). It
 enters **in a straight line from the right** at the same time as the footer: from
 `translateX(160%)` to `translateX(0)` with `.55s cubic-bezier(.22,1,.36,1)`; no tilt.
+
+**He talks.** His bubble shows the once-a-visit greeting on the first poke, and it is also where the
+Stack's technology names appear (§3.8): the group hands him a string and he says it. It is
+`role="status"` for the greeting, because a screen reader should hear that, and not for the names,
+which change as the pointer sweeps the grid. He registers himself on mount, so the Stack knows there
+is a voice without knowing why there might not be one.
 
 The lemon is drawn in CSS: a 58×48px body with
 `border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%` and a **flat `var(--acc-solid)` fill, no

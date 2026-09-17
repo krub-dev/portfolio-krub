@@ -102,19 +102,21 @@ Renders a `<button>` when neither `to` nor `href` is given. Default slot: the co
 | `count` | number \| null | yellow superscript (projects only) |
 
 ### TechIcon
-`name`, `src`, `invertOnDark` (boolean), `wide` (boolean). Paints the 60px tile (48px below 900px)
-and draws the logo twice — a grey, held-back copy and a colour one on top — so the spotlight can fade
-the colour in with an opacity instead of animating a filter. Both copies render at 38px (30px on
-mobile); `invertOnDark` puts `[data-invert-dark]` on both, and `wide` gives a wordmark a wider box so
-it is not a stripe in the middle of its tile. It carries `data-tile` and `data-name`, which is what
-the readout and the tap handler read.
+`name`, `src`, `invertOnDark` (boolean), `wide` (boolean), `interactive` (boolean). Paints the 60px
+tile (48px below 900px) and draws the logo twice — a grey, held-back copy and a colour one on top — so
+the spotlight can fade the colour in with an opacity instead of animating a filter. Both copies render
+at 38px (30px on mobile); `invertOnDark` puts `[data-invert-dark]` on both, and `wide` gives a
+wordmark a wider box so it is not a stripe in the middle of its tile. `data-tile` and `data-name` are
+what the tap handler and the readout read; `interactive` adds `[data-interactive]`, which is what
+opens the custom cursor's ring.
 
 ### StackGroup
 `label` (string), `items` (array of TechIcon). It also runs the light: on a pointer device it lights
-the tiles the cursor passes near, lifts them, and writes the name of the nearest one into its own mono
-readout; on touch the light stands still and the tiles scroll through it, and a tap names one where it
-sits. It hangs off `usePointer` and `useScroll` — one loop and one listener for the whole site — and
-does nothing under reduced motion.
+the tiles the cursor passes near and lifts them, and it hands the name of the nearest one to Limonacho
+— or writes it into its own mono readout when there is no lemon on the page. On touch the scroll is
+the light and it comes on a whole group at a time, and a tap hands a name over the same way. It hangs
+off `usePointer` and `useScroll` — one loop and one listener for the whole site — and does nothing
+under reduced motion.
 
 ### SocialLink
 `name` (becomes the aria-label), `href`, `icon` (key into its own inline SVG paths).
@@ -130,7 +132,8 @@ border).
 `label` (string), `color` (defaults to `#39D98A`). Wraps the fixed core and the pulsing ring.
 
 ### SpeechBubble
-`text`. Presentation only.
+`text`, `live` (boolean, default true → `role="status"`). Presentation only: the lemon owns the timers.
+Not live for a technology name, which changes as the pointer sweeps the grid.
 
 ### LangButton
 No props. The ES / EN button; calls `useLang().toggle()`. Used in the navbar on desktop and in the
@@ -286,8 +289,10 @@ props. Subscribes to `usePointer()` and refuses to mount on touch or below 900px
 on the rest of the app.
 
 ### LemonPet
-No props: the bubble text comes from `copy.lemon`, and it reads `--footer-h` from CSS to sit on
-top of the footer. Owns its own shake and bubble timers.
+No props: the greeting text comes from `copy.lemon`, and it reads `--footer-h` from CSS to sit on top
+of the footer. Owns its own shake and greeting timers. On mount it registers with `useLemonVoice()`,
+which is how the Stack knows there is a voice on the page and hands it the technology names; the
+cleanup goes with the unmount.
 
 ### BackgroundGrid
 Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the crossfade).
@@ -314,6 +319,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useElementHeight(el, prop)` | the mechanism behind it, shared with the navbar's `--navbar-h`. Observes the border box and re-reads on a `visualViewport` resize, because the iOS toolbar changes the footer's padding and a ResizeObserver can miss that |
 | `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it, and it is true from the start on a route with no hero (the 404) |
 | `useAcho()` | `playOnce()`: true on the first poke of a visit — the one that says "acho" and shows the bubble — and false after. Module scope, so it is per page load and nothing is stored |
+| `useLemonVoice()` | `say(text)` / `hush()` for whatever Limonacho should be saying, plus `message`, `listening` and the lemon's `listen()` registration. Owner-aware, so the four Stack groups do not talk over each other, and a `shallowRef` because the owner check is an identity check and a plain `ref` would hand back a proxy |
 | `useBodyScrollLock(active)` | locks scrolling while the modal is open |
 
 One single `requestAnimationFrame` drives everything that follows the mouse (cursor, lemon

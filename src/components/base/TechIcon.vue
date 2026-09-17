@@ -24,11 +24,21 @@ defineProps({
   src: { type: String, required: true },
   invertOnDark: { type: Boolean, default: false },
   wide: { type: Boolean, default: false },
+  // Marks the tile as something the cursor should open its ring over. The Stack
+  // only asks for that when there is no Limonacho to name tiles, because that is
+  // the only case where clicking one does anything.
+  interactive: { type: Boolean, default: false },
 })
 </script>
 
 <template>
-  <span class="tile" :class="{ wide }" data-tile :data-name="name">
+  <span
+    class="tile"
+    :class="{ wide }"
+    data-tile
+    :data-name="name"
+    :data-interactive="interactive || undefined"
+  >
     <img
       class="icon base"
       :class="{ grey: !invertOnDark }"

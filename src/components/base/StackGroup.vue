@@ -7,21 +7,26 @@
   one to come from:
 
   - On a pointer device it follows the cursor. Every tile within reach fades its
-    colour copy in, lifts a few pixels, and a mono readout names the nearest one.
-  - On touch there is no cursor, so the light stands still and the tiles scroll
-    through it: the page scrolling is what reveals them. A tap names a tile
-    where it sits, for a moment, because a tooltip you can only get by hovering
-    is a tooltip half the visitors never see.
+    colour copy in and lifts a few pixels.
+  - On touch there is no cursor, so the scroll is the light: a group comes on
+    whole as it climbs into view, rather than tile by tile.
+
+  Naming the tile is Limonacho's job. He sits in the corner with a bubble, and
+  the Stack only has to hand him a string. If he is not on the page — showLemon
+  off, no hero, no lemon — the name falls back to a mono readout that follows
+  the cursor, and the tiles mark themselves as clickable so the custom cursor
+  says so too.
 
   Either way it hangs off the site's shared machinery — usePointer and useScroll
   each own ONE listener for the whole app — so this costs no extra
   requestAnimationFrame and no extra scroll listener. Under reduced motion it
   does nothing at all and the grid stays grey.
 */
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
 import TechIcon from './TechIcon.vue'
 import { isPointerDevice, usePointer } from '../../composables/usePointer'
+import { useLemonVoice } from '../../composables/useLemonVoice'
 import { useScroll } from '../../composables/useScroll'
 
 defineProps({
@@ -39,18 +44,18 @@ const GROW = 0.06
 const EASING = 0.16
 // How far the readout sits from the cursor, clear of the dot.
 const NAME_OFFSET = 16
-// Where the standing light sits on screen, as a fraction of the viewport.
-const LINE = 0.55
 // How long a tapped name stays up.
 const PIN = 1800
+// The touch reveal: a group is fully lit once its top edge has climbed from
+// REVEAL_FROM of the viewport height to REVEAL_TO.
+const REVEAL_FROM = 0.9
+const REVEAL_TO = 0.55
 
 const pointerDevice = isPointerDevice()
-/*
-  While the page scrolls, this is only called when the scroll moves, so it
-  cannot ease: a half-finished ease would freeze on screen the moment the
-  scrolling stops.
-*/
-const STEP = pointerDevice ? EASING : 1
+
+const { listening, say, hush } = useLemonVoice()
+// The lemon registers itself on mount. While it is there it does the talking.
+const voice = computed(() => listening.value > 0)
 
 const root = ref(null)
 const icons = ref(null)
@@ -65,6 +70,7 @@ let nameY = 0
 let nameLit = 0
 let namePlaced = false
 let pin = null
+let revealed = -1
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 
@@ -97,7 +103,7 @@ function measure() {
   Lights every tile near (x, y), which are viewport coordinates. Returns the
   nearest one, so the caller can name it.
 */
-function paint(x, y, step) {
+function paint(x, y) {
   const box = root.value
   let nearest = null
   let nearestDistance = Infinity
@@ -111,7 +117,7 @@ function paint(x, y, step) {
     const distance = Math.hypot(x - (origin.left + tile.x), y - (origin.top + tile.y))
     // Falls off with distance, and squared so the centre is clearly the centre.
     const target = distance < REACH ? (1 - distance / REACH) ** 1.6 : 0
-    const value = lit[i] + (target - lit[i]) * step
+    const value = lit[i] + (target - lit[i]) * EASING
     lit[i] = value
 
     if (value > 0.01) {
@@ -133,15 +139,28 @@ function paint(x, y, step) {
   return { nearest, distance: nearestDistance }
 }
 
-// The pointer path: the light is the cursor and the readout trails it.
+// The pointer path: the light is the cursor, and the name goes to Limonacho.
 function frame(pointer) {
   if (reduced.matches) return
 
-  const { nearest, distance } = paint(pointer.x, pointer.y, STEP)
-  const label = readout.value
-  if (!label || !nearest) return
+  const { nearest, distance } = paint(pointer.x, pointer.y)
+  if (!nearest) return
 
   const close = distance < NAME_REACH
+
+  /*
+    With the lemon on the page he names the tile and the readout stays asleep.
+    Calling say() with the name it already has is a no-op, so this can run every
+    frame without re-rendering anything.
+  */
+  if (voice.value) {
+    if (close) say(nearest.name)
+    else hush()
+    return
+  }
+
+  const label = readout.value
+  if (!label) return
 
   /*
     Snap on the first frame of an appearance and trail after that. A readout
@@ -171,25 +190,55 @@ function frame(pointer) {
   label.style.opacity = nameLit.toFixed(3)
 }
 
-// The touch path: the light stands still and the tiles scroll through it.
-function sweep() {
-  if (reduced.matches) return
-  paint(window.innerWidth / 2, window.innerHeight * LINE, 1)
+/*
+  The touch path: no cursor, so the light is the scroll and it comes on a WHOLE
+  group at a time. The tiles of a group are read together — lighting them one by
+  one as each passed a line was noise — and they do not lift either, because a
+  block of tiles rising as one reads as the page jumping. The scroll only calls
+  this when it moves, so there is nothing to ease: a half-finished ease would
+  freeze on screen the moment the scrolling stopped.
+*/
+function reveal() {
+  const box = root.value
+  if (reduced.matches || !box || !tiles.length) return
+
+  const rect = box.getBoundingClientRect()
+  const from = window.innerHeight * REVEAL_FROM
+  const span = window.innerHeight * (REVEAL_FROM - REVEAL_TO)
+  const value = Math.min(1, Math.max(0, (from - rect.top) / span))
+  // Rounded, so a scroll that does not change the value writes nothing.
+  const step = Math.round(value * 200) / 200
+
+  if (step === revealed) return
+  revealed = step
+
+  for (const tile of tiles) {
+    tile.colour.style.opacity = step.toFixed(3)
+    if (tile.el.style.transform) tile.el.style.transform = ''
+  }
 }
 
 /*
-  A tap names the tile under it, where it sits. Static: the readout does not
-  follow the finger, it appears, holds and goes. Only on touch — on a pointer
-  device the cursor has already named it, and this would fight the frame loop
-  for the same element.
+  A tap names the tile under it. With the lemon there it is his bubble, up for a
+  moment; without him it is the readout, placed where the tile is. Only on
+  touch — on a pointer device the cursor has already done the naming.
 */
 function onTap(event) {
   if (pointerDevice || reduced.matches) return
 
   const el = event.target.closest('[data-tile]')
   const tile = el && tiles.find((candidate) => candidate.el === el)
+  if (!tile) return
+
+  if (voice.value) {
+    say(tile.name)
+    clearTimeout(pin)
+    pin = setTimeout(hush, PIN)
+    return
+  }
+
   const label = readout.value
-  if (!tile || !label) return
+  if (!label) return
 
   const rect = el.getBoundingClientRect()
   label.textContent = tile.name
@@ -214,13 +263,13 @@ function onTap(event) {
 usePointer(frame)
 
 const { y } = useScroll()
-if (!pointerDevice) watch(y, sweep)
+if (!pointerDevice) watch(y, reveal)
 
 onMounted(() => {
   // A frame first, so the grid has been laid out and the fonts have settled.
   requestAnimationFrame(() => {
     measure()
-    if (!pointerDevice) sweep()
+    if (!pointerDevice) reveal()
   })
   // And again whenever the group changes size: a rewrap, a language switch.
   observer = new ResizeObserver(measure)
@@ -232,6 +281,7 @@ onUnmounted(() => {
   observer?.disconnect()
   window.removeEventListener('resize', measure)
   clearTimeout(pin)
+  hush()
   // Leave nothing behind: a tile frozen mid-lift would stay offset.
   for (const tile of tiles) {
     tile.colour.style.opacity = ''
@@ -251,6 +301,7 @@ onUnmounted(() => {
         :src="item.icon"
         :invert-on-dark="item.invertOnDark"
         :wide="item.wide"
+        :interactive="!voice"
       />
     </div>
 

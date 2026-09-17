@@ -20,10 +20,10 @@ import { ref } from 'vue'
 
 import { isPointerDevice, usePointer } from '../../composables/usePointer'
 
-defineProps({
+const props = defineProps({
   interactiveSelector: {
     type: String,
-    default: 'a,button,[role="button"],input,select,textarea,[data-magnetic]',
+    default: 'a,button,[role="button"],input,select,textarea,[data-magnetic],[data-interactive]',
   },
 })
 
@@ -46,7 +46,7 @@ usePointer((pointer) => {
     actually behaves like a control.
   */
   const el = document.elementFromPoint(pointer.x, pointer.y)
-  const hot = Boolean(el?.closest('a,button,[role="button"],input,select,textarea,[data-magnetic]'))
+  const hot = Boolean(el?.closest(props.interactiveSelector))
 
   if (ring.value) {
     ring.value.style.transform = `${move} scale(${hot ? 1 : 0.55})`

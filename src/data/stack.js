@@ -1,9 +1,10 @@
 /*
   The four technology groups of the Stack section, in display order.
 
-  Four, in a two-column grid. The AI tools live in the last group rather than in
-  one of their own: merged with the tooling they still lead it, and a group of
-  two icons beside a group of ten would have read as an accident.
+  Four, in a two-column grid. The AI tools close the last group rather than
+  opening it: they are the newest thing there and the ones a reader is most
+  likely to be looking for, and a pair at the end of a row is easier to find
+  than a pair at the start of it.
 
   Group labels come from the dictionary (stack.g1…g4) because they are
   interface words, not prose — they happen to be identical in both languages
@@ -64,8 +65,6 @@ export const stack = [
   {
     labelKey: 'stack.g4',
     items: [
-      { name: 'Claude', icon: '/icons/claude/claude-original.svg', invertOnDark: false },
-      { name: 'OpenCode', icon: '/icons/opencode/opencode-original.svg', invertOnDark: true },
       { name: 'Git', icon: '/icons/git/git-original.svg', invertOnDark: false },
       { name: 'GitHub', icon: '/icons/github/github-original.svg', invertOnDark: true },
       { name: 'Docker', icon: '/icons/docker/docker-original.svg', invertOnDark: false },
@@ -74,6 +73,8 @@ export const stack = [
       { name: 'IntelliJ IDEA', icon: '/icons/intellij/intellij-original.svg', invertOnDark: false },
       { name: 'Vim', icon: '/icons/vim/vim-plain.svg', invertOnDark: false },
       { name: 'Linux', icon: '/icons/linux/linux-plain.svg', invertOnDark: true },
+      { name: 'Claude', icon: '/icons/claude/claude-original.svg', invertOnDark: false },
+      { name: 'OpenCode', icon: '/icons/opencode/opencode-original.svg', invertOnDark: true },
     ],
   },
 ]
