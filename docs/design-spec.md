@@ -401,11 +401,12 @@ track wraps never shows two solid words side by side.
 Behind it sits a **second band** of the same words, outline only in `--on-acc` at `opacity:.45`, a step
 higher (`margin-top:-.12em`) and travelling the **other way**. That is where the depth comes from.
 
-It moves with the **scroll** and only with the scroll: `TalkBand` works out how far the band has
-crossed the viewport (0 when its top edge reaches the bottom of the screen, 1 when its bottom edge has
-left the top) and writes it to `--band-progress`, which the two layers read — the front forwards, the
-backwards one as `1 - progress`. It never moves on its own. Under `prefers-reduced-motion` the value
-is never written and the band sits at the start. Decorative: `aria-hidden`.
+It moves with the **scroll** and only with the scroll. Where the browser has scroll-driven animations
+that is a `bandSlide` animation on a `view()` timeline — the compositor drives it, so the band keeps
+up with the scroll even when the main thread is busy. Where it does not, `TalkBand` works the same
+progress out by hand (0 when the band's top edge reaches the bottom of the screen, 1 when its bottom
+edge has left the top) and writes it onto the two tracks. Neither path ever moves on its own, and
+under `prefers-reduced-motion` neither runs. Decorative: `aria-hidden`.
 
 Below it, an inner column carries the gutter and the 1180px cap the other sections use — the section
 itself has neither, because the band has to reach both edges. Inside: the heading, the form, the rows

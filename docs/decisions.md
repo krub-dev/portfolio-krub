@@ -1257,16 +1257,27 @@ The section was rebuilt around a band, the networks written out, and (next) a fo
 **The band is CSS and one scroll read, not GSAP, and it is two bands.** The reference does two
 things, and neither needs a library: the words alternating between solid and outline is
 `-webkit-text-stroke` with a transparent fill, and "passing by" is the marquee the site already has
-under the hero — two copies and a `-50%` slide. What is new is only what drives it, and that changed
-once: the first version used `animation-timeline: view()`, which is the elegant way, and its fallback
-for browsers without scroll-driven animations was the marquee's clock — so on those browsers the band
-moved **on its own**, which is exactly what the owner did not want. It now works out the progress in
-the component and writes it to `--band-progress`, and the transform stays in CSS. Fifteen lines, no
-new listener (it reads the one `useScroll` already owns), and the same behaviour in every browser.
+under the hero — two copies and a `-50%` slide. What is new is only what drives it, and that took
+three attempts:
+
+1. `animation-timeline: view()` alone, with the marquee as the fallback for browsers without
+   scroll-driven animations — so on those browsers the band moved **on its own**, which is exactly
+   what the owner did not want.
+2. The progress worked out in the component and written to a custom property. It never moved on its
+   own, but the owner reported it as jerky, and the reasons are visible in the code: the value was
+   computed on the main thread on every scroll tick, and a custom property inherits, so setting it on
+   the band invalidated the computed style of all 216 letters — letters that carry a text stroke and
+   are expensive to re-raster.
+3. What ships: the `view()` timeline where the browser has it, because the **compositor** drives it
+   and it keeps up with the scroll even when the main thread is busy; and the hand-written progress
+   where it does not, writing the transform straight onto the two tracks so nothing invalidates the
+   subtree. The component feature-detects once and only one path ever runs, and neither moves on its
+   own.
+
 GSAP would have been 50–70 KB for a keyframe and a transform, and it brings its own ticker, against a
-project whose rule is one `requestAnimationFrame` for everything that moves. The band wears the
-accent background the marquee wears, at display size. A second copy of the words, outline only and a
-step higher, travels the other way behind the first: that is what gives the band its depth.
+project whose rule is one `requestAnimationFrame` for everything that moves. The band wears the accent
+background the marquee wears, at display size. A second copy of the words, outline only and a step
+higher, travels the other way behind the first: that is what gives the band its depth.
 
 **The alternation is by word, not by letter.** Per letter it read as noise — an outline `l` between
 two solid ones looks like a mistake rather than a pattern — and the first attempt at it was exactly

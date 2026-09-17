@@ -57,10 +57,15 @@ test.describe('chrome reacts to scrolling', () => {
       // Deliberately deterministic: scrollIntoViewIfNeeded may not scroll at
       // all when the element is already partly visible, which leaves the
       // section short of the spy's 35%-of-viewport line. Put its top edge at a
-      // known 100px instead.
+      // known 100px instead — and instantly, because the page scrolls smoothly
+      // by default and this assertion is about where the mark lands, not about
+      // the animation getting there.
       await page.evaluate((sectionId) => {
         const el = document.getElementById(sectionId)
-        window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100)
+        window.scrollTo({
+          top: el.getBoundingClientRect().top + window.scrollY - 100,
+          behavior: 'instant',
+        })
       }, id)
       await expect(active).toHaveCount(1)
       await expect(active).toHaveAttribute('href', `/#${id}`)

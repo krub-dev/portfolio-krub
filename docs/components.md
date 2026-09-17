@@ -212,8 +212,8 @@ is the full-bleed container the band needs, and an inner column carries the meas
 ### TalkBand
 `text`. The band at the top of Contact: on the accent background, display type with the words
 alternating between solid and outline over a second, fainter copy travelling the other way. It moves
-with the scroll and only with the scroll — the component writes the band's progress into
-`--band-progress` and the two layers read it. Decorative (`aria-hidden`).
+with the scroll and only with the scroll — a `view()` timeline where the browser has one, and the
+same progress worked out by hand where it does not. Decorative (`aria-hidden`).
 
 ### BrandName
 The KIKO / RUBIO reveal at the top of the hero. A pure CSS animation — the letters are markup, not

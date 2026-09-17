@@ -74,30 +74,45 @@ const copies = computed(() => {
 
 /*
   How far the band has crossed the viewport: 0 when its top edge sits at the
-  bottom of the screen, 1 when its bottom edge has left the top. Written as a
-  variable rather than applied here, so both layers can read the same number and
-  move opposite ways.
+  bottom of the screen, 1 when its bottom edge has left the top.
+
+  This is the FALLBACK. Where the browser has scroll-driven animations the slide
+  is a CSS animation on a view() timeline, which the compositor drives: it stays
+  in step with the scroll even when the main thread is busy, which is what makes
+  it feel smooth. Written by hand it can only be as smooth as the main thread,
+  so this path is for the browsers that do not have the feature.
+
+  The transform is written straight onto the two tracks rather than through a
+  custom property on the band: a custom property inherits, so setting it on the
+  band invalidated the computed style of all 216 letters on every scroll tick,
+  and those letters carry a text stroke, which is expensive to re-raster.
 */
 function slide() {
   const el = band.value
   if (!el) return
 
+  const front = el.querySelector('.layer.front .track')
+  const back = el.querySelector('.layer.back .track')
+  if (!front || !back) return
+
   const rect = el.getBoundingClientRect()
   const range = window.innerHeight + rect.height
   const progress = range > 0 ? Math.min(1, Math.max(0, (window.innerHeight - rect.top) / range)) : 0
 
-  el.style.setProperty('--band-progress', progress.toFixed(4))
+  front.style.transform = `translateX(${(progress * -50).toFixed(3)}%)`
+  back.style.transform = `translateX(${((1 - progress) * -50).toFixed(3)}%)`
 }
 
 /*
   Decorative motion, so under reduced motion it does not happen at all and the
-  band sits at the start. The global [data-motion="decorative"] rule cannot do
-  this one: there is no animation to switch off, the number comes from here.
+  band sits at the start: the global [data-motion="decorative"] rule switches the
+  CSS animation off, and this check keeps the fallback from running.
 */
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+const composited = CSS.supports('animation-timeline', 'view()')
 
 onMounted(() => {
-  if (reduced.matches) return
+  if (composited || reduced.matches) return
   slide()
   window.addEventListener('resize', slide, { passive: true })
 })
@@ -105,7 +120,8 @@ onMounted(() => {
 onUnmounted(() => window.removeEventListener('resize', slide))
 
 watch(y, () => {
-  if (!reduced.matches) slide()
+  if (composited || reduced.matches) return
+  slide()
 })
 </script>
 
@@ -117,7 +133,7 @@ watch(y, () => {
       class="layer"
       :class="layer"
     >
-      <div class="track">
+      <div class="track" data-motion="decorative">
         <div v-for="(copy, c) in copies" :key="c" class="run">
           <span
             v-for="(cell, i) in copy"
@@ -141,7 +157,10 @@ watch(y, () => {
 .band {
   position: relative;
   overflow: clip;
-  padding: clamp(20px, 3vw, 48px) 0;
+  /* Tight on purpose: with a display size this large, a line-height of 1 plus a
+     generous padding leaves a band of empty accent under the caps, which reads
+     as a mistake rather than as breathing room. */
+  padding: clamp(14px, 2vw, 30px) 0;
   /* The marquee's band, at this size. */
   background: var(--acc);
   color: var(--on-acc);
@@ -151,7 +170,7 @@ watch(y, () => {
      size rather than in pixels that only work at one width. */
   font-size: clamp(64px, 13vw, 190px);
   font-weight: 700;
-  line-height: 0.92;
+  line-height: 0.8;
   letter-spacing: -0.03em;
   text-transform: uppercase;
 }
@@ -166,20 +185,33 @@ watch(y, () => {
   position: absolute;
   top: 0;
   left: 0;
-  margin-top: -0.12em;
+  margin-top: -0.1em;
   opacity: 0.45;
 }
 
 .track {
   display: flex;
   width: max-content;
-  /* The slide. --band-progress is 0 to 1, written by the script above. */
-  transform: translateX(calc(var(--band-progress, 0) * -50%));
 }
 
-/* The same number, read backwards: this one travels the other way. */
-.layer.back .track {
-  transform: translateX(calc((1 - var(--band-progress, 0)) * -50%));
+/*
+  The slide, where the browser can do it properly. A view() timeline is driven by
+  the compositor, so the band keeps up with the scroll even when the main thread
+  is busy — which is what the hand-written version below cannot promise. The
+  fallback never runs where this applies: the component checks for the feature.
+*/
+@supports (animation-timeline: view()) {
+  .track {
+    animation-name: bandSlide;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: view();
+  }
+
+  /* The same travel, read backwards: this one moves the other way. */
+  .layer.back .track {
+    animation-direction: reverse;
+  }
 }
 
 .run {
