@@ -85,6 +85,15 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
   await expect(dialog).toBeVisible()
   await expect(dialog.locator('.name')).toHaveText(name.trim())
 
+  /*
+    The media strip spans the whole panel. As a flex item with an aspect-ratio
+    and only a max-height, its width was derived from its height — about 600px
+    in a 1000px panel, with the rest of the row left empty.
+  */
+  const panelBox = await dialog.boundingBox()
+  const mediaBox = await dialog.locator('.carousel').boundingBox()
+  expect(mediaBox.width).toBeGreaterThan(panelBox.width * 0.95)
+
   // Focus moved inside, and the page behind cannot scroll.
   await expect(dialog.locator(':focus')).toHaveCount(1)
   await expect(page.locator('body')).toHaveCSS('overflow', 'hidden')
@@ -339,6 +348,38 @@ test('the stack is monochrome until the pointer reaches a tile', async ({ page, 
   // And the readout names the tile, which is the only visible name there is.
   const readout = page.locator('#stack .readout').first()
   await expect(readout).toHaveText('Java')
+  await expect(readout).toHaveCSS('opacity', '1')
+})
+
+test('on touch the stack lights with the scroll, and a tap names a tile', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'this is the path taken when there is no pointer')
+
+  await page.goto('/')
+
+  // The light stands still and the tiles scroll through it, so scrolling is
+  // what reveals them.
+  const tile = page.locator('#stack .tile').first()
+  await tile.evaluate((el) => el.scrollIntoView({ behavior: 'instant', block: 'center' }))
+
+  // Polled, because a scroll event is delivered a frame after the scroll
+  // itself, so a plain read can land before the sweep has run.
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          [...document.querySelectorAll('#stack .colour')].filter(
+            (el) => Number(el.style.opacity || 0) > 0.2,
+          ).length,
+      ),
+    )
+    .toBeGreaterThan(0)
+
+  // A tap names the tile where it sits, without moving anything.
+  const name = await tile.getAttribute('data-name')
+  await tile.click()
+
+  const readout = page.locator('#stack .readout').first()
+  await expect(readout).toHaveText(name)
   await expect(readout).toHaveCSS('opacity', '1')
 })
 

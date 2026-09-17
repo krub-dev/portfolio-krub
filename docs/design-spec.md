@@ -17,7 +17,7 @@ vertical order:
 | — | — | Marquee | Yellow band with two looping phrases |
 | 00 | `me` | About | Three paragraphs, experience/education tabs, CV button, photo |
 | 01 | `projects` | Projects | Card grid; clicking a card opens a detail modal |
-| 02 | `stack` | Stack | Six groups of technology icons, two per row |
+| 02 | `stack` | Stack | Four groups of technology icons, two per row |
 | — | `testimonials` | Testimonials | Two quotes. **Optional section**, toggled by config |
 | 03 | `contact` | Contact | Large headline, email CTA, three social icons |
 | — | — | Footer | Pinned to the bottom: credit, copyright, TOP button, city and Madrid clock |
@@ -354,7 +354,9 @@ radius 22, background `--surface`, border `--line`.
 
 - Header (`padding:18px 22px`, bottom border): the `[0N]` index in yellow mono 11px, the path
   `/projects/<slug>` in mono 13px `--fg-2`, and a 38×38 radius-10 ✕ button.
-- Carousel: `aspect-ratio:16/9`, `max-height:40svh`, the same diagonal stripes, label
+- Carousel: `width:100%` **and** `aspect-ratio:16/9` with `max-height:40svh` — the width is explicit
+  because with only an aspect-ratio and a max-height the width is derived *from* the height, which
+  left the right of the row empty. The same diagonal stripes, label
   "IMAGE n / total · SLUG"; ← → arrows at 44×44 radius 12 with background
   `color-mix(in srgb, var(--ink) 70%, transparent)`; 7px dots centred at the bottom (active
   yellow, the rest `--line`). Indices wrap around (modulo).
@@ -366,17 +368,20 @@ radius 22, background `--surface`, border `--line`.
 
 ### 3.8 Stack
 
-`grid; repeat(2, minmax(0,1fr)); gap:44px 40px`, collapsing to one column at 900px. **Six** groups —
-Languages, Backend & data, Frontend & motion, Design, Tools & workflow, AI — two per row, so the AI
-block is a block of its own and not three letters buried in a title. Each group: an uppercase mono
-13px `--fg-3` label with a `border-bottom` and `padding-bottom:12px`, and the icons below in
-`flex-wrap` with `gap:12px`.
+`grid; repeat(2, minmax(0,1fr)); gap:44px 40px`, collapsing to one column at 900px. **Four** groups —
+Languages, Backend & data, Frontend & design, Tools & AI — two per row. The AI tools lead the last
+group rather than having one of their own: a group of two icons beside a group of ten would have read
+as an accident. Each group: an uppercase mono 13px `--fg-3` label with a `border-bottom` and
+`padding-bottom:12px`, and the icons below in `flex-wrap` with `gap:12px`.
 
-Icon tile: 60×60, radius 13, background `--surface-2`, border `--line`,
-`box-sizing:border-box`. Every logo renders at 38×38, centred. The dark monochrome logos (Express,
-Prisma, Three.js, GitHub, Linux, Framer, OpenCode) would vanish against `--surface-2` in the dark
-theme, so both of their copies carry `[data-invert-dark]`, inverted **in dark theme only** with
-`filter: invert(1) hue-rotate(180deg)`; no filter in light.
+Icon tile: 60×60, radius 13, background `--surface-2`, border `--line`, `box-sizing:border-box`;
+48×48 below 900px, where the section is read at arm's length and a wall of 60px tiles was taking most
+of the screen. Every logo renders at 38×38 (30×30 on mobile), centred, except a **wordmark**, which
+gets a wider box — GSAP's is almost 3:1 and would otherwise render as a thin stripe in the middle of
+its tile. The dark monochrome logos (Express, Prisma, Three.js, GitHub, Linux, Framer, OpenCode,
+GSAP) would vanish against `--surface-2` in the dark theme, so both of their copies carry
+`[data-invert-dark]`, inverted **in dark theme only** with `filter: invert(1) hue-rotate(180deg)`;
+no filter in light.
 
 **The grid is monochrome at rest.** Each logo is drawn twice, one grey copy at `opacity:.6` (and
 `grayscale(1)` when the logo has colour of its own) and one in colour on top at `opacity:0`, and
@@ -392,9 +397,15 @@ IDEA" does not fit in 60px at a legible size — and a caption under every tile 
 grid apart or overlap the row below. It is `aria-hidden`: each icon already carries `alt` with its
 name, and no longer `title`, which would have shown a second, slower name over the readout.
 
-The whole effect hangs off the site's single pointer loop (`usePointer`), so it costs no second
-`requestAnimationFrame`, and it is off on touch and under `prefers-reduced-motion` — there the grid
-is simply grey.
+**On touch there is no cursor, so the light stands still and the tiles scroll through it**: the same
+falloff, measured from a point at `55%` of the viewport height, with no easing — the scroll only calls
+it when it moves, and a half-finished ease would freeze on screen. A tap names the tile under it where
+it sits, for `1.8s`, clamped inside the screen: a tooltip you can only get by hovering is a tooltip
+half the visitors never see.
+
+Either path hangs off machinery the site already owns — `usePointer` and `useScroll` each keep ONE
+listener for the whole app — so it costs no second `requestAnimationFrame` and no extra scroll
+listener. Under `prefers-reduced-motion` it does nothing and the grid stays grey.
 
 This section has **no footnote**.
 
@@ -659,7 +670,7 @@ None of this belongs inside a template, and there are two homes for it (decision
 - **Timelines** (`experience.js`, `education.js`): two and four entries. Each has `from`, `to`
   (`null` for "still going"), a `current` flag that paints the years in `--acc-text`, and an
   `en` / `es` object with `title` and `body`.
-- **Stack** (`stack.js`): six groups with a name and a list of technologies; each technology
+- **Stack** (`stack.js`): four groups with a name and a list of technologies; each technology
   with a name, an icon file and whether it needs inverting in dark theme.
 - **Socials** (`socials.js`): name, URL and icon, plus `email`, `cvPath` and `photoPath`.
 - **Testimonials** (`testimonials.js`): quote, name, role, avatar. Placeholders; the section is

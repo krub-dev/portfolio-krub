@@ -7,8 +7,11 @@
   animated `filter: grayscale()` because a filter repaints the tile on every
   frame, while an opacity is composited — and this runs at pointer speed.
 
-  Every logo renders at 38px inside the 60px tile. box-sizing:border-box stays on
-  the tile, since the project has no global border-box.
+  Every logo renders at 38px inside the 60px tile, and at 30px inside 48px on
+  mobile, where the section is read at arm's length and a wall of 60px tiles was
+  taking most of the screen. A wordmark (GSAP, almost 3:1) gets a wider box, or
+  it would render as a thin stripe in the middle of its tile. box-sizing:
+  border-box stays on the tile, since the project has no global border-box.
 
   The dark monochrome logos (Express, Prisma, Three.js, GitHub, Linux, Framer,
   OpenCode) would disappear against --surface-2 in the dark theme, so BOTH copies
@@ -20,11 +23,12 @@ defineProps({
   name: { type: String, required: true },
   src: { type: String, required: true },
   invertOnDark: { type: Boolean, default: false },
+  wide: { type: Boolean, default: false },
 })
 </script>
 
 <template>
-  <span class="tile" :data-name="name">
+  <span class="tile" :class="{ wide }" data-tile :data-name="name">
     <img
       class="icon base"
       :class="{ grey: !invertOnDark }"
@@ -65,6 +69,28 @@ defineProps({
   width: 38px;
   height: 38px;
   display: block;
+}
+
+/* A wordmark gets the width; the SVG letterboxes itself to its own ratio. */
+.tile.wide .icon {
+  width: 52px;
+}
+
+@media (max-width: 900px) {
+  .tile {
+    width: 48px;
+    height: 48px;
+    border-radius: 11px;
+  }
+
+  .icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .tile.wide .icon {
+    width: 42px;
+  }
 }
 
 /* What shows when the spotlight is elsewhere: the same logo without its colour,

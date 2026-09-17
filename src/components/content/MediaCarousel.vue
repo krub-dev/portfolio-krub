@@ -55,6 +55,12 @@ function go(step) {
 <style scoped>
 .carousel {
   position: relative;
+  /* width, explicitly. As a flex item with only an aspect-ratio and a
+     max-height, the width was derived FROM the height — 40svh tall meant 40svh
+     × 16/9 wide, about 600px in a 1000px panel, with the rest of the row left
+     empty. The aspect-ratio now only decides the height on narrow screens,
+     where 100% × 9/16 is under the cap. */
+  width: 100%;
   aspect-ratio: 16 / 9;
   max-height: 40svh;
   flex: 0 0 auto;

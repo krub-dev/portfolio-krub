@@ -200,7 +200,7 @@ onMounted(readTokens)
         />
       </div>
 
-      <p class="note"><code>StackGroup</code> → <code>TechIcon</code> — the invert-on-dark ones are in Backend, Frontend, Design, Tools and AI.</p>
+      <p class="note"><code>StackGroup</code> → <code>TechIcon</code> — the invert-on-dark ones are in Backend, Frontend and Tools, and GSAP is the wordmark.</p>
       <div class="stack-grid">
         <StackGroup v-for="g in stack" :key="g.labelKey" :label="t(g.labelKey)" :items="g.items" />
       </div>

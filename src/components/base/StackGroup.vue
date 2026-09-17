@@ -3,25 +3,30 @@
   One of the four Stack groups: a mono label with a rule under it, then the
   icons wrapping below.
 
-  The group is monochrome at rest and the pointer lights what it passes near:
-  the colour copy fades in, the tile lifts a few pixels, and a mono readout
-  names the tile closest to the cursor. It hangs off usePointer — the site's
-  single loop, shared with the cursor, the magnetic hover and the parallax — so
-  it costs no second requestAnimationFrame, and it does nothing at all on touch
-  or under reduced motion, where the group simply stays grey.
+  The group is monochrome at rest and the light comes from wherever there is
+  one to come from:
 
-  Why a readout and not a name inside the tile: "IntelliJ IDEA" does not fit in
-  64px at any legible size, and a caption under every tile would either push the
-  grid apart or overlap the row below.
+  - On a pointer device it follows the cursor. Every tile within reach fades its
+    colour copy in, lifts a few pixels, and a mono readout names the nearest one.
+  - On touch there is no cursor, so the light stands still and the tiles scroll
+    through it: the page scrolling is what reveals them. A tap names a tile
+    where it sits, for a moment, because a tooltip you can only get by hovering
+    is a tooltip half the visitors never see.
+
+  Either way it hangs off the site's shared machinery — usePointer and useScroll
+  each own ONE listener for the whole app — so this costs no extra
+  requestAnimationFrame and no extra scroll listener. Under reduced motion it
+  does nothing at all and the grid stays grey.
 */
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import TechIcon from './TechIcon.vue'
-import { usePointer } from '../../composables/usePointer'
+import { isPointerDevice, usePointer } from '../../composables/usePointer'
+import { useScroll } from '../../composables/useScroll'
 
 defineProps({
   label: { type: String, required: true }, // already translated
-  items: { type: Array, default: () => [] }, // [{ name, icon, invertOnDark }]
+  items: { type: Array, default: () => [] }, // [{ name, icon, invertOnDark, wide }]
 })
 
 // How far the light carries, and how close a tile must be to be named.
@@ -34,6 +39,18 @@ const GROW = 0.06
 const EASING = 0.16
 // How far the readout sits from the cursor, clear of the dot.
 const NAME_OFFSET = 16
+// Where the standing light sits on screen, as a fraction of the viewport.
+const LINE = 0.55
+// How long a tapped name stays up.
+const PIN = 1800
+
+const pointerDevice = isPointerDevice()
+/*
+  While the page scrolls, this is only called when the scroll moves, so it
+  cannot ease: a half-finished ease would freeze on screen the moment the
+  scrolling stops.
+*/
+const STEP = pointerDevice ? EASING : 1
 
 const root = ref(null)
 const icons = ref(null)
@@ -47,6 +64,7 @@ let nameX = 0
 let nameY = 0
 let nameLit = 0
 let namePlaced = false
+let pin = null
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 
@@ -54,7 +72,7 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
   Positions relative to the group, never to the page. The group moves down when
   anything above it grows — a project added, the testimonials switched on — and
   page coordinates cached at mount would quietly light the wrong tile. One rect
-  per frame for the group, then arithmetic on the cached offsets.
+  per call for the group, then arithmetic on the cached offsets.
 */
 function measure() {
   const box = root.value
@@ -62,7 +80,7 @@ function measure() {
   if (!box || !grid) return
 
   const origin = box.getBoundingClientRect()
-  tiles = Array.from(grid.querySelectorAll('.tile')).map((el) => {
+  tiles = Array.from(grid.querySelectorAll('[data-tile]')).map((el) => {
     const rect = el.getBoundingClientRect()
     return {
       el,
@@ -75,23 +93,25 @@ function measure() {
   lit = tiles.map(() => 0)
 }
 
-function frame(pointer) {
+/*
+  Lights every tile near (x, y), which are viewport coordinates. Returns the
+  nearest one, so the caller can name it.
+*/
+function paint(x, y, step) {
   const box = root.value
-  if (reduced.matches || !box || !tiles.length) return
-
-  const origin = box.getBoundingClientRect()
   let nearest = null
   let nearestDistance = Infinity
 
+  if (!box || !tiles.length) return { nearest, distance: nearestDistance }
+
+  const origin = box.getBoundingClientRect()
+
   for (let i = 0; i < tiles.length; i += 1) {
     const tile = tiles[i]
-    const distance = Math.hypot(
-      pointer.x - (origin.left + tile.x),
-      pointer.y - (origin.top + tile.y),
-    )
+    const distance = Math.hypot(x - (origin.left + tile.x), y - (origin.top + tile.y))
     // Falls off with distance, and squared so the centre is clearly the centre.
     const target = distance < REACH ? (1 - distance / REACH) ** 1.6 : 0
-    const value = lit[i] + (target - lit[i]) * EASING
+    const value = lit[i] + (target - lit[i]) * step
     lit[i] = value
 
     if (value > 0.01) {
@@ -110,10 +130,18 @@ function frame(pointer) {
     }
   }
 
-  const label = readout.value
-  if (!label) return
+  return { nearest, distance: nearestDistance }
+}
 
-  const close = nearestDistance < NAME_REACH
+// The pointer path: the light is the cursor and the readout trails it.
+function frame(pointer) {
+  if (reduced.matches) return
+
+  const { nearest, distance } = paint(pointer.x, pointer.y, STEP)
+  const label = readout.value
+  if (!label || !nearest) return
+
+  const close = distance < NAME_REACH
 
   /*
     Snap on the first frame of an appearance and trail after that. A readout
@@ -143,11 +171,57 @@ function frame(pointer) {
   label.style.opacity = nameLit.toFixed(3)
 }
 
+// The touch path: the light stands still and the tiles scroll through it.
+function sweep() {
+  if (reduced.matches) return
+  paint(window.innerWidth / 2, window.innerHeight * LINE, 1)
+}
+
+/*
+  A tap names the tile under it, where it sits. Static: the readout does not
+  follow the finger, it appears, holds and goes. Only on touch — on a pointer
+  device the cursor has already named it, and this would fight the frame loop
+  for the same element.
+*/
+function onTap(event) {
+  if (pointerDevice || reduced.matches) return
+
+  const el = event.target.closest('[data-tile]')
+  const tile = el && tiles.find((candidate) => candidate.el === el)
+  const label = readout.value
+  if (!tile || !label) return
+
+  const rect = el.getBoundingClientRect()
+  label.textContent = tile.name
+  named = tile.name
+  // Measured before placing, so a long name near the right edge is pulled back
+  // inside the screen instead of running off it.
+  const x = Math.min(rect.left, window.innerWidth - label.offsetWidth - 12)
+  const y = Math.min(rect.bottom + 8, window.innerHeight - 28)
+
+  label.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`
+  label.style.opacity = '1'
+
+  clearTimeout(pin)
+  pin = setTimeout(() => {
+    label.style.opacity = '0'
+    named = null
+    nameLit = 0
+    namePlaced = false
+  }, PIN)
+}
+
 usePointer(frame)
+
+const { y } = useScroll()
+if (!pointerDevice) watch(y, sweep)
 
 onMounted(() => {
   // A frame first, so the grid has been laid out and the fonts have settled.
-  requestAnimationFrame(measure)
+  requestAnimationFrame(() => {
+    measure()
+    if (!pointerDevice) sweep()
+  })
   // And again whenever the group changes size: a rewrap, a language switch.
   observer = new ResizeObserver(measure)
   if (root.value) observer.observe(root.value)
@@ -157,6 +231,7 @@ onMounted(() => {
 onUnmounted(() => {
   observer?.disconnect()
   window.removeEventListener('resize', measure)
+  clearTimeout(pin)
   // Leave nothing behind: a tile frozen mid-lift would stay offset.
   for (const tile of tiles) {
     tile.colour.style.opacity = ''
@@ -168,13 +243,14 @@ onUnmounted(() => {
 <template>
   <div ref="root" class="group">
     <p class="label">{{ label }}</p>
-    <div ref="icons" class="icons">
+    <div ref="icons" class="icons" @click="onTap">
       <TechIcon
         v-for="item in items"
         :key="item.name"
         :name="item.name"
         :src="item.icon"
         :invert-on-dark="item.invertOnDark"
+        :wide="item.wide"
       />
     </div>
 
@@ -222,5 +298,11 @@ onUnmounted(() => {
   text-transform: uppercase;
   color: var(--acc-text);
   white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .icons {
+    gap: 10px;
+  }
 }
 </style>

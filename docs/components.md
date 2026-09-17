@@ -102,16 +102,19 @@ Renders a `<button>` when neither `to` nor `href` is given. Default slot: the co
 | `count` | number \| null | yellow superscript (projects only) |
 
 ### TechIcon
-`name`, `src`, `invertOnDark` (boolean). Paints the 60px tile and draws the logo twice — a grey,
-held-back copy and a colour one on top — so the spotlight can fade the colour in with an opacity
-instead of animating a filter. Both copies render at 38px; `invertOnDark` puts `[data-invert-dark]`
-on both. It also carries `data-name`, which is what the readout reads.
+`name`, `src`, `invertOnDark` (boolean), `wide` (boolean). Paints the 60px tile (48px below 900px)
+and draws the logo twice — a grey, held-back copy and a colour one on top — so the spotlight can fade
+the colour in with an opacity instead of animating a filter. Both copies render at 38px (30px on
+mobile); `invertOnDark` puts `[data-invert-dark]` on both, and `wide` gives a wordmark a wider box so
+it is not a stripe in the middle of its tile. It carries `data-tile` and `data-name`, which is what
+the readout and the tap handler read.
 
 ### StackGroup
-`label` (string), `items` (array of TechIcon). It also runs the spotlight: it lights the tiles the
-pointer passes near, lifts them, and writes the name of the nearest one into its own mono readout.
-That hangs off `usePointer` — one loop for the whole site — and does nothing on touch or under
-reduced motion.
+`label` (string), `items` (array of TechIcon). It also runs the light: on a pointer device it lights
+the tiles the cursor passes near, lifts them, and writes the name of the nearest one into its own mono
+readout; on touch the light stands still and the tiles scroll through it, and a tap names one where it
+sits. It hangs off `usePointer` and `useScroll` — one loop and one listener for the whole site — and
+does nothing under reduced motion.
 
 ### SocialLink
 `name` (becomes the aria-label), `href`, `icon` (key into its own inline SVG paths).
@@ -205,8 +208,8 @@ No `id`: it is a band, not a destination.
 modal itself lives in `HomeView`, so the section does not own it.
 
 ### StackSection
-`id="stack"`. The six groups from `src/data/stack.js` in a two-column grid: `StackGroup` →
-`TechIcon`. The groups carry the pointer work; the section is just the grid and the heading.
+`id="stack"`. The four groups from `src/data/stack.js` in a two-column grid: `StackGroup` →
+`TechIcon`. The groups carry the light; the section is just the grid and the heading.
 
 ### ContactSection
 `id="contact"`. The heading, the band, the form, and one full-width row per contact (the address

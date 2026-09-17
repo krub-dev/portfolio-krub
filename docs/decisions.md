@@ -1368,15 +1368,21 @@ Three smaller calls:
 
 **Date:** 2026-09-17 — **Status:** active
 
-The section was faithful to the reference and flat: twenty-nine full-colour logos in tiles, the only
+The section was faithful to the reference and flat: thirty full-colour logos in tiles, the only
 place on the site with that much colour at once. The backlog had it as "monochrome, animation,
 interaction, a mask" and the mask never happened. What shipped is the first three.
 
-- **Six blocks, two per row.** Four groups spread across the width read as one continuous band of
-  logos, and the AI tools had nowhere to go that did not hide them — inside "Tools & workflow" they
-  are two entries in a list of eight. Six blocks in two columns gives AI its own, and the tiles went
-  from 44px to 60px and the labels from 11px to 13px so a group reads as a block rather than as a
-  swatch. Four groups would still fit the same grid if the AI block is ever merged back.
+- **Four blocks, two per row, and the AI inside the last.** Four groups spread across the width read
+  as one continuous band of logos, so they went to two columns, and the tiles from 44px to 60px with
+  the labels from 11px to 13px so a group reads as a block rather than as a swatch. AI first got a
+  block of its own and then went back into Tools & AI: two icons beside a group of ten read as an
+  accident, and leading that group they are the first thing in it anyway. Blender, Figma, Framer,
+  GSAP, Claude and OpenCode joined the grid on the way.
+- **Touch gets the light too.** No cursor means no hover, and a section that only comes alive under a
+  mouse is dead on the phone it is most likely to be read on. There the light stands still at 55% of
+  the viewport and the tiles scroll through it — no easing, because the scroll only calls it when it
+  moves and a half-finished ease would freeze on screen — and a tap names a tile where it sits, for a
+  moment. Both paths run the same falloff code; only the source of the light and the step differ.
 
 - **Monochrome by drawing the logo twice.** Each icon renders a grey copy under a colour copy, and
   the spotlight fades the colour one in with `opacity`. The obvious version animates

@@ -1,6 +1,6 @@
 <script setup>
 /*
-  Section 02. Six groups of technology icons, straight from src/data/stack.js.
+  Section 02. Four groups of technology icons, straight from src/data/stack.js.
 */
 import { useI18n } from 'vue-i18n'
 
@@ -52,5 +52,4 @@ const { t } = useI18n()
     grid-template-columns: minmax(0, 1fr);
     gap: 32px;
   }
-}
-</style>
+}</style>

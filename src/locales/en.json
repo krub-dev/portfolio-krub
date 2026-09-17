@@ -39,10 +39,8 @@
   "stack": {
     "g1": "Languages",
     "g2": "Backend & data",
-    "g3": "Frontend & motion",
-    "g4": "Design",
-    "g5": "Tools & workflow",
-    "g6": "AI"
+    "g3": "Frontend & design",
+    "g4": "Tools & AI"
   },
   "actions": {
     "cv": "Download CV (PDF)",

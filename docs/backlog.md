@@ -91,11 +91,12 @@ section, folded together where they overlapped.
   before starting. When it lands, its download is the only one on this site worth reporting: a real
   percentage from `THREE.LoadingManager` inside the stage, and a delayed shimmer while it arrives —
   see the skeleton note below and decision 54.
-- [x] **Rethink the stack section.** Done on 2026-09-17: six blocks in two columns (AI gets its own),
-  tiles from 44px to 60px and labels from 11px to 13px, the grid monochrome at rest — each logo drawn
-  twice, a held-back grey copy under a colour one — and the pointer lights the tiles it passes near
-  and names the nearest one in mono. No mask, and no softened edges. It rides the existing pointer
-  loop, so it costs no second `requestAnimationFrame`, and on touch it stays grey. See decision 58.
+- [x] **Rethink the stack section.** Done on 2026-09-17: four blocks in two columns, tiles from 44px
+  to 60px and labels from 11px to 13px (48px tiles on mobile, where 60px was eating the screen), the
+  grid monochrome at rest — each logo drawn twice, a held-back grey copy under a colour one — and the
+  light following the cursor, or standing still while the tiles scroll through it on touch, with a tap
+  naming one. No mask, and no softened edges. It rides `usePointer` and `useScroll`, the app's single
+  loop and single scroll listener. See decision 58.
 - [x] **Give the contact section more weight.** Rebuilt on 2026-09-17: a full-bleed band on the
   accent background, its words alternating solid and outline over a second, fainter copy travelling
   the other way, and moving with the scroll and only with the scroll. One full-width row per contact
