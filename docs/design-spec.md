@@ -380,11 +380,15 @@ This section has **no footnote**.
 
 ### 3.9 Testimonials (optional)
 
-Shown or hidden by config. Two cards: border `--line`, radius 18, background `--surface`,
-`padding:26px`, `gap:18px`. Quote 17px `line-height:1.55` in `--fg`; footer with a 36px avatar
-circle (placeholder), 14px/600 name and the company in mono 11px `--fg-3`. The current content
-is filler: replace it with real quotes or leave the section off. **No "optional section" note**
-in the interface.
+Shown or hidden by config, and it lives at the **end of the Projects grid**, not as a section of its
+own: it is about that work, and a fifth destination would break the 00–03 numbering for something
+that can disappear. It carries the same mono label the contact rows use (`/testimonials`, 10px,
+uppercase, `--fg-3`) instead of a heading. See decisions.md 56.
+
+Two cards: border `--line`, radius 18, background `--surface`, `padding:26px`, `gap:18px`. Quote 17px
+`line-height:1.55` in `--fg`; footer with a 36px avatar circle (placeholder), 14px/600 name and the
+company in mono 11px `--fg-3`. The current content is filler: replace it with real quotes or turn
+`config.showTestimonials` off again. **No "optional section" note** in the interface.
 
 ### 3.10 Contact
 
@@ -416,6 +420,27 @@ and the CTA.
 (`kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev` — a network's address is
 derived from its href), `clamp(22px,3.2vw,40px)` weight 700, and `↗` on the right spanning both
 lines. Hover turns the address and the arrow `--acc-text` and moves the arrow 3px up and right.
+
+**The form** sits between the heading and the rows, in a panel: border `--line`, radius 18,
+`padding:clamp(20px,3vw,34px)`, the fields in a column with `clamp(18px,2.4vw,26px)` between them.
+A mono 10px uppercase label (`SEND A MESSAGE`) titles it, and each field repeats the pattern: a mono
+10px uppercase label in `--fg-3`, the input, and its error in `--acc-text` when there is one. The
+fields are **a line, not a box**: `border-bottom:1px solid var(--line)`, transparent background,
+17px `--fg`, and focus turns that line `--acc-text`. The caret is the browser's own, coloured with
+`caret-color:var(--acc-text)` — a drawn one cannot follow the insertion point in a textarea, so it is
+not copied. The footer holds the "Send ↗" button (solid, `size="md"`, `type="submit"`) and the mono
+note "Or write direct to …" with the address.
+
+Four states, and one live region (`role="status"`, `aria-live="polite"`) that is empty and hidden
+while idle: sending (the button says so and is dimmed), sent (a thank-you, and the fields are
+emptied), error (write to me at …). Validation: name ≥2, a plausible email, message ≥10, each error
+tied to its field with `aria-invalid` and `aria-describedby`. A hidden honeypot field is filled by
+bots and dropped by the endpoint.
+
+The form posts to `config.contactEndpoint` — our own `/api/contact`, never Web3Forms directly: the
+key is `WEB3FORMS_KEY` on the server (`api/contact.js` on Vercel, the same file mounted by
+`vite.config.js` in development), so it is not in the bundle. The endpoint validates everything again
+and rebuilds the payload field by field before forwarding it.
 
 Then the main CTA "Let's talk ↗" (yellow, radius 999, `padding:12px 26px`, 19px, weight 600), which
 is the mailto; the form will sit beside it. On mobile the CTA row becomes a column and the inner

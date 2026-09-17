@@ -28,6 +28,8 @@ const props = defineProps({
   to: { type: String, default: null }, // internal route, navigated without a reload
   external: { type: Boolean, default: false },
   magnetic: { type: Boolean, default: false },
+  // Only the <button> branch uses it, and only a form needs anything but 'button'.
+  type: { type: String, default: 'button' },
 })
 
 const emit = defineEmits(['click'])
@@ -74,7 +76,7 @@ const magneticAttr = computed(() => (props.magnetic ? '' : undefined))
 
   <button
     v-else
-    type="button"
+    :type="type"
     class="btn"
     :class="classes"
     :data-magnetic="magneticAttr"

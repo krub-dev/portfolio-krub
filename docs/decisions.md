@@ -1301,3 +1301,53 @@ and the footer.
 
 **The mailto stays.** The reference keeps a direct link beside its form, and that is what this does:
 the button is the mailto, and the form joins it rather than replacing it.
+
+### 56. The testimonials go inside Projects, not beside them
+
+**Date:** 2026-09-17 · **Status:** active
+
+The section existed with an `id` and a heading and no number, which read as an orphan: the numbering
+runs 00–03 across the four permanent sections, and the testimonials can disappear entirely
+(`config.showTestimonials`), so giving them a number would leave a hole in the sequence — and leaving
+them without one, next to four numbered siblings, reads as an oversight.
+
+They are now a block at the **end of the Projects grid**, with the mono label the contact rows use
+instead of a heading. Three reasons:
+
+- they are about the work, so they belong beside it rather than two sections later;
+- they add no destination, so the navbar keeps its four links and the page its four numbers;
+- the component stops being a section at all, which by the rule in components.md makes it a
+  `content/` piece — it is one entity out of `src/data/` that could sit inside any section.
+
+### 57. The form posts to our own endpoint, never to Web3Forms
+
+**Date:** 2026-09-17 · **Status:** active
+
+The contact form sends a real message, and the service behind it is Web3Forms. What it does **not** do
+is post to Web3Forms from the browser.
+
+Web3Forms' access key is designed to be public — their docs say so, and the practical protection is
+the domain restriction in their panel. Hiding it is still strictly better: no key in the bundle,
+validation and rate-limiting possible on the server, and the provider becomes something that can be
+swapped in one file. So the browser posts to `/api/contact`, which is a Vercel function
+(`api/contact.js`) holding the key as an environment variable (`WEB3FORMS_KEY`, set in the project's
+settings; `.env.local` locally, which the `*.local` rule already keeps out of git).
+
+That file is also mounted by `vite.config.js` **in development only**, so `npm run dev` can send a
+real message without the Vercel CLI — and it is the reason the handler is written as a plain
+`(req, res)` and not in a Vercel-only shape. It is deliberately not mounted for `npm run preview`:
+the end-to-end suite runs against a preview build, and a live endpoint would post a real message
+every time the suite ran. The suite stubs the route instead.
+
+Three smaller calls:
+
+- **The rules live in two places, on purpose.** `src/utils/contact.js` is the browser's copy, a pure
+  function so it can be unit-tested; `api/contact.js` validates again and rebuilds the payload field
+  by field. A rule that only exists in the browser is not a rule — anyone can post to the endpoint
+  directly.
+- **A honeypot, not a captcha.** A field nobody can see, dropped by the endpoint, which answers as if
+  it had worked so a bot learns nothing. A captcha would put a third party and a puzzle between the
+  visitor and the message.
+- **The caret is the browser's.** The reference draws one, and that is the detail that cannot be
+  copied honestly: a drawn caret cannot follow the insertion point inside a textarea, so it would sit
+  still while the text moved under it. `caret-color` is the real thing, coloured to the accent.

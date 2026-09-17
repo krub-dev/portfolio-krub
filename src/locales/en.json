@@ -22,6 +22,20 @@
     "band": "Let's talk",
     "email": "Email"
   },
+  "form": {
+    "title": "Send a message",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send ↗",
+    "sending": "Sending…",
+    "sent": "Thanks. I'll get back to you as soon as I can.",
+    "note": "Or write direct to {email}",
+    "error": "That did not go through. Write to me at {email} and I'll answer.",
+    "required": "Required",
+    "badEmail": "Check the address",
+    "shortMessage": "A little more, please"
+  },
   "stack": {
     "g1": "Languages",
     "g2": "Backend",

@@ -31,6 +31,13 @@ export const config = {
 
   // Timezone for the footer clock. Anything Intl accepts.
   timezone: 'Europe/Madrid',
+
+  /*
+    Where the contact form posts to. Our own endpoint, not Web3Forms directly:
+    the key lives on the server (WEB3FORMS_KEY) and never in the bundle. See
+    api/contact.js.
+  */
+  contactEndpoint: '/api/contact',
 }
 
 export default config

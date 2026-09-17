@@ -17,6 +17,7 @@ import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../base/BaseButton.vue'
 import SectionHeading from '../base/SectionHeading.vue'
+import ContactForm from './ContactForm.vue'
 import TalkBand from './TalkBand.vue'
 import { email, socials } from '../../data'
 import { formatUrl } from '../../utils/format'
@@ -44,6 +45,8 @@ const rows = computed(() => [
 
     <div class="inner">
       <SectionHeading index="03" :title="t('section.contact')" />
+
+      <ContactForm />
 
       <ul class="rows">
         <li v-for="row in rows" :key="row.name">

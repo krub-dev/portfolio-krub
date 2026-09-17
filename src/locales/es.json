@@ -22,6 +22,20 @@
     "band": "Hablemos",
     "email": "Correo"
   },
+  "form": {
+    "title": "Enviar un mensaje",
+    "name": "Nombre",
+    "email": "Correo",
+    "message": "Mensaje",
+    "send": "Enviar ↗",
+    "sending": "Enviando…",
+    "sent": "Gracias. Te contesto en cuanto pueda.",
+    "note": "O escríbeme directo a {email}",
+    "error": "No ha salido. Escríbeme a {email} y te contesto.",
+    "required": "Obligatorio",
+    "badEmail": "Revisa la dirección",
+    "shortMessage": "Cuéntame un poco más"
+  },
   "stack": {
     "g1": "Languages",
     "g2": "Backend",

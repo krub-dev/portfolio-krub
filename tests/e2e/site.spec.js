@@ -314,3 +314,43 @@ test('the hero glow turns, and stops turning under reduced motion', async ({ pag
   await page.waitForTimeout(700)
   expect(await angle()).toBe(still)
 })
+
+test('the contact form asks for what is missing, then sends', async ({ page }) => {
+  // The endpoint is ours, so the suite can stub it and still test the whole
+  // flow: validation, the request, the state and the emptying of the fields.
+  let posted = null
+  await page.route('**/api/contact', async (route) => {
+    posted = JSON.parse(route.request().postData() ?? '{}')
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ ok: true }),
+    })
+  })
+
+  await page.goto('/')
+  await page.evaluate(() => {
+    const form = document.querySelector('.form')
+    window.scrollTo({ top: form.getBoundingClientRect().top + window.scrollY - 150, behavior: 'instant' })
+  })
+
+  const send = page.locator('.form button[type="submit"]')
+
+  // Empty: it asks for the three fields and posts nothing.
+  await send.click()
+  await expect(page.locator('.form .error')).toHaveCount(3)
+  expect(posted).toBeNull()
+
+  await page.locator('#contact-name').fill('Kiko')
+  await page.locator('#contact-email').fill('kikorubioillan@gmail.com')
+  await page.locator('#contact-message').fill('Hola, te escribo por lo del backend.')
+  await send.click()
+
+  await expect(page.locator('.form .status')).toHaveText(/Thanks/)
+  expect(posted.name).toBe('Kiko')
+  expect(posted.message).toContain('backend')
+
+  // Emptied on success, so the same message cannot go twice by accident.
+  await expect(page.locator('#contact-name')).toHaveValue('')
+  await expect(page.locator('.form .error')).toHaveCount(0)
+})

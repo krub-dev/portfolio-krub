@@ -59,15 +59,12 @@ App
 │   │   └─ BaseButton (CV, behind config.showCv)
 │   ├─ ProjectsSection
 │   │   ├─ SectionHeading
-│   │   └─ ProjectCard ×n
-│   ├─ StackSection
-│   │   ├─ SectionHeading
-│   │   └─ StackGroup → TechIcon
-│   ├─ TestimonialsSection      (optional)
-│   │   └─ TestimonialCard ×n
+│   │   ├─ ProjectCard ×n
+│   │   └─ Testimonials         (optional, from config)
 │   └─ ContactSection
 │       ├─ SectionHeading
 │       ├─ TalkBand
+│       ├─ ContactForm
 │       └─ BaseButton
 ├─ ProjectModal
 │   ├─ MediaCarousel
@@ -165,6 +162,10 @@ resolves its own Role / Year / Stack labels through i18n).
 ### TestimonialCard
 `quote`, `name`, `role`, `avatar`.
 
+### Testimonials
+The block at the end of the Projects grid: a mono label and the cards, gated by `config` in
+ProjectsSection. It used to be a section of its own — see decisions.md 56.
+
 ---
 
 ## Section components
@@ -200,14 +201,14 @@ modal itself lives in `HomeView`, so the section does not own it.
 ### StackSection
 `id="stack"`. The four groups from `src/data/stack.js`: `StackGroup` → `TechIcon`.
 
-### TestimonialsSection
-`id="testimonials"`. Assumes it is wanted: `HomeView` is what checks `config.showTestimonials`, so
-this one can be written as if the section were always on.
-
 ### ContactSection
-`id="contact"`. The band, the heading, the closing line, one full-width row per network (the address
-written out, derived from the href) and the mailto button. The section itself carries no gutter — it
-is the full-bleed container the band needs, and an inner column carries the measurements.
+`id="contact"`. The band, the heading, the form, one full-width row per contact (the address written
+out, derived from the href) and the mailto button. The section itself carries no gutter — it is the
+full-bleed container the band needs, and an inner column carries the measurements.
+
+### ContactForm
+The panel: the three fields, the send button, the mono note with the address, the honeypot and the
+live region. It paints; the state is in `useContactForm`. Every string comes from `src/locales/`.
 
 ### TalkBand
 `text`. The band at the top of Contact: on the accent background, display type with the words
@@ -330,7 +331,16 @@ src/
 ├─ styles/
 │   └─ tokens.css        (:root + [data-theme="light"] + @keyframes + resets)
 └─ utils/
-    └─ format.js         pure helpers, unit-tested: formatPeriod, wrapIndex, formatUrl
+    ├─ format.js         pure helpers, unit-tested: formatPeriod, wrapIndex, formatUrl
+    └─ contact.js        the contact form's rules, unit-tested
+```
+
+Outside `src/`, at the repository root:
+
+```
+api/
+└─ contact.js            the form's endpoint: a Vercel function holding WEB3FORMS_KEY, and
+                         the same handler mounted by vite.config.js in development
 ```
 
 The split is deliberate and it is the rule to keep:

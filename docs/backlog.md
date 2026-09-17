@@ -100,12 +100,13 @@ section, folded together where they overlapped.
   is translated ("Hablemos"), and so is the CTA. It turned up a real bug on the way: `.app`'s
   `overflow-x: hidden` made the wrapper a scroll container that never scrolls, which froze the
   band's CSS timeline. See decision 55.
-- [ ] **A simple contact form**, in addition to the mailto. Decided on 2026-09-17: name, email and
-  message; a POST to `/api/contact`, a Vercel function holding `WEB3FORMS_KEY` as an environment
-  variable, so the key never reaches the bundle (locally it goes in `.env.local`, which `*.local`
-  already ignores). Validation, the four states (idle / sending / sent / error) and `aria-live` for
-  the status. The fields take the theme's border colour and the accent caret. The reference keeps a
-  mailto beside its form, which is what this does.
+- [x] **A simple contact form**, in addition to the mailto. Built on 2026-09-17: name, email and
+  message in a panel above the rows, with validation, the four states, `aria-live`, a honeypot and
+  the theme's border colour with the accent caret. It posts to `/api/contact`, a Vercel function
+  holding `WEB3FORMS_KEY` as an environment variable, so the key never reaches the bundle; the same
+  handler is mounted by `vite.config.js` in development, and `.env.local` carries the key locally.
+  See decision 57. **Still to do by hand: set `WEB3FORMS_KEY` in the Vercel project settings**, or
+  production answers 500 and the form falls back to its error state. **(owner)**
 - [ ] **Turn Limonacho into something that answers.** A small chat backed by a model, given
   `src/data/` as its context, so a visitor can ask about a project instead of reading for it —
   with a bit of Murcian in the voice, because a mascot that talks like documentation is not a

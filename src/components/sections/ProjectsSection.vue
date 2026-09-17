@@ -4,15 +4,18 @@
   projects exist — no filler cards, no reserved gaps. Add an entry to
   src/data/projects.js and a card appears.
 
-  The modal is step 10. For now `open` is emitted upward and HomeView ignores it.
+  The testimonials sit at the end of the grid: they are about this work, and
+  they are a block rather than a section, so they add no destination and no
+  number. See docs/decisions.md 56.
 */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SectionHeading from '../base/SectionHeading.vue'
 import ProjectCard from '../content/ProjectCard.vue'
+import Testimonials from '../content/Testimonials.vue'
 import { useLang } from '../../composables/useLang'
-import { projects } from '../../data'
+import { config, projects } from '../../data'
 
 const { lang } = useLang()
 const { t } = useI18n()
@@ -41,6 +44,8 @@ const items = computed(() =>
         @open="$emit('open', i)"
       />
     </div>
+
+    <Testimonials v-if="config.showTestimonials" />
   </section>
 </template>
 
