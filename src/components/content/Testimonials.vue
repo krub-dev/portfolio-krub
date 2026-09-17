@@ -25,6 +25,10 @@
 
   config.showTestimonials is checked by ProjectsSection, not here: the parent
   decides whether the block exists at all.
+
+  The two glyphs in the header are Material Symbols (`format_quote`, `swap_vert`),
+  Apache 2.0, inlined as paths rather than fetched: two shapes in one component,
+  and a request for them would cost more than they weigh.
 */
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -293,11 +297,44 @@ onUnmounted(() => {
   <div class="testimonials">
     <div class="pager">
       <div class="box">
-        <span class="mark" aria-hidden="true">”</span>
-
         <div class="head">
           <p class="label">{{ t('section.test') }}</p>
-          <span class="position">{{ index + 1 }} / {{ items.length }}</span>
+
+          <!--
+            The gesture. The arrows are gone on a phone, so without this nothing
+            on the page says the quotes move at all. Up and down arrows because
+            that is the movement, and it bobs so it reads as something you do
+            rather than as another control. Touch only: on a desktop the arrows
+            beside the box say the same thing without a second icon.
+          -->
+          <span class="hint" aria-hidden="true" data-motion="decorative">
+            <svg viewBox="170 -880 620 800" focusable="false">
+              <path
+                d="M352.82-450q-12.82 0-21.32-8.63-8.5-8.62-8.5-21.37v-286L223-666q-9 9-21.16 9t-21-8.61Q172-675 172-687.1q0-12.1 9-20.9l151-151q5-5 10.13-7 5.14-2 11-2 5.87 0 10.87 2 5 2 10 7l151 151q9 9 9 21t-9 21.39q-9 8.61-21 8.61t-21-9L383-766v286q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63ZM606.87-92Q601-92 596-94q-5-2-10-7L435-252q-9-9-9-21t9-21.39q9-8.61 21-8.61t21 9l100 100v-286q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v286l100-100q9-9 21.16-9t21 8.61Q788-285 788-272.9q0 12.1-9 20.9L628-101q-5 5-10.13 7-5.14 2-11 2Z"
+              />
+            </svg>
+          </span>
+
+          <!--
+            The counter and the mark travel together: the mark is centred on the
+            counter, so it has to move with it and not with the box.
+          -->
+          <span class="tally">
+            <span class="position">{{ index + 1 }} / {{ items.length }}</span>
+
+            <!--
+              The quote mark. It is the box's, not an entry's, so it stays put
+              while the quotes slide through it: the one thing in the block that
+              does not move.
+            -->
+            <span class="mark" aria-hidden="true">
+              <svg viewBox="200 -600 600 370" focusable="false">
+                <path
+                  d="m275-287 67-115q-5 1-11 1.5t-11 .5q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 21-5.5 41T458-480L329-255q-4 8-11.5 11.5T302-240q-18 0-27-15.5t0-31.5Zm360 0 67-115q-5 1-11 1.5t-11 .5q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 21-5.5 41T818-480L689-255q-4 8-11.5 11.5T662-240q-18 0-27-15.5t0-31.5Z"
+                />
+              </svg>
+            </span>
+          </span>
         </div>
 
         <div
@@ -378,9 +415,14 @@ onUnmounted(() => {
 }
 
 /*
-  A quote mark in the accent, large and faint, in the window's top right. It
+  A quote mark in the accent, large and faint, hanging under the counter. It
   belongs to the box and not to an entry, so it stays put while the quotes slide
   through it — the one thing on the page that does not move.
+
+  Material Symbols' format_quote, Apache 2.0, inlined as a path. Not a font
+  glyph: the site self-hosts two faces and a third for one decorative character
+  is not worth the bytes, and the system serif that would give the same shape
+  varies by platform.
 
   --acc and not --acc-text: this is a fill, not text. At this opacity the
   legible variant would read as a grey smudge on the dark theme instead of as
@@ -389,23 +431,67 @@ onUnmounted(() => {
 */
 .mark {
   position: absolute;
-  /* Below the header's rule, not across it: the counter lives up there, and the
-     two glyphs on top of each other read as a mistake rather than as a mark. */
-  top: 44px;
-  right: 16px;
-  font-family: var(--font-sans);
-  font-size: clamp(76px, 8vw, 104px);
-  font-weight: 700;
-  line-height: 1;
+  /* Centred on the counter, and just under it. */
+  top: calc(100% + 16px);
+  left: 50%;
+  /*
+    Tilted, because the straight-on mark read as a pair of brackets rather than
+    as punctuation. Not centred on the box: it hangs off the counter, which is
+    where the eye already is when the counter changes.
+  */
+  transform: translateX(-50%) rotate(-7deg);
+  /*
+    Sized to fit. Centred on the counter is what was asked for, and the counter
+    sits 18px from the box's edge: measured, anything wider than this put the
+    mark's right edge past the box and the box clipped it.
+  */
+  width: clamp(56px, 7vw, 72px);
   color: var(--acc);
   opacity: 0.08;
   pointer-events: none;
   user-select: none;
 }
 
+.mark svg,
+.hint svg {
+  display: block;
+  fill: currentColor;
+}
+
+.mark svg {
+  width: 100%;
+  height: auto;
+}
+
+/* The counter, kept together with the mark so the mark can be centred on it. */
+.tally {
+  position: relative;
+  display: inline-flex;
+  justify-content: flex-end;
+}
+
+/*
+  The swipe cue. Hidden on a pointer device, where the arrows are on screen and
+  say the same thing; it exists for the phone, where they are not.
+*/
+.hint {
+  display: none;
+}
+
+@keyframes hintBob {
+  0%,
+  100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(2px);
+  }
+}
+
 /* The block's own header, inside the box: the mono label and the position, with
    the rule the stack groups and the contact rows use. */
 .head {
+  position: relative;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -500,12 +586,58 @@ onUnmounted(() => {
 
 @media (max-width: 900px) {
   .pager {
-    gap: 10px;
+    position: relative;
+    gap: 0;
   }
 
-  .pager-arrow {
-    width: 36px;
-    height: 36px;
+  /*
+    The arrows go on a phone. The swipe is the gesture there and the two buttons
+    beside the box only took width from the quote — which is also why they were
+    the only thing on the screen sitting hard against the right edge.
+
+    They are not removed, though: visually hidden, they stay in the
+    accessibility tree and keep their focus. The drag is not something a screen
+    reader or a keyboard can do, so without them the other quotes would be
+    unreachable, and the `inert` on the entries that are not showing means there
+    is no other way in. They come back the moment one of them takes focus.
+  */
+  .pager-controls {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .pager-controls:focus-within {
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+  }
+
+  .hint {
+    display: block;
+    /* Absolute, so it centres on the box: as a flex item its auto margins
+       centre it between the label and the counter, which are not the same
+       width, and it drifts right. */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--fg-3);
+  }
+
+  .hint svg {
+    width: 18px;
+    height: 18px;
+    animation: hintBob 2.6s ease-in-out infinite;
   }
 }
 

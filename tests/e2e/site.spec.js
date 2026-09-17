@@ -280,7 +280,7 @@ test('on touch the rail marks the card it is parked on', async ({ page, isMobile
   await expect(cards.nth(0)).not.toHaveClass(/current/)
 })
 
-test('the testimonials page one at a time, and the window follows the quote', async ({ page }) => {
+test('the testimonials page one at a time, and the window follows the quote', async ({ page, isMobile }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
 
@@ -290,13 +290,20 @@ test('the testimonials page one at a time, and the window follows the quote', as
   const prev = page.getByRole('button', { name: 'Previous testimonial' })
   const next = page.getByRole('button', { name: 'Next testimonial' })
 
+  /*
+    On a phone the arrows are visually hidden — the swipe is the gesture there —
+    so they are pressed through the DOM. This test is about what paging does,
+    not about where the button is.
+  */
+  const press = (button) => (isMobile ? button.evaluate((el) => el.click()) : button.click())
+
   await expect(prev).toBeDisabled()
   await expect(next).toBeEnabled()
   await expect(count).toHaveText('1 / 3')
   await expect(first).not.toHaveAttribute('inert')
 
   const tallest = await pane.evaluate((el) => el.clientHeight)
-  await next.click()
+  await press(next)
 
   await expect(count).toHaveText('2 / 3')
   await expect(prev).toBeEnabled()
@@ -311,9 +318,35 @@ test('the testimonials page one at a time, and the window follows the quote', as
   */
   await expect.poll(() => pane.evaluate((el) => el.clientHeight)).toBe(tallest)
 
-  await prev.click()
+  await press(prev)
   await expect(count).toHaveText('1 / 3')
   await expect(prev).toBeDisabled()
+})
+
+test('the arrows give way to the swipe cue on a phone', async ({ page, isMobile }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+
+  const hint = page.locator('#projects .hint')
+  const controls = page.locator('#projects .pager-controls')
+
+  if (!isMobile) {
+    await expect(hint).toBeHidden()
+    await expect(page.getByRole('button', { name: 'Next testimonial' })).toBeVisible()
+    return
+  }
+
+  await expect(hint).toBeVisible()
+
+  /*
+    Clipped rather than removed. The drag is not something a screen reader or a
+    keyboard can do, and the entries that are not showing are inert, so the
+    buttons are the only way to the other quotes — hiding them from the
+    accessibility tree too would strand them there.
+  */
+  await expect(page.getByRole('button', { name: 'Next testimonial' })).toHaveCount(1)
+  const box = await controls.boundingBox()
+  expect(box.width).toBeLessThan(2)
 })
 
 test('collapsing a quote brings the window back down', async ({ page }) => {
