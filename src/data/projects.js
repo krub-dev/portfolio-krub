@@ -61,42 +61,6 @@ export const projects = [
     },
   },
   {
-    slug: 'showroom',
-    shotLabel: 'SHOT · SHOWROOM',
-    image: null,
-    slides: 4,
-    repo: 'https://github.com/krub-dev/SHOWROOM-FULLSTACK-M3',
-    live: 'https://showroom-fullstack-m3-production.up.railway.app/',
-    stack: ['Vue 3', 'Express', 'PostgreSQL', 'Prisma', 'Jest', 'Railway'],
-    en: {
-      name: 'Showroom',
-      tag: 'BOOTCAMP',
-      role: 'Fullstack',
-      year: '2025',
-      repoLabel: '/repo',
-      liveLabel: '/live ↗',
-      summary: 'Fullstack app to manage and show projects: full CRUD, search and an admin panel.',
-      lead: 'Ironhack Module 3 final project: a portfolio that administers itself.',
-      body: 'Vue 3 frontend with Composition API and Vue Router; Express backend with PostgreSQL and Prisma ORM. Full CRUD, featured-projects system, search by title and technologies, and server-side pagination. Write operations are protected by an API key.',
-      body2:
-        'Deployed on Railway with Prisma migrations on every deploy and a health-check endpoint. 17 integration tests with Jest and Supertest against a real database, skeleton loaders, recoverable error states and a 100/100 Lighthouse accessibility score.',
-    },
-    es: {
-      name: 'Showroom',
-      tag: 'BOOTCAMP',
-      role: 'Fullstack',
-      year: '2025',
-      repoLabel: '/repo',
-      liveLabel: '/live ↗',
-      summary:
-        'App fullstack para gestionar y mostrar proyectos: CRUD completo, buscador y panel de administración.',
-      lead: 'Proyecto final del Módulo 3 de Ironhack: un portfolio que se administra a sí mismo.',
-      body: 'Frontend en Vue 3 con Composition API y Vue Router; backend en Express con PostgreSQL y Prisma ORM. CRUD completo, sistema de proyectos destacados, búsqueda por título y tecnologías, y paginación en servidor. Las operaciones de escritura van protegidas por API key.',
-      body2:
-        'Desplegado en Railway con migraciones de Prisma en cada deploy y endpoint de health check. 17 tests de integración con Jest y Supertest contra base de datos real, skeleton loaders, estados de error recuperables y 100/100 de accesibilidad en Lighthouse.',
-    },
-  },
-  {
     slug: 'sideforge',
     shotLabel: 'SHOT · SIDEFORGE',
     image: null,
@@ -139,6 +103,79 @@ export const projects = [
       body: 'Modelo de dominio con usuarios, admins, clientes, assets, escenas y diseños: un usuario autenticado crea escenas, asocia assets y define diseños por partes concretas del modelo, con colores, materiales, logos y textos. Spring Data JPA sobre MySQL, DTOs por entidad, paginación y búsqueda, y manejo de errores centralizado.',
       body2:
         'Spring Security con acceso por rol, contraseñas hasheadas, documentación en Swagger/OpenAPI y colección de Postman para la demo. Tests de controladores con MockMvc y de servicios con Mockito. En la hoja de ruta: JWT, almacenamiento de imágenes en la nube, versionado de diseños y la integración 3D en el front.',
+    },
+  },
+  {
+    slug: 'krub-dev',
+    shotLabel: 'SHOT · KRUB.DEV',
+    image: null,
+    slides: 3,
+    repo: 'https://github.com/krub-dev/portfolio-krub',
+    live: 'https://krub.dev',
+    stack: ['Vue 3', 'Vite', 'vue-i18n', 'Vitest', 'Playwright', 'Vercel'],
+    en: {
+      name: 'krub.dev',
+      tag: 'OWN',
+      role: 'Design + development',
+      year: '2026',
+      repoLabel: '/repo',
+      liveLabel: '/live ↗',
+      summary:
+        'This site: a Vue 3 SPA with a design system of its own, built from a reference and tested end to end.',
+      lead: 'The portfolio you are reading. Designed from a reference, rewritten as idiomatic Vue, and tested in a real browser.',
+      body: 'Vue 3 with Vite and vue-i18n for the two languages, on a design system of its own: one token file drives two themes and six accent palettes, and no component keeps a colour or a string of its own. The scroll behaviour, the mascot, the project modal and the custom cursor share a single requestAnimationFrame loop, and every piece of motion switches off under prefers-reduced-motion.',
+      body2:
+        'The contact form posts to a serverless function, so the Web3Forms key stays on the server and never reaches the bundle. A unit suite with Vitest and a Playwright suite covering the flows that only fail in a real browser: the scroll spy, the focus trap and the footer on iOS. Deployed on Vercel.',
+    },
+    es: {
+      name: 'krub.dev',
+      tag: 'PROPIO',
+      role: 'Diseño + desarrollo',
+      year: '2026',
+      repoLabel: '/repo',
+      liveLabel: '/live ↗',
+      summary:
+        'Esta web: una SPA en Vue 3 con design system propio, hecha desde una referencia y probada de punta a punta.',
+      lead: 'El portfolio que estás leyendo. Diseñado desde una referencia, reescrito como Vue idiomático y probado en un navegador real.',
+      body: 'Vue 3 con Vite y vue-i18n para los dos idiomas, sobre un design system propio: un solo fichero de tokens gobierna dos temas y seis paletas de acento, y ningún componente guarda un color ni un texto suyo. El scroll, la mascota, el modal de proyectos y el cursor comparten un único bucle de requestAnimationFrame, y todo el movimiento se apaga con prefers-reduced-motion.',
+      body2:
+        'El formulario de contacto envía a una función serverless, así que la clave de Web3Forms se queda en el servidor y nunca llega al bundle. Suite unitaria con Vitest y suite de Playwright cubriendo los flujos que solo fallan en un navegador real: el scroll spy, la trampa de foco y el pie en iOS. Desplegado en Vercel.',
+    },
+  },
+  {
+    slug: 'showroom',
+    shotLabel: 'SHOT · SHOWROOM',
+    image: null,
+    slides: 4,
+    repo: 'https://github.com/krub-dev/SHOWROOM-FULLSTACK-M3',
+    live: 'https://showroom-fullstack-m3-production.up.railway.app/',
+    stack: ['Vue 3', 'Express', 'PostgreSQL', 'Prisma', 'Jest', 'Railway'],
+    en: {
+      name: 'Showroom',
+      tag: 'BOOTCAMP',
+      role: 'Fullstack',
+      year: '2025',
+      repoLabel: '/repo',
+      liveLabel: '/live ↗',
+      summary: 'Fullstack app to manage and show projects: full CRUD, search and an admin panel.',
+      lead: 'Ironhack Module 3 final project: a portfolio that administers itself.',
+      body: 'Vue 3 frontend with Composition API and Vue Router; Express backend with PostgreSQL and Prisma ORM. Full CRUD, featured-projects system, search by title and technologies, and server-side pagination. Write operations are protected by an API key.',
+      body2:
+        'Deployed on Railway with Prisma migrations on every deploy and a health-check endpoint. 17 integration tests with Jest and Supertest against a real database, skeleton loaders, recoverable error states and a 100/100 Lighthouse accessibility score.',
+    },
+    es: {
+      name: 'Showroom',
+      tag: 'BOOTCAMP',
+      role: 'Fullstack',
+      year: '2025',
+      repoLabel: '/repo',
+      liveLabel: '/live ↗',
+      summary:
+        'App fullstack para gestionar y mostrar proyectos: CRUD completo, buscador y panel de administración.',
+      lead: 'Proyecto final del Módulo 3 de Ironhack: un portfolio que se administra a sí mismo.',
+      body: 'Frontend en Vue 3 con Composition API y Vue Router; backend en Express con PostgreSQL y Prisma ORM. CRUD completo, sistema de proyectos destacados, búsqueda por título y tecnologías, y paginación en servidor. Las operaciones de escritura van protegidas por API key.',
+      body2:
+        'Desplegado en Railway con migraciones de Prisma en cada deploy y endpoint de health check. 17 tests de integración con Jest y Supertest contra base de datos real, skeleton loaders, estados de error recuperables y 100/100 de accesibilidad en Lighthouse.',
     },
   },
 ]

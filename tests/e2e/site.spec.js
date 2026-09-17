@@ -350,11 +350,16 @@ test('the stack is monochrome until the pointer reaches a tile', async ({ page, 
 
   /*
     Beside him, not on his head. The bubble has no tail, so centred over the
-    lemon it reads as sitting on his leaf.
+    lemon it reads as sitting on his leaf. Polled, because it animates in and a
+    rect read mid-animation is not the rect it settles at.
   */
-  const bubble = await page.locator('.pet .bubble').boundingBox()
-  const lemon = await page.locator('.pet .lemon').boundingBox()
-  expect(bubble.x + bubble.width).toBeLessThanOrEqual(lemon.x + 1)
+  await expect
+    .poll(async () => {
+      const bubble = await page.locator('.pet .bubble').boundingBox()
+      const lemon = await page.locator('.pet .lemon').boundingBox()
+      return bubble.x + bubble.width - lemon.x
+    })
+    .toBeLessThanOrEqual(1)
 
   // Out of the grid he stops saying it.
   await page.mouse.move(5, 5)

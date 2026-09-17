@@ -26,7 +26,7 @@ section, folded together where they overlapped.
   2026-09-17) so it can be seen, but `public/uploads/` holds no file, so it currently downloads
   nothing: **drop the PDF at the path below, or turn the switch off again, before this reaches
   `main`.** The original was pulled from the deployment and purged from the git history. **(owner)**
-- [ ] **Real testimonials.** The section, the cards and the layout are built and reviewed, and the
+- [ ] **Real testimonials.** The section, the entries and the layout are built and reviewed, and the
   section is now **on** (`config.showTestimonials` is true, since 2026-09-17) so the real quotes can
   be dropped in one at a time. Until that happens it shows the bracketed placeholders in
   `src/data/testimonials.js`, which is why the switch was off: **turn it off again, or replace the
@@ -113,6 +113,12 @@ section, folded together where they overlapped.
   handler is mounted by `vite.config.js` in development, and `.env.local` carries the key locally.
   See decision 57. **Still to do by hand: set `WEB3FORMS_KEY` in the Vercel project settings**, or
   production answers 500 and the form falls back to its error state. **(owner)**
+- [ ] **The projects grid with four cards.** With three it was one clean row. With four, the
+  `auto-fit minmax(280px,1fr)` grid puts three on the first row and leaves the fourth alone beside
+  an empty column — measured at 1280px: 1152px of grid, 371px cards, 3 + 1. A phone stacks all four,
+  which is fine. Two columns would make it a 2×2, but the cards would grow to about 566px and the
+  shot with them. Decide: leave it at three across, go to two, or let the odd card span the row.
+  The krub.dev card was added on 2026-09-17 to see this, and it is third in the order.
 - [ ] **Turn Limonacho into something that answers.** A small chat backed by a model, given
   `src/data/` as its context, so a visitor can ask about a project instead of reading for it —
   with a bit of Murcian in the voice, because a mascot that talks like documentation is not a
@@ -120,9 +126,9 @@ section, folded together where they overlapped.
   cannot live in a static bundle. The speech bubble and its timers are already built and would
   become the chat surface.
 - [ ] **Shimmering skeleton placeholders.** Held until something genuinely arrives late, which today
-  nothing does: the three projects have `image: null` and their cards paint a `shotLabel`, the 24
-  stack icons come to 50 KB between them, and the photo is local — a placeholder would flash for
-  about 40 ms and read as a fault. The two spots that will earn one: the 3D model (with a real
+  nothing does: the four projects have `image: null` and their cards paint a `shotLabel`, the 30
+  stack icons come to about 60 KB between them, and the photo is local — a placeholder would flash
+  for about 40 ms and read as a fault. The two spots that will earn one: the 3D model (with a real
   percentage, not a fake bar) and real project images once they exist. Whenever it goes in, delay it
   (~300 ms) so it only shows when the load is actually slow. Technique: a `linear-gradient` with an
   oversized `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%`
