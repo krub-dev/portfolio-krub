@@ -43,6 +43,13 @@ import { config, projects } from '../../data'
 // open a card they just dragged.
 const DRAG_SLOP = 6
 
+// How much of a card a drag has to move before it counts as "the next one"
+// rather than falling back to the nearest. Without it the rail settled on
+// whichever card was closer, so a phone swipe had to travel more than half a
+// card — 160px — before anything happened, which reads as the rail refusing to
+// budge.
+const FLICK = 0.2
+
 const { lang } = useLang()
 const { t } = useI18n()
 
@@ -58,6 +65,19 @@ const dragging = ref(false)
 const atStart = ref(true)
 const atEnd = ref(false)
 const parked = ref([]) // per card: fully out of the rail, so out of the tab order
+
+/*
+  Which edges to fade. The clip cuts a card off mid-way, and a hard vertical edge
+  reads as a mistake rather than as "there is more this way" — but only the side
+  the rail actually continues on: at the start the first card's rounded corner
+  sits on the edge and fading it would eat it.
+*/
+const fade = computed(() => {
+  if (atStart.value && atEnd.value) return 'none'
+  if (atStart.value) return 'fade-right'
+  if (atEnd.value) return 'fade-left'
+  return 'fade-both'
+})
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 
@@ -155,11 +175,15 @@ function onPointerUp(event) {
   }
 
   /*
-    Settle on the nearest card, in the next frame: the transform has to change
-    once the curve is back in place, or it lands with a jump instead of gliding.
+    Settle on a card, in the next frame: the transform has to change once the
+    curve is back in place, or it lands with a jump instead of gliding. A drag
+    that moved far enough takes the next card in the direction it was going;
+    anything shorter falls back to the nearest.
   */
   requestAnimationFrame(() => {
-    index = step > 0 ? Math.round(offset / step) : 0
+    const moved = offset - startOffset
+    index =
+      Math.abs(moved) > step * FLICK ? index + Math.sign(moved) : Math.round(offset / step)
     sync()
   })
 }
@@ -209,7 +233,7 @@ onUnmounted(() => window.removeEventListener('resize', sync))
       <div
         ref="viewport"
         class="viewport"
-        :class="{ dragging }"
+        :class="[fade, { dragging }]"
         role="group"
         :aria-label="t('a11y.projectsRail')"
         @pointerdown="onPointerDown"
@@ -290,14 +314,36 @@ onUnmounted(() => window.removeEventListener('resize', sync))
 
 /*
   Clipped, with vertical room for the magnetic pull, which moves a card up to
-  10px. touch-action: pan-y is what lets a horizontal swipe drag the rail while a
-  vertical one still scrolls the page.
+  10px. `pan-y` is the whole declaration: the browser intersects touch-action
+  from the element the finger lands on down to the nearest scroll container, so
+  one rule here covers every card inside — a vertical swipe is left to the page
+  and a horizontal one comes to us.
 */
 .viewport {
   overflow: hidden;
   padding: 12px 0;
   touch-action: pan-y;
   cursor: grab;
+  --rail-fade: 56px;
+}
+
+/*
+  A card the clip cuts in half gets a soft edge instead of a hard one, and only
+  on the side the rail continues on.
+*/
+.fade-right {
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--rail-fade)), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--rail-fade)), transparent 100%);
+}
+
+.fade-left {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--rail-fade), #000 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--rail-fade), #000 100%);
+}
+
+.fade-both {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--rail-fade), #000 calc(100% - var(--rail-fade)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--rail-fade), #000 calc(100% - var(--rail-fade)), transparent 100%);
 }
 
 .viewport.dragging {

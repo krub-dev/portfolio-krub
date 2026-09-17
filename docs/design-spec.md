@@ -196,9 +196,12 @@ Required `@keyframes`: `marquee`, `lemonShake`, `dotHalo`, `bubbleIn`.
 
 ### 3.1 Navigation bar (fixed, `z-index:100`)
 
-A `position:fixed` container at the top, `padding:14px clamp(14px,4vw,40px)`, centred.
-Inside it a **capsule** with `max-width:1180px`, `padding:12px 16px`, transparent border,
-transparent background and `border-radius:16px`.
+A `position:fixed` container at the top, `padding:14px clamp(14px,4vw,40px)`, centred, and
+`pointer-events:none` with `pointer-events:auto` on the capsule inside it. The strip is full width but
+only the capsule is a control: without that, the empty half of the bar swallowed every click that
+landed in its band, which is anything scrolling up behind the compact capsule — the project arrows,
+the appearance controls, any button. Inside it a **capsule** with `max-width:1180px`,
+`padding:12px 16px`, transparent border, transparent background and `border-radius:16px`.
 
 Contents, left to right: logo (the logo image applied as a mask over
 `background: var(--mark)`, height 22px, `aspect-ratio:1.682`) + the text `.dev` (mono 15px,
@@ -334,11 +337,21 @@ which is also how the reader learns how much is left, and the transform is insta
 `prefers-reduced-motion`.
 
 **Dragging** covers every pointer type — a mouse has no horizontal gesture, and the rail is not a
-scroll container so the phone has no swipe either. `touch-action:pan-y` is what leaves the vertical
-swipe to the page, the transition is switched off while the pointer is in charge, and on release the
-rail settles on the nearest card in the next frame, once the curve is back. A drag that travels more
-than `6px` swallows the click in the capture phase, because nobody means to open a card they just
-dragged.
+scroll container so the phone has no swipe either. `touch-action:pan-y` is the whole declaration: the
+browser intersects touch-action from the element the finger lands on down to the nearest scroll
+container, so one rule covers every card inside. The transition is switched off while the pointer is in
+charge, and on release the rail settles in the next frame, once the curve is back: a drag that moved
+more than a fifth of a card takes the **next card in the direction it was going**, and anything
+shorter falls back to the nearest. Without that fifth, a phone swipe had to travel more than half a
+card — 160px — before anything happened, which reads as the rail refusing to budge. A drag that
+travels more than `6px` swallows the click in the capture phase, because nobody means to open a card
+they just dragged.
+
+**The edge the clip cuts gets a soft one.** The viewport carries a `mask-image` fade of `56px` on
+whichever side the rail continues on — the right at the start, the left at the end, both in the
+middle, none when everything fits. A hard vertical edge where a card is cut reads as a mistake rather
+than as "there is more this way", and the side with nothing to continue is left alone: at the start
+the first card's rounded corner sits on the edge, and fading it would eat it.
 
 **Cards that are fully out of the rail carry `inert`.** They stay in the DOM — the keyboard has to
 reach them — and `inert` is what keeps Tab from walking into a card nobody can see, which is the trap

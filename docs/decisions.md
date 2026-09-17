@@ -1472,4 +1472,28 @@ likely to be skimming.
 - **The drag needed a click guard.** The whole card is a click target behind an overlay, so a drag
   that ends over one would open it. The click is watched in the capture phase and swallowed once the
   drag has travelled 6px.
+- **And a flick threshold.** Settling on the nearest card meant a phone swipe had to travel more than
+  half a card — 160px — before anything happened: shorter than that and the rail glided back where it
+  came from, which the owner read as the rail refusing to budge. A drag that moved more than a fifth
+  of a card now takes the next one in the direction it was going.
+- **The cut edge gets a soft one.** A `mask-image` fade on whichever side the rail continues on. A
+  hard vertical edge where a card is clipped reads as a mistake rather than as "there is more this
+  way" — but only on that side: at the start the first card's rounded corner sits on the edge and
+  fading it would eat it.
 - **Measured after:** 1010px on a phone, 1134px on a desktop.
+
+### 61. The navbar was swallowing every click in its band
+
+**Date:** 2026-09-17 — **Status:** active
+
+The bar is a `position:fixed` strip across the whole viewport with 14px of vertical padding, and the
+capsule inside it shrinks to hug its own contents once compact. Nothing about the strip is
+interactive, but nothing said so either: it was a normal element covering a full-width band, so every
+click that landed in that band went to it and stopped there. The owner found it with the project
+arrows, which are simply the first thing that happened to scroll up behind the bar.
+
+`pointer-events:none` on the strip and `pointer-events:auto` on the capsule. It is the standard fix
+and it is one line, but the failure mode is worth remembering because it does not look like a bug:
+nothing is visually wrong, the controls are right there, and they only stop working at the scroll
+positions where they overlap the bar. The e2e test reads `elementFromPoint` in the band but clear of
+the capsule, so it fails if the strip ever takes clicks again.

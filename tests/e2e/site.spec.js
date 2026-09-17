@@ -16,7 +16,7 @@ test.describe('chrome reacts to scrolling', () => {
     const wide = (await capsule.boundingBox()).width
     expect(wide).toBeGreaterThan(1000)
 
-    await page.evaluate(() => window.scrollTo(0, 600))
+    await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }))
     // The capsule animates its max-width over 0.55s; wait for the end state
     // rather than for a fixed delay.
     await expect(capsule).toHaveClass(/compact/)
@@ -33,7 +33,14 @@ test.describe('chrome reacts to scrolling', () => {
     // Off-screen at the top of the page.
     expect((await footer.boundingBox()).y).toBeGreaterThanOrEqual(viewport - 1)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    /*
+      Instant. `html { scroll-behavior: smooth }` is global, so a plain scrollTo
+      animates — and under parallel workers that animation outran the 2s the poll
+      below allows, which is what made this test flake.
+    */
+    await page.evaluate(() =>
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }),
+    )
     await expect(footer).toHaveClass(/shown/)
     await expect
       .poll(async () => (await footer.boundingBox()).y, { timeout: 2000 })
@@ -158,6 +165,38 @@ test('the project rail pages with its arrows, and stops at both ends', async ({ 
   expect(last.x + last.width).toBeLessThanOrEqual(rail.x + rail.width + 1)
 })
 
+test('the navbar only takes clicks where the capsule is', async ({ page }) => {
+  await page.goto('/')
+
+  // Past 60px the capsule compacts and shrinks to hug its own contents.
+  await page.evaluate(() => window.scrollTo({ top: 400, behavior: 'instant' }))
+  await expect(page.locator('.capsule')).toHaveClass(/compact/)
+
+  /*
+    The bar is a full-width fixed strip. Without pointer-events:none on it, its
+    empty half swallowed every click that landed in that band — which is
+    anything that scrolls up behind the compact capsule, a third of its width:
+    the project arrows, the appearance controls, any button.
+  */
+  const hit = await page.evaluate(() => {
+    const band = document.querySelector('.bar').getBoundingClientRect()
+    const capsule = document.querySelector('.capsule').getBoundingClientRect()
+    const y = band.top + band.height / 2
+    const right = capsule.right + 40
+    const x = right < window.innerWidth - 8 ? right : capsule.left - 40
+    return document.elementFromPoint(x, y)?.closest('.bar') ? 'bar' : 'content'
+  })
+  expect(hit).toBe('content')
+
+  // And the capsule itself is still live.
+  const onCapsule = await page.evaluate(() => {
+    const capsule = document.querySelector('.capsule').getBoundingClientRect()
+    const el = document.elementFromPoint(capsule.left + 4, capsule.top + capsule.height / 2)
+    return Boolean(el?.closest('.capsule'))
+  })
+  expect(onCapsule).toBe(true)
+})
+
 test('the project rail drags with the mouse, and a drag does not open a card', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
@@ -177,17 +216,58 @@ test('the project rail drags with the mouse, and a drag does not open a card', a
   const box = await viewport.boundingBox()
   const middle = box.y + box.height / 2
 
-  await page.mouse.move(box.x + box.width - 60, middle)
+  /*
+    A deliberately short drag — 100px, a quarter of a card. It has to take the
+    next card; settling on the nearest one would put the rail back where it
+    started, which is what "it will not move" was.
+  */
+  await page.mouse.move(box.x + 120, middle)
   await page.mouse.down()
-  await page.mouse.move(box.x + 60, middle, { steps: 12 })
+  await page.mouse.move(box.x + 20, middle, { steps: 12 })
   await page.mouse.up()
 
   // The rail moved on...
-  await expect.poll(shift).toBeLessThan(0)
+  await expect.poll(shift).toBeLessThan(-100)
 
   // ...and the card the drag ended over did not open. Without the click guard
   // the whole card is a click target, so a drag would open whatever it lands on.
   await expect(page.getByRole('dialog')).toBeHidden()
+})
+
+test('the project rail drags with a finger too', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'there is no finger on a desktop')
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+
+  const viewport = page.locator('#projects .viewport')
+  const track = page.locator('#projects .track')
+  const shift = () =>
+    track.evaluate((el) => {
+      const value = getComputedStyle(el).transform
+      return value === 'none' ? 0 : Math.round(new DOMMatrixReadOnly(value).m41)
+    })
+
+  await viewport.evaluate((el) => el.scrollIntoView({ behavior: 'instant', block: 'center' }))
+  const box = await viewport.boundingBox()
+
+  // Dispatched as real touch events, starting over a CARD rather than the gap
+  // between two, and short enough that the nearest-card rule would undo it.
+  const client = await page.context().newCDPSession(page)
+  const y = box.y + box.height / 2
+  const from = box.x + 120
+  const at = (x) => [{ x, y, radiusX: 6, radiusY: 6, force: 1, id: 1 }]
+
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: at(from) })
+  for (let step = 1; step <= 8; step += 1) {
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: at(from - (100 * step) / 8),
+    })
+  }
+  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+
+  await expect.poll(shift).toBeLessThan(-100)
 })
 
 test('an unknown path shows the 404, chrome and all, and offers a way back', async ({ page, isMobile }) => {
@@ -287,7 +367,7 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
 
   // Compact: the bar hands the controls over — to the settings button on
   // desktop, to the menu on a phone.
-  await page.evaluate(() => window.scrollTo(0, 400))
+  await page.evaluate(() => window.scrollTo({ top: 400, behavior: 'instant' }))
   await expect(page.locator('.capsule')).toHaveClass(/compact/)
   if (isMobile) {
     await expect(page.locator('.controls.mobile .full')).toBeHidden()
@@ -298,7 +378,7 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
     await page.locator('.settings .trigger').click()
     await expect(page.locator('.settings-panel .lang-btn')).toBeVisible()
     // A scroll closes it, as it does the mobile menu.
-    await page.evaluate(() => window.scrollTo(0, 800))
+    await page.evaluate(() => window.scrollTo({ top: 800, behavior: 'instant' }))
     await expect(page.locator('.settings-panel')).toHaveCount(0)
   }
 
@@ -320,7 +400,8 @@ test('Limonacho greets you on the first poke of a visit, and only on that one', 
   await page.goto('/')
 
   // He is parked off-screen until the hero is behind you.
-  const bringHimIn = () => page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  const bringHimIn = () =>
+    page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }))
   const lemon = page.locator('.lemon')
   const bubble = page.locator('.bubble')
   const plays = () => page.evaluate(() => window.__acho)

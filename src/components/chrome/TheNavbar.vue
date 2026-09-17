@@ -209,6 +209,19 @@ watch(lang, async () => {
   z-index: 100;
   display: flex;
   justify-content: center;
+  /*
+    The strip is full width, but only the capsule is a control. Without this the
+    empty half of the bar swallowed every click that landed in its band — which
+    is anything that scrolls up behind the compact capsule, a third of its
+    width, arrows and buttons included.
+  */
+  pointer-events: none;
+  /*
+    The strip is full width, but only the capsule is a control. Without this the
+    empty half of the bar swallowed every click that landed in its band — which
+    is anything that scrolls up behind the compact capsule, a third of its
+    width, arrows and buttons included.
+  */
   /* The side insets are the notch in landscape; 0 everywhere else. */
   /* Longhand for the same reason as the footer: a shorthand that fails to
      parse takes the vertical padding down with it. */
@@ -220,6 +233,7 @@ watch(lang, async () => {
 
 .capsule {
   box-sizing: border-box;
+  pointer-events: auto;
   width: 100%;
   display: flex;
   align-items: center;
