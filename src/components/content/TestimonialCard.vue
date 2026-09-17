@@ -17,7 +17,7 @@
   because with the clamp off the measurement would always say it fits and the
   button would disappear under the reader.
 */
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 defineProps({
@@ -47,8 +47,15 @@ function measure() {
 
 function toggle() {
   expanded.value = !expanded.value
-  measure()
 }
+
+/*
+  Measured once the DOM has caught up, never inside the click handler. Reading
+  the box there happens before Vue has put the class back, so on the way closed
+  the two heights are equal, the button decides there is nothing to reveal and
+  never comes back — which is exactly what it did.
+*/
+watch(expanded, measure, { flush: 'post' })
 
 onMounted(() => {
   measure()
@@ -113,9 +120,10 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 }
 
 /* A real button, styled as the inline action it is: the accent and an underline
-   are the affordance, because nothing else on the site is one of these. */
+   are the affordance, because nothing else on the site is one of these. It sits
+   on the right, under the end of the quote it belongs to. */
 .more {
-  align-self: flex-start;
+  align-self: flex-end;
   padding: 0;
   border: 0;
   background: none;

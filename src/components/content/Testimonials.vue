@@ -49,11 +49,12 @@ const items = computed(() => testimonials.map((entry) => ({ ...entry, ...entry[l
 }
 
 /* The same mono label the contact rows use, not a section heading: this is a
-   block inside a section, not a destination. */
+   block inside a section, not a destination. A step larger than those rows,
+   because this one is a block title and not a field label. */
 .label {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;

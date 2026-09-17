@@ -323,13 +323,16 @@ Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`,
 
 ### 3.6 Projects
 
-A **horizontal rail**: a clipped viewport (`overflow:hidden`, `padding:12px 0` to leave the magnetic
-pull its 10px, `touch-action:pan-y`) holding a `flex` track with `gap:20px`, moved by
-`transform: translate3d(-offset, 0, 0)` on a `0.55s cubic-bezier(.22,1,.36,1)` transition — the same
-arrive-and-settle the lemon and the footer use — with `will-change:transform`. **Three cards and the
-sliver of a fourth** on a desktop, **one and a sliver** below 900px, which is the whole affordance: the
-sliver says there is more, without a dot or a counter. The card width is
-`calc((100% - 40px - 68px) / 3)` — two gaps and the sliver — and `82%` on a phone.
+A **horizontal rail**: a clipped viewport (`overflow:hidden`, `padding:12px 0` to leave the magnetic pull
+its 10px, `touch-action:pan-y`) holding a `flex` track with `gap:20px`, moved by
+`transform: translate3d(-offset, 0, 0)` with `will-change:transform`. **The travel is a loop in the
+script, not a CSS transition**, because the fade has to know the position it is passing through: a
+transition runs in the compositor where nothing can read it, so the fade could only be decided from the
+destination. It eases at `0.16` per frame, stops the moment it settles, and jumps straight to the
+target under `prefers-reduced-motion`. **Three cards and the sliver of a fourth** on a desktop, **one
+and a sliver** below 900px, which is the whole affordance: the sliver says there is more, without a dot
+or a counter. The card width is `calc((100% - 2 * var(--rail-gap) - var(--rail-peek)) / 3)` — the two
+gaps and the peek — and `calc(100% - var(--rail-peek))` on a phone.
 
 The rail travels one card per step and stops with the last card flush to the right edge, so the last
 position shows cards 2–4 rather than card 4 alone. **The two arrows above it disable at the ends**,
@@ -347,16 +350,15 @@ card — 160px — before anything happened, which reads as the rail refusing to
 travels more than `6px` swallows the click in the capture phase, because nobody means to open a card
 they just dragged.
 
-**The edge the clip cuts gets a soft one.** The viewport carries a `mask-image` fade on whichever side
-the rail continues on — the right at the start, the left at the end, both in the middle, none when
-everything fits — **and both while it is travelling**, because mid-flight there is a card hanging off
-each side and the position rule only knows the destination, so it left one of them cut for the length
-of the animation. A hard vertical edge where a card is cut reads as a mistake rather than as "there is
-more this way", and the side with nothing to continue is left alone: at the start the first card's
-rounded corner sits on the edge, and fading it would eat it. **The fade is the peek**, derived from the
-same two variables the card width is, so it stops exactly where the card you are reading begins. A flat
-`56px` did not: the peek is `45px` on a phone, so the fade reached 11px into the visible card and
-smudged its right edge instead of softening the next one.
+**The edge the clip cuts gets a soft one**, and **the fade follows the live position**: a side is faded
+only while there is a card hanging off it. The right at the start, the left at the end, both in the
+middle, none when everything fits — and, because it reads the offset rather than the destination, it is
+right at every frame of the travel. A hard vertical edge where a card is cut reads as a mistake rather
+than as "there is more this way", and the side with nothing to continue is left alone: at the start the
+first card's rounded corner sits on the edge, and fading it would eat it. **The fade is the peek**,
+derived from the same two variables the card width is, so it stops exactly where the card you are
+reading begins. A flat `56px` did not: the peek is `45px` on a phone, so the fade reached 11px into the
+visible card and smudged its right edge instead of softening the next one.
 
 **Cards that are fully out of the rail carry `inert`.** They stay in the DOM — the keyboard has to
 reach them — and `inert` is what keeps Tab from walking into a card nobody can see, which is the trap
@@ -476,12 +478,15 @@ line — the name in `--fg-2` and the company in `--fg-3` (`13px`, tracked/upper
 than the 10–11px labels because this one is read rather than scanned), with a `40px` avatar circle when
 there is one. Entries are separated by `--line` rules, like the timeline in About.
 
-**A long quote is clamped to three lines**, with a mono uppercase "Read more" under it in `--acc-text`
-and underlined — the only inline action on the site, so it carries the affordance itself. The button
-only exists when there is something to reveal, which is measured, not assumed: the clamp is applied by
-default so the box shows three lines while reporting the height of all of them, and the gap between
-`scrollHeight` and `clientHeight` is the test. Asking for the clamp only when there is something to
-hide never fires — the box is unclamped, the two heights are equal, and the button never appears.
+**A long quote is clamped to three lines**, with a mono uppercase "Read more" under it in `--acc-text`,
+underlined and set to the **right**, under the end of the quote it belongs to. It is the only inline
+action on the site, so it carries the affordance itself. The button only exists when there is something
+to reveal, which is measured, not assumed: the clamp is applied by default so the box shows three lines
+while reporting the height of all of them, and the gap between `scrollHeight` and `clientHeight` is the
+test. **The measurement runs after the DOM has caught up**, never inside the click handler — read there
+it happens before Vue has put the class back, so on the way closed the two heights are equal, the button
+decides there is nothing to reveal, and it never comes back. Asking for the clamp only when there is
+something to hide never fires at all, for the same reason.
 
 The avatar is `object-fit:contain` in a `--surface-2` circle, not `cover`: the one here is a client's
 mark rather than a photograph, and cropping a logo cuts away the part that says who it is.

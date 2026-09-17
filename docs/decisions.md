@@ -1533,16 +1533,25 @@ project copy, the About paragraph, the 404 line, the testimonial and the year ra
   dashes, and rewriting them would be a diff of hundreds of lines with nothing to show for it. The
   rule is about the copy.
 
-### 63. The projects rail fades both edges while it travels
+### 63. The rail's fade follows the live position, so the travel is a loop
 
 **Date:** 2026-09-17 — **Status:** active
 
-The fade on the cut edge was decided by where the rail *is* — right at the start, left at the end,
-both in the middle — and the owner still saw a card cut in half while it moved. The rule only knows
-the destination: mid-flight there is a card hanging off **each** side, and the side the rail is
-travelling towards is not faded yet, so it stayed cut for the whole 0.55s of the animation.
+The fade on the cut edge is decided by where the rail *is*: a side is faded only while there is a card
+hanging off it. Getting that right took three tries, and the first two failed for the same reason.
 
-Both edges now fade from the moment the rail starts moving until a little after it settles. The timer
-is a hair longer than the transition, and it is re-armed on every frame of a drag, so a long drag
-stays covered. It is the kind of thing only the animation shows: at rest, and in a screenshot, the
-position rule looks correct.
+1. **Decided from the destination.** A CSS transition runs in the compositor, where nothing can read
+   the position it is passing through, so the fade could only know where the rail was going. Travelling
+   towards an end it left the arriving side unfaded, and a card stayed cut in half for the whole 0.55s
+   of the animation.
+2. **Both edges for the length of the movement.** That covered the travel and broke the ends: for the
+   window it lasted, the card sitting flush against the rail's edge — the first at the start, the last
+   at the end — was itself faded, which is the one thing the rule exists to avoid.
+3. **What ships: the travel is a loop in the script.** Easing at `0.16` per frame, stopping when it
+   settles, and jumping straight to the target under `prefers-reduced-motion`. The fade reads the live
+   offset, so it is correct at every frame, and it only writes its class when the answer changes — a
+   handful of times per movement, not sixty times a second. It is also one less thing to synchronise:
+   no transition, no `transitionend`, no timer guessing how long the animation lasts.
+
+The lesson is the same one the band taught: **a compositor animation cannot be observed from the main
+thread**, and anything that has to react to it frame by frame has to be driven frame by frame.

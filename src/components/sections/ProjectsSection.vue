@@ -66,25 +66,21 @@ const atStart = ref(true)
 const atEnd = ref(false)
 const parked = ref([]) // per card: fully out of the rail, so out of the tab order
 const current = ref(0) // the card the rail is parked on, which touch marks
-const moving = ref(false)
+const fade = ref('fade-right') // which edges the clip softens
 
 /*
-  Which edges to fade. The clip cuts a card off mid-way, and a hard vertical edge
-  reads as a mistake rather than as "there is more this way" — but only the side
-  the rail actually continues on: at the start the first card's rounded corner
-  sits on the edge and fading it would eat it.
+  Which edges to fade: a side only while there is a card hanging off it. The clip
+  cuts a card off mid-way, and a hard vertical edge reads as a mistake rather
+  than as "there is more this way" — but the side with nothing to continue is
+  left alone. At the start the first card's rounded corner sits on the edge and
+  fading it would eat it.
 */
-const fade = computed(() => {
-  // Both, while it travels. Mid-flight there is a card hanging off each side,
-  // and the rule below only knows where the rail is going: it left one of them
-  // with a hard cut for the whole animation, which is what "it still cuts while
-  // it moves" was.
-  if (moving.value) return 'fade-both'
-  if (atStart.value && atEnd.value) return 'none'
-  if (atStart.value) return 'fade-right'
-  if (atEnd.value) return 'fade-left'
-  return 'fade-both'
-})
+function syncFade() {
+  const left = offset > 1
+  const right = offset < maxOffset - 1
+  const next = left && right ? 'fade-both' : left ? 'fade-left' : right ? 'fade-right' : 'none'
+  if (next !== fade.value) fade.value = next
+}
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 
@@ -95,32 +91,56 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 */
 let step = 0 // one card plus one gap, in px
 let maxOffset = 0 // how far the rail can travel before the last card is in
-let offset = 0
+let offset = 0 // where it is, which is what gets painted
+let target = 0 // where it is going
 let index = 0
 let startX = 0
 let startOffset = 0
 let travelled = 0
-let movingTimer = null
+let frame = null
 
 /*
-  A little longer than the transition, so the fade covers the whole travel and
-  the settle, and no longer than that.
+  The travel is animated here rather than by a CSS transition, and the fade is
+  why. A transition runs in the compositor, where nothing can read the position
+  it is passing through, so the fade could only be decided from the destination —
+  which left a card cut on the side the rail was travelling towards, for the
+  whole 0.55s. A loop knows the live offset, so the fade is right at every frame,
+  and it stops the moment the rail settles.
 */
-function markMoving() {
-  moving.value = true
-  clearTimeout(movingTimer)
-  movingTimer = setTimeout(() => (moving.value = false), 700)
-}
+const EASING = 0.16
 
 function paint() {
   if (track.value) track.value.style.transform = `translate3d(${-offset}px, 0, 0)`
+  syncFade()
+}
+
+function settle() {
+  if (reduced.matches) {
+    offset = target
+    paint()
+    return
+  }
+
+  if (frame) return
+  frame = requestAnimationFrame(function tick() {
+    offset += (target - offset) * EASING
+    if (Math.abs(target - offset) < 0.5) {
+      offset = target
+      frame = null
+    } else {
+      frame = requestAnimationFrame(tick)
+    }
+    paint()
+  })
 }
 
 /*
-  Re-measures the rail and puts the state back on it. Runs on mount, on resize,
-  and whenever the index moves.
+  Re-measures the rail and puts the state back on it. Runs on mount, on resize
+  and whenever the index moves. `snap` puts it straight where it belongs instead
+  of leaving it to travel there: the geometry changed under it, so there is
+  nothing to animate from.
 */
-function sync() {
+function sync(snap) {
   const rail = track.value
   const view = viewport.value
   if (!rail || !view) return
@@ -132,10 +152,11 @@ function sync() {
 
   const last = step > 0 ? Math.ceil(maxOffset / step) : 0
   index = Math.min(Math.max(index, 0), last)
-  offset = Math.min(index * step, maxOffset)
+  target = Math.min(index * step, maxOffset)
+  if (snap) offset = target
 
   atStart.value = index <= 0
-  atEnd.value = offset >= maxOffset - 1
+  atEnd.value = target >= maxOffset - 1
   current.value = index
 
   parked.value = items.value.map((_, i) => {
@@ -151,8 +172,8 @@ function page(direction) {
   const next = Math.min(Math.max(index + direction, 0), last)
   if (next === index) return
   index = next
-  markMoving()
-  sync()
+  sync(false)
+  settle()
 }
 
 /*
@@ -167,9 +188,12 @@ function onPointerDown(event) {
   travelled = 0
   startX = event.clientX
   startOffset = offset
-  markMoving()
-  // No curve while the pointer is in charge, or the rail lags behind it.
-  track.value.style.transition = 'none'
+  target = offset
+  // The pointer is in charge, so any travel still running is abandoned.
+  if (frame) {
+    cancelAnimationFrame(frame)
+    frame = null
+  }
   viewport.value.style.userSelect = 'none'
   viewport.value.setPointerCapture(event.pointerId)
 }
@@ -179,17 +203,13 @@ function onPointerMove(event) {
   const delta = event.clientX - startX
   travelled = Math.max(travelled, Math.abs(delta))
   offset = Math.min(Math.max(startOffset - delta, 0), maxOffset)
-  markMoving()
   paint()
 }
 
 function onPointerUp(event) {
   if (!dragging.value) return
   dragging.value = false
-  markMoving()
 
-  const rail = track.value
-  if (rail) rail.style.transition = ''
   if (viewport.value) {
     viewport.value.style.userSelect = ''
     if (viewport.value.hasPointerCapture(event.pointerId)) {
@@ -198,17 +218,15 @@ function onPointerUp(event) {
   }
 
   /*
-    Settle on a card, in the next frame: the transform has to change once the
-    curve is back in place, or it lands with a jump instead of gliding. A drag
-    that moved far enough takes the next card in the direction it was going;
-    anything shorter falls back to the nearest.
+    Settle on a card. A drag that moved far enough takes the next one in the
+    direction it was going; anything shorter falls back to the nearest. The
+    offset is left where the finger dropped it, so the loop travels from there.
   */
-  requestAnimationFrame(() => {
-    const moved = offset - startOffset
-    index =
-      Math.abs(moved) > step * FLICK ? index + Math.sign(moved) : Math.round(offset / step)
-    sync()
-  })
+  const moved = offset - startOffset
+  index =
+    Math.abs(moved) > step * FLICK ? index + Math.sign(moved) : Math.round(offset / step)
+  sync(false)
+  settle()
 }
 
 function onClickCapture(event) {
@@ -218,15 +236,19 @@ function onClickCapture(event) {
   event.preventDefault()
 }
 
+function onResize() {
+  sync(true)
+}
+
 onMounted(() => {
   // A frame, so the cards are laid out and there is something to measure.
-  requestAnimationFrame(sync)
-  window.addEventListener('resize', sync, { passive: true })
+  requestAnimationFrame(() => sync(true))
+  window.addEventListener('resize', onResize, { passive: true })
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', sync)
-  clearTimeout(movingTimer)
+  window.removeEventListener('resize', onResize)
+  if (frame) cancelAnimationFrame(frame)
 })
 </script>
 
@@ -388,9 +410,8 @@ onUnmounted(() => {
 .track {
   display: flex;
   gap: var(--rail-gap);
-  /* Composited, and the curve is ours: the same arrive-and-settle the lemon and
-     the footer use. */
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  /* The travel is written here from the script, one frame at a time, so it
+     stays on the compositor and the fade can follow it. */
   will-change: transform;
 }
 
@@ -406,12 +427,6 @@ onUnmounted(() => {
 
   .track > * {
     flex: 0 0 calc(100% - var(--rail-peek));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .track {
-    transition: none;
   }
 }
 </style>

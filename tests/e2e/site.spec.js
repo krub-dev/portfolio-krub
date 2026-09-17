@@ -136,11 +136,19 @@ test('the project rail pages with its arrows, and stops at both ends', async ({ 
 
   const prev = page.getByRole('button', { name: 'Previous project' })
   const next = page.getByRole('button', { name: 'Next project' })
+  const viewport = page.locator('#projects .viewport')
 
   // Nothing behind you at the start.
   await expect(prev).toBeDisabled()
   await expect(next).toBeEnabled()
   expect(await shift()).toBe(0)
+
+  /*
+    And the edge with nothing beyond it is not faded: the first card's rounded
+    corner sits on the left edge, and fading that side would eat it. The fade
+    follows the live position, so at the ends it is one-sided.
+  */
+  await expect(viewport).toHaveClass(/fade-right/)
 
   await next.click()
   await expect.poll(shift).toBeLessThan(0)
@@ -158,6 +166,9 @@ test('the project rail pages with its arrows, and stops at both ends', async ({ 
     await expect.poll(shift).not.toBe(before)
   }
   await expect(next).toBeDisabled()
+
+  // At the far end it is the other way round: the last card sits on the right.
+  await expect(viewport).toHaveClass(/fade-left/)
 
   // And the card it was hiding ended up inside the rail.
   const last = await page.locator('#projects .card').last().boundingBox()
