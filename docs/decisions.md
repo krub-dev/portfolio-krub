@@ -1584,6 +1584,11 @@ projects grid, and it got the same answer — one at a time.
 - **The window is as tall as the tallest entry, not as tall as the one showing.** Sized to the current
   quote it changed height every time you paged, and everything under it moved with it. It is the kind of
   thing a screenshot cannot show and a scroll position can.
+- **And every entry fills the window.** Sizing the window to the tallest was only half of it: the entries
+  were still their own height, so a short quote left its share of the window empty and the next entry
+  showed through the gap. The height goes on the entries as a `min-height` fed by a variable the window
+  sets — two lines, and the stack comes out uniform, which is also what makes the offsets a plain
+  multiple of it.
 - **And the settle compares offsets.** The first version worked the target index out as
   `offset / height`, which is right only while every entry is the same height: with one long quote and a
   short one, a drag that was too small to count as a flick landed on the wrong quote — the counter

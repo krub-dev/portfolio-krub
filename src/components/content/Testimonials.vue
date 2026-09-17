@@ -128,10 +128,16 @@ function apply(snap) {
   /*
     The window is as tall as the tallest entry, not as tall as the one showing.
     Sized to the current quote it changed height every time you paged, which
-    moved everything under it; this way it only changes if an entry grows past
-    the tallest, which is what expanding one can do.
+    moved everything under it.
+
+    And the variable goes with it, because every entry is told to fill the
+    window: a short quote left its share of the window empty, and the next entry
+    showed through the gap. With the height on the entries the stack is uniform,
+    which is also what makes the offsets a plain multiple of it.
   */
-  view.style.height = `${Math.max(...heights)}px`
+  const tallest = Math.max(...heights)
+  view.style.setProperty('--pane-h', `${tallest}px`)
+  view.style.height = `${tallest}px`
 
   atStart.value = index.value <= 0
   atEnd.value = index.value >= offsets.length - 1

@@ -91,9 +91,16 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 <style scoped>
 .entry {
   margin: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /*
+    At least the window's height, whatever this quote needs. The window is as
+    tall as the tallest entry, so without this a short quote leaves its share of
+    the window empty and the next entry shows through the gap.
+  */
+  min-height: var(--pane-h, 0);
   /* Vertical padding only: the pager's window is the box, and the entries are
      stacked inside it with no gap, so this is what separates one quote from the
      next as it slides past. */

@@ -510,12 +510,15 @@ more" swallows the click rather than pressing it. **The rail's drag could leave 
 page; this one cannot**, so the pane claims both axes (`touch-action:none`) and the page is scrolled by
 starting the touch anywhere else on the screen — the price of a vertical pager.
 
-**The window is as tall as the tallest entry**, not as tall as the one showing: sized to the current
-quote it changed height every time you paged, which moved everything under it. The entries are different
-lengths, so where each one sits is its own offset — a uniform step would be wrong the moment one quote is
-longer than another — and a `ResizeObserver` on the reel re-measures when a quote is expanded past the
-tallest or the fonts land. The entries that are not showing carry `inert`, so Tab cannot walk into a quote
-nobody can see. Same rule as the rail.
+**The window is as tall as the tallest entry, and every entry fills it.** Sized to the one showing it
+changed height every time you paged, which moved everything under it; sized to the tallest but with the
+entries left at their own height, a short quote left its share of the window empty and the next entry
+showed through the gap. So the height goes on the entries as `min-height` (through a `--pane-h` the
+window sets), and the stack comes out uniform — which is also what makes the offsets a plain multiple
+of it. Where each entry sits is still measured, because expanding one makes it taller: a uniform step
+would be wrong the moment a quote is longer than another, and a `ResizeObserver` on the reel
+re-measures when that happens or when the fonts land. The entries that are not showing carry `inert`, so
+Tab cannot walk into a quote nobody can see. Same rule as the rail.
 
 Each entry is `figure` → `figcaption` → `blockquote`: **the attribution first**, and on two lines — a
 `48px` avatar circle when there is one, and beside it the name in `--fg-2` over the company in `--fg-3`
