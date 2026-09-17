@@ -1555,3 +1555,30 @@ hanging off it. Getting that right took three tries, and the first two failed fo
 
 The lesson is the same one the band taught: **a compositor animation cannot be observed from the main
 thread**, and anything that has to react to it frame by frame has to be driven frame by frame.
+
+### 64. The testimonials became a pager
+
+**Date:** 2026-09-17 — **Status:** active
+
+The block was a column, and the column grew: measured, one entry is `214px` on a phone, so three of them
+made the block `678px` and the section nearly two screens. That is the same arithmetic that killed the
+projects grid, and it got the same answer — one at a time.
+
+- **A pager, not a rail.** The movement is vertical because the entries are: a horizontal rail of quotes
+  is harder to read than a card, and the arrows point the way the content moves. Down brings the next
+  quote up from below while the one showing leaves upwards.
+- **The arrows moved to the side.** The rail already has a pair of horizontal arrows over its head, and
+  two pairs in one column of the page read as one control that lost its way.
+- **The window is sized to the quote, and the travel is measured.** The entries are different lengths,
+  so a uniform step would be wrong the moment one quote is longer than another: each entry's own offset
+  and height are read from the DOM. The height transition is what stops the section jumping as the
+  quotes change.
+- **This is what let the clamp go.** The "read more" existed because a column had to stay short. One at
+  a time shows each quote whole, so the clamp, the button, its measurement and its two locale keys went
+  with it. Deleting working code is right when the reason for it has gone.
+- **It reverses decision 56 on boxes — for one box.** 56 said no cards, because a grid of them read as a
+  second set of projects. One window is not a grid: there is nothing to mistake it for, and the box is
+  what makes a single quote feel like an object rather than a stray paragraph.
+- **And the quotes are quoted.** A testimonial is a quote, and the marks are what say so before anyone
+  reads the attribution. The placeholders had them and the first real one did not, which is the tell
+  that gave it away.

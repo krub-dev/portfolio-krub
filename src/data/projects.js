@@ -115,7 +115,7 @@ export const projects = [
     stack: ['Vue 3', 'Vite', 'vue-i18n', 'Vitest', 'Playwright', 'Vercel'],
     en: {
       name: 'krub.dev',
-      tag: 'OWN',
+      tag: 'PORTFOLIO',
       role: 'Design + development',
       year: '2026',
       repoLabel: '/repo',
@@ -129,7 +129,7 @@ export const projects = [
     },
     es: {
       name: 'krub.dev',
-      tag: 'PROPIO',
+      tag: 'PORTFOLIO',
       role: 'Diseño + desarrollo',
       year: '2026',
       repoLabel: '/repo',

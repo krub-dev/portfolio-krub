@@ -208,6 +208,23 @@ test('the navbar only takes clicks where the capsule is', async ({ page }) => {
   expect(onCapsule).toBe(true)
 })
 
+test('the rail never fades the card it is parked on', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'only a phone has a position with a whole card either side')
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+
+  const viewport = page.locator('#projects .viewport')
+
+  // One card in: the one behind is exactly off the rail — a card plus a gap of
+  // travel — so there is nothing on that side to soften, and the card the rail
+  // is parked on must not be faded. Reading "has the rail moved" instead of "is
+  // a card hanging off it" faded its left edge, which is what this guards.
+  await page.getByRole('button', { name: 'Next project' }).click()
+  await expect(viewport).toHaveClass(/fade-right/)
+  await expect(viewport).not.toHaveClass(/fade-both/)
+})
+
 test('the project rail drags with the mouse, and a drag does not open a card', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
@@ -263,26 +280,36 @@ test('on touch the rail marks the card it is parked on', async ({ page, isMobile
   await expect(cards.nth(0)).not.toHaveClass(/current/)
 })
 
-test('a long testimonial is clamped, and read more opens it', async ({ page }) => {
+test('the testimonials page one at a time, and the window follows the quote', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
 
-  const quote = page.locator('#projects .quote')
-  const more = page.getByRole('button', { name: 'Read more' })
+  const pane = page.locator('#projects .pane')
+  const first = page.locator('#projects .entry').first()
+  const count = page.locator('#projects .position')
+  const prev = page.getByRole('button', { name: 'Previous testimonial' })
+  const next = page.getByRole('button', { name: 'Next testimonial' })
 
-  // The quote runs past three lines, so the control exists.
-  await expect(more).toBeVisible()
-  await expect(quote).toHaveClass(/clamped/)
+  await expect(prev).toBeDisabled()
+  await expect(next).toBeEnabled()
+  await expect(count).toHaveText('1 / 3')
+  await expect(first).not.toHaveAttribute('inert')
 
-  const closed = await quote.evaluate((el) => el.clientHeight)
-  await more.click()
-  await expect(quote).not.toHaveClass(/clamped/)
+  const tallest = await pane.evaluate((el) => el.clientHeight)
+  await next.click()
 
-  const open = await quote.evaluate((el) => el.clientHeight)
-  expect(open).toBeGreaterThan(closed)
+  await expect(count).toHaveText('2 / 3')
+  await expect(prev).toBeEnabled()
 
-  // And it closes again.
-  await page.getByRole('button', { name: 'Read less' }).click()
-  await expect(quote).toHaveClass(/clamped/)
+  // Out of the tab order while it is not showing, in the DOM all the same.
+  await expect(first).toHaveAttribute('inert')
+
+  // The window is sized to the quote on show, and the second one is shorter.
+  await expect.poll(() => pane.evaluate((el) => el.clientHeight)).toBeLessThan(tallest)
+
+  await prev.click()
+  await expect(count).toHaveText('1 / 3')
+  await expect(prev).toBeDisabled()
 })
 
 test('the project rail drags with a finger too', async ({ page, isMobile }) => {

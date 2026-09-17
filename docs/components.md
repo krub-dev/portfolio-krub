@@ -171,12 +171,14 @@ owns its own index state, wrapping around) and `SpecList` (props `role`, `year`,
 resolves its own Role / Year / Stack labels through i18n).
 
 ### TestimonialCard
-`quote`, `name`, `role`, `avatar`. No card: text, a mono attribution and a rule between entries, so
-the quotes read as a list and not as another grid of projects. See decisions.md 56.
+`quote`, `name`, `role`, `avatar`. One entry as the pager's content: the attribution first, then the
+quote in quotation marks. No box of its own and no clamp — the pager's window is the box and shows one
+quote whole. See decisions.md 56 and 64.
 
 ### Testimonials
-The block at the end of the Projects grid: a mono label and the entries, gated by `config` in
-ProjectsSection. It used to be a section of its own — see decisions.md 56.
+The block at the end of the Projects rail: a mono label and a vertical pager, one quote at a time, with
+the arrows and a `n / total` beside the box. The window is sized to the quote on show and the entries
+that are not showing are `inert`. Gated by `config` in ProjectsSection. See decisions.md 64.
 
 ---
 

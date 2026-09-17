@@ -69,14 +69,17 @@ const current = ref(0) // the card the rail is parked on, which touch marks
 const fade = ref('fade-right') // which edges the clip softens
 
 /*
-  Which edges to fade: a side only while there is a card hanging off it. The clip
-  cuts a card off mid-way, and a hard vertical edge reads as a mistake rather
-  than as "there is more this way" — but the side with nothing to continue is
-  left alone. At the start the first card's rounded corner sits on the edge and
-  fading it would eat it.
+  Which edges to fade: a side only while a card is actually hanging off it.
+
+  Not "has the rail moved": at a settled index the rail has moved and the card
+  behind is exactly off the edge — a whole card plus a gap of travel — so that
+  test faded the left side of the card the rail is parked on, which is the one
+  thing this is meant to avoid. What matters is whether a card straddles the
+  edge, and that is what the offset within the current step says.
 */
 function syncFade() {
-  const left = offset > 1
+  const at = step > 0 ? offset % step : 0
+  const left = at > 0 && at < cardWidth
   const right = offset < maxOffset - 1
   const next = left && right ? 'fade-both' : left ? 'fade-left' : right ? 'fade-right' : 'none'
   if (next !== fade.value) fade.value = next
@@ -90,6 +93,7 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
   frame of a drag.
 */
 let step = 0 // one card plus one gap, in px
+let cardWidth = 0 // one card, in px
 let maxOffset = 0 // how far the rail can travel before the last card is in
 let offset = 0 // where it is, which is what gets painted
 let target = 0 // where it is going
@@ -147,6 +151,7 @@ function sync(snap) {
 
   const gap = parseFloat(getComputedStyle(rail).columnGap) || 0
   const card = rail.firstElementChild?.getBoundingClientRect().width ?? 0
+  cardWidth = card
   step = card + gap
   maxOffset = Math.max(0, rail.scrollWidth - view.clientWidth)
 

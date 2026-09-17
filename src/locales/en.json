@@ -45,8 +45,6 @@
   "actions": {
     "cv": "Download CV (PDF)",
     "talk": "Let's talk ↗",
-    "readMore": "Read more",
-    "readLess": "Read less",
     "projects": "/projects",
     "home": "Back home"
   },
@@ -95,6 +93,8 @@
     "prevProject": "Previous project",
     "nextProject": "Next project",
     "projectsRail": "Projects",
+    "prevTestimonial": "Previous testimonial",
+    "nextTestimonial": "Next testimonial",
     "backToTop": "Back to top",
     "openProject": "Open project: {name}"
   }

@@ -351,14 +351,16 @@ travels more than `6px` swallows the click in the capture phase, because nobody 
 they just dragged.
 
 **The edge the clip cuts gets a soft one**, and **the fade follows the live position**: a side is faded
-only while there is a card hanging off it. The right at the start, the left at the end, both in the
-middle, none when everything fits — and, because it reads the offset rather than the destination, it is
-right at every frame of the travel. A hard vertical edge where a card is cut reads as a mistake rather
-than as "there is more this way", and the side with nothing to continue is left alone: at the start the
-first card's rounded corner sits on the edge, and fading it would eat it. **The fade is the peek**,
-derived from the same two variables the card width is, so it stops exactly where the card you are
-reading begins. A flat `56px` did not: the peek is `45px` on a phone, so the fade reached 11px into the
-visible card and smudged its right edge instead of softening the next one.
+only while a card is actually hanging off it, which is what the offset within the current step says —
+not "has the rail moved", which is true at every settled index past the first even though the card
+behind is exactly off the edge. The right at the start, the left at the end, both mid-travel, none when
+everything fits — and because it reads the offset rather than the destination, it is right at every
+frame. A hard vertical edge where a card is cut reads as a mistake rather than as "there is more this
+way", and the side with nothing to continue is left alone: at the start the first card's rounded corner
+sits on the edge, and fading it would eat it. **The fade is the peek**, derived from the same two
+variables the card width is, so it stops exactly where the card you are reading begins. A flat `56px`
+did not: the peek is `45px` on a phone, so the fade reached 11px into the visible card and smudged its
+right edge instead of softening the next one.
 
 **Cards that are fully out of the rail carry `inert`.** They stay in the DOM — the keyboard has to
 reach them — and `inert` is what keeps Tab from walking into a card nobody can see, which is the trap
@@ -466,37 +468,46 @@ This section has **no footnote**.
 
 ### 3.9 Testimonials (optional)
 
-Shown or hidden by config, and it lives at the **end of the Projects grid**, not as a section of its
+Shown or hidden by config, and it lives at the **end of the Projects rail**, not as a section of its
 own: it is about that work, and a fifth destination would break the 00–03 numbering for something
-that can disappear. It carries the same mono label the contact rows use (`/testimonials`, 10px,
-uppercase, `--fg-3`) instead of a heading. See decisions.md 56.
+that can disappear. It carries the same mono label the contact rows use (`/testimonials`, 13px,
+uppercase, `--fg-3`) instead of a heading, and a `margin-top` of its own on top of the section's gap.
+See decisions.md 56 and 64.
 
-No cards. As a box with a border the quotes read as another grid of projects sitting under the
-projects — the same shape twice, saying different things — so each entry is text: **the attribution
-first** — a `48px` avatar circle when there is one, the name in `--fg-2` and the company in `--fg-3`
-(`13px`, tracked/uppercase, a step larger than the 10–11px labels because this one is read rather than
-scanned) — then the quote (`clamp(18px,2vw,23px)`, `line-height:1.5`, `--fg`, 62ch, `text-wrap:pretty`).
-Header first because that is how it reads — who is talking, then what they said — and because it puts
-the "read more" at the end of the block rather than between the quote and the name, where it looked like
-it belonged to neither. Entries are separated by `--line` rules, like the timeline in About, and the
-block carries its own `margin-top` on top of the section's gap: the rail and the quotes are two
-different things and were sitting too close to tell.
+**One at a time, in a pager.** A column grows: measured, one entry is `214px` on a phone, so three made
+the block `678px` and the section nearly two screens — the problem the projects grid had, and the same
+answer. The block shows a single quote and keeps the height of one however many arrive, which is also
+what lets each quote be shown whole instead of clamped.
 
-**A long quote is clamped to three lines**, with a mono uppercase "Read more" under it in `--acc-text`,
-underlined and set to the **right**, under the end of the quote it belongs to. It is the only inline
-action on the site, so it carries the affordance itself. The button only exists when there is something
-to reveal, which is measured, not assumed: the clamp is applied by default so the box shows three lines
-while reporting the height of all of them, and the gap between `scrollHeight` and `clientHeight` is the
-test. **The measurement runs after the DOM has caught up**, never inside the click handler — read there
-it happens before Vue has put the class back, so on the way closed the two heights are equal, the button
-decides there is nothing to reveal, and it never comes back. Asking for the clamp only when there is
-something to hide never fires at all, for the same reason.
+The box is `--surface` with a `--line` border and radius 18, and **the controls sit beside it, not
+above it**: the rail already has a pair of horizontal arrows over its head, and two pairs in one column
+of the page read as one control that lost its way. **The arrows are vertical** — up, then a mono
+`n / total`, then down — because the movement is: down brings the next quote up from below while the
+one showing leaves upwards. The window is `overflow:hidden` with a `mask-image` fading its top and
+bottom `18px`, so a quote arrives and departs through a fade; at rest the mask does nothing, because
+the entries carry `22px` of vertical padding and the text never sits on the edge. `transform` on the
+reel and `height` on the window transition on `.5s cubic-bezier(.22,1,.36,1)`, both off under
+`prefers-reduced-motion`.
 
-The avatar is `object-fit:contain` in a `--surface-2` circle, not `cover`: the one here is a client's
-mark rather than a photograph, and cropping a logo cuts away the part that says who it is.
+**The window is sized to the quote on show**, measured rather than assumed: the entries are different
+lengths, so where each one sits is its own offset and the height is its own height — a uniform step
+would be wrong the moment one quote is longer than another. The entries that are not showing carry
+`inert`, so Tab cannot walk into a quote nobody can see. Same rule as the rail.
 
-The quotes are real. The placeholders were written in square brackets with "Name Surname" so they
-could not be mistaken for genuine ones and shipped by accident; that worked, and they are gone.
+Each entry is `figure` → `figcaption` → `blockquote`: **the attribution first** — a `48px` avatar circle
+when there is one, the name in `--fg-2` and the company in `--fg-3` (`13px`, tracked/uppercase, a step
+larger than the 10–11px labels because this one is read rather than scanned) — then the quote
+(`clamp(18px,2vw,23px)`, `line-height:1.5`, `--fg`, 62ch, `text-wrap:pretty`). Header first because that
+is how it reads: who is talking, then what they said. The avatar is `object-fit:contain` in a
+`--surface-2` circle, not `cover`: the one here is a client's mark rather than a photograph, and
+cropping a logo cuts away the part that says who it is.
+
+**The quotes are in quotation marks.** A testimonial is a quote and the marks are what say so before
+anyone reads the attribution; the placeholders had them and the first real one did not, which is what
+gave it away. One is real and two are placeholders, in square brackets with "Name Surname" so they
+cannot be mistaken for genuine ones and shipped by accident: **delete or replace them before this
+reaches `main`.**
+
 **No "optional section" note** in the interface.
 
 ### 3.10 Contact
