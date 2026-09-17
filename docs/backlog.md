@@ -91,11 +91,12 @@ section, folded together where they overlapped.
   see the skeleton note below and decision 54.
 - [ ] **Rethink the stack section.** The icon grid is faithful to the spec but flat. Ideas so far:
   monochrome, animation, interaction, a mask, softened edges.
-- [x] **Give the contact section more weight.** Rebuilt on 2026-09-17: a full-bleed "LET'S TALK"
-  band whose letters alternate solid and outline and which slides with the scroll (`view()`, with the
-  marquee as the fallback), one full-width row per network with the address written out, and the
-  mailto kept. It turned up a real bug on the way: `.app`'s `overflow-x: hidden` made the wrapper a
-  scroll container that never scrolls, which froze the band's timeline. See decision 55.
+- [x] **Give the contact section more weight.** Rebuilt on 2026-09-17: a full-bleed band whose words
+  alternate solid and outline over a second, fainter band drifting the other way, sliding with the
+  scroll (`view()`, with the marquee as the fallback), one full-width row per network with the address
+  written out, and the mailto kept. The band's phrase is translated ("Hablemos"), and so is the CTA.
+  It turned up a real bug on the way: `.app`'s `overflow-x: hidden` made the wrapper a scroll
+  container that never scrolls, which froze the band's timeline. See decision 55.
 - [ ] **A simple contact form**, in addition to the mailto. Decided on 2026-09-17: name, email and
   message; a POST to `/api/contact`, a Vercel function holding `WEB3FORMS_KEY` as an environment
   variable, so the key never reaches the bundle (locally it goes in `.env.local`, which `*.local`

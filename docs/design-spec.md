@@ -388,14 +388,22 @@ in the interface.
 
 ### 3.10 Contact
 
-A **full-bleed band** at the top: "LET'S TALK" in display type (700, `clamp(64px,13vw,190px)`,
-`line-height:.92`, `letter-spacing:-.03em`, uppercase), the letters alternating between solid `--fg`
-and outline (`-webkit-text-stroke:1.5px var(--acc-text)`, no fill), the phrase repeated **three**
-times inside each of **two** copies, and the pair sliding `-50%`. It is driven by the **scroll**
-(`animation-timeline: view()`), so the type travels as the section arrives and settles; where
-scroll-driven animations are missing it falls back to `marquee 26s linear infinite`. Decorative:
-`aria-hidden`. The spaces are cells too but do not count towards the alternation, or the visible
-letters would pair up.
+A **full-bleed band** at the top, in display type (700, `clamp(64px,13vw,190px)`, `line-height:.92`,
+`letter-spacing:-.03em`, uppercase): the phrase from `contact.band` — "Let's talk" / "Hablemos" —
+with its **words alternating** between solid `--fg` and outline (`-webkit-text-stroke:1.5px
+var(--acc-text)`, no fill), repeated **three** times inside each of the **two** copies the loop
+needs, sliding `-50%`. Per word, not per letter: an outline letter between two solid ones reads as a
+mistake rather than as a pattern. The parity carries on across the repetitions *and* into the second
+copy, so a one-word phrase still alternates and the seam where the track wraps never shows two solid
+words side by side.
+
+Behind it sits a **second band** of the same words, outline only in `--fg-3` at `opacity:.5`, a step
+higher (`margin-top:-.12em`) and drifting the **other way** (`animation-direction:reverse`). That is
+where the depth comes from.
+
+The slide is driven by the **scroll** (`animation-timeline: view()`), so the type travels as the
+section arrives and settles when it is centred; where scroll-driven animations are missing it falls
+back to `marquee 26s linear infinite`. Decorative: `aria-hidden`.
 
 Below it, an inner column carries the gutter and the 1180px cap the other sections use — the section
 itself has neither, because the band has to reach both edges. Inside: the heading, the headline

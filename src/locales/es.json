@@ -19,7 +19,7 @@
     "contact": "/contacto"
   },
   "contact": {
-    "band": "Let's talk"
+    "band": "Hablemos"
   },
   "stack": {
     "g1": "Languages",
@@ -29,7 +29,7 @@
   },
   "actions": {
     "cv": "Descargar CV (PDF)",
-    "talk": "Let's talk ↗",
+    "talk": "Hablemos ↗",
     "projects": "/proyectos",
     "home": "Volver al inicio"
   },

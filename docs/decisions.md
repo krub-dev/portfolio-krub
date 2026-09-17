@@ -1254,15 +1254,23 @@ the 3D model and the project images once they exist.
 
 The section was rebuilt around a band, the networks written out, and (next) a form.
 
-**The band is CSS, not GSAP.** The reference does two things, and neither needs a library: the
-letters alternating between solid and outline is `-webkit-text-stroke` with a transparent fill on
-every other letter, and "passing by" is the marquee the site already has under the hero — two copies
+**The band is CSS, not GSAP, and it is two bands.** The reference does two things, and neither needs
+a library: the words alternating between solid and outline is `-webkit-text-stroke` with a
+transparent fill, and "passing by" is the marquee the site already has under the hero — two copies
 and a `-50%` slide. What is new is only what drives it: `animation-timeline: view()` ties the slide
 to how far the band has crossed the viewport, so the type travels as the section arrives. That is a
 scroll-driven animation, which Chrome, Edge and recent Safari have; where it is missing, an
 `@supports not` block falls back to the same loop on a clock. GSAP would have been 50–70 KB for a
 keyframe and a transform, and it brings its own ticker, against a project whose rule is one
-`requestAnimationFrame` for everything that moves.
+`requestAnimationFrame` for everything that moves. A second copy of the words, outline only and a
+step higher, drifts the other way behind the first: that is what gives the band its depth.
+
+**The alternation is by word, not by letter.** Per letter it read as noise — an outline `l` between
+two solid ones looks like a mistake rather than a pattern — and the first attempt at it was exactly
+that. Per word it reads as two colours, as in the reference. The parity carries on across the
+repetitions and into the second copy rather than restarting, for two reasons: the Spanish phrase is
+a single word ("Hablemos"), so a per-phrase restart would paint the whole band one colour, and an odd
+number of words per copy would put two solid words together at the seam where the track wraps.
 
 **Building it found a real bug in the layout.** The band sat frozen at 26% of its travel whatever the
 scroll did — the timeline reported the same progress at five different scroll positions. `.app` had
