@@ -1268,11 +1268,18 @@ three attempts:
    computed on the main thread on every scroll tick, and a custom property inherits, so setting it on
    the band invalidated the computed style of all 216 letters — letters that carry a text stroke and
    are expensive to re-raster.
-3. What ships: the `view()` timeline where the browser has it, because the **compositor** drives it
-   and it keeps up with the scroll even when the main thread is busy; and the hand-written progress
-   where it does not, writing the transform straight onto the two tracks so nothing invalidates the
-   subtree. The component feature-detects once and only one path ever runs, and neither moves on its
-   own.
+3. The `view()` timeline where the browser has it, and the hand-written progress where it does not.
+   Composited, but still not right: it moved **half the track across the band's own crossing** — about
+   two and a half times the scroll — and the owner still read it as not fluid. No amount of
+   frame-perfect rendering makes a movement that fast feel calm; the problem was the velocity and the
+   size of the layer, not the frames.
+4. What ships: one track per layer, four repetitions instead of two copies of three, and the text
+   travels a **fifth of its own track**, easing toward where the scroll says it should be with a
+   little inertia — the loop stops the moment it has caught up. The layer is half the size it was
+   (fewer stroked glyphs to rasterise), the velocity reads as drifting, and the lag is what makes it
+   feel alive. It is a second `requestAnimationFrame`, against the project's one-loop rule — but that
+   rule is about the pointer, which runs whenever the mouse is over the page, and this one only runs
+   while the band is still moving.
 
 GSAP would have been 50–70 KB for a keyframe and a transform, and it brings its own ticker, against a
 project whose rule is one `requestAnimationFrame` for everything that moves. The band wears the accent
@@ -1318,6 +1325,11 @@ instead of a heading. Three reasons:
 - they add no destination, so the navbar keeps its four links and the page its four numbers;
 - the component stops being a section at all, which by the rule in components.md makes it a
   `content/` piece — it is one entity out of `src/data/` that could sit inside any section.
+
+They also stopped being cards. As boxes with a border they read as a second grid of projects sitting
+under the projects — the same shape twice, saying different things. The site already has a way of
+listing things that are not cards: text, a mono attribution and a rule between entries, which is what
+the timeline in About and the contact rows do, so the quotes use that.
 
 ### 57. The form posts to our own endpoint, never to Web3Forms
 

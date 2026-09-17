@@ -385,43 +385,44 @@ own: it is about that work, and a fifth destination would break the 00–03 numb
 that can disappear. It carries the same mono label the contact rows use (`/testimonials`, 10px,
 uppercase, `--fg-3`) instead of a heading. See decisions.md 56.
 
-Two cards: border `--line`, radius 18, background `--surface`, `padding:26px`, `gap:18px`. Quote 17px
-`line-height:1.55` in `--fg`; footer with a 36px avatar circle (placeholder), 14px/600 name and the
-company in mono 11px `--fg-3`. The current content is filler: replace it with real quotes or turn
-`config.showTestimonials` off again. **No "optional section" note** in the interface.
+No cards. As a box with a border the quotes read as another grid of projects sitting under the
+projects — the same shape twice, saying different things — so each entry is text: the quote
+(`clamp(18px,2vw,23px)`, `line-height:1.5`, `--fg`, 62ch, `text-wrap:pretty`) and, under it, a mono
+line — the name in `--fg-2` and the company in `--fg-3` (`11px`, tracked/uppercase), with a 28px
+avatar circle when there is one. Entries are separated by `--line` rules, like the timeline in About.
+The current content is filler: replace it with real quotes or turn `config.showTestimonials` off
+again. **No "optional section" note** in the interface.
 
 ### 3.10 Contact
 
 A **full-bleed band** at the top, on the accent band the marquee wears (`background:var(--acc)`,
 `--on-acc` for everything on it, 1px borders in `--acc`), in display type (700,
-`clamp(64px,13vw,190px)`, `line-height:.92`, `letter-spacing:-.03em`, uppercase): the phrase from
+`clamp(64px,13vw,190px)`, `line-height:.8`, `letter-spacing:-.03em`, uppercase): the phrase from
 `contact.band` — "Let's talk" / "Hablemos" — with its **words alternating** between solid `--on-acc`
-and outline (`-webkit-text-stroke:1.5px var(--on-acc)`, no fill), repeated **three** times inside each
-of the **two** copies the loop needs, sliding `-50%`. Per word, not per letter: an outline letter
-between two solid ones reads as a mistake rather than as a pattern. The parity carries on across the
-repetitions *and* into the second copy, so a one-word phrase still alternates and the seam where the
-track wraps never shows two solid words side by side.
+and outline (`-webkit-text-stroke:1.5px var(--on-acc)`, no fill), repeated **four** times. Per word,
+not per letter: an outline letter between two solid ones reads as a mistake rather than as a pattern.
+The parity runs on across the repetitions, so a one-word phrase still alternates.
 
 Behind it sits a **second band** of the same words, outline only in `--on-acc` at `opacity:.45`, a step
-higher (`margin-top:-.12em`) and travelling the **other way**. That is where the depth comes from.
+higher (`margin-top:-.1em`) and travelling the **other way**. That is where the depth comes from.
 
-It moves with the **scroll** and only with the scroll. Where the browser has scroll-driven animations
-that is a `bandSlide` animation on a `view()` timeline — the compositor drives it, so the band keeps
-up with the scroll even when the main thread is busy. Where it does not, `TalkBand` works the same
-progress out by hand (0 when the band's top edge reaches the bottom of the screen, 1 when its bottom
-edge has left the top) and writes it onto the two tracks. Neither path ever moves on its own, and
-under `prefers-reduced-motion` neither runs. Decorative: `aria-hidden`.
+It moves with the **scroll**, only with the scroll, and **less than the scroll does** — the text
+travels a fifth of its own track, so it reads as drifting with the page instead of racing it. It also
+**eases** toward where the scroll says it should be (an inertia of about a frame of lag), and the loop
+stops the moment it has caught up. Under `prefers-reduced-motion` nothing runs. Decorative:
+`aria-hidden`.
 
 Below it, an inner column carries the gutter and the 1180px cap the other sections use — the section
-itself has neither, because the band has to reach both edges. Inside: the heading, the form, the rows
-and the CTA.
+itself has neither, because the band has to reach both edges. Inside: the heading, the rows and the
+form.
 
 **The rows**, separated by `--line`: the label in mono 10px uppercase `--fg-3`, the address below it
 (`kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev` — a network's address is
 derived from its href), `clamp(22px,3.2vw,40px)` weight 700, and `↗` on the right spanning both
-lines. Hover turns the address and the arrow `--acc-text` and moves the arrow 3px up and right.
+lines. Hover turns the address and the arrow `--acc-text` and moves the arrow 3px up and right. The
+email row is the mailto — there is no separate button; one address, one way in.
 
-**The form** sits between the heading and the rows, in a panel: border `--line`, radius 18,
+**The form** sits after the rows, in a panel: border `--line`, radius 18,
 `padding:clamp(20px,3vw,34px)`, the fields in a column with `clamp(18px,2.4vw,26px)` between them.
 A mono 10px uppercase label (`SEND A MESSAGE`) titles it, and each field repeats the pattern: a mono
 10px uppercase label in `--fg-3`, the input, and its error in `--acc-text` when there is one. The
@@ -442,9 +443,8 @@ key is `WEB3FORMS_KEY` on the server (`api/contact.js` on Vercel, the same file 
 `vite.config.js` in development), so it is not in the bundle. The endpoint validates everything again
 and rebuilds the payload field by field before forwarding it.
 
-Then the main CTA "Let's talk ↗" (yellow, radius 999, `padding:12px 26px`, 19px, weight 600), which
-is the mailto; the form will sit beside it. On mobile the CTA row becomes a column and the inner
-column takes `padding-bottom:34px` so it does not collide with the fixed footer.
+On mobile the inner column takes `padding-bottom:34px` so the last row and the form do not collide
+with the fixed footer.
 
 Links: `mailto:kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev`.
 

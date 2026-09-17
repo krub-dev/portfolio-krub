@@ -15,7 +15,6 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import BaseButton from '../base/BaseButton.vue'
 import SectionHeading from '../base/SectionHeading.vue'
 import ContactForm from './ContactForm.vue'
 import TalkBand from './TalkBand.vue'
@@ -46,8 +45,6 @@ const rows = computed(() => [
     <div class="inner">
       <SectionHeading index="03" :title="t('section.contact')" />
 
-      <ContactForm />
-
       <ul class="rows">
         <li v-for="row in rows" :key="row.name">
           <a
@@ -63,11 +60,7 @@ const rows = computed(() => [
         </li>
       </ul>
 
-      <div class="actions" data-contact-actions>
-        <BaseButton variant="solid" size="lg" magnetic :href="`mailto:${email}`" class="cta">
-          {{ t('actions.talk') }}
-        </BaseButton>
-      </div>
+      <ContactForm />
     </div>
   </section>
 </template>
@@ -144,30 +137,10 @@ const rows = computed(() => [
   transform: translate(3px, -3px);
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  align-items: center;
-}
-
-/* 19px / 12px 26px — a notch above BaseButton's lg. One instance, so it is
-   overridden here rather than added to the size scale. */
-.cta {
-  font-size: 19px;
-  padding: 12px 26px;
-}
-
 @media (max-width: 900px) {
   .inner {
     padding-bottom: 34px;
     gap: 24px;
-  }
-
-  .actions {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
   }
 }
 </style>

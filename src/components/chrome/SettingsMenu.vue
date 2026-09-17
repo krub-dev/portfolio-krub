@@ -104,6 +104,7 @@ onUnmounted(() => {
       <div
         v-if="open"
         class="settings-panel"
+        data-motion="decorative"
         data-settings
         :style="{ top: `${top}px`, right: `${right}px` }"
       >
@@ -151,6 +152,7 @@ onUnmounted(() => {
    `position: fixed`. The background and blur are the capsule's own, so the two
    read as the same surface. No shadow. */
 .settings-panel {
+  animation: panelIn 0.18s ease;
   position: fixed;
   z-index: 160;
   display: flex;

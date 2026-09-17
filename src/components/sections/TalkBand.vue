@@ -2,25 +2,26 @@
 /*
   The band at the top of Contact: the phrase huge, running off both edges, on the
   accent band the marquee wears, with a second copy of the words in outline
-  behind it and a step higher, drifting the other way.
+  behind it and a step higher, travelling the other way.
 
-  It moves with the SCROLL and only with the scroll. The first version drove the
-  slide from a `view()` timeline in CSS — the elegant way to do it — but its
-  fallback was the marquee's clock, so on a browser without scroll-driven
-  animations the band moved on its own, which is not what this band is for. The
-  progress is worked out here and written to a CSS variable; the transform stays
-  in CSS.
+  It moves with the scroll and only with the scroll, and it moves LESS than the
+  scroll does — a fifth of its own track, not half — which is what makes it read
+  as drifting with the page instead of racing it. It also eases toward where the
+  scroll says it should be, so it has a little inertia: it lags a beat behind and
+  settles, and the loop stops the moment it has caught up.
 
-  The listener is not a new one: useScroll() already owns the app's single scroll
-  handler and this reads its position. The rectangle is measured on every tick on
-  purpose — caching it is the trap the marquee documents at length, because the
-  page's height is not final until the fonts and the sections are in.
+  Two earlier versions are worth remembering. One drove the slide from a view()
+  timeline in CSS, whose fallback for browsers without scroll-driven animations
+  was the marquee's clock: the band moved on its own, which is not what it is
+  for. The other worked the progress out by hand but moved half the track across
+  the band's own crossing — about two and a half times the scroll, and no amount
+  of frame-perfect rendering makes that feel calm. See docs/decisions.md 55.
 
   The alternation is by WORD, not by letter: per letter it read as noise, and an
   outline "l" between two solid ones looks like a mistake rather than a pattern.
-  The parity carries on across the repetitions and into the second copy, because
-  the Spanish phrase is a single word ("Hablemos") and an odd count would
-  otherwise put two solid words together at the seam where the track wraps.
+  The parity runs on across the repetitions, because the Spanish phrase is a
+  single word ("Hablemos") and restarting it per phrase would paint the band one
+  colour.
 
   Decorative: it says what the section heading already says, so it is
   aria-hidden and its letters are not read out one at a time.
@@ -33,15 +34,26 @@ const props = defineProps({
   text: { type: String, required: true },
 })
 
-// Three phrases at a display size that is a fraction of the viewport width is
-// comfortably wider than any screen this site is read on.
-const REPEATS = 3
+// Four phrases at a display size that is a fraction of the viewport width is
+// wider than any screen this site is read on, with room for the slide below.
+const REPEATS = 4
+
+// How far the text travels, as a percentage of the track. Deliberately small:
+// this is the difference between drifting and racing.
+const TRAVEL = -20
+
+// How much of the remaining distance is covered per frame. Lower is heavier.
+const EASING = 0.14
 
 const band = ref(null)
 const { y } = useScroll()
 
-// One copy of the track, with the word parity running 0, 1, 0, 1… down it. The
-// space that separates two words is a cell as well, so it can be laid out.
+let current = 0
+let target = 0
+let frame = null
+
+// Every letter, each knowing whether its word is the solid one. The space
+// between two words is a cell as well, so it can be laid out.
 const cells = computed(() => {
   const words = props.text.split(/\s+/).filter(Boolean)
   const out = []
@@ -59,35 +71,21 @@ const cells = computed(() => {
   return out
 })
 
-/*
-  The two copies the -50% slide is built from. The second carries the alternation
-  ON rather than starting it again, or the seam where the track wraps shows two
-  solid words in a row. With an even number of words per copy the pattern already
-  repeats exactly and nothing is flipped.
-*/
-const copies = computed(() => {
-  const first = cells.value
-  const odd = (REPEATS * props.text.split(/\s+/).filter(Boolean).length) % 2 === 1
-  if (!odd) return [first, first]
-  return [first, first.map((cell) => ({ char: cell.char, hollow: !cell.hollow }))]
-})
+// How far the band has crossed the viewport: 0 when its top edge sits at the
+// bottom of the screen, 1 when its bottom edge has left the top.
+function progress() {
+  const el = band.value
+  if (!el) return 0
 
-/*
-  How far the band has crossed the viewport: 0 when its top edge sits at the
-  bottom of the screen, 1 when its bottom edge has left the top.
+  const rect = el.getBoundingClientRect()
+  const range = window.innerHeight + rect.height
+  return range > 0 ? Math.min(1, Math.max(0, (window.innerHeight - rect.top) / range)) : 0
+}
 
-  This is the FALLBACK. Where the browser has scroll-driven animations the slide
-  is a CSS animation on a view() timeline, which the compositor drives: it stays
-  in step with the scroll even when the main thread is busy, which is what makes
-  it feel smooth. Written by hand it can only be as smooth as the main thread,
-  so this path is for the browsers that do not have the feature.
-
-  The transform is written straight onto the two tracks rather than through a
-  custom property on the band: a custom property inherits, so setting it on the
-  band invalidated the computed style of all 216 letters on every scroll tick,
-  and those letters carry a text stroke, which is expensive to re-raster.
-*/
-function slide() {
+// Written straight onto the two tracks rather than through a custom property on
+// the band: a custom property inherits, so setting it there invalidated the
+// computed style of every letter on every tick.
+function write(value) {
   const el = band.value
   if (!el) return
 
@@ -95,53 +93,68 @@ function slide() {
   const back = el.querySelector('.layer.back .track')
   if (!front || !back) return
 
-  const rect = el.getBoundingClientRect()
-  const range = window.innerHeight + rect.height
-  const progress = range > 0 ? Math.min(1, Math.max(0, (window.innerHeight - rect.top) / range)) : 0
+  front.style.transform = `translateX(${(value * TRAVEL).toFixed(3)}%)`
+  back.style.transform = `translateX(${((1 - value) * TRAVEL).toFixed(3)}%)`
+}
 
-  front.style.transform = `translateX(${(progress * -50).toFixed(3)}%)`
-  back.style.transform = `translateX(${((1 - progress) * -50).toFixed(3)}%)`
+/*
+  The inertia. A second requestAnimationFrame, which the project's one-loop rule
+  would rather not have — but that rule is about the pointer, which runs whenever
+  the mouse is over the page. This one only runs while the band is still catching
+  up, and it stops itself.
+*/
+function tick() {
+  current += (target - current) * EASING
+
+  if (Math.abs(target - current) < 0.001) {
+    current = target
+    frame = null
+    write(current)
+    return
+  }
+
+  write(current)
+  frame = requestAnimationFrame(tick)
+}
+
+function follow() {
+  target = progress()
+  if (!frame) frame = requestAnimationFrame(tick)
 }
 
 /*
   Decorative motion, so under reduced motion it does not happen at all and the
-  band sits at the start: the global [data-motion="decorative"] rule switches the
-  CSS animation off, and this check keeps the fallback from running.
+  band sits where it starts.
 */
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-const composited = CSS.supports('animation-timeline', 'view()')
 
 onMounted(() => {
-  if (composited || reduced.matches) return
-  slide()
-  window.addEventListener('resize', slide, { passive: true })
+  if (reduced.matches) return
+  current = target = progress()
+  write(current)
+  window.addEventListener('resize', follow, { passive: true })
 })
 
-onUnmounted(() => window.removeEventListener('resize', slide))
+onUnmounted(() => {
+  window.removeEventListener('resize', follow)
+  if (frame) cancelAnimationFrame(frame)
+})
 
 watch(y, () => {
-  if (composited || reduced.matches) return
-  slide()
+  if (!reduced.matches) follow()
 })
 </script>
 
 <template>
   <div ref="band" class="band" aria-hidden="true">
-    <div
-      v-for="layer in ['back', 'front']"
-      :key="layer"
-      class="layer"
-      :class="layer"
-    >
-      <div class="track" data-motion="decorative">
-        <div v-for="(copy, c) in copies" :key="c" class="run">
-          <span
-            v-for="(cell, i) in copy"
-            :key="i"
-            class="letter"
-            :class="{ hollow: layer === 'front' && cell.hollow }"
-          >{{ cell.char }}</span>
-        </div>
+    <div v-for="layer in ['back', 'front']" :key="layer" class="layer" :class="layer">
+      <div class="track">
+        <span
+          v-for="(cell, i) in cells"
+          :key="i"
+          class="letter"
+          :class="{ hollow: layer === 'front' && cell.hollow }"
+        >{{ cell.char }}</span>
       </div>
     </div>
   </div>
@@ -179,8 +192,8 @@ watch(y, () => {
   position: relative;
 }
 
-/* The band behind: the same words, outline only, a step higher and drifting the
-   other way. Out of the flow, or the two would stack and double the height. */
+/* The band behind: the same words, outline only, a step higher and travelling
+   the other way. Out of the flow, or the two would stack and double the height. */
 .layer.back {
   position: absolute;
   top: 0;
@@ -192,30 +205,9 @@ watch(y, () => {
 .track {
   display: flex;
   width: max-content;
-}
-
-/*
-  The slide, where the browser can do it properly. A view() timeline is driven by
-  the compositor, so the band keeps up with the scroll even when the main thread
-  is busy — which is what the hand-written version below cannot promise. The
-  fallback never runs where this applies: the component checks for the feature.
-*/
-@supports (animation-timeline: view()) {
-  .track {
-    animation-name: bandSlide;
-    animation-timing-function: linear;
-    animation-fill-mode: both;
-    animation-timeline: view();
-  }
-
-  /* The same travel, read backwards: this one moves the other way. */
-  .layer.back .track {
-    animation-direction: reverse;
-  }
-}
-
-.run {
-  display: flex;
+  /* The transform is written here from the script; this keeps it on the
+     compositor, so the band does not re-rasterise as it moves. */
+  will-change: transform;
 }
 
 /* The space between words is a cell too, and a span would collapse it. */

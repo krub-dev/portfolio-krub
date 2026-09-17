@@ -160,10 +160,11 @@ owns its own index state, wrapping around) and `SpecList` (props `role`, `year`,
 resolves its own Role / Year / Stack labels through i18n).
 
 ### TestimonialCard
-`quote`, `name`, `role`, `avatar`.
+`quote`, `name`, `role`, `avatar`. No card: text, a mono attribution and a rule between entries, so
+the quotes read as a list and not as another grid of projects. See decisions.md 56.
 
 ### Testimonials
-The block at the end of the Projects grid: a mono label and the cards, gated by `config` in
+The block at the end of the Projects grid: a mono label and the entries, gated by `config` in
 ProjectsSection. It used to be a section of its own — see decisions.md 56.
 
 ---
@@ -202,9 +203,10 @@ modal itself lives in `HomeView`, so the section does not own it.
 `id="stack"`. The four groups from `src/data/stack.js`: `StackGroup` → `TechIcon`.
 
 ### ContactSection
-`id="contact"`. The band, the heading, the form, one full-width row per contact (the address written
-out, derived from the href) and the mailto button. The section itself carries no gutter — it is the
-full-bleed container the band needs, and an inner column carries the measurements.
+`id="contact"`. The band, the heading, the form, and one full-width row per contact (the address
+written out, derived from the href; the email row is the mailto, so there is no separate button). The
+section itself carries no gutter — it is the full-bleed container the band needs, and an inner column
+carries the measurements.
 
 ### ContactForm
 The panel: the three fields, the send button, the mono note with the address, the honeypot and the
@@ -213,8 +215,8 @@ live region. It paints; the state is in `useContactForm`. Every string comes fro
 ### TalkBand
 `text`. The band at the top of Contact: on the accent background, display type with the words
 alternating between solid and outline over a second, fainter copy travelling the other way. It moves
-with the scroll and only with the scroll — a `view()` timeline where the browser has one, and the
-same progress worked out by hand where it does not. Decorative (`aria-hidden`).
+with the scroll and only with the scroll, a fifth of its own track, and eases toward where the scroll
+says it should be — the loop stops once it has caught up. Decorative (`aria-hidden`).
 
 ### BrandName
 The KIKO / RUBIO reveal at the top of the hero. A pure CSS animation — the letters are markup, not

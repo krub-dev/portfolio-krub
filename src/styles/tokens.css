@@ -390,13 +390,12 @@ section[id] {
 }
 
 /*
-  The band at the top of Contact: two copies and a slide of exactly -50%, the
-  same idea as the marquee but driven by the scroll instead of the clock. See
-  TalkBand.vue for the timeline and the hand-written fallback.
+  The two dropdowns — the mobile menu and the compact navbar's settings panel —
+  arriving instead of appearing. Only a `from`: the element is created with
+  v-if, so it animates from here to whatever its own styles say.
 */
-@keyframes bandSlide {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
 }
 
 @keyframes lemonShake {

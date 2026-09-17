@@ -96,7 +96,8 @@ section, folded together where they overlapped.
 - [x] **Give the contact section more weight.** Rebuilt on 2026-09-17: a full-bleed band on the
   accent background, its words alternating solid and outline over a second, fainter copy travelling
   the other way, and moving with the scroll and only with the scroll. One full-width row per contact
-  (the address first, then LinkedIn and GitHub — X is gone), and the mailto kept. The band's phrase
+  (the address first, then LinkedIn and GitHub — X is gone), and the mailto is now the email row,
+  with no separate button. The band's phrase
   is translated ("Hablemos"), and so is the CTA. It turned up a real bug on the way: `.app`'s
   `overflow-x: hidden` made the wrapper a scroll container that never scrolls, which froze the
   band's CSS timeline. See decision 55.

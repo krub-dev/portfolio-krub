@@ -66,7 +66,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="open" class="menu" data-mobile-menu>
+  <div v-if="open" class="menu" data-mobile-menu data-motion="decorative">
     <div class="head">
       <span class="title">{{ t('menu.label') }}</span>
       <span class="sub">{{ t('menu.sub') }}</span>
@@ -106,6 +106,7 @@ onUnmounted(() => {
 
 <style scoped>
 .menu {
+  animation: panelIn 0.18s ease;
   position: fixed;
   top: 74px;
   /* Centred rather than pinned under the button it opens from: owner

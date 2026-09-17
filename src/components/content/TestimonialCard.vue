@@ -2,6 +2,12 @@
 /*
   One testimonial. <figure>/<blockquote>/<figcaption> rather than divs, so the
   quote is marked up as a quote and the attribution is tied to it.
+
+  No card. As a box with a border it read as another grid of projects sitting
+  under the projects — the same shape twice, saying different things. The site
+  already has a way of listing things that are not cards: text, a mono label and
+  a rule between entries, which is what the timeline in About and the contact
+  rows do. See docs/decisions.md 56.
 */
 defineProps({
   quote: { type: String, required: true },
@@ -12,48 +18,46 @@ defineProps({
 </script>
 
 <template>
-  <figure class="card">
+  <figure class="entry">
     <blockquote class="quote">{{ quote }}</blockquote>
     <figcaption class="who">
       <img v-if="avatar" :src="avatar" :alt="name" class="avatar" />
       <span v-else class="avatar placeholder" aria-hidden="true" />
-      <span class="who-text">
-        <span class="name">{{ name }}</span>
-        <span class="role">{{ role }}</span>
-      </span>
+      <span class="name">{{ name }}</span>
+      <span class="role">{{ role }}</span>
     </figcaption>
   </figure>
 </template>
 
 <style scoped>
-.card {
+.entry {
   margin: 0;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--surface);
-  padding: 26px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
+  padding: clamp(20px, 3vw, 28px) 0;
+  border-bottom: 1px solid var(--line);
 }
 
 .quote {
   margin: 0;
-  font-size: 17px;
-  line-height: 1.55;
+  max-width: 62ch;
+  font-size: clamp(18px, 2vw, 23px);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   color: var(--fg);
+  text-wrap: pretty;
 }
 
 .who {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: auto;
+  gap: 10px;
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   flex: 0 0 auto;
   border-radius: 50%;
   object-fit: cover;
@@ -64,15 +68,13 @@ defineProps({
   background: var(--surface-2);
 }
 
-.who-text {
-  display: flex;
-  flex-direction: column;
-}
-
+/* The same mono the site uses for every other piece of metadata. */
 .name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-2);
 }
 
 .role {

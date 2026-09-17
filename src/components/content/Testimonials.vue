@@ -28,7 +28,7 @@ const items = computed(() => testimonials.map((entry) => ({ ...entry, ...entry[l
   <div class="testimonials">
     <p class="label">{{ t('section.test') }}</p>
 
-    <div class="grid">
+    <div class="entries">
       <TestimonialCard
         v-for="(item, i) in items"
         :key="i"
@@ -60,9 +60,11 @@ const items = computed(() => testimonials.map((entry) => ({ ...entry, ...entry[l
   color: var(--fg-3);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+/* A rule on top and one under each entry: the list the timeline in About is,
+   rather than a second grid of boxes under the projects. */
+.entries {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
 }
 </style>

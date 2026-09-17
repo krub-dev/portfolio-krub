@@ -49,6 +49,7 @@ const statusText = computed(() => {
         class="input"
         type="text"
         name="name"
+        maxlength="80"
         autocomplete="name"
         :aria-invalid="Boolean(errors.name)"
         :aria-describedby="errors.name ? 'contact-name-error' : undefined"
@@ -65,6 +66,7 @@ const statusText = computed(() => {
         class="input"
         type="email"
         name="email"
+        maxlength="120"
         autocomplete="email"
         :aria-invalid="Boolean(errors.email)"
         :aria-describedby="errors.email ? 'contact-email-error' : undefined"
@@ -81,6 +83,7 @@ const statusText = computed(() => {
         class="input"
         name="message"
         rows="4"
+        maxlength="4000"
         :aria-invalid="Boolean(errors.message)"
         :aria-describedby="errors.message ? 'contact-message-error' : undefined"
         @input="errors.message = ''"
@@ -168,8 +171,11 @@ const statusText = computed(() => {
   border-bottom-color: var(--acc-text);
 }
 
+/* Both limits are the ones api/contact.js enforces. maxlength stops the typing;
+   the height cap stops the field from being dragged down the page. */
 textarea.input {
   min-height: 96px;
+  max-height: 240px;
   resize: vertical;
 }
 
