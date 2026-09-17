@@ -492,7 +492,10 @@ back.
 The box is `--surface` with a `--line` border and radius 18, and it carries **its own header**: the mono
 label and the `n / total` position, with a rule under them, the same header the stack groups and the
 contact rows use. The label floating above an empty box said nothing about what the box was; inside, the
-block reads as one object. **The controls sit beside the box, not above it**: the rail already has a pair
+block reads as one object. The position is in `--acc-text`, the one live piece of metadata in an
+otherwise quiet header, and a large `”` in `--acc` at `opacity:.08` sits below the header's rule in the
+window's top right: it belongs to the box and not to an entry, so it is the one thing in the block that
+does not move. **The controls sit beside the box, not above it**: the rail already has a pair
 of horizontal arrows over its head, and two pairs in one column of the page read as one control that lost
 its way. **The arrows are vertical** — up, then down — because the movement is: down brings the next
 quote up from below while the one showing leaves upwards. The window is `overflow:hidden` with a
@@ -506,19 +509,25 @@ its own and the pager is not a scroll container, so a phone has no swipe either.
 fifth of the window takes the next quote in the direction it was going; anything shorter falls back to
 the **nearest entry, found by comparing offsets** — dividing the offset by a height sent a short drag to
 the wrong quote as soon as the first entry was longer than the others. A drag that ends over the "read
-more" swallows the click rather than pressing it. **The rail's drag could leave the vertical axis to the
+more" swallows the click rather than pressing it. The pane takes pointer capture **once the gesture has
+proved itself a drag**, in the move and not on pointerdown: captured on pointerdown, the pointerup is
+retargeted to the pane and the click that follows lands on the pane, so the "read more" under the finger
+never saw it. **The rail's drag could leave the vertical axis to the
 page; this one cannot**, so the pane claims both axes (`touch-action:none`) and the page is scrolled by
 starting the touch anywhere else on the screen — the price of a vertical pager.
 
-**The window is as tall as the tallest entry, and every entry fills it.** Sized to the one showing it
-changed height every time you paged, which moved everything under it; sized to the tallest but with the
-entries left at their own height, a short quote left its share of the window empty and the next entry
-showed through the gap. So the height goes on the entries as `min-height` (through a `--pane-h` the
-window sets), and the stack comes out uniform — which is also what makes the offsets a plain multiple
-of it. Where each entry sits is still measured, because expanding one makes it taller: a uniform step
-would be wrong the moment a quote is longer than another, and a `ResizeObserver` on the reel
-re-measures when that happens or when the fonts land. The entries that are not showing carry `inert`, so
-Tab cannot walk into a quote nobody can see. Same rule as the rail.
+**The window is as tall as the tallest entry, and every entry is padded to the tallest one that is
+closed.** Two heights, not one, and the difference is the whole thing. The window is the tallest entry,
+so it grows while a quote is open and comes back down when it closes. The floor — what the entries take
+as `min-height`, through a `--pane-h` the window sets — is read from the entries that are *not* open.
+Fed from the tallest including the open one, the floor rose with the expansion and stayed there:
+collapsing a quote left the block at the expanded size for good. Paging closes whatever was open before
+it moves, for the same reason — an open entry holds the window at the expanded size, and a short quote
+under it would leave the gap that lets the next one show through. Where each entry sits is still
+measured, because expanding one makes it taller: a uniform step would be wrong the moment a quote is
+longer than another, and a `ResizeObserver` on the reel re-measures when that happens or when the fonts
+land. The entries that are not showing carry `inert`, so Tab cannot walk into a quote nobody can see.
+Same rule as the rail.
 
 Each entry is `figure` → `figcaption` → `blockquote`: **the attribution first**, and on two lines — a
 `48px` avatar circle when there is one, and beside it the name in `--fg-2` over the company in `--fg-3`

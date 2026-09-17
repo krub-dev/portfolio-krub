@@ -1589,6 +1589,26 @@ projects grid, and it got the same answer — one at a time.
   showed through the gap. The height goes on the entries as a `min-height` fed by a variable the window
   sets — two lines, and the stack comes out uniform, which is also what makes the offsets a plain
   multiple of it.
+- **Two heights, not one, and the second one is read only from the closed entries.** The window and the
+  floor the entries are padded to were the same variable, so opening a quote raised the floor of every
+  entry and nothing could ever shrink again: the block stayed at the expanded size for good. The window is
+  still the tallest entry; the floor leaves out the open one. Paging closes whatever was open before it
+  moves, for the same reason — an open entry holds the window at the expanded size, and a short quote
+  under it would leave the gap that lets the next one show through. `nextTick` before re-measuring there,
+  because the offsets come from the DOM and it is Vue that puts the clamp back.
+- **The pane captures the pointer only once the gesture has proved itself a drag.** Captured on
+  `pointerdown`, the `pointerup` is retargeted to the pane and the click that follows is dispatched at
+  the common ancestor of the two — the pane — so the "read more" under the finger never received it. It
+  worked with a programmatic click and not with a real one, which is what pointed at capture rather than
+  at the button. And the paging only closes the open quote when the index actually moves: a tap reaches
+  the same handler on its `pointerup`, before the click, and closing there collapsed the quote the click
+  was about to toggle, so "read less" reopened it.
+- **The box got a mark and the counter got the accent.** A large `”` in `--acc` at `opacity:.08`, below
+  the header's rule in the window's top right, and the `n / total` in `--acc-text`. The mark is the box's,
+  not an entry's, so it stays put while the quotes slide through it — the one thing in the block that
+  does not move. `--acc` and not `--acc-text` for it: it is a fill, not text, and at this opacity the
+  legible variant reads as a grey smudge on the dark theme rather than as the palette's colour. Placed
+  below the rule on purpose — above it, the two glyphs on top of each other read as a mistake.
 - **And the settle compares offsets.** The first version worked the target index out as
   `offset / height`, which is right only while every entry is the same height: with one long quote and a
   short one, a drag that was too small to count as a flick landed on the wrong quote — the counter

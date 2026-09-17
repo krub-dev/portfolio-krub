@@ -13,6 +13,11 @@
   height for every quote that overflows the clamp, however long the quote is.
   Expanding one is the reader's choice, and the window grows with it.
 
+  Whether it is open belongs to the pager, not here. The pager is the one that
+  sizes the window, and it needs to know which entry is the tall one to leave it
+  out of the height the others are padded to — kept inside the card, the two
+  could only be reconciled by reading the DOM back.
+
   The measurement runs after the DOM has caught up, never inside the click
   handler: read there it happens before Vue has put the clamp back, so on the way
   closed the two heights are equal, the button decides there is nothing to
@@ -21,30 +26,32 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-defineProps({
+const props = defineProps({
   quote: { type: String, required: true },
   name: { type: String, required: true },
   role: { type: String, required: true },
   avatar: { type: String, default: null },
+  open: { type: Boolean, default: false },
 })
+
+const emit = defineEmits(['toggle'])
 
 const { t } = useI18n()
 
 const quoteEl = ref(null)
-const expanded = ref(false)
 const hasMore = ref(false)
 
 function measure() {
   const el = quoteEl.value
   if (!el) return
-  hasMore.value = expanded.value || el.scrollHeight > el.clientHeight + 1
+  hasMore.value = props.open || el.scrollHeight > el.clientHeight + 1
 }
 
 function toggle() {
-  expanded.value = !expanded.value
+  emit('toggle')
 }
 
-watch(expanded, measure, { flush: 'post' })
+watch(() => props.open, measure, { flush: 'post' })
 
 onMounted(() => {
   measure()
@@ -72,7 +79,7 @@ onUnmounted(() => window.removeEventListener('resize', measure))
       </span>
     </figcaption>
 
-    <blockquote ref="quoteEl" class="quote" :class="{ clamped: !expanded }">
+    <blockquote ref="quoteEl" class="quote" :class="{ clamped: !open }">
       {{ quote }}
     </blockquote>
 
@@ -80,10 +87,10 @@ onUnmounted(() => window.removeEventListener('resize', measure))
       v-if="hasMore"
       class="more"
       type="button"
-      :aria-expanded="expanded"
+      :aria-expanded="open"
       @click="toggle"
     >
-      {{ expanded ? t('actions.readLess') : t('actions.readMore') }}
+      {{ open ? t('actions.readLess') : t('actions.readMore') }}
     </button>
   </figure>
 </template>

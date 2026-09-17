@@ -316,6 +316,34 @@ test('the testimonials page one at a time, and the window follows the quote', as
   await expect(prev).toBeDisabled()
 })
 
+test('collapsing a quote brings the window back down', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  /*
+    A phone-width viewport on both projects: on a wide one the real quote fits
+    inside the four-line clamp and there is no "read more" to press.
+  */
+  await page.setViewportSize({ width: 420, height: 900 })
+  await page.goto('/')
+
+  const pane = page.locator('#projects .pane')
+  const height = () => pane.evaluate((el) => el.clientHeight)
+
+  const clamped = await height()
+  const more = page.locator('#projects .entry:not([inert]) .more')
+
+  await expect(more).toBeVisible()
+  await more.click()
+  await expect.poll(height).toBeGreaterThan(clamped)
+
+  /*
+    And back. The window and the floor the entries are padded to were the same
+    variable, so opening a quote raised the floor of every entry and nothing
+    could shrink again: the block stayed at the expanded size for good.
+  */
+  await more.click()
+  await expect.poll(height).toBe(clamped)
+})
+
 test('the project rail drags with a finger too', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'there is no finger on a desktop')
 

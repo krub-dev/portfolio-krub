@@ -26,7 +26,7 @@
   config.showTestimonials is checked by ProjectsSection, not here: the parent
   decides whether the block exists at all.
 */
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import TestimonialCard from './TestimonialCard.vue'
@@ -52,6 +52,7 @@ const items = computed(() => testimonials.map((entry) => ({ ...entry, ...entry[l
 const pane = ref(null)
 const reel = ref(null)
 const index = ref(0)
+const open = ref(-1)
 const atStart = ref(true)
 const atEnd = ref(false)
 const hidden = ref([])
@@ -72,6 +73,7 @@ let frame = null
 let startY = 0
 let startOffset = 0
 let travelled = 0
+let pointerId = null
 let observer = null
 
 function paint() {
@@ -126,18 +128,21 @@ function apply(snap) {
   if (snap) offset = target
 
   /*
-    The window is as tall as the tallest entry, not as tall as the one showing.
-    Sized to the current quote it changed height every time you paged, which
-    moved everything under it.
+    Two heights, not one, and that is the whole fix for the window that only
+    ever grew.
 
-    And the variable goes with it, because every entry is told to fill the
-    window: a short quote left its share of the window empty, and the next entry
-    showed through the gap. With the height on the entries the stack is uniform,
-    which is also what makes the offsets a plain multiple of it.
+    The floor is what the entries are padded to, so a short quote fills the
+    window and the next one cannot show through the gap. It is read from the
+    entries that are NOT open: an open quote is taller than its clamped self,
+    and feeding that back into the floor raised the floor of every entry, which
+    is why collapsing used to leave the block at the expanded size. The window
+    itself is still the tallest entry, so it grows while a quote is open and
+    comes back down when it closes.
   */
-  const tallest = Math.max(...heights)
-  view.style.setProperty('--pane-h', `${tallest}px`)
-  view.style.height = `${tallest}px`
+  const rest = heights.filter((_, i) => i !== open.value)
+  const floor = rest.length ? Math.max(...rest) : Math.max(...heights)
+  view.style.setProperty('--pane-h', `${floor}px`)
+  view.style.height = `${Math.max(...heights)}px`
 
   atStart.value = index.value <= 0
   atEnd.value = index.value >= offsets.length - 1
@@ -146,12 +151,45 @@ function apply(snap) {
   paint()
 }
 
-function step(direction) {
-  const next = Math.min(Math.max(index.value + direction, 0), offsets.length - 1)
-  if (next === index.value) return
-  index.value = next
+/*
+  One open quote at a time, and it belongs here because the window's height is
+  derived from the entries: the pager has to know which one is the tall one.
+*/
+function toggle(i) {
+  open.value = open.value === i ? -1 : i
+}
+
+/*
+  Going to a quote closes whatever was open first, and that is not tidiness. An
+  open entry is taller than its clamped self, so it holds the window at the
+  expanded size; a short quote shown in that window would leave the gap that
+  lets the next one show through.
+
+  nextTick before the second measurement, because the offsets come from the DOM
+  and it is Vue that puts the clamp back — measured in the same tick they are
+  still the expanded ones and the pager lands on the wrong entry.
+*/
+async function goTo(next) {
+  const wanted = Math.min(Math.max(next, 0), offsets.length - 1)
+
+  /*
+    Only when the index actually moves. A tap on the pane arrives here too (the
+    pointerup before the click), and closing on it would collapse the quote the
+    click is about to toggle — the "read less" would reopen it.
+  */
+  if (wanted !== index.value && open.value !== -1) {
+    open.value = -1
+    await nextTick()
+    measure()
+  }
+
+  index.value = wanted
   apply(false)
   settle()
+}
+
+function step(direction) {
+  goTo(index.value + direction)
 }
 
 /*
@@ -166,24 +204,40 @@ function onPointerDown(event) {
   startY = event.clientY
   startOffset = offset
   target = offset
+  pointerId = event.pointerId
   if (frame) {
     cancelAnimationFrame(frame)
     frame = null
   }
-  pane.value.setPointerCapture(event.pointerId)
+  /*
+    Deliberately NOT capturing here. Capturing on pointerdown makes the pane the
+    target of the pointerup, and the click that follows is then dispatched at
+    the common ancestor of the two — the pane — so the "read more" under the
+    finger never sees it. Capture is taken in the move, once the gesture has
+    proved it is a drag and not a click.
+  */
 }
 
 function onPointerMove(event) {
-  if (!pane.value?.hasPointerCapture(event.pointerId)) return
+  if (pointerId === null || pointerId !== event.pointerId) return
   const delta = event.clientY - startY
   travelled = Math.max(travelled, Math.abs(delta))
+
+  if (!pane.value?.hasPointerCapture(event.pointerId)) {
+    if (travelled <= DRAG_SLOP) return
+    pane.value?.setPointerCapture(event.pointerId)
+  }
+
   offset = Math.min(Math.max(startOffset - delta, 0), maxOffset)
   paint()
 }
 
 function onPointerUp(event) {
-  if (!pane.value?.hasPointerCapture(event.pointerId)) return
-  pane.value.releasePointerCapture(event.pointerId)
+  if (pointerId === null || pointerId !== event.pointerId) return
+  pointerId = null
+  if (pane.value?.hasPointerCapture(event.pointerId)) {
+    pane.value.releasePointerCapture(event.pointerId)
+  }
 
   /*
     Settle on a quote. A drag that covered enough of the window takes the next
@@ -199,9 +253,13 @@ function onPointerUp(event) {
     if (Math.abs(offsets[i] - offset) < Math.abs(offsets[next] - offset)) next = i
   }
   if (Math.abs(moved) > height * FLICK) next = index.value + Math.sign(moved)
-  index.value = Math.min(Math.max(next, 0), offsets.length - 1)
-  apply(false)
-  settle()
+
+  /*
+    Through goTo, so a drag while a quote is open closes it first — and so a
+    drag that lands back where it started still settles, which is why this is
+    not an early return.
+  */
+  goTo(next)
 }
 
 // A drag that ends over the "read more" must not press it.
@@ -235,6 +293,8 @@ onUnmounted(() => {
   <div class="testimonials">
     <div class="pager">
       <div class="box">
+        <span class="mark" aria-hidden="true">”</span>
+
         <div class="head">
           <p class="label">{{ t('section.test') }}</p>
           <span class="position">{{ index + 1 }} / {{ items.length }}</span>
@@ -257,7 +317,9 @@ onUnmounted(() => {
               :name="item.name"
               :role="item.role"
               :avatar="item.avatar"
+              :open="open === i"
               :inert="hidden[i] || undefined"
+              @toggle="toggle(i)"
             />
           </div>
         </div>
@@ -306,12 +368,39 @@ onUnmounted(() => {
 }
 
 .box {
+  position: relative;
   flex: 1;
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--surface);
   overflow: hidden;
+}
+
+/*
+  A quote mark in the accent, large and faint, in the window's top right. It
+  belongs to the box and not to an entry, so it stays put while the quotes slide
+  through it — the one thing on the page that does not move.
+
+  --acc and not --acc-text: this is a fill, not text. At this opacity the
+  legible variant would read as a grey smudge on the dark theme instead of as
+  the palette's colour. aria-hidden in the template, because it is punctuation
+  and it says nothing.
+*/
+.mark {
+  position: absolute;
+  /* Below the header's rule, not across it: the counter lives up there, and the
+     two glyphs on top of each other read as a mistake rather than as a mark. */
+  top: 44px;
+  right: 16px;
+  font-family: var(--font-sans);
+  font-size: clamp(76px, 8vw, 104px);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--acc);
+  opacity: 0.08;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* The block's own header, inside the box: the mono label and the position, with
@@ -335,10 +424,13 @@ onUnmounted(() => {
   color: var(--fg-3);
 }
 
+/* The position in the accent: the one live piece of metadata in the header, and
+   the box is a quiet object otherwise. Mono and 11px, so it reads as a counter
+   and not as a heading. */
 .position {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--fg-3);
+  color: var(--acc-text);
   white-space: nowrap;
 }
 
