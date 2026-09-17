@@ -472,11 +472,15 @@ that can disappear. It carries the same mono label the contact rows use (`/testi
 uppercase, `--fg-3`) instead of a heading. See decisions.md 56.
 
 No cards. As a box with a border the quotes read as another grid of projects sitting under the
-projects — the same shape twice, saying different things — so each entry is text: the quote
-(`clamp(18px,2vw,23px)`, `line-height:1.5`, `--fg`, 62ch, `text-wrap:pretty`) and, under it, a mono
-line — the name in `--fg-2` and the company in `--fg-3` (`13px`, tracked/uppercase, a step larger
-than the 10–11px labels because this one is read rather than scanned), with a `40px` avatar circle when
-there is one. Entries are separated by `--line` rules, like the timeline in About.
+projects — the same shape twice, saying different things — so each entry is text: **the attribution
+first** — a `48px` avatar circle when there is one, the name in `--fg-2` and the company in `--fg-3`
+(`13px`, tracked/uppercase, a step larger than the 10–11px labels because this one is read rather than
+scanned) — then the quote (`clamp(18px,2vw,23px)`, `line-height:1.5`, `--fg`, 62ch, `text-wrap:pretty`).
+Header first because that is how it reads — who is talking, then what they said — and because it puts
+the "read more" at the end of the block rather than between the quote and the name, where it looked like
+it belonged to neither. Entries are separated by `--line` rules, like the timeline in About, and the
+block carries its own `margin-top` on top of the section's gap: the rail and the quotes are two
+different things and were sitting too close to tell.
 
 **A long quote is clamped to three lines**, with a mono uppercase "Read more" under it in `--acc-text`,
 underlined and set to the **right**, under the end of the quote it belongs to. It is the only inline

@@ -68,6 +68,19 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 
 <template>
   <figure class="entry">
+    <!--
+      The attribution first. It reads as a header — who is talking, then what
+      they said — and it puts the "read more" at the end of the block instead of
+      between the quote and the name, where it looked like it belonged to
+      neither.
+    -->
+    <figcaption class="who">
+      <img v-if="avatar" :src="avatar" :alt="name" class="avatar" />
+      <span v-else class="avatar" aria-hidden="true" />
+      <span class="name">{{ name }}</span>
+      <span class="role">{{ role }}</span>
+    </figcaption>
+
     <blockquote ref="quoteEl" class="quote" :class="{ clamped: !expanded }">
       {{ quote }}
     </blockquote>
@@ -81,13 +94,6 @@ onUnmounted(() => window.removeEventListener('resize', measure))
     >
       {{ expanded ? t('actions.readLess') : t('actions.readMore') }}
     </button>
-
-    <figcaption class="who">
-      <img v-if="avatar" :src="avatar" :alt="name" class="avatar" />
-      <span v-else class="avatar" aria-hidden="true" />
-      <span class="name">{{ name }}</span>
-      <span class="role">{{ role }}</span>
-    </figcaption>
   </figure>
 </template>
 
@@ -144,15 +150,17 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   flex: 0 0 auto;
   box-sizing: border-box;
   border-radius: 50%;
   /* contain, not cover: the one avatar here is a mark rather than a photograph,
-     and cropping a logo cuts away the part that says who it is. */
+     and cropping a logo cuts away the part that says who it is. Four pixels of
+     padding and not six: the mark is a detailed drawing, and every pixel it
+     gains is one it can be read at. */
   object-fit: contain;
-  padding: 6px;
+  padding: 4px;
   background: var(--surface-2);
   border: 1px solid var(--line);
 }

@@ -46,6 +46,9 @@ const items = computed(() => testimonials.map((entry) => ({ ...entry, ...entry[l
   display: flex;
   flex-direction: column;
   gap: 18px;
+  /* Air before the block, on top of the section's own gap: the rail and the
+     quotes are two different things and were sitting too close to tell. */
+  margin-top: clamp(28px, 4vw, 56px);
 }
 
 /* The same mono label the contact rows use, not a section heading: this is a
