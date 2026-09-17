@@ -1379,13 +1379,15 @@ interaction, a mask" and the mask never happened. What shipped is the first thre
   accident, and leading that group they are the first thing in it anyway. Blender, Figma, Framer,
   GSAP, Claude and OpenCode joined the grid on the way.
 - **Touch gets the light too.** No cursor means no hover, and a section that only comes alive under a
-  mouse is dead on the phone it is most likely to be read on. There the scroll is the light, and it
-  comes on a whole group at a time — a group starts lighting when its top edge reaches the bottom of
-  the viewport and is fully lit at 70% of it. Tile by tile was the first attempt and read as noise:
-  the tiles of a group are read together. They do not lift either, because a block of tiles rising as
-  one reads as the page jumping. The threshold started at 90%–55% and lit the whole section the moment
-  you arrived, because the section is about a viewport tall on a phone; from the bottom edge the groups
-  come on one after another as you scroll, which is what it was for.
+  mouse is dead on the phone it is most likely to be read on. There the scroll is the light and it
+  comes on **one group at a time, in order, from a grey base**: the grid's crossing of the viewport —
+  from its top at 75% of the screen to its bottom at 50% — is divided into as many slices as there are
+  groups, and each owns one. Tile by tile was the first attempt and read as noise: the tiles of a group
+  are read together. They do not lift either, because a block of tiles rising as one reads as the page
+  jumping. Two thresholds per group came before this and **both lit everything at once** — the grid is
+  646px tall against an 839px phone viewport, so every group was already past any line drawn on the
+  screen by the time you could see them all. The measurement is what settled it; the numbers had been
+  guessed twice.
 
 - **Monochrome by drawing the logo twice.** Each icon renders a grey copy under a colour copy, and
   the spotlight fades the colour one in with `opacity`. The obvious version animates

@@ -17,10 +17,12 @@ const { t } = useI18n()
 
     <div class="grid">
       <StackGroup
-        v-for="group in stack"
+        v-for="(group, i) in stack"
         :key="group.labelKey"
         :label="t(group.labelKey)"
         :items="group.items"
+        :index="i"
+        :total="stack.length"
       />
     </div>
   </section>

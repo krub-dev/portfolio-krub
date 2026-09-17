@@ -404,13 +404,13 @@ themselves `data-interactive` in that case only, so the custom cursor opens its 
 the lemon the name comes from hovering, and without him the only way to get it is to click, which is
 what the cursor has to say.
 
-**On touch there is no cursor, so the scroll is the light, and it comes on a whole group at a time**: a
-group starts lighting when its top edge reaches the bottom of the viewport and is fully lit once it has
-climbed to `70%` of it. Tile by tile was noise — the tiles of a group are read together — and they do
-not lift either, because a block of tiles rising as one reads as the page jumping. The threshold sits
-at the bottom edge on purpose: the section is about a viewport tall on a phone, so a threshold near the
-top lit every group the moment you arrived. A tap hands the tile's name to Limonacho, up for `1.8s`, or
-to the readout when there is no lemon.
+**On touch there is no cursor, so the scroll is the light, and it comes on one group at a time, in
+order, from a grey base.** Not by a threshold drawn on the screen: the grid is `646px` tall against an
+`839px` phone viewport, so every group was already past any line by the time you could see them all,
+and the whole section lit at once. Instead the grid's crossing of the viewport — from its top at `75%`
+of the screen to its bottom at `50%` — is divided into as many slices as there are groups, and each
+owns one. They do not lift either, because a block of tiles rising as one reads as the page jumping. A
+tap hands the tile's name to Limonacho, up for `1.8s`, or to the readout when there is no lemon.
 
 Either path hangs off machinery the site already owns — `usePointer` and `useScroll` each keep ONE
 listener for the whole app — so it costs no second `requestAnimationFrame` and no extra scroll

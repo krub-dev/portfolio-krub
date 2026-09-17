@@ -29,9 +29,13 @@ import { isPointerDevice, usePointer } from '../../composables/usePointer'
 import { useLemonVoice } from '../../composables/useLemonVoice'
 import { useScroll } from '../../composables/useScroll'
 
-defineProps({
+const props = defineProps({
   label: { type: String, required: true }, // already translated
   items: { type: Array, default: () => [] }, // [{ name, icon, invertOnDark, wide }]
+  // Where this group sits in the grid, and how many there are: the touch reveal
+  // divides the grid's travel between them so they come on one at a time.
+  index: { type: Number, default: 0 },
+  total: { type: Number, default: 1 },
 })
 
 // How far the light carries, and how close a tile must be to be named.
@@ -46,15 +50,18 @@ const EASING = 0.16
 const NAME_OFFSET = 16
 // How long a tapped name stays up.
 const PIN = 1800
-// The touch reveal: a group starts lighting when its top edge reaches the bottom
-// of the viewport, and is fully lit once it has climbed to REVEAL_TO of it.
-//
-// Near the top it was lighting the whole section on arrival: the section is
-// about a viewport tall on a phone, so with the threshold up there every group
-// was already past it by the time you got to it. From the bottom edge the groups
-// come on one after another as you scroll, which is what it was for.
-const REVEAL_FROM = 1
-const REVEAL_TO = 0.7
+/*
+  The touch reveal, as fractions of the viewport. The first group starts when the
+  top of the grid reaches REVEAL_FROM; the last one finishes when its bottom
+  reaches REVEAL_TO. Everything between is divided into as many slices as there
+  are groups.
+
+  Not a threshold per group, which is what this was: the grid is 646px tall on a
+  phone against an 839px viewport, so every group was already past any line drawn
+  on the screen by the time you could see them all, and the section lit at once.
+*/
+const REVEAL_FROM = 0.75
+const REVEAL_TO = 0.5
 
 const pointerDevice = isPointerDevice()
 
@@ -196,21 +203,26 @@ function frame(pointer) {
 }
 
 /*
-  The touch path: no cursor, so the light is the scroll and it comes on a WHOLE
-  group at a time. The tiles of a group are read together — lighting them one by
-  one as each passed a line was noise — and they do not lift either, because a
-  block of tiles rising as one reads as the page jumping. The scroll only calls
-  this when it moves, so there is nothing to ease: a half-finished ease would
-  freeze on screen the moment the scrolling stopped.
+  The touch path: no cursor, so the light is the scroll, and it comes on one
+  group at a time, in order, from a grey base. The scroll only calls this when it
+  moves, so there is nothing to ease — a half-finished ease would freeze on
+  screen the moment the scrolling stopped. No lift either: a block of tiles
+  rising as one reads as the page jumping.
 */
 function reveal() {
   const box = root.value
-  if (reduced.matches || !box || !tiles.length) return
+  const area = box?.parentElement // the grid, which holds every group
+  if (reduced.matches || !box || !area || !tiles.length) return
 
-  const rect = box.getBoundingClientRect()
-  const from = window.innerHeight * REVEAL_FROM
-  const span = window.innerHeight * (REVEAL_FROM - REVEAL_TO)
-  const value = Math.min(1, Math.max(0, (from - rect.top) / span))
+  const rect = area.getBoundingClientRect()
+  const travel = window.innerHeight * (REVEAL_FROM - REVEAL_TO) + rect.height
+  const progress = Math.min(
+    1,
+    Math.max(0, (window.innerHeight * REVEAL_FROM - rect.top) / travel),
+  )
+
+  const total = Math.max(1, props.total)
+  const value = Math.min(1, Math.max(0, (progress - props.index / total) * total))
   // Rounded, so a scroll that does not change the value writes nothing.
   const step = Math.round(value * 200) / 200
 

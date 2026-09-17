@@ -366,23 +366,24 @@ test('on touch the stack lights with the scroll, and a tap names a tile', async 
 
   await page.goto('/')
 
-  // The light stands still and the tiles scroll through it, so scrolling is
-  // what reveals them.
+  // The light is the scroll, and it comes on group by group from a grey base:
+  // with the first group in the middle of the screen, the last one has not been
+  // reached yet.
   const tile = page.locator('#stack .tile').first()
   await tile.evaluate((el) => el.scrollIntoView({ behavior: 'instant', block: 'center' }))
 
   // Polled, because a scroll event is delivered a frame after the scroll
   // itself, so a plain read can land before the sweep has run.
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          [...document.querySelectorAll('#stack .colour')].filter(
-            (el) => Number(el.style.opacity || 0) > 0.2,
-          ).length,
-      ),
+  const lit = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('#stack .group')].map((group) => {
+        const copies = [...group.querySelectorAll('.colour')]
+        return copies.reduce((sum, el) => sum + Number(el.style.opacity || 0), 0) / copies.length
+      }),
     )
-    .toBeGreaterThan(0)
+
+  await expect.poll(async () => (await lit())[0]).toBeGreaterThan(0.8)
+  expect((await lit()).at(-1)).toBeLessThan(0.2)
 
   // A tap names the tile, and Limonacho is the one who says it.
   const name = await tile.getAttribute('data-name')
