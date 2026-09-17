@@ -16,7 +16,7 @@ vertical order:
 | — | `top` | Hero | Name, headline, paragraph, two CTAs, square stage holding the logo |
 | — | — | Marquee | Yellow band with two looping phrases |
 | 00 | `me` | About | Three paragraphs, experience/education tabs, CV button, photo |
-| 01 | `projects` | Projects | Card grid; clicking a card opens a detail modal |
+| 01 | `projects` | Projects | Horizontal rail of cards; clicking one opens a detail modal |
 | 02 | `stack` | Stack | Four groups of technology icons, two per row |
 | — | `testimonials` | Testimonials | Two quotes. **Optional section**, toggled by config |
 | 03 | `contact` | Contact | Large headline, email CTA, three social icons |
@@ -320,9 +320,28 @@ Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`,
 
 ### 3.6 Projects
 
-`display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:20px`. The
-grid distributes itself according to how many projects there are: **no filler cards, no
-reserved gaps**, and no "click to open" hint (the card design says it already).
+A **horizontal rail**: `flex`, `gap:20px`, `overflow-x:auto`, `overflow-y:hidden` (the other axis
+computes to `auto` as soon as one is `auto`, so it is clipped on purpose — with `12px` of vertical
+padding, because the magnetic pull moves a card up to 10px), `scroll-snap-type:x mandatory` and a
+hidden scrollbar. **Three cards and the sliver of a fourth** on a desktop, **one and a sliver** below
+900px, which is the whole affordance: the sliver says there is more, without a dot or a counter. The
+card width is `calc((100% - 40px - 68px) / 3)` — two gaps and the sliver — and `82%` on a phone.
+
+It is a **native scroll container, not a transformed track**. That keeps every card in the DOM, so the
+keyboard reaches them all, there is no hidden focus to trap and no carousel ARIA to get wrong, and the
+phone gets its swipe for free. The rail is focusable (`tabindex="0"`, `role="group"` with a label) so
+the arrow keys scroll it, and the **arrows above it only call `scrollBy`** — one card at a time,
+`behavior:'auto'` under reduced motion. They disable at the ends, which is also how the reader learns
+how much is left. Measured before this: four stacked cards were `2319px` on a phone against an `839px`
+viewport; the rail is `1010px`.
+
+**Dragging with the mouse** is the same gesture for a pointer that has no horizontal one: pointer
+capture on the rail, `scrollLeft` written per move, and the snap switched off while dragging so the
+browser does not fight every frame. A drag that travels more than `6px` swallows the click in the
+capture phase, because nobody means to open a card they just dragged.
+
+The grid distributed itself according to how many projects there were: **no filler cards, no reserved
+gaps**, and no "click to open" hint (the card design says it already).
 
 Card (a clickable `<article>`, `cursor:pointer`): border `--line`, radius 18, background
 `--surface`, `overflow:hidden`, column. Hover: border `--acc-text`

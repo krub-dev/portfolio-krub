@@ -90,6 +90,9 @@
     "closeModal": "Close project",
     "prevImage": "Previous image",
     "nextImage": "Next image",
+    "prevProject": "Previous project",
+    "nextProject": "Next project",
+    "projectsRail": "Projects",
     "backToTop": "Back to top",
     "openProject": "Open project: {name}"
   }

@@ -54,7 +54,10 @@ export function useMagnetic(rootSelector = '[data-magnetic]') {
     for (const el of elements) {
       const rect = el.getBoundingClientRect()
       // Skip anything scrolled out of view: no point pulling what nobody sees.
+      // Both axes, because the project rail scrolls horizontally and a card
+      // parked off to the side is still "in the viewport" vertically.
       if (rect.bottom < 0 || rect.top > window.innerHeight) continue
+      if (rect.right < 0 || rect.left > window.innerWidth) continue
 
       /*
         The RESTING centre, not the current one.

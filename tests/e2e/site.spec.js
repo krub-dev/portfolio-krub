@@ -110,6 +110,48 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
   await expect(card).toBeFocused()
 })
 
+test('the project rail pages with its arrows, and stops at both ends', async ({ page }) => {
+  /*
+    Instant scrolling, so the assertions do not race the animation. It also
+    covers the reduced-motion path, which is the same code with the easing off.
+  */
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+
+  const track = page.locator('#projects .track')
+  const scroll = () => track.evaluate((el) => Math.round(el.scrollLeft))
+  const prev = page.getByRole('button', { name: 'Previous project' })
+  const next = page.getByRole('button', { name: 'Next project' })
+
+  // Nothing behind you at the start.
+  await expect(prev).toBeDisabled()
+  await expect(next).toBeEnabled()
+
+  await next.click()
+  await expect.poll(scroll).toBeGreaterThan(0)
+  await expect(prev).toBeEnabled()
+
+  await prev.click()
+  await expect.poll(scroll).toBe(0)
+  await expect(prev).toBeDisabled()
+
+  // Page to the end: the arrow says when there is nowhere left to go.
+  for (let i = 0; i < 6; i += 1) {
+    if (await next.isDisabled()) break
+    const before = await scroll()
+    await next.click()
+    await expect
+      .poll(async () => (await scroll()) !== before || (await next.isDisabled()))
+      .toBe(true)
+  }
+  await expect(next).toBeDisabled()
+
+  // And the card it was hiding ended up inside the rail.
+  const last = await page.locator('#projects .card').last().boundingBox()
+  const rail = await track.boundingBox()
+  expect(last.x + last.width).toBeLessThanOrEqual(rail.x + rail.width + 1)
+})
+
 test('an unknown path shows the 404, chrome and all, and offers a way back', async ({ page, isMobile }) => {
   await page.goto('/no-such-page')
 

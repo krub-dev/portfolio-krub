@@ -113,12 +113,11 @@ section, folded together where they overlapped.
   handler is mounted by `vite.config.js` in development, and `.env.local` carries the key locally.
   See decision 57. **Still to do by hand: set `WEB3FORMS_KEY` in the Vercel project settings**, or
   production answers 500 and the form falls back to its error state. **(owner)**
-- [ ] **The projects grid with four cards.** With three it was one clean row. With four, the
-  `auto-fit minmax(280px,1fr)` grid puts three on the first row and leaves the fourth alone beside
-  an empty column — measured at 1280px: 1152px of grid, 371px cards, 3 + 1. A phone stacks all four,
-  which is fine. Two columns would make it a 2×2, but the cards would grow to about 566px and the
-  shot with them. Decide: leave it at three across, go to two, or let the odd card span the row.
-  The krub.dev card was added on 2026-09-17 to see this, and it is third in the order.
+- [x] **The projects grid with four cards.** Closed on 2026-09-17 by turning the grid into a rail: a
+  native scroll container with snap, three cards and the sliver of a fourth on a desktop and one and a
+  sliver on a phone, with arrows that page one card and a mouse drag with a click guard. It came from
+  the same measurement that killed the guesses elsewhere: four stacked cards were 2319px against an
+  839px phone viewport, and the rail is 1010px. See decision 60.
 - [ ] **Turn Limonacho into something that answers.** A small chat backed by a model, given
   `src/data/` as its context, so a visitor can ask about a project instead of reading for it —
   with a bit of Murcian in the voice, because a mascot that talks like documentation is not a

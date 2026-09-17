@@ -1443,3 +1443,25 @@ lemon to say it instead — he is already there, in the corner, with a bubble an
   token itself. The ownership test is an identity test, so it silently never matched: the bubble
   appeared and then could not be taken down. Nothing here needs deep reactivity — the object is
   replaced whole, never mutated — so shallow is also the honest choice, not just the working one.
+
+### 60. The projects move into a rail
+
+**Date:** 2026-09-17 — **Status:** active
+
+Four projects in a grid meant a second row holding one card beside an empty column — measured at
+1280px: 1152px of grid, 371px cards, 3 + 1 — and on a phone four stacked cards made the section
+**2319px against an 839px viewport**, nearly three screens for the part of the page a reader is most
+likely to be skimming.
+
+- **A native scroll container, not a transformed carousel.** The obvious version is the modal's: an
+  index, a `transform`, dots. It also means the cards that are off-screen are still in the DOM and
+  still focusable, so a keyboard user tabs into a card they cannot see — and the ARIA pattern for a
+  carousel with interactive content inside is genuinely fiddly. A scroll container with snap keeps
+  every card reachable, gives the phone its swipe for nothing, and needs no index at all.
+- **The sliver is the affordance.** Three cards and 68px of the fourth says "there is more" without a
+  dot, a counter or a hint, which is the rule the rest of the site already follows.
+- **The drag needed a click guard.** A mouse has no horizontal gesture, so dragging the rail is the
+  natural move — but the whole card is a click target behind an overlay, so a drag that ends over one
+  would open it. The click is watched in the capture phase and swallowed once the drag has travelled
+  6px. The snap is switched off during the drag too, or the browser fights it on every frame.
+- **Measured after:** 1010px on a phone, 1134px on a desktop.

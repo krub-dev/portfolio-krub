@@ -207,8 +207,11 @@ No `id`: it is a band, not a destination.
 `config.showCv`, and the photo.
 
 ### ProjectsSection
-`id="projects"`. The grid of `ProjectCard`. Emits `open` with the project that was clicked — the
-modal itself lives in `HomeView`, so the section does not own it.
+`id="projects"`. A horizontal rail of `ProjectCard`: a native scroll container with snap, three cards
+and a sliver on a desktop and one on a phone, with two arrow buttons that only call `scrollBy` and
+disable at the ends. The rail also drags with the mouse, and swallows the click when the drag passed
+6px so a drag does not open a card. Emits `open` with the project that was clicked — the modal itself
+lives in `HomeView`, so the section does not own it.
 
 ### StackSection
 `id="stack"`. The four groups from `src/data/stack.js` in a two-column grid: `StackGroup` →
