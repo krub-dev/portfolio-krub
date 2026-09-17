@@ -8,21 +8,76 @@
   already has a way of listing things that are not cards: text, a mono label and
   a rule between entries, which is what the timeline in About and the contact
   rows do. See docs/decisions.md 56.
+
+  A long quote is clamped to three lines with a "read more" under it. The button
+  only exists when there is something to reveal — measured, not assumed, because
+  a quote that already fits would get a control that does nothing. Two things
+  about that measurement: it is re-run once the fonts have loaded, since a
+  reflow changes what fits, and once open it stays open through a resize,
+  because with the clamp off the measurement would always say it fits and the
+  button would disappear under the reader.
 */
+import { onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 defineProps({
   quote: { type: String, required: true },
   name: { type: String, required: true },
   role: { type: String, required: true },
   avatar: { type: String, default: null },
 })
+
+const { t } = useI18n()
+
+const quoteEl = ref(null)
+const expanded = ref(false)
+const hasMore = ref(false)
+
+function measure() {
+  const el = quoteEl.value
+  if (!el) return
+  /*
+    The clamp is on by default, and that is what makes this measurable: the box
+    shows three lines while reporting the height of all of them, and the gap
+    between the two is the whole test. Asking for the clamp only when there is
+    something to hide is the other way round, and it never fires.
+  */
+  hasMore.value = expanded.value || el.scrollHeight > el.clientHeight + 1
+}
+
+function toggle() {
+  expanded.value = !expanded.value
+  measure()
+}
+
+onMounted(() => {
+  measure()
+  document.fonts?.ready.then(measure)
+  window.addEventListener('resize', measure, { passive: true })
+})
+
+onUnmounted(() => window.removeEventListener('resize', measure))
 </script>
 
 <template>
   <figure class="entry">
-    <blockquote class="quote">{{ quote }}</blockquote>
+    <blockquote ref="quoteEl" class="quote" :class="{ clamped: !expanded }">
+      {{ quote }}
+    </blockquote>
+
+    <button
+      v-if="hasMore"
+      class="more"
+      type="button"
+      :aria-expanded="expanded"
+      @click="toggle"
+    >
+      {{ expanded ? t('actions.readLess') : t('actions.readMore') }}
+    </button>
+
     <figcaption class="who">
       <img v-if="avatar" :src="avatar" :alt="name" class="avatar" />
-      <span v-else class="avatar placeholder" aria-hidden="true" />
+      <span v-else class="avatar" aria-hidden="true" />
       <span class="name">{{ name }}</span>
       <span class="role">{{ role }}</span>
     </figcaption>
@@ -49,6 +104,31 @@ defineProps({
   text-wrap: pretty;
 }
 
+.quote.clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+/* A real button, styled as the inline action it is: the accent and an underline
+   are the affordance, because nothing else on the site is one of these. */
+.more {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--acc-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 .who {
   display: flex;
   align-items: center;
@@ -59,13 +139,14 @@ defineProps({
   width: 28px;
   height: 28px;
   flex: 0 0 auto;
+  box-sizing: border-box;
   border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid var(--line);
-}
-
-.placeholder {
+  /* contain, not cover: the one avatar here is a mark rather than a photograph,
+     and cropping a logo cuts away the part that says who it is. */
+  object-fit: contain;
+  padding: 4px;
   background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 /* The same mono the site uses for every other piece of metadata. */

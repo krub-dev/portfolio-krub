@@ -1331,6 +1331,15 @@ under the projects — the same shape twice, saying different things. The site a
 listing things that are not cards: text, a mono attribution and a rule between entries, which is what
 the timeline in About and the contact rows do, so the quotes use that.
 
+**A long quote is clamped to three lines with a "read more"**, added when the first real quote
+arrived and ran to four lines on a desktop and seven on a phone. The button only exists when there is
+something to reveal, and that is measured rather than assumed — which needed the clamp to be on by
+default: the box shows three lines while reporting the height of all of them, and the gap between
+`scrollHeight` and `clientHeight` is the test. Applied the other way round, only when there was
+something to hide, the box was unclamped, the two heights were equal and the button never appeared.
+The client's own mark goes in the avatar circle with `object-fit:contain`, because cropping a logo
+cuts away the part that says who it is.
+
 ### 57. The form posts to our own endpoint, never to Web3Forms
 
 **Date:** 2026-09-17 · **Status:** active
@@ -1479,7 +1488,14 @@ likely to be skimming.
 - **The cut edge gets a soft one.** A `mask-image` fade on whichever side the rail continues on. A
   hard vertical edge where a card is clipped reads as a mistake rather than as "there is more this
   way" — but only on that side: at the start the first card's rounded corner sits on the edge and
-  fading it would eat it.
+  fading it would eat it. The width is **derived from the rail's own geometry**, not a flat number:
+  the first attempt used `56px` and the peek is `45px` on a phone, so the fade reached 11px into the
+  card you were reading and smudged its edge instead of softening the next one's.
+- **Hover is guarded by `hover: hover`, and touch gets a position marker.** A tap leaves `:hover`
+  stuck on whatever it touched, so the yellow border was there or not depending on where the last
+  finger landed — the owner read that as the marking being unreliable. The hover styles now live
+  under `@media (hover:hover)`, and where there is no hover the same border marks the card the rail
+  is parked on, moving with the rail rather than with the finger.
 - **Measured after:** 1010px on a phone, 1134px on a desktop.
 
 ### 61. The navbar was swallowing every click in its band

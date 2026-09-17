@@ -234,6 +234,46 @@ test('the project rail drags with the mouse, and a drag does not open a card', a
   await expect(page.getByRole('dialog')).toBeHidden()
 })
 
+test('on touch the rail marks the card it is parked on', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'the marker exists because there is no hover to mark it')
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+
+  const cards = page.locator('#projects .card')
+
+  // The first card carries it, the rest do not.
+  await expect(cards.nth(0)).toHaveClass(/current/)
+  await expect(cards.nth(1)).not.toHaveClass(/current/)
+
+  // And it moves with the rail, not with the finger.
+  await page.getByRole('button', { name: 'Next project' }).click()
+  await expect(cards.nth(1)).toHaveClass(/current/)
+  await expect(cards.nth(0)).not.toHaveClass(/current/)
+})
+
+test('a long testimonial is clamped, and read more opens it', async ({ page }) => {
+  await page.goto('/')
+
+  const quote = page.locator('#projects .quote')
+  const more = page.getByRole('button', { name: 'Read more' })
+
+  // The quote runs past three lines, so the control exists.
+  await expect(more).toBeVisible()
+  await expect(quote).toHaveClass(/clamped/)
+
+  const closed = await quote.evaluate((el) => el.clientHeight)
+  await more.click()
+  await expect(quote).not.toHaveClass(/clamped/)
+
+  const open = await quote.evaluate((el) => el.clientHeight)
+  expect(open).toBeGreaterThan(closed)
+
+  // And it closes again.
+  await page.getByRole('button', { name: 'Read less' }).click()
+  await expect(quote).toHaveClass(/clamped/)
+})
+
 test('the project rail drags with a finger too', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'there is no finger on a desktop')
 

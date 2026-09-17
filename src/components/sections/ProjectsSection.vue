@@ -65,6 +65,7 @@ const dragging = ref(false)
 const atStart = ref(true)
 const atEnd = ref(false)
 const parked = ref([]) // per card: fully out of the rail, so out of the tab order
+const current = ref(0) // the card the rail is parked on, which touch marks
 
 /*
   Which edges to fade. The clip cuts a card off mid-way, and a hard vertical edge
@@ -118,6 +119,7 @@ function sync() {
 
   atStart.value = index <= 0
   atEnd.value = offset >= maxOffset - 1
+  current.value = index
 
   parked.value = items.value.map((_, i) => {
     const left = i * step - offset
@@ -253,6 +255,7 @@ onUnmounted(() => window.removeEventListener('resize', sync))
             :image="project.image"
             :stack="project.stack"
             :inert="parked[i] || undefined"
+            :current="i === current"
             @open="$emit('open', i)"
           />
         </div>
@@ -318,13 +321,21 @@ onUnmounted(() => window.removeEventListener('resize', sync))
   from the element the finger lands on down to the nearest scroll container, so
   one rule here covers every card inside — a vertical swipe is left to the page
   and a horizontal one comes to us.
+
+  The geometry lives here as variables because the fade has to know it: the fade
+  is exactly the part of the next card that shows, so it can never reach back
+  into the card you are reading. A flat 56px did: on a phone the peek is 45px,
+  so the fade ate 11px of the visible card's right edge and the card looked
+  smudged rather than the next one looking cut.
 */
 .viewport {
+  --rail-gap: 20px;
+  --rail-peek: 68px;
+  --rail-fade: calc(var(--rail-peek) - var(--rail-gap));
   overflow: hidden;
   padding: 12px 0;
   touch-action: pan-y;
   cursor: grab;
-  --rail-fade: 56px;
 }
 
 /*
@@ -352,22 +363,25 @@ onUnmounted(() => window.removeEventListener('resize', sync))
 
 .track {
   display: flex;
-  gap: 20px;
+  gap: var(--rail-gap);
   /* Composited, and the curve is ours: the same arrive-and-settle the lemon and
      the footer use. */
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
-/* Three cards and the sliver of a fourth. The 40px is the two gaps, the 68px the
-   sliver. A phone shows one and a sliver of the next. */
+/* Three cards and the peek at a fourth. A phone shows one and the same peek. */
 .track > * {
-  flex: 0 0 calc((100% - 40px - 68px) / 3);
+  flex: 0 0 calc((100% - 2 * var(--rail-gap) - var(--rail-peek)) / 3);
 }
 
 @media (max-width: 900px) {
+  .viewport {
+    --rail-peek: 18%;
+  }
+
   .track > * {
-    flex: 0 0 82%;
+    flex: 0 0 calc(100% - var(--rail-peek));
   }
 }
 

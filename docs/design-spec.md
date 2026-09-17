@@ -347,11 +347,14 @@ card — 160px — before anything happened, which reads as the rail refusing to
 travels more than `6px` swallows the click in the capture phase, because nobody means to open a card
 they just dragged.
 
-**The edge the clip cuts gets a soft one.** The viewport carries a `mask-image` fade of `56px` on
-whichever side the rail continues on — the right at the start, the left at the end, both in the
-middle, none when everything fits. A hard vertical edge where a card is cut reads as a mistake rather
-than as "there is more this way", and the side with nothing to continue is left alone: at the start
-the first card's rounded corner sits on the edge, and fading it would eat it.
+**The edge the clip cuts gets a soft one.** The viewport carries a `mask-image` fade on whichever side
+the rail continues on — the right at the start, the left at the end, both in the middle, none when
+everything fits. A hard vertical edge where a card is cut reads as a mistake rather than as "there is
+more this way", and the side with nothing to continue is left alone: at the start the first card's
+rounded corner sits on the edge, and fading it would eat it. **The fade is the peek**, derived from the
+same two variables the card width is, so it stops exactly where the card you are reading begins. A flat
+`56px` did not: the peek is `45px` on a phone, so the fade reached 11px into the visible card and
+smudged its right edge instead of softening the next one.
 
 **Cards that are fully out of the rail carry `inert`.** They stay in the DOM — the keyboard has to
 reach them — and `inert` is what keeps Tab from walking into a card nobody can see, which is the trap
@@ -361,8 +364,11 @@ Measured: `2319px` on a phone against an `839px` viewport before this and `1010p
 `1134px` on a desktop. No "click to open" hint: the card design says it already.
 
 Card (a clickable `<article>`, `cursor:pointer`): border `--line`, radius 18, background
-`--surface`, `overflow:hidden`, column. Hover: border `--acc-text`
-(`transition: border-color .16s ease`).
+`--surface`, `overflow:hidden`, column. Hover — **only under `@media (hover:hover)`** — border
+`--acc-text` and the arrow circle filled with `--acc`, `transition: border-color .16s ease`. A phone
+has no hover: a tap leaves `:hover` stuck on whatever was touched, so the marker was there or not
+depending on where the last finger went. Where there is no hover the rail marks the card it is parked
+on instead, with the same yellow border, and it moves as you scroll the rail.
 
 1. Screenshot frame: `aspect-ratio:16/10`, diagonal stripe background
    `repeating-linear-gradient(135deg, var(--surface-2) 0 12px, var(--ink) 12px 24px)`, with a
@@ -466,8 +472,20 @@ projects — the same shape twice, saying different things — so each entry is 
 (`clamp(18px,2vw,23px)`, `line-height:1.5`, `--fg`, 62ch, `text-wrap:pretty`) and, under it, a mono
 line — the name in `--fg-2` and the company in `--fg-3` (`11px`, tracked/uppercase), with a 28px
 avatar circle when there is one. Entries are separated by `--line` rules, like the timeline in About.
-The current content is filler: replace it with real quotes or turn `config.showTestimonials` off
-again. **No "optional section" note** in the interface.
+
+**A long quote is clamped to three lines**, with a mono uppercase "Read more" under it in `--acc-text`
+and underlined — the only inline action on the site, so it carries the affordance itself. The button
+only exists when there is something to reveal, which is measured, not assumed: the clamp is applied by
+default so the box shows three lines while reporting the height of all of them, and the gap between
+`scrollHeight` and `clientHeight` is the test. Asking for the clamp only when there is something to
+hide never fires — the box is unclamped, the two heights are equal, and the button never appears.
+
+The avatar is `object-fit:contain` in a `--surface-2` circle, not `cover`: the one here is a client's
+mark rather than a photograph, and cropping a logo cuts away the part that says who it is.
+
+The quotes are real. The placeholders were written in square brackets with "Name Surname" so they
+could not be mistaken for genuine ones and shipped by accident; that worked, and they are gone.
+**No "optional section" note** in the interface.
 
 ### 3.10 Contact
 

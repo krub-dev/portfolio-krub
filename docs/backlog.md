@@ -26,11 +26,10 @@ section, folded together where they overlapped.
   2026-09-17) so it can be seen, but `public/uploads/` holds no file, so it currently downloads
   nothing: **drop the PDF at the path below, or turn the switch off again, before this reaches
   `main`.** The original was pulled from the deployment and purged from the git history. **(owner)**
-- [ ] **Real testimonials.** The section, the entries and the layout are built and reviewed, and the
-  section is now **on** (`config.showTestimonials` is true, since 2026-09-17) so the real quotes can
-  be dropped in one at a time. Until that happens it shows the bracketed placeholders in
-  `src/data/testimonials.js`, which is why the switch was off: **turn it off again, or replace the
-  quotes, before this reaches `main`.** One quote is enough: the grid closes up on its own. **(owner)**
+- [x] **Real testimonials.** Closed on 2026-09-17 with the first real quote, from Lourdes Campuzano of
+  CreandoMientras, and her own mark in the avatar circle. Long quotes are clamped to three lines with a
+  "read more", which is what makes the length a non-issue. The bracketed placeholders and the second
+  entry are gone, so nothing blocks `main` here any more.
 - [ ] **Reread the prose.** Every sentence lives in `src/data/`, both languages side by side, one
   file per kind of content. It was always going to be iterated after launch rather than
   written once. **(owner)**

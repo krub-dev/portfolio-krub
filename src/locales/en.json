@@ -45,6 +45,8 @@
   "actions": {
     "cv": "Download CV (PDF)",
     "talk": "Let's talk ↗",
+    "readMore": "Read more",
+    "readLess": "Read less",
     "projects": "/projects",
     "home": "Back home"
   },

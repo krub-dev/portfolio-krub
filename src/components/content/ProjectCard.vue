@@ -27,6 +27,9 @@ const props = defineProps({
   shotLabel: { type: String, default: '' },
   image: { type: String, default: null },
   stack: { type: Array, default: () => [] },
+  // True for the card the rail is parked on. Only read where there is no hover:
+  // it is what marks the position there instead.
+  current: { type: Boolean, default: false },
 })
 
 defineEmits(['open'])
@@ -35,7 +38,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <article class="card" data-magnetic>
+  <article class="card" :class="{ current }" data-magnetic>
     <div class="shot">
       <img v-if="image" :src="image" :alt="name" class="shot-img" />
       <span v-else class="shot-label">{{ shotLabel }}</span>
@@ -78,8 +81,33 @@ const { t } = useI18n()
   transition: border-color 0.16s ease;
 }
 
-.card:hover {
-  border-color: var(--acc-text);
+/*
+  Hover only where there is a hover. On a phone a tap leaves `:hover` stuck on
+  whatever was touched, so a card kept its yellow border after being opened and
+  the next tap lit a different one — the marker was there or not depending on
+  where you last put your finger.
+*/
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--acc-text);
+  }
+
+  .card:hover .arrow {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: var(--on-acc);
+  }
+}
+
+/*
+  And where there is no hover, the same border marks where you are instead: the
+  card the rail is parked on, moving as you scroll the rail rather than as you
+  touch it.
+*/
+@media (hover: none) {
+  .card.current {
+    border-color: var(--acc-text);
+  }
 }
 
 .shot {
@@ -206,11 +234,5 @@ const { t } = useI18n()
     background-color 0.16s ease,
     border-color 0.16s ease,
     color 0.16s ease;
-}
-
-.card:hover .arrow {
-  background: var(--acc);
-  border-color: var(--acc);
-  color: var(--on-acc);
 }
 </style>
