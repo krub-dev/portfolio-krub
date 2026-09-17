@@ -304,8 +304,12 @@ test('the testimonials page one at a time, and the window follows the quote', as
   // Out of the tab order while it is not showing, in the DOM all the same.
   await expect(first).toHaveAttribute('inert')
 
-  // The window is sized to the quote on show, and the second one is shorter.
-  await expect.poll(() => pane.evaluate((el) => el.clientHeight)).toBeLessThan(tallest)
+  /*
+    And the window does NOT resize. Sized to the quote on show it changed height
+    every time you paged, which moved everything under it; it is as tall as the
+    tallest entry instead.
+  */
+  await expect.poll(() => pane.evaluate((el) => el.clientHeight)).toBe(tallest)
 
   await prev.click()
   await expect(count).toHaveText('1 / 3')

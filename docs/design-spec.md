@@ -503,15 +503,19 @@ they settle; under `prefers-reduced-motion` they jump.
 
 **It drags, with any pointer type**, the same as the projects rail: the mouse has no vertical gesture of
 its own and the pager is not a scroll container, so a phone has no swipe either. A drag that covers a
-fifth of the window takes the next quote in the direction it was going, and a drag that ends over the
-"read more" swallows the click rather than pressing it. **The rail's drag could leave the vertical axis
-to the page; this one cannot**, so the pane claims both axes (`touch-action:none`) and the page is
-scrolled by starting the touch anywhere else on the screen — the price of a vertical pager.
+fifth of the window takes the next quote in the direction it was going; anything shorter falls back to
+the **nearest entry, found by comparing offsets** — dividing the offset by a height sent a short drag to
+the wrong quote as soon as the first entry was longer than the others. A drag that ends over the "read
+more" swallows the click rather than pressing it. **The rail's drag could leave the vertical axis to the
+page; this one cannot**, so the pane claims both axes (`touch-action:none`) and the page is scrolled by
+starting the touch anywhere else on the screen — the price of a vertical pager.
 
-**The window is sized to the quote on show**, measured rather than assumed: the entries are different
-lengths, so where each one sits is its own offset and the height is its own height — a uniform step
-would be wrong the moment one quote is longer than another. The entries that are not showing carry
-`inert`, so Tab cannot walk into a quote nobody can see. Same rule as the rail.
+**The window is as tall as the tallest entry**, not as tall as the one showing: sized to the current
+quote it changed height every time you paged, which moved everything under it. The entries are different
+lengths, so where each one sits is its own offset — a uniform step would be wrong the moment one quote is
+longer than another — and a `ResizeObserver` on the reel re-measures when a quote is expanded past the
+tallest or the fonts land. The entries that are not showing carry `inert`, so Tab cannot walk into a quote
+nobody can see. Same rule as the rail.
 
 Each entry is `figure` → `figcaption` → `blockquote`: **the attribution first**, and on two lines — a
 `48px` avatar circle when there is one, and beside it the name in `--fg-2` over the company in `--fg-3`

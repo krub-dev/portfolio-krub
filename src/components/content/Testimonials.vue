@@ -72,6 +72,7 @@ let frame = null
 let startY = 0
 let startOffset = 0
 let travelled = 0
+let observer = null
 
 function paint() {
   if (reel.value) reel.value.style.transform = `translateY(${-offset}px)`
@@ -124,7 +125,14 @@ function apply(snap) {
   target = offsets[index.value]
   if (snap) offset = target
 
-  view.style.height = `${heights[index.value]}px`
+  /*
+    The window is as tall as the tallest entry, not as tall as the one showing.
+    Sized to the current quote it changed height every time you paged, which
+    moved everything under it; this way it only changes if an entry grows past
+    the tallest, which is what expanding one can do.
+  */
+  view.style.height = `${Math.max(...heights)}px`
+
   atStart.value = index.value <= 0
   atEnd.value = index.value >= offsets.length - 1
   hidden.value = offsets.map((_, i) => i !== index.value)
@@ -173,20 +181,19 @@ function onPointerUp(event) {
 
   /*
     Settle on a quote. A drag that covered enough of the window takes the next
-    one in the direction it was going; anything shorter falls back to the nearest.
-    The offset is left where the finger dropped it, so the loop travels from
-    there.
+    one in the direction it was going; anything shorter falls back to the nearest
+    one, which is found by comparing offsets — NOT by dividing the offset by a
+    height, which is what this did and what sent a short drag to the wrong quote
+    as soon as the first entry was longer than the others.
   */
   const moved = offset - startOffset
-  const height = heights[index.value] || 1
-  const next = Math.min(
-    Math.max(
-      Math.abs(moved) > height * FLICK ? index.value + Math.sign(moved) : Math.round(offset / height),
-      0,
-    ),
-    offsets.length - 1,
-  )
-  index.value = next
+  const height = Math.max(...heights) || 1
+  let next = 0
+  for (let i = 1; i < offsets.length; i += 1) {
+    if (Math.abs(offsets[i] - offset) < Math.abs(offsets[next] - offset)) next = i
+  }
+  if (Math.abs(moved) > height * FLICK) next = index.value + Math.sign(moved)
+  index.value = Math.min(Math.max(next, 0), offsets.length - 1)
   apply(false)
   settle()
 }
@@ -201,12 +208,18 @@ function onClickCapture(event) {
 
 onMounted(() => {
   measure()
-  // And again once the fonts have landed: a reflow changes every height here.
-  document.fonts?.ready.then(() => apply(false))
+  /*
+    The reel changes size when a quote is expanded and when the fonts land, and
+    the window's height is derived from the tallest entry — so it is the reel
+    that is watched, not the window, which would be a loop.
+  */
+  observer = new ResizeObserver(measure)
+  if (reel.value) observer.observe(reel.value)
   window.addEventListener('resize', measure, { passive: true })
 })
 
 onUnmounted(() => {
+  observer?.disconnect()
   window.removeEventListener('resize', measure)
   if (frame) cancelAnimationFrame(frame)
 })

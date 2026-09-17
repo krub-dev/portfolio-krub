@@ -1581,6 +1581,14 @@ projects grid, and it got the same answer — one at a time.
   would be wrong the moment one quote is longer than another: each entry's own offset and height are read
   from the DOM. The drag is the rail's, on the other axis — a fifth of the window to take the next one,
   and a drag that ends over the "read more" swallows the click rather than pressing it.
+- **The window is as tall as the tallest entry, not as tall as the one showing.** Sized to the current
+  quote it changed height every time you paged, and everything under it moved with it. It is the kind of
+  thing a screenshot cannot show and a scroll position can.
+- **And the settle compares offsets.** The first version worked the target index out as
+  `offset / height`, which is right only while every entry is the same height: with one long quote and a
+  short one, a drag that was too small to count as a flick landed on the wrong quote — the counter
+  jumped to `2 / 3` on the first quote. Comparing the live offset against each entry's own offset is
+  correct whatever the lengths are, and it is the same measurement the paging already uses.
 - **The vertical drag has a cost the horizontal one did not.** The rail could leave the vertical axis to
   the page and take only the horizontal; a vertical pager cannot, so the pane claims both and the page is
   scrolled by starting the touch anywhere else. Worth watching: if it reads as a trap, the arrows are the
