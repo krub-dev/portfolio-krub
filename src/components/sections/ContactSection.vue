@@ -1,12 +1,13 @@
 <script setup>
 /*
-  Section 03. The band, then the heading, the rows and the mailto. The form goes
-  between the heading and the rows.
+  Section 03. The heading, then the band, then the rows and the form.
 
-  The section no longer carries the page gutter: it is the full-bleed container
-  the band needs, and an inner column carries the measurements every other
-  section uses. The bottom padding on that column is what keeps the last row
-  clear of the fixed footer, which arrives in step 7.
+  The section is the full-bleed container the band needs, so it carries no page
+  gutter of its own: two inner columns carry the measurements every other
+  section uses, one above the band and one below. The heading comes first so the
+  band is not flush against the projects section. The bottom padding on the
+  lower column is what keeps the form clear of the fixed footer, which arrives
+  in step 7.
 
   The rows replaced the three 46px icon buttons. They say the same thing with
   the address written out, which is what gives the end of the page its weight —
@@ -40,11 +41,13 @@ const rows = computed(() => [
 
 <template>
   <section id="contact" class="contact">
+    <div class="inner head">
+      <SectionHeading index="03" :title="t('section.contact')" />
+    </div>
+
     <TalkBand :text="t('contact.band')" />
 
-    <div class="inner">
-      <SectionHeading index="03" :title="t('section.contact')" />
-
+    <div class="inner body">
       <ul class="rows">
         <li v-for="row in rows" :key="row.name">
           <a
@@ -71,10 +74,28 @@ const rows = computed(() => [
   z-index: 1;
 }
 
+/*
+  The page gutter and the 1180px cap the other sections use. The band is
+  full-bleed, so it cannot live inside one of these and the section carries two.
+*/
 .inner {
-  padding: clamp(40px, 6vw, 80px) var(--gutter-r) clamp(48px, 6vw, 90px) var(--gutter-l);
+  padding-left: var(--gutter-l);
+  padding-right: var(--gutter-r);
   max-width: 1180px;
   margin: 0 auto;
+}
+
+/* The separator the other sections carry, at their 1180px rather than across
+   the whole viewport: the heading starts the section, not the band. */
+.head {
+  padding-top: clamp(56px, 8vw, 110px);
+  padding-bottom: clamp(40px, 6vw, 80px);
+  border-top: 1px solid var(--line);
+}
+
+.body {
+  padding-top: clamp(40px, 6vw, 80px);
+  padding-bottom: clamp(48px, 6vw, 90px);
   display: flex;
   flex-direction: column;
   gap: 30px;
@@ -138,7 +159,7 @@ const rows = computed(() => [
 }
 
 @media (max-width: 900px) {
-  .inner {
+  .body {
     padding-bottom: 34px;
     gap: 24px;
   }

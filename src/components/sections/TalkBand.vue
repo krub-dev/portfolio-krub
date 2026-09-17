@@ -1,8 +1,8 @@
 <script setup>
 /*
-  The band at the top of Contact: the phrase huge, running off both edges, on the
-  accent band the marquee wears, with a second copy of the words in outline
-  behind it and a step higher, travelling the other way.
+  The band in Contact, between the heading and the rows: the phrase huge, running
+  off both edges, on the accent band the marquee wears, with a second copy of the
+  words in outline behind it and a step higher, travelling the other way.
 
   It moves with the scroll and only with the scroll, and it moves LESS than the
   scroll does — a fifth of its own track, not half — which is what makes it read

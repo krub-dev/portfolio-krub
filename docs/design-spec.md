@@ -395,7 +395,11 @@ again. **No "optional section" note** in the interface.
 
 ### 3.10 Contact
 
-A **full-bleed band** at the top, on the accent band the marquee wears (`background:var(--acc)`,
+The section opens with its **heading**, the same mono title and giant number the other sections use,
+carrying their `border-top:1px solid var(--line)` at their 1180px. It is there to separate the band
+from Projects: flush against the grid, the band read as part of it rather than as the start of Contact.
+
+Under the heading, a **full-bleed band**, on the accent band the marquee wears (`background:var(--acc)`,
 `--on-acc` for everything on it, 1px borders in `--acc`), in display type (700,
 `clamp(64px,13vw,190px)`, `line-height:.8`, `letter-spacing:-.03em`, uppercase): the phrase from
 `contact.band` — "Let's talk" / "Hablemos" — with its **words alternating** between solid `--on-acc`
@@ -412,9 +416,9 @@ travels a fifth of its own track, so it reads as drifting with the page instead 
 stops the moment it has caught up. Under `prefers-reduced-motion` nothing runs. Decorative:
 `aria-hidden`.
 
-Below it, an inner column carries the gutter and the 1180px cap the other sections use — the section
-itself has neither, because the band has to reach both edges. Inside: the heading, the rows and the
-form.
+The section is the full-bleed container the band needs, so it carries no gutter of its own: **two**
+inner columns carry the gutter and the 1180px cap the other sections use, one above the band (the
+heading) and one below (the rows and the form).
 
 **The rows**, separated by `--line`: the label in mono 10px uppercase `--fg-3`, the address below it
 (`kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev` — a network's address is

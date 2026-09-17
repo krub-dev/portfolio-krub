@@ -203,20 +203,22 @@ modal itself lives in `HomeView`, so the section does not own it.
 `id="stack"`. The four groups from `src/data/stack.js`: `StackGroup` → `TechIcon`.
 
 ### ContactSection
-`id="contact"`. The band, the heading, the form, and one full-width row per contact (the address
+`id="contact"`. The heading, the band, the form, and one full-width row per contact (the address
 written out, derived from the href; the email row is the mailto, so there is no separate button). The
-section itself carries no gutter — it is the full-bleed container the band needs, and an inner column
-carries the measurements.
+section itself carries no gutter — it is the full-bleed container the band needs, so two inner
+columns carry the measurements, one above the band (the heading) and one below (the rows and the
+form).
 
 ### ContactForm
 The panel: the three fields, the send button, the mono note with the address, the honeypot and the
 live region. It paints; the state is in `useContactForm`. Every string comes from `src/locales/`.
 
 ### TalkBand
-`text`. The band at the top of Contact: on the accent background, display type with the words
-alternating between solid and outline over a second, fainter copy travelling the other way. It moves
-with the scroll and only with the scroll, a fifth of its own track, and eases toward where the scroll
-says it should be — the loop stops once it has caught up. Decorative (`aria-hidden`).
+`text`. The band in Contact, between the heading and the rows: on the accent background, display type
+with the words alternating between solid and outline over a second, fainter copy travelling the other
+way. It moves with the scroll and only with the scroll, a fifth of its own track, and eases toward
+where the scroll says it should be — the loop stops once it has caught up. Decorative
+(`aria-hidden`).
 
 ### BrandName
 The KIKO / RUBIO reveal at the top of the hero. A pure CSS animation — the letters are markup, not
