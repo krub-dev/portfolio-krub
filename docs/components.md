@@ -292,7 +292,9 @@ on the rest of the app.
 No props: the greeting text comes from `copy.lemon`, and it reads `--footer-h` from CSS to sit on top
 of the footer. Owns its own shake and greeting timers. On mount it registers with `useLemonVoice()`,
 which is how the Stack knows there is a voice on the page and hands it the technology names; the
-cleanup goes with the unmount.
+cleanup goes with the unmount. His pupils follow the cursor, and on touch they glance at the last tap
+(a transition on the pupil, only under `hover: none`). His bubble is pushed left by his own width,
+because with no tail centred over him it reads as sitting on his leaf.
 
 ### BackgroundGrid
 Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the crossfade).

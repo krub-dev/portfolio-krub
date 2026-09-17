@@ -46,10 +46,15 @@ const EASING = 0.16
 const NAME_OFFSET = 16
 // How long a tapped name stays up.
 const PIN = 1800
-// The touch reveal: a group is fully lit once its top edge has climbed from
-// REVEAL_FROM of the viewport height to REVEAL_TO.
-const REVEAL_FROM = 0.9
-const REVEAL_TO = 0.55
+// The touch reveal: a group starts lighting when its top edge reaches the bottom
+// of the viewport, and is fully lit once it has climbed to REVEAL_TO of it.
+//
+// Near the top it was lighting the whole section on arrival: the section is
+// about a viewport tall on a phone, so with the threshold up there every group
+// was already past it by the time you got to it. From the bottom edge the groups
+// come on one after another as you scroll, which is what it was for.
+const REVEAL_FROM = 1
+const REVEAL_TO = 0.7
 
 const pointerDevice = isPointerDevice()
 

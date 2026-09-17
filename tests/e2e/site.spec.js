@@ -348,6 +348,14 @@ test('the stack is monochrome until the pointer reaches a tile', async ({ page, 
   // And Limonacho names it, which is the only visible name there is.
   await expect(page.locator('.pet .bubble')).toHaveText('Java')
 
+  /*
+    Beside him, not on his head. The bubble has no tail, so centred over the
+    lemon it reads as sitting on his leaf.
+  */
+  const bubble = await page.locator('.pet .bubble').boundingBox()
+  const lemon = await page.locator('.pet .lemon').boundingBox()
+  expect(bubble.x + bubble.width).toBeLessThanOrEqual(lemon.x + 1)
+
   // Out of the grid he stops saying it.
   await page.mouse.move(5, 5)
   await expect(page.locator('.pet .bubble')).toHaveCount(0)
@@ -381,6 +389,11 @@ test('on touch the stack lights with the scroll, and a tap names a tile', async 
   await tile.click()
 
   await expect(page.locator('.pet .bubble')).toHaveText(name)
+
+  // No cursor to follow, so he glances at where the tap landed instead.
+  await expect
+    .poll(() => page.locator('.pupil').first().evaluate((el) => el.style.transform))
+    .not.toBe('')
 })
 
 test('the contact form asks for what is missing, then sends', async ({ page }) => {

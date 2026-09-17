@@ -405,10 +405,12 @@ the lemon the name comes from hovering, and without him the only way to get it i
 what the cursor has to say.
 
 **On touch there is no cursor, so the scroll is the light, and it comes on a whole group at a time**: a
-group is fully lit once its top edge has climbed from `90%` of the viewport height to `55%`. Tile by
-tile was noise — the tiles of a group are read together — and they do not lift either, because a block
-of tiles rising as one reads as the page jumping. A tap hands the tile's name to Limonacho, up for
-`1.8s`, or to the readout when there is no lemon.
+group starts lighting when its top edge reaches the bottom of the viewport and is fully lit once it has
+climbed to `70%` of it. Tile by tile was noise — the tiles of a group are read together — and they do
+not lift either, because a block of tiles rising as one reads as the page jumping. The threshold sits
+at the bottom edge on purpose: the section is about a viewport tall on a phone, so a threshold near the
+top lit every group the moment you arrived. A tap hands the tile's name to Limonacho, up for `1.8s`, or
+to the readout when there is no lemon.
 
 Either path hangs off machinery the site already owns — `usePointer` and `useScroll` each keep ONE
 listener for the whole app — so it costs no second `requestAnimationFrame` and no extra scroll
@@ -583,17 +585,23 @@ Stack's technology names appear (§3.8): the group hands him a string and he say
 which change as the pointer sweeps the grid. He registers himself on mount, so the Stack knows there
 is a voice without knowing why there might not be one.
 
+**The bubble sits beside him, not above him**: it is pushed left by exactly his own width, because the
+bubble has no tail and centred over him it reads as sitting on his leaf. **The pupils look at a point** —
+the cursor, or on touch the last tap, where a `0.45s` transition on the pupil's transform turns it into
+a glance instead of a jump. That transition exists only under `hover: none`: on a pointer device the
+frame loop rewrites the position every frame and it would drag the eyes behind the mouse.
+
 The lemon is drawn in CSS: a 58×48px body with
 `border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%` and a **flat `var(--acc-solid)` fill, no
 gradient** — the accent at full saturation in both themes, so he does not wash out in the dark
 one; an 11×12px nub centred on top; a 21×12px leaf in `#3EA34B` outlined `#2C7A36`,
 rotated `-24deg`; four texture dots in a darkened yellow at opacities between .35 and .55; and
-two 16px white eyes with 7px `#0C0C0D` pupils that **follow the cursor**, shifting 4px in its
-direction.
+two 16px white eyes with 7px `#0C0C0D` pupils that **follow the cursor** — or the last tap, on touch —
+shifting 4px in its direction.
 
-On click: a `lemonShake .5s ease` shake and a speech bubble above it (max 230px, radius 14,
-background `--surface`, `bubbleIn .28s`) reading "Welcome! I'm Limonacho" / "¡Bienvenido! Soy
-Limonacho", which hides itself after 4 seconds.
+On click: a `lemonShake .5s ease` shake and a speech bubble beside him — pushed left by his own width
+so it does not sit on his leaf — (max 230px, radius 14, background `--surface`, `bubbleIn .28s`)
+reading "Welcome! I'm Limonacho" / "¡Bienvenido! Soy Limonacho", which hides itself after 4 seconds.
 
 The **first** click of a visit is the greeting: he says "acho" — a one-second MP3 (`achoSound`,
 `src/data/sound.js`, 17 KB), asked for inside the click handler so a phone lets it play, and never

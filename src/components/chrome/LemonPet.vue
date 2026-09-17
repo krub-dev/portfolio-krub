@@ -20,12 +20,14 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useAcho } from '../../composables/useAcho'
 import { useLang } from '../../composables/useLang'
 import { useLemonVoice } from '../../composables/useLemonVoice'
-import { usePointer } from '../../composables/usePointer'
+import { isPointerDevice, usePointer } from '../../composables/usePointer'
 import { usePastHero } from '../../composables/usePastHero'
 import { copy } from '../../data'
 import SpeechBubble from '../base/SpeechBubble.vue'
 
 const PUPIL_TRAVEL = 4 // px the pupils can drift inside the eye
+
+const pointerDevice = isPointerDevice()
 
 const { lang } = useLang()
 
@@ -55,23 +57,37 @@ const { playOnce } = useAcho()
 const said = computed(() => message.value || (greeting.value ? text.value : ''))
 
 /*
-  The pupils look at the cursor. Each eye works out the direction from its own
-  centre to the pointer and slides its pupil that way, capped at 4px — the
-  distance is normalised, so a cursor across the room and a cursor just outside
-  the eye both produce a full look, rather than the pupil creeping further out
-  the further away you are.
+  The pupils look at a point. Each eye works out the direction from its own
+  centre to it and slides its pupil that way, capped at 4px — the distance is
+  normalised, so a cursor across the room and a cursor just outside the eye both
+  produce a full look, rather than the pupil creeping further out the further
+  away you are.
 */
-usePointer((pointer) => {
+function lookAt(x, y) {
   for (const pupil of [leftPupil.value, rightPupil.value]) {
     if (!pupil) continue
     const eye = pupil.parentElement.getBoundingClientRect()
-    const dx = pointer.x - (eye.left + eye.width / 2)
-    const dy = pointer.y - (eye.top + eye.height / 2)
+    const dx = x - (eye.left + eye.width / 2)
+    const dy = y - (eye.top + eye.height / 2)
     const length = Math.hypot(dx, dy) || 1
     const travel = Math.min(PUPIL_TRAVEL, length)
     pupil.style.transform = `translate(${((dx / length) * travel).toFixed(2)}px, ${((dy / length) * travel).toFixed(2)}px)`
   }
-})
+}
+
+usePointer((pointer) => lookAt(pointer.x, pointer.y))
+
+/*
+  On touch there is no cursor to follow, so he looks at whatever was tapped last
+  instead. The transition on .pupil is what turns it into a glance rather than a
+  jump, and it only exists on touch: on a pointer device the loop above rewrites
+  the position every frame, and a transition there would drag the eyes behind the
+  mouse.
+*/
+function onPointerDown(event) {
+  if (pointerDevice) return
+  lookAt(event.clientX, event.clientY)
+}
 
 function poke() {
   // The first poke of a visit is the greeting: the voice and the bubble. Every
@@ -102,10 +118,12 @@ function poke() {
 */
 onMounted(() => {
   unlisten = listen()
+  window.addEventListener('pointerdown', onPointerDown, { passive: true })
 })
 
 onUnmounted(() => {
   unlisten?.()
+  window.removeEventListener('pointerdown', onPointerDown)
   clearTimeout(bubbleTimer)
   clearTimeout(shakeTimer)
 })
@@ -163,6 +181,9 @@ onUnmounted(() => {
   bottom: calc(24px + var(--footer-h, 0px));
   right: 24px;
   z-index: 120;
+  /* His width, shared: the bubble is pushed left by exactly this much so it
+     sits beside him rather than on his head. */
+  --lemon-w: 58px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -178,9 +199,18 @@ onUnmounted(() => {
   transform: translateX(0);
 }
 
+/*
+  Off to his left rather than straight above him. The bubble has no tail, so
+  centred over the lemon it reads as sitting on his leaf; pushed left by exactly
+  his width it reads as his voice coming from beside him.
+*/
+.pet :deep(.bubble) {
+  margin-right: var(--lemon-w);
+}
+
 .lemon {
   position: relative;
-  width: 58px;
+  width: var(--lemon-w);
   height: 48px;
   padding: 0;
   border: 0;
@@ -260,6 +290,15 @@ onUnmounted(() => {
   background: #0c0c0d;
 }
 
+/* On touch he cannot follow a cursor, so he glances at the last tap. Only on
+   touch: on a pointer device the frame loop writes this every frame, and a
+   transition there would drag the eyes behind the mouse. */
+@media (hover: none) {
+  .pupil {
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
 @media (max-width: 900px) {
   .pet {
     bottom: calc(16px + var(--footer-h, 0px));
@@ -274,6 +313,10 @@ onUnmounted(() => {
 
   .lemon.shaking {
     animation: none;
+  }
+
+  .pupil {
+    transition: none;
   }
 }
 </style>
