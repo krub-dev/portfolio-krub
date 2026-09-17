@@ -1567,15 +1567,24 @@ projects grid, and it got the same answer — one at a time.
 - **A pager, not a rail.** The movement is vertical because the entries are: a horizontal rail of quotes
   is harder to read than a card, and the arrows point the way the content moves. Down brings the next
   quote up from below while the one showing leaves upwards.
-- **The arrows moved to the side.** The rail already has a pair of horizontal arrows over its head, and
-  two pairs in one column of the page read as one control that lost its way.
-- **The window is sized to the quote, and the travel is measured.** The entries are different lengths,
-  so a uniform step would be wrong the moment one quote is longer than another: each entry's own offset
-  and height are read from the DOM. The height transition is what stops the section jumping as the
-  quotes change.
-- **This is what let the clamp go.** The "read more" existed because a column had to stay short. One at
-  a time shows each quote whole, so the clamp, the button, its measurement and its two locale keys went
-  with it. Deleting working code is right when the reason for it has gone.
+- **The arrows moved to the side, and the label moved into the box.** The rail already has a pair of
+  horizontal arrows over its head, and two pairs in one column of the page read as one control that lost
+  its way. The `n / total` went with them, out from between the two arrows: with a counter wedged in the
+  middle the pair read as two separate things, one of them pushed right. The mono label went inside the
+  box, over a rule — the same header the stack groups and the contact rows use — because floating above
+  an empty box it said nothing about what the box was.
+- **The clamp came back, and it is what makes the height predictable.** Removing it was right for a
+  moment: with one quote at a time there is nothing hidden. But a real quote is long, and on a phone the
+  first one made the window most of a screen. Four lines, and a "read more" when there is more of it, so
+  every quote that overflows is the same height and the block stays the size it was designed to be.
+- **The travel is measured, and so is the drag.** The entries are different lengths, so a uniform step
+  would be wrong the moment one quote is longer than another: each entry's own offset and height are read
+  from the DOM. The drag is the rail's, on the other axis — a fifth of the window to take the next one,
+  and a drag that ends over the "read more" swallows the click rather than pressing it.
+- **The vertical drag has a cost the horizontal one did not.** The rail could leave the vertical axis to
+  the page and take only the horizontal; a vertical pager cannot, so the pane claims both and the page is
+  scrolled by starting the touch anywhere else. Worth watching: if it reads as a trap, the arrows are the
+  fallback and the drag goes back to the mouse only.
 - **It reverses decision 56 on boxes — for one box.** 56 said no cards, because a grid of them read as a
   second set of projects. One window is not a grid: there is nothing to mistake it for, and the box is
   what makes a single quote feel like an object rather than a stray paragraph.

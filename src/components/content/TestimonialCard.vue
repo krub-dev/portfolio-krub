@@ -8,28 +8,83 @@
   through it. As a grid of boxes these read as a second set of projects, which is
   what decision 56 was about; one window is not a grid.
 
-  No clamp and no "read more" either. Those existed because a column of entries
-  had to stay short; the pager shows one quote at a time and the window is sized
-  to it, so there is nothing hidden to reveal.
+  The quote is clamped to four lines and a "read more" appears when there is more
+  of it. That is what keeps the block a predictable size: the window is the same
+  height for every quote that overflows the clamp, however long the quote is.
+  Expanding one is the reader's choice, and the window grows with it.
+
+  The measurement runs after the DOM has caught up, never inside the click
+  handler: read there it happens before Vue has put the clamp back, so on the way
+  closed the two heights are equal, the button decides there is nothing to
+  reveal, and it never comes back.
 */
+import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 defineProps({
   quote: { type: String, required: true },
   name: { type: String, required: true },
   role: { type: String, required: true },
   avatar: { type: String, default: null },
 })
+
+const { t } = useI18n()
+
+const quoteEl = ref(null)
+const expanded = ref(false)
+const hasMore = ref(false)
+
+function measure() {
+  const el = quoteEl.value
+  if (!el) return
+  hasMore.value = expanded.value || el.scrollHeight > el.clientHeight + 1
+}
+
+function toggle() {
+  expanded.value = !expanded.value
+}
+
+watch(expanded, measure, { flush: 'post' })
+
+onMounted(() => {
+  measure()
+  // And again once the fonts have landed: a reflow changes what fits.
+  document.fonts?.ready.then(measure)
+  window.addEventListener('resize', measure, { passive: true })
+})
+
+onUnmounted(() => window.removeEventListener('resize', measure))
 </script>
 
 <template>
   <figure class="entry">
+    <!--
+      The attribution on two lines: the name over the project. Side by side they
+      are two mono strings of different lengths fighting for one line, and on a
+      phone the second one wraps under the first anyway.
+    -->
     <figcaption class="who">
       <img v-if="avatar" :src="avatar" :alt="name" class="avatar" />
       <span v-else class="avatar" aria-hidden="true" />
-      <span class="name">{{ name }}</span>
-      <span class="role">{{ role }}</span>
+      <span class="lines">
+        <span class="name">{{ name }}</span>
+        <span class="role">{{ role }}</span>
+      </span>
     </figcaption>
 
-    <blockquote class="quote">{{ quote }}</blockquote>
+    <blockquote ref="quoteEl" class="quote" :class="{ clamped: !expanded }">
+      {{ quote }}
+    </blockquote>
+
+    <button
+      v-if="hasMore"
+      class="more"
+      type="button"
+      :aria-expanded="expanded"
+      @click="toggle"
+    >
+      {{ expanded ? t('actions.readLess') : t('actions.readMore') }}
+    </button>
   </figure>
 </template>
 
@@ -55,10 +110,43 @@ defineProps({
   text-wrap: pretty;
 }
 
+.quote.clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
+/* A real button, styled as the inline action it is: the accent and an underline
+   are the affordance, because nothing else on the site is one of these. It sits
+   on the right, under the end of the quote it belongs to. */
+.more {
+  align-self: flex-end;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--acc-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 .who {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .avatar {

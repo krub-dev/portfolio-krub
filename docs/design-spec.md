@@ -476,27 +476,48 @@ See decisions.md 56 and 64.
 
 **One at a time, in a pager.** A column grows: measured, one entry is `214px` on a phone, so three made
 the block `678px` and the section nearly two screens — the problem the projects grid had, and the same
-answer. The block shows a single quote and keeps the height of one however many arrive, which is also
-what lets each quote be shown whole instead of clamped.
+answer. The block shows a single quote and keeps the height of one however many arrive.
 
-The box is `--surface` with a `--line` border and radius 18, and **the controls sit beside it, not
-above it**: the rail already has a pair of horizontal arrows over its head, and two pairs in one column
-of the page read as one control that lost its way. **The arrows are vertical** — up, then a mono
-`n / total`, then down — because the movement is: down brings the next quote up from below while the
-one showing leaves upwards. The window is `overflow:hidden` with a `mask-image` fading its top and
-bottom `18px`, so a quote arrives and departs through a fade; at rest the mask does nothing, because
-the entries carry `22px` of vertical padding and the text never sits on the edge. `transform` on the
-reel and `height` on the window transition on `.5s cubic-bezier(.22,1,.36,1)`, both off under
-`prefers-reduced-motion`.
+**The quote is clamped to four lines**, with a mono uppercase "Read more" in `--acc-text`, underlined
+and set to the right, under the end of the quote it belongs to. That is what makes the height
+predictable: every quote that overflows the clamp is the same height, so the window is the same size
+however long they get, and expanding one is the reader's choice — the window grows with it. The button
+only exists when there is something to reveal, which is measured, not assumed: the clamp is applied by
+default so the box shows four lines while reporting the height of all of them, and the gap between
+`scrollHeight` and `clientHeight` is the test. **The measurement runs after the DOM has caught up**,
+never inside the click handler — read there it happens before Vue has put the clamp back, so on the way
+closed the two heights are equal, the button decides there is nothing to reveal, and it never comes
+back.
+
+The box is `--surface` with a `--line` border and radius 18, and it carries **its own header**: the mono
+label and the `n / total` position, with a rule under them, the same header the stack groups and the
+contact rows use. The label floating above an empty box said nothing about what the box was; inside, the
+block reads as one object. **The controls sit beside the box, not above it**: the rail already has a pair
+of horizontal arrows over its head, and two pairs in one column of the page read as one control that lost
+its way. **The arrows are vertical** — up, then down — because the movement is: down brings the next
+quote up from below while the one showing leaves upwards. The window is `overflow:hidden` with a
+`mask-image` fading its top and bottom `18px`, so a quote arrives and departs through a fade; at rest the
+mask does nothing, because the entries carry `22px` of vertical padding and the text never sits on the
+edge. `transform` on the reel and `height` on the window ease at `.16` per frame in a loop and stop when
+they settle; under `prefers-reduced-motion` they jump.
+
+**It drags, with any pointer type**, the same as the projects rail: the mouse has no vertical gesture of
+its own and the pager is not a scroll container, so a phone has no swipe either. A drag that covers a
+fifth of the window takes the next quote in the direction it was going, and a drag that ends over the
+"read more" swallows the click rather than pressing it. **The rail's drag could leave the vertical axis
+to the page; this one cannot**, so the pane claims both axes (`touch-action:none`) and the page is
+scrolled by starting the touch anywhere else on the screen — the price of a vertical pager.
 
 **The window is sized to the quote on show**, measured rather than assumed: the entries are different
 lengths, so where each one sits is its own offset and the height is its own height — a uniform step
 would be wrong the moment one quote is longer than another. The entries that are not showing carry
 `inert`, so Tab cannot walk into a quote nobody can see. Same rule as the rail.
 
-Each entry is `figure` → `figcaption` → `blockquote`: **the attribution first** — a `48px` avatar circle
-when there is one, the name in `--fg-2` and the company in `--fg-3` (`13px`, tracked/uppercase, a step
-larger than the 10–11px labels because this one is read rather than scanned) — then the quote
+Each entry is `figure` → `figcaption` → `blockquote`: **the attribution first**, and on two lines — a
+`48px` avatar circle when there is one, and beside it the name in `--fg-2` over the company in `--fg-3`
+(`13px`, tracked/uppercase, a step larger than the 10–11px labels because this one is read rather than
+scanned). Stacked because side by side they are two mono strings of different lengths fighting for one
+line, and on a phone the second wraps under the first anyway. Then the quote
 (`clamp(18px,2vw,23px)`, `line-height:1.5`, `--fg`, 62ch, `text-wrap:pretty`). Header first because that
 is how it reads: who is talking, then what they said. The avatar is `object-fit:contain` in a
 `--surface-2` circle, not `cover`: the one here is a client's mark rather than a photograph, and

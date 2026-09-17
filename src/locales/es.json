@@ -45,6 +45,8 @@
   "actions": {
     "cv": "Descargar CV (PDF)",
     "talk": "Hablemos ↗",
+    "readMore": "Leer más",
+    "readLess": "Leer menos",
     "projects": "/proyectos",
     "home": "Volver al inicio"
   },

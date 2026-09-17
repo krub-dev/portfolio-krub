@@ -4,19 +4,24 @@
 
   It used to be a column, and a column grows. Measured: one entry is 214px on a
   phone, so three of them made the block 678px and the section nearly two
-  screens — the same problem the projects grid had, and the same answer. One at a
-  time keeps the block the height of a single quote, however many arrive, and
-  that is what lets the quote be shown whole instead of clamped.
+  screens — the same problem the projects grid had, and the same answer.
 
-  The arrows are vertical and on the side because the movement is: pressing down
-  brings the next quote up from below while the one showing leaves upwards. The
-  window is clipped and masked at its two edges, so a quote arrives and departs
-  through a fade rather than through a hard cut — the mask does nothing at rest,
-  because the entries' own padding keeps the text clear of the edges.
+  The box carries its own header — the mono label and the position — because the
+  label floating above an empty box said nothing about what the box was. Inside,
+  with a rule under it, it is the same header the stack groups and the contact
+  rows use, and the block reads as one object instead of a label and a mystery.
 
-  Every entry stays in the DOM — the keyboard has to be able to reach them — so
-  the ones that are not showing carry `inert`, which is what keeps Tab from
-  walking into a quote nobody can see. Same rule as the projects rail.
+  The movement is vertical, so the arrows are: up above, down below, at the side.
+  It drags with any pointer type, the same as the projects rail — the mouse has
+  no vertical gesture of its own and the pager is not a scroll container — and a
+  drag that travels far enough takes the next quote in the direction it was
+  going. The rail's drag could leave the vertical axis to the page; this one
+  cannot, so the pane claims both axes and the page is scrolled by starting the
+  touch anywhere else on the screen.
+
+  The window is masked at its two edges, so a quote arrives and departs through a
+  fade rather than a hard cut. At rest the mask does nothing, because the entries
+  carry their own vertical padding and the text never sits on the edge.
 
   config.showTestimonials is checked by ProjectsSection, not here: the parent
   decides whether the block exists at all.
@@ -27,6 +32,17 @@ import { useI18n } from 'vue-i18n'
 import TestimonialCard from './TestimonialCard.vue'
 import { useLang } from '../../composables/useLang'
 import { testimonials } from '../../data'
+
+// How far a drag has to travel before it counts as one. Under this it is a click
+// and whatever is under it opens; over it the click is swallowed.
+const DRAG_SLOP = 6
+
+// How much of the window a drag has to cover to count as "the next one" rather
+// than falling back to the nearest.
+const FLICK = 0.2
+
+// Fraction of the remaining distance covered per frame. Lower is heavier.
+const EASING = 0.16
 
 const { lang } = useLang()
 const { t } = useI18n()
@@ -40,9 +56,46 @@ const atStart = ref(true)
 const atEnd = ref(false)
 const hidden = ref([])
 
-// Plain, not reactive: they are measured from the DOM and written back to it.
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+/*
+  The animation state is deliberately plain and not reactive: it is written onto
+  the reel, not rendered. A reactive offset would re-render the block on every
+  frame of a drag.
+*/
 let offsets = []
 let heights = []
+let maxOffset = 0
+let offset = 0
+let target = 0
+let frame = null
+let startY = 0
+let startOffset = 0
+let travelled = 0
+
+function paint() {
+  if (reel.value) reel.value.style.transform = `translateY(${-offset}px)`
+}
+
+function settle() {
+  if (reduced.matches) {
+    offset = target
+    paint()
+    return
+  }
+
+  if (frame) return
+  frame = requestAnimationFrame(function tick() {
+    offset += (target - offset) * EASING
+    if (Math.abs(target - offset) < 0.5) {
+      offset = target
+      frame = null
+    } else {
+      frame = requestAnimationFrame(tick)
+    }
+    paint()
+  })
+}
 
 /*
   Measured, not assumed. The entries are different lengths, so where each one
@@ -57,63 +110,143 @@ function measure() {
   const top = rail.getBoundingClientRect().top
   offsets = entries.map((el) => el.getBoundingClientRect().top - top)
   heights = entries.map((el) => el.getBoundingClientRect().height)
+  maxOffset = offsets.length ? offsets[offsets.length - 1] : 0
 
   index.value = Math.min(Math.max(index.value, 0), entries.length - 1)
-  apply()
+  apply(true)
 }
 
-function apply() {
+function apply(snap) {
   const view = pane.value
   const rail = reel.value
   if (!view || !rail || !offsets.length) return
 
-  rail.style.transform = `translateY(${-offsets[index.value]}px)`
-  view.style.height = `${heights[index.value]}px`
+  target = offsets[index.value]
+  if (snap) offset = target
 
+  view.style.height = `${heights[index.value]}px`
   atStart.value = index.value <= 0
   atEnd.value = index.value >= offsets.length - 1
   hidden.value = offsets.map((_, i) => i !== index.value)
+
+  paint()
 }
 
 function step(direction) {
   const next = Math.min(Math.max(index.value + direction, 0), offsets.length - 1)
   if (next === index.value) return
   index.value = next
-  apply()
+  apply(false)
+  settle()
+}
+
+/*
+  Dragging. One set of handlers for every pointer type: a mouse has no vertical
+  gesture of its own, and the pager is not a scroll container, so a phone has no
+  swipe either. The pane claims both axes, which is the cost of a vertical pager:
+  the page is scrolled by starting the touch anywhere else.
+*/
+function onPointerDown(event) {
+  if (!reel.value || !pane.value) return
+  travelled = 0
+  startY = event.clientY
+  startOffset = offset
+  target = offset
+  if (frame) {
+    cancelAnimationFrame(frame)
+    frame = null
+  }
+  pane.value.setPointerCapture(event.pointerId)
+}
+
+function onPointerMove(event) {
+  if (!pane.value?.hasPointerCapture(event.pointerId)) return
+  const delta = event.clientY - startY
+  travelled = Math.max(travelled, Math.abs(delta))
+  offset = Math.min(Math.max(startOffset - delta, 0), maxOffset)
+  paint()
+}
+
+function onPointerUp(event) {
+  if (!pane.value?.hasPointerCapture(event.pointerId)) return
+  pane.value.releasePointerCapture(event.pointerId)
+
+  /*
+    Settle on a quote. A drag that covered enough of the window takes the next
+    one in the direction it was going; anything shorter falls back to the nearest.
+    The offset is left where the finger dropped it, so the loop travels from
+    there.
+  */
+  const moved = offset - startOffset
+  const height = heights[index.value] || 1
+  const next = Math.min(
+    Math.max(
+      Math.abs(moved) > height * FLICK ? index.value + Math.sign(moved) : Math.round(offset / height),
+      0,
+    ),
+    offsets.length - 1,
+  )
+  index.value = next
+  apply(false)
+  settle()
+}
+
+// A drag that ends over the "read more" must not press it.
+function onClickCapture(event) {
+  if (travelled <= DRAG_SLOP) return
+  travelled = 0
+  event.stopPropagation()
+  event.preventDefault()
 }
 
 onMounted(() => {
   measure()
   // And again once the fonts have landed: a reflow changes every height here.
-  document.fonts?.ready.then(measure)
+  document.fonts?.ready.then(() => apply(false))
   window.addEventListener('resize', measure, { passive: true })
 })
 
-onUnmounted(() => window.removeEventListener('resize', measure))
+onUnmounted(() => {
+  window.removeEventListener('resize', measure)
+  if (frame) cancelAnimationFrame(frame)
+})
 </script>
 
 <template>
   <div class="testimonials">
-    <p class="label">{{ t('section.test') }}</p>
-
     <div class="pager">
-      <div ref="pane" class="pane">
-        <div ref="reel" class="reel">
-          <TestimonialCard
-            v-for="(item, i) in items"
-            :key="i"
-            :quote="item.quote"
-            :name="item.name"
-            :role="item.role"
-            :avatar="item.avatar"
-            :inert="hidden[i] || undefined"
-          />
+      <div class="box">
+        <div class="head">
+          <p class="label">{{ t('section.test') }}</p>
+          <span class="position">{{ index + 1 }} / {{ items.length }}</span>
+        </div>
+
+        <div
+          ref="pane"
+          class="pane"
+          @pointerdown="onPointerDown"
+          @pointermove="onPointerMove"
+          @pointerup="onPointerUp"
+          @pointercancel="onPointerUp"
+          @click.capture="onClickCapture"
+        >
+          <div ref="reel" class="reel">
+            <TestimonialCard
+              v-for="(item, i) in items"
+              :key="i"
+              :quote="item.quote"
+              :name="item.name"
+              :role="item.role"
+              :avatar="item.avatar"
+              :inert="hidden[i] || undefined"
+            />
+          </div>
         </div>
       </div>
 
-      <div class="controls">
+      <div class="pager-controls">
         <button
-          class="arrow"
+          class="pager-arrow"
           type="button"
           :aria-label="t('a11y.prevTestimonial')"
           :disabled="atStart"
@@ -121,9 +254,8 @@ onUnmounted(() => window.removeEventListener('resize', measure))
         >
           ↑
         </button>
-        <span class="position">{{ index + 1 }} / {{ items.length }}</span>
         <button
-          class="arrow"
+          class="pager-arrow"
           type="button"
           :aria-label="t('a11y.nextTestimonial')"
           :disabled="atEnd"
@@ -138,17 +270,42 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 
 <style scoped>
 .testimonials {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
   /* Air before the block, on top of the section's own gap: the rail and the
      quotes are two different things and were sitting too close to tell. */
   margin-top: clamp(28px, 4vw, 56px);
 }
 
-/* The same mono label the contact rows use, not a section heading: this is a
-   block inside a section, not a destination. A step larger than those rows,
-   because this one is a block title and not a field label. */
+/*
+  The controls beside the box and not above it: the rail already has a pair of
+  horizontal arrows over its head, and two pairs in the same column of the page
+  read as one control that lost its way.
+*/
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.box {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* The block's own header, inside the box: the mono label and the position, with
+   the rule the stack groups and the contact rows use. */
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px clamp(18px, 2.6vw, 26px);
+  border-bottom: 1px solid var(--line);
+}
+
 .label {
   margin: 0;
   font-family: var(--font-mono);
@@ -159,31 +316,25 @@ onUnmounted(() => window.removeEventListener('resize', measure))
   color: var(--fg-3);
 }
 
-/*
-  The box, with the controls beside it and not above it: the rail already has a
-  pair of horizontal arrows over its head, and two pairs in the same column of
-  the page read as one control that lost its way.
-*/
-.pager {
-  display: flex;
-  align-items: stretch;
-  gap: 16px;
-  padding: clamp(18px, 2.6vw, 28px) clamp(18px, 2.6vw, 28px);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--surface);
+.position {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  white-space: nowrap;
 }
 
 /*
   The window. Clipped and masked top and bottom: the mask is what turns the
   arrival and departure of a quote into a fade, and it is invisible at rest
   because the entries carry their own vertical padding and the text never sits on
-  the edge.
+  the edge. touch-action:none is what lets a vertical drag work on a phone — the
+  cost is that the page is scrolled by starting the touch anywhere else.
 */
 .pane {
-  flex: 1;
-  min-width: 0;
   overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  padding: 0 clamp(18px, 2.6vw, 26px);
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
@@ -202,19 +353,16 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 }
 
 .reel {
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
-.controls {
+.pager-controls {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
 }
 
-.arrow {
+.pager-arrow {
   width: 40px;
   height: 40px;
   flex: 0 0 auto;
@@ -229,36 +377,29 @@ onUnmounted(() => window.removeEventListener('resize', measure))
     color 0.16s ease;
 }
 
-.arrow:hover:not(:disabled) {
+.pager-arrow:hover:not(:disabled) {
   border-color: var(--acc-text);
   color: var(--acc-text);
 }
 
-.arrow:disabled {
+.pager-arrow:disabled {
   opacity: 0.35;
   cursor: default;
 }
 
-.position {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--fg-3);
-  white-space: nowrap;
-}
-
 @media (max-width: 900px) {
   .pager {
-    gap: 12px;
+    gap: 10px;
   }
 
-  .arrow {
+  .pager-arrow {
     width: 36px;
     height: 36px;
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .pane,
-  .reel {
+  .pane {
     transition: none;
   }
 }
