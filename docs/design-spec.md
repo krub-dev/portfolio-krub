@@ -370,11 +370,30 @@ radius 22, background `--surface`, border `--line`.
 Frontend, Tools & workflow. Each group: an uppercase mono 11px `--fg-3` label with a
 `border-bottom` and `padding-bottom:10px`, and the icons below in `flex-wrap` with `gap:10px`.
 
-Icon tile: 44×44, radius 10, background `--surface-2`, border `--line`, `padding:8px`,
-`box-sizing:border-box`. The dark monochrome icons (Express, Prisma, Three.js, GitHub, Linux)
-render at 28×28 inside a flex tile and are inverted **in dark theme only** with
-`filter: invert(1) hue-rotate(180deg)`; no filter in light. Every icon carries `alt` and
-`title` with the technology name.
+Icon tile: 44×44, radius 10, background `--surface-2`, border `--line`,
+`box-sizing:border-box`. Every logo renders at 28×28, centred — which is what the full-colour ones
+already did (44px with 8px of padding is a 28px box) and what the monochrome ones always did. The
+dark monochrome logos (Express, Prisma, Three.js, GitHub, Linux) would vanish against `--surface-2`
+in the dark theme, so both of their copies carry `[data-invert-dark]`, inverted **in dark theme
+only** with `filter: invert(1) hue-rotate(180deg)`; no filter in light.
+
+**The grid is monochrome at rest.** Each logo is drawn twice, one grey copy at `opacity:.6` (and
+`grayscale(1)` when the logo has colour of its own) and one in colour on top at `opacity:0`, and
+**the pointer lights what it passes near**: within `130px` of the cursor a tile's colour copy fades
+in on a `(1 - distance/reach)^1.6` falloff, the tile lifts `3px` and grows `6%`, all eased at `0.16`
+per frame. Two copies rather than an animated `filter: grayscale()` because a filter repaints the
+tile every frame and an opacity is composited — this runs at pointer speed.
+
+**The readout.** A mono 11px uppercase label in `--acc-text`, `position:fixed`, `16px` from the
+cursor, naming the nearest tile once it is within `64px`; it fades with the same easing and snaps to
+the cursor on the first frame of each appearance. A name inside the tile is not possible — "IntelliJ
+IDEA" does not fit in 44px at a legible size — and a caption under every tile would either push the
+grid apart or overlap the row below. It is `aria-hidden`: each icon already carries `alt` with its
+name, and no longer `title`, which would have shown a second, slower name over the readout.
+
+The whole effect hangs off the site's single pointer loop (`usePointer`), so it costs no second
+`requestAnimationFrame`, and it is off on touch and under `prefers-reduced-motion` — there the grid
+is simply grey.
 
 This section has **no footnote**.
 

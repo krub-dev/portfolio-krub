@@ -1363,3 +1363,35 @@ Three smaller calls:
 - **The caret is the browser's.** The reference draws one, and that is the detail that cannot be
   copied honestly: a drawn caret cannot follow the insertion point inside a textarea, so it would sit
   still while the text moved under it. `caret-color` is the real thing, coloured to the accent.
+
+### 58. The Stack goes monochrome, and the pointer lights it
+
+**Date:** 2026-09-17 — **Status:** active
+
+The section was faithful to the reference and flat: twenty-four full-colour logos in tiles, the only
+place on the site with that much colour at once. The backlog had it as "monochrome, animation,
+interaction, a mask" and the mask never happened. What shipped is the first three.
+
+- **Monochrome by drawing the logo twice.** Each icon renders a grey copy under a colour copy, and
+  the spotlight fades the colour one in with `opacity`. The obvious version animates
+  `filter: grayscale(1)` instead, and it repaints the tile on every frame; an opacity is composited.
+  The grey copy also sits at `opacity:.6`, because removing the colour alone still leaves twenty-four
+  full-contrast logos — quiet is the point.
+- **The light is a radius, not a winner.** The magnetic hover picks a single element, because two
+  elements leaning at once reads as the page wobbling. This is the opposite case: a radius of light
+  that falls off with distance reads as a torch, so every tile in range lights, each by how close it
+  is. Positions are cached relative to the group and the group's rect is read once per frame, so a
+  section that moves down (a project added, the testimonials switched on) cannot light the wrong
+  tile.
+- **The name is a readout, not a caption.** A name inside the tile is impossible at a legible size
+  ("IntelliJ IDEA" in 44px), and a caption under each tile would either reserve a line under
+  twenty-four of them or overlap the row below. A mono label that trails the cursor is the one shape
+  that costs a single node and moves nothing. It snaps on the first frame and eases after that, so it
+  never flies in from where it last was.
+- **`title` had to go.** Every icon carried one. With the readout, the native tooltip would appear a
+  second later and print the same name somewhere else. `alt` still carries it for a screen reader.
+- **It rides the existing loop.** `usePointer` is one mouse listener and one `requestAnimationFrame`
+  for the cursor, the magnetic hover, the parallax and the lemon. A fifth loop for this would be a
+  fifth chance to leave something running. On touch there is no pointer to subscribe with and under
+  reduced motion the frame returns immediately, so there the grid is simply grey — which is the
+  design, not a fallback.

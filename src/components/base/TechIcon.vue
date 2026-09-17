@@ -2,17 +2,21 @@
 /*
   One 44px tile in the Stack grid.
 
-  Two layouts, because the icons come in two kinds:
+  The logo is drawn twice, one copy grey and one in colour, and the group's
+  spotlight fades the colour one in over the grey. Two copies instead of an
+  animated `filter: grayscale()` because a filter repaints the tile on every
+  frame, while an opacity is composited — and this runs at pointer speed.
 
-  - Full-colour logos (Vue, Java, Docker…) fill the tile at 44px with 8px of
-    padding. box-sizing:border-box here is deliberate and local — the project
-    has no global border-box, so without it the padding would push the tile to
-    60px. See docs/decisions.md.
+  Every logo renders at 28px inside the 44px tile, which is what the full-colour
+  ones already did (44px with 8px of padding is a 28px box) and what the
+  monochrome ones always did. box-sizing:border-box stays on the tile, since the
+  project has no global border-box.
 
-  - Dark monochrome logos (Express, Prisma, Three.js, GitHub, Linux) would
-    disappear against --surface-2 in the dark theme. They render at 28px inside
-    a flex tile and get inverted by the global [data-invert-dark] rule, which
-    is switched off again in the light theme.
+  The dark monochrome logos (Express, Prisma, Three.js, GitHub, Linux) would
+  disappear against --surface-2 in the dark theme, so BOTH copies carry
+  [data-invert-dark] and the global rule switches it off again in the light
+  theme. The grey copy is the one that keeps the alt; the colour copy is the
+  same picture and is aria-hidden, so a screen reader hears each technology once.
 */
 defineProps({
   name: { type: String, required: true },
@@ -22,37 +26,67 @@ defineProps({
 </script>
 
 <template>
-  <span v-if="invertOnDark" class="tile flex">
-    <img :src="src" :alt="name" :title="name" width="28" height="28" data-invert-dark class="mono-icon" />
+  <span class="tile" :data-name="name">
+    <img
+      class="icon base"
+      :class="{ grey: !invertOnDark }"
+      :src="src"
+      :alt="name"
+      :data-invert-dark="invertOnDark || undefined"
+      width="28"
+      height="28"
+    />
+    <img
+      class="icon colour"
+      :src="src"
+      alt=""
+      aria-hidden="true"
+      :data-invert-dark="invertOnDark || undefined"
+      width="28"
+      height="28"
+    />
   </span>
-  <img v-else :src="src" :alt="name" :title="name" width="44" height="44" class="tile padded" />
 </template>
 
 <style scoped>
 .tile {
+  position: relative;
   width: 44px;
   height: 44px;
   flex: 0 0 auto;
+  box-sizing: border-box;
   border-radius: 10px;
   background: var(--surface-2);
   border: 1px solid var(--line);
-}
-
-.padded {
-  padding: 8px;
-  box-sizing: border-box;
-  display: block;
-}
-
-.flex {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.mono-icon {
+.icon {
   width: 28px;
   height: 28px;
   display: block;
+}
+
+/* What shows when the spotlight is elsewhere: the same logo without its colour,
+   and held back, so the grid reads as one quiet tone rather than as a chart of
+   twenty-four brands. */
+.base {
+  opacity: 0.6;
+}
+
+.base.grey {
+  filter: grayscale(1);
+}
+
+/* The colour copy, on top and invisible until the light reaches the tile.
+   margin:auto centres it, since an absolutely positioned child is out of the
+   flex flow. */
+.colour {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0;
 }
 </style>

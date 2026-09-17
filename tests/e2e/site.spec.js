@@ -315,6 +315,33 @@ test('the hero glow turns, and stops turning under reduced motion', async ({ pag
   expect(await angle()).toBe(still)
 })
 
+test('the stack is monochrome until the pointer reaches a tile', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'there is no pointer below 900px')
+
+  await page.goto('/')
+
+  const tile = page.locator('#stack .tile').first()
+  // Instant, because html { scroll-behavior: smooth } would still be travelling
+  // when the mouse lands, and the box would be read mid-flight.
+  await tile.evaluate((el) => el.scrollIntoView({ behavior: 'instant', block: 'center' }))
+
+  const colour = tile.locator('.colour')
+  const opacity = () => colour.evaluate((el) => Number(el.style.opacity || 0))
+
+  // At rest the colour copy is invisible and the tile shows the grey one.
+  expect(await opacity()).toBe(0)
+
+  const box = await tile.boundingBox()
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+
+  await expect.poll(opacity).toBeGreaterThan(0.5)
+
+  // And the readout names the tile, which is the only visible name there is.
+  const readout = page.locator('#stack .readout').first()
+  await expect(readout).toHaveText('Java')
+  await expect(readout).toHaveCSS('opacity', '1')
+})
+
 test('the contact form asks for what is missing, then sends', async ({ page }) => {
   // The endpoint is ours, so the suite can stub it and still test the whole
   // flow: validation, the request, the state and the emptying of the fields.

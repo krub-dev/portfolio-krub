@@ -102,11 +102,16 @@ Renders a `<button>` when neither `to` nor `href` is given. Default slot: the co
 | `count` | number \| null | yellow superscript (projects only) |
 
 ### TechIcon
-`name`, `src`, `invertOnDark` (boolean). Paints the 44px tile; with `invertOnDark` the SVG
-drops to 28px and inverts in dark theme only.
+`name`, `src`, `invertOnDark` (boolean). Paints the 44px tile and draws the logo twice — a grey,
+held-back copy and a colour one on top — so the spotlight can fade the colour in with an opacity
+instead of animating a filter. Both copies render at 28px; `invertOnDark` puts `[data-invert-dark]`
+on both. It also carries `data-name`, which is what the readout reads.
 
 ### StackGroup
-`label` (string), `items` (array of TechIcon).
+`label` (string), `items` (array of TechIcon). It also runs the spotlight: it lights the tiles the
+pointer passes near, lifts them, and writes the name of the nearest one into its own mono readout.
+That hangs off `usePointer` — one loop for the whole site — and does nothing on touch or under
+reduced motion.
 
 ### SocialLink
 `name` (becomes the aria-label), `href`, `icon` (key into its own inline SVG paths).
@@ -200,7 +205,8 @@ No `id`: it is a band, not a destination.
 modal itself lives in `HomeView`, so the section does not own it.
 
 ### StackSection
-`id="stack"`. The four groups from `src/data/stack.js`: `StackGroup` → `TechIcon`.
+`id="stack"`. The four groups from `src/data/stack.js`: `StackGroup` → `TechIcon`. The groups carry
+the pointer work; the section is just the grid and the heading.
 
 ### ContactSection
 `id="contact"`. The heading, the band, the form, and one full-width row per contact (the address
