@@ -1226,3 +1226,56 @@ not advance its animation clock unless a paint is forced, so every measurement o
 jump, real or not. The code path is the same one Chromium animates smoothly, but if the dots snap on
 a real iPhone the fix is to move them out of the `<svg>` and into HTML elements, which is the known
 weak spot for transitions on SVG children.
+
+### 54. No fake loader, and no skeleton until something actually arrives late
+
+**Date:** 2026-09-17 · **Status:** active
+
+Both were considered and both are held, for the same reason: on this site nothing arrives late enough
+to deserve either, and building one anyway would be decoration pretending to be a state.
+
+**The loader.** A bar from 0 to 100 that measures nothing is a fake delay over content the browser
+already has — the HTML and the CSS are in the first frame. It spends exactly the two numbers
+Lighthouse is built around, the largest paint and the time to interactive, and it is worst for the
+person who comes back: their copy is cached and they still sit through it. The honest version of this
+is a real percentage tied to a real download, which is what the 3D model will have through
+`THREE.LoadingManager` — shown inside the stage, where the thing is arriving, not over the page.
+
+**The skeleton.** Same test, and the measurements make it concrete: the three projects have
+`image: null` and their cards paint a `shotLabel` instead, the 24 stack icons come to 50 KB between
+them, and the photo is local — so a shimmering placeholder would appear for about 40 ms and read as a
+flicker rather than a load. A skeleton also has to be delayed (~300 ms) before it is worth showing at
+all, and that only pays off against something genuinely slow. The two spots that will earn one are
+the 3D model and the project images once they exist.
+
+### 55. The contact section: a band that moves with the scroll, and the wrapper that was eating the timeline
+
+**Date:** 2026-09-17 · **Status:** active
+
+The section was rebuilt around a band, the networks written out, and (next) a form.
+
+**The band is CSS, not GSAP.** The reference does two things, and neither needs a library: the
+letters alternating between solid and outline is `-webkit-text-stroke` with a transparent fill on
+every other letter, and "passing by" is the marquee the site already has under the hero — two copies
+and a `-50%` slide. What is new is only what drives it: `animation-timeline: view()` ties the slide
+to how far the band has crossed the viewport, so the type travels as the section arrives. That is a
+scroll-driven animation, which Chrome, Edge and recent Safari have; where it is missing, an
+`@supports not` block falls back to the same loop on a clock. GSAP would have been 50–70 KB for a
+keyframe and a transform, and it brings its own ticker, against a project whose rule is one
+`requestAnimationFrame` for everything that moves.
+
+**Building it found a real bug in the layout.** The band sat frozen at 26% of its travel whatever the
+scroll did — the timeline reported the same progress at five different scroll positions. `.app` had
+`overflow-x: hidden`, and a box with one axis hidden makes the other compute to `auto`: the app
+wrapper was a **scroll container**, one that never scrolls, because its content is exactly as tall as
+it is. A `view()` timeline is measured against the nearest scroll container, so it was measuring
+against a box that never moves. `overflow-x: clip` keeps the guard and does not create a scroller.
+The band had the same trap in its own `overflow: hidden`, fixed the same way.
+
+**The rows replaced the three icon buttons.** The icons said where the links were; the rows say the
+address as well, which is what gives the end of the page its weight, and the address is derived from
+the href so a link is edited in one place. Nothing was lost: the icons are still in the mobile menu
+and the footer.
+
+**The mailto stays.** The reference keeps a direct link beside its form, and that is what this does:
+the button is the mailto, and the form joins it rather than replacing it.

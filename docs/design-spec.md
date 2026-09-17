@@ -388,11 +388,27 @@ in the interface.
 
 ### 3.10 Contact
 
-A large headline (`clamp(26px,4vw,52px)`, 22ch, `text-wrap:balance`), and a row with the main
-CTA "Let's talk ↗" (yellow, radius 999, `padding:12px 26px`, 19px, weight 600) and three 46×46
-social icons, radius 12, border `--line`, 17–19px icon in `--fg-2`; hover turns border and
-colour yellow, active fills yellow. On mobile the row becomes a column and the section takes
-`padding-bottom:34px` so it does not collide with the fixed footer.
+A **full-bleed band** at the top: "LET'S TALK" in display type (700, `clamp(64px,13vw,190px)`,
+`line-height:.92`, `letter-spacing:-.03em`, uppercase), the letters alternating between solid `--fg`
+and outline (`-webkit-text-stroke:1.5px var(--acc-text)`, no fill), the phrase repeated **three**
+times inside each of **two** copies, and the pair sliding `-50%`. It is driven by the **scroll**
+(`animation-timeline: view()`), so the type travels as the section arrives and settles; where
+scroll-driven animations are missing it falls back to `marquee 26s linear infinite`. Decorative:
+`aria-hidden`. The spaces are cells too but do not count towards the alternation, or the visible
+letters would pair up.
+
+Below it, an inner column carries the gutter and the 1180px cap the other sections use — the section
+itself has neither, because the band has to reach both edges. Inside: the heading, the headline
+(`clamp(26px,4vw,52px)`, 22ch, `text-wrap:balance`), the rows and the CTA.
+
+**The rows**, one per network, separated by `--line`: the name in mono 10px uppercase `--fg-3`, the
+address below it (`github.com/krub-dev`, derived from the href), `clamp(22px,3.2vw,40px)` weight 700,
+and `↗` on the right spanning both lines. Hover turns the address and the arrow `--acc-text` and
+moves the arrow 3px up and right.
+
+Then the main CTA "Let's talk ↗" (yellow, radius 999, `padding:12px 26px`, 19px, weight 600), which
+is the mailto; the form will sit beside it. On mobile the CTA row becomes a column and the inner
+column takes `padding-bottom:34px` so it does not collide with the fixed footer.
 
 Links: `mailto:krubioillan@gmail.com`, `github.com/krub-dev`, `linkedin.com/in/krub`,
 `x.com/krub_dev`.

@@ -389,6 +389,17 @@ section[id] {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/*
+  The band at the top of Contact. The same idea as the marquee — two copies and
+  a slide of exactly -50% — but driven by the scroll instead of the clock:
+  TalkBand.vue ties it to a view() timeline, and falls back to `marquee` where
+  that is not supported.
+*/
+@keyframes talkSlide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 @keyframes lemonShake {
   0%, 100% { transform: translate(0, 0) rotate(0); }
   15% { transform: translate(-3px, 1px) rotate(-7deg); }

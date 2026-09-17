@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatPeriod, wrapIndex } from '../../src/utils/format'
+import { formatPeriod, formatUrl, wrapIndex } from '../../src/utils/format'
 
 describe('formatPeriod', () => {
   it('uses the "now" label when the period is still open', () => {
@@ -39,5 +39,25 @@ describe('wrapIndex', () => {
 
   it('does not divide by zero on an empty list', () => {
     expect(wrapIndex(0, 1, 0)).toBe(0)
+  })
+})
+
+describe('formatUrl', () => {
+  it('drops the protocol', () => {
+    expect(formatUrl('https://github.com/krub-dev')).toBe('github.com/krub-dev')
+    expect(formatUrl('http://example.com')).toBe('example.com')
+  })
+
+  it('drops a trailing slash, and more than one', () => {
+    expect(formatUrl('https://x.com/krub_dev/')).toBe('x.com/krub_dev')
+    expect(formatUrl('https://example.com//')).toBe('example.com')
+  })
+
+  it('leaves a bare host alone', () => {
+    expect(formatUrl('linkedin.com/in/krub')).toBe('linkedin.com/in/krub')
+  })
+
+  it('does not touch the path', () => {
+    expect(formatUrl('https://example.com/a/b')).toBe('example.com/a/b')
   })
 })

@@ -100,7 +100,17 @@ function goTop() {
     scrolls. That scroll was enough to trip the navbar into its compact state.
   */
   box-sizing: border-box;
-  overflow-x: hidden;
+  /*
+    clip, not hidden. The guard is the same — nothing may stick out sideways and
+    bring a horizontal scrollbar with it — but `hidden` has a cost that is not
+    obvious: a box with one axis hidden makes the other compute to `auto`, so
+    this wrapper became a scroll container, and it never scrolls (its content is
+    as tall as it is). A view() timeline is measured against the nearest scroll
+    container, so the scroll-driven band in Contact was reading its progress
+    against a box that never moves and sat frozen. `clip` does not create a
+    scroller, so the timeline belongs to the page again.
+  */
+  overflow-x: clip;
   padding-bottom: var(--footer-h, 52px);
 }
 </style>

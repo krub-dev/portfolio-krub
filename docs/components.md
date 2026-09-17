@@ -67,8 +67,8 @@ App
 │   │   └─ TestimonialCard ×n
 │   └─ ContactSection
 │       ├─ SectionHeading
-│       ├─ BaseButton
-│       └─ SocialLink ×n
+│       ├─ TalkBand
+│       └─ BaseButton
 ├─ ProjectModal
 │   ├─ MediaCarousel
 │   └─ SpecList
@@ -205,7 +205,15 @@ modal itself lives in `HomeView`, so the section does not own it.
 this one can be written as if the section were always on.
 
 ### ContactSection
-`id="contact"`. The closing line, the email button and the social icons.
+`id="contact"`. The band, the heading, the closing line, one full-width row per network (the address
+written out, derived from the href) and the mailto button. The section itself carries no gutter — it
+is the full-bleed container the band needs, and an inner column carries the measurements.
+
+### TalkBand
+`text`. The "LET'S TALK" band at the top of Contact: display type with the letters alternating
+between solid and outline, sliding `-50%` on a `view()` timeline so it travels with the scroll, and
+falling back to the marquee keyframe where scroll-driven animations are missing. Decorative
+(`aria-hidden`).
 
 ### BrandName
 The KIKO / RUBIO reveal at the top of the hero. A pure CSS animation — the letters are markup, not
@@ -322,7 +330,7 @@ src/
 ├─ styles/
 │   └─ tokens.css        (:root + [data-theme="light"] + @keyframes + resets)
 └─ utils/
-    └─ format.js         pure helpers, unit-tested: formatPeriod, wrapIndex
+    └─ format.js         pure helpers, unit-tested: formatPeriod, wrapIndex, formatUrl
 ```
 
 The split is deliberate and it is the rule to keep:

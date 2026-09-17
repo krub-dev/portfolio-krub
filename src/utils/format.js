@@ -37,3 +37,18 @@ export function wrapIndex(current, step, total) {
   if (total <= 0) return 0
   return (((current + step) % total) + total) % total
 }
+
+/**
+ * A link as it is shown in the contact rows: no protocol, no trailing slash.
+ *
+ *   'https://github.com/krub-dev' -> 'github.com/krub-dev'
+ *   'https://x.com/krub_dev/'     -> 'x.com/krub_dev'
+ *
+ * Derived from the href rather than written next to it, so the two can never
+ * drift apart and a link is changed in one place.
+ */
+export function formatUrl(href) {
+  return String(href)
+    .replace(/^https?:\/\//, '')
+    .replace(/\/+$/, '')
+}

@@ -86,26 +86,42 @@ section, folded together where they overlapped.
   carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the
   inner grid, so a Three.js scene replaces the `.mark` element and nothing else has to move.
   Needs the model out of Blender first, exported as glTF/GLB. Read the mobile note below
-  before starting.
+  before starting. When it lands, its download is the only one on this site worth reporting: a real
+  percentage from `THREE.LoadingManager` inside the stage, and a delayed shimmer while it arrives —
+  see the skeleton note below and decision 54.
 - [ ] **Rethink the stack section.** The icon grid is faithful to the spec but flat. Ideas so far:
   monochrome, animation, interaction, a mask, softened edges.
-- [ ] **Give the contact section more weight.** It is the end of the page and should land like it —
-  more impact, a shape of its own.
-- [ ] **A simple contact form**, in addition to the mailto. Needs somewhere to send it — Web3Forms
-  is already proven on CreandoMientras.
+- [x] **Give the contact section more weight.** Rebuilt on 2026-09-17: a full-bleed "LET'S TALK"
+  band whose letters alternate solid and outline and which slides with the scroll (`view()`, with the
+  marquee as the fallback), one full-width row per network with the address written out, and the
+  mailto kept. It turned up a real bug on the way: `.app`'s `overflow-x: hidden` made the wrapper a
+  scroll container that never scrolls, which froze the band's timeline. See decision 55.
+- [ ] **A simple contact form**, in addition to the mailto. Decided on 2026-09-17: name, email and
+  message; a POST to `/api/contact`, a Vercel function holding `WEB3FORMS_KEY` as an environment
+  variable, so the key never reaches the bundle (locally it goes in `.env.local`, which `*.local`
+  already ignores). Validation, the four states (idle / sending / sent / error) and `aria-live` for
+  the status. The fields take the theme's border colour and the accent caret. The reference keeps a
+  mailto beside its form, which is what this does.
 - [ ] **Turn Limonacho into something that answers.** A small chat backed by a model, given
   `src/data/` as its context, so a visitor can ask about a project instead of reading for it —
   with a bit of Murcian in the voice, because a mascot that talks like documentation is not a
   mascot. Wants its own context and a reset/clear. Needs a server-side endpoint: an API key
   cannot live in a static bundle. The speech bubble and its timers are already built and would
   become the chat surface.
-- [ ] **Shimmering skeleton placeholders.** A loading state made from a `linear-gradient` with an
+- [ ] **Shimmering skeleton placeholders.** Held until something genuinely arrives late, which today
+  nothing does: the three projects have `image: null` and their cards paint a `shotLabel`, the 24
+  stack icons come to 50 KB between them, and the photo is local — a placeholder would flash for
+  about 40 ms and read as a fault. The two spots that will earn one: the 3D model (with a real
+  percentage, not a fake bar) and real project images once they exist. Whenever it goes in, delay it
+  (~300 ms) so it only shows when the load is actually slow. Technique: a `linear-gradient` with an
   oversized `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%`
   with `background-position` running to `-200% 0` at 1.2s linear infinite). Reference: @aniakubow
-  on Instagram. Where it goes is open — the site is fast and mostly static, so it needs a spot
-  where something genuinely arrives late; project images are the obvious candidate.
-- [ ] **A simulated entry loader — or not.** An open decision. If it happens it must not become a
-  fake delay over content that is already there.
+  on Instagram. See decision 54.
+- [x] **A simulated entry loader — no.** Closed on 2026-09-17: a 0-100 over content that is already
+  in the first frame is a fake delay, it costs exactly the numbers Lighthouse is built around (the
+  largest paint and the time to interactive), and on a return visit it is friction for someone whose
+  copy is already cached. The honest version of it arrives with the 3D model, as a real percentage
+  from `THREE.LoadingManager` shown inside the stage. See decision 54.
 - [x] **Easter egg: the "Acho" audio.** Built on 2026-09-17: it plays on the first poke of Limonacho
   in a visit, and the bubble appears with it — the greeting is voice and bubble together, and every
   later poke is only the shake. He was already a button, so it costs nothing in accessibility, and

@@ -18,6 +18,9 @@
     "test": "/testimonials",
     "contact": "/contact"
   },
+  "contact": {
+    "band": "Let's talk"
+  },
   "stack": {
     "g1": "Languages",
     "g2": "Backend",

@@ -1,38 +1,61 @@
 <script setup>
 /*
-  Section 03. Big headline, email CTA, three social icons.
+  Section 03. The band, then the heading, the headline, the three networks as
+  full-width rows, and the mailto.
 
-  The extra bottom padding keeps the last line clear of the fixed footer, which
-  arrives in step 7.
+  The section no longer carries the page gutter: it is the full-bleed container
+  the band needs, and an inner column carries the measurements every other
+  section uses. The bottom padding on that column is what keeps the last row
+  clear of the fixed footer, which arrives in step 7.
+
+  The rows replaced the three 46px icon buttons. They say the same thing with
+  the address written out, which is what gives the end of the page its weight —
+  and the icons are still in the mobile menu and the footer, so nothing was
+  lost. The mailto button stays: the reference keeps a direct link beside its
+  form, and the form is the next step.
 */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../base/BaseButton.vue'
 import SectionHeading from '../base/SectionHeading.vue'
-import SocialLink from '../base/SocialLink.vue'
+import TalkBand from './TalkBand.vue'
 import { useLang } from '../../composables/useLang'
 import { copy, email, socials } from '../../data'
+import { formatUrl } from '../../utils/format'
 
 const { lang } = useLang()
 const { t } = useI18n()
 
 const contact = computed(() => copy.contact[lang.value])
+
+// The address as it is shown comes from the href, so a link is edited once.
+const rows = computed(() => socials.map((social) => ({ ...social, value: formatUrl(social.href) })))
 </script>
 
 <template>
   <section id="contact" class="contact">
-    <SectionHeading index="03" :title="t('section.contact')" />
+    <TalkBand :text="t('contact.band')" />
 
-    <p class="headline">{{ contact.body }}</p>
+    <div class="inner">
+      <SectionHeading index="03" :title="t('section.contact')" />
 
-    <div class="actions" data-contact-actions>
-      <BaseButton variant="solid" size="lg" magnetic :href="`mailto:${email}`" class="cta">
-        {{ t('actions.talk') }}
-      </BaseButton>
+      <p class="headline">{{ contact.body }}</p>
 
-      <div class="socials">
-        <SocialLink v-for="s in socials" :key="s.name" v-bind="s" />
+      <ul class="rows">
+        <li v-for="row in rows" :key="row.name">
+          <a class="row" :href="row.href" target="_blank" rel="noopener">
+            <span class="label">{{ row.name }}</span>
+            <span class="value">{{ row.value }}</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="actions" data-contact-actions>
+        <BaseButton variant="solid" size="lg" magnetic :href="`mailto:${email}`" class="cta">
+          {{ t('actions.talk') }}
+        </BaseButton>
       </div>
     </div>
   </section>
@@ -42,10 +65,13 @@ const contact = computed(() => copy.contact[lang.value])
 .contact {
   position: relative;
   z-index: 1;
-  padding: clamp(56px, 8vw, 110px) var(--gutter-r) clamp(48px, 6vw, 90px) var(--gutter-l);
+  border-top: 1px solid var(--line);
+}
+
+.inner {
+  padding: clamp(40px, 6vw, 80px) var(--gutter-r) clamp(48px, 6vw, 90px) var(--gutter-l);
   max-width: 1180px;
   margin: 0 auto;
-  border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   gap: 30px;
@@ -59,6 +85,63 @@ const contact = computed(() => copy.contact[lang.value])
   letter-spacing: -0.03em;
   max-width: 22ch;
   text-wrap: balance;
+}
+
+/* One line per network, the label above the address and the arrow on the
+   right, spanning both. */
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 16px;
+  padding: clamp(16px, 2.4vw, 26px) 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--fg);
+}
+
+.label {
+  grid-column: 1;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.value {
+  grid-column: 1;
+  font-size: clamp(22px, 3.2vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  transition: color 0.16s ease;
+}
+
+/* ↗, not →. The same arrow as the project cards. */
+.arrow {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: clamp(20px, 2.4vw, 30px);
+  color: var(--fg-2);
+  transition: color 0.16s ease, transform 0.16s ease;
+}
+
+.row:hover .value,
+.row:hover .arrow {
+  color: var(--acc-text);
+}
+
+.row:hover .arrow {
+  transform: translate(3px, -3px);
 }
 
 .actions {
@@ -75,13 +158,8 @@ const contact = computed(() => copy.contact[lang.value])
   padding: 12px 26px;
 }
 
-.socials {
-  display: flex;
-  gap: 12px;
-}
-
 @media (max-width: 900px) {
-  .contact {
+  .inner {
     padding-bottom: 34px;
     gap: 24px;
   }
