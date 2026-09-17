@@ -22,13 +22,15 @@ section, folded together where they overlapped.
 ## Content, CV and SEO
 
 - [ ] **Rewrite the CV.** ATS-friendly, in both languages, without the phone number and home
-  address the original carried. Drop the file in `public/uploads/` and set `showCv: true` in
-  `src/data/config.js`. The button and its wiring are already built; the original PDF was
-  pulled from the deployment and purged from the git history. **(owner)**
-- [ ] **Real testimonials.** The section, the cards and the layout are built and reviewed — they
-  ship hidden because the quotes in `src/data/testimonials.js` are bracketed placeholders.
-  Replace them and flip `showTestimonials` in `src/data/config.js`. One quote is enough: the
-  grid closes up on its own. **(owner)**
+  address the original carried. The button is now **on** (`config.showCv` is true, since
+  2026-09-17) so it can be seen, but `public/uploads/` holds no file, so it currently downloads
+  nothing: **drop the PDF at the path below, or turn the switch off again, before this reaches
+  `main`.** The original was pulled from the deployment and purged from the git history. **(owner)**
+- [ ] **Real testimonials.** The section, the cards and the layout are built and reviewed, and the
+  section is now **on** (`config.showTestimonials` is true, since 2026-09-17) so the real quotes can
+  be dropped in one at a time. Until that happens it shows the bracketed placeholders in
+  `src/data/testimonials.js`, which is why the switch was off: **turn it off again, or replace the
+  quotes, before this reaches `main`.** One quote is enough: the grid closes up on its own. **(owner)**
 - [ ] **Reread the prose.** Every sentence lives in `src/data/`, both languages side by side, one
   file per kind of content. It was always going to be iterated after launch rather than
   written once. **(owner)**
@@ -91,12 +93,13 @@ section, folded together where they overlapped.
   see the skeleton note below and decision 54.
 - [ ] **Rethink the stack section.** The icon grid is faithful to the spec but flat. Ideas so far:
   monochrome, animation, interaction, a mask, softened edges.
-- [x] **Give the contact section more weight.** Rebuilt on 2026-09-17: a full-bleed band whose words
-  alternate solid and outline over a second, fainter band drifting the other way, sliding with the
-  scroll (`view()`, with the marquee as the fallback), one full-width row per network with the address
-  written out, and the mailto kept. The band's phrase is translated ("Hablemos"), and so is the CTA.
-  It turned up a real bug on the way: `.app`'s `overflow-x: hidden` made the wrapper a scroll
-  container that never scrolls, which froze the band's timeline. See decision 55.
+- [x] **Give the contact section more weight.** Rebuilt on 2026-09-17: a full-bleed band on the
+  accent background, its words alternating solid and outline over a second, fainter copy travelling
+  the other way, and moving with the scroll and only with the scroll. One full-width row per contact
+  (the address first, then LinkedIn and GitHub — X is gone), and the mailto kept. The band's phrase
+  is translated ("Hablemos"), and so is the CTA. It turned up a real bug on the way: `.app`'s
+  `overflow-x: hidden` made the wrapper a scroll container that never scrolls, which froze the
+  band's CSS timeline. See decision 55.
 - [ ] **A simple contact form**, in addition to the mailto. Decided on 2026-09-17: name, email and
   message; a POST to `/api/contact`, a Vercel function holding `WEB3FORMS_KEY` as an environment
   variable, so the key never reaches the bundle (locally it goes in `.env.local`, which `*.local`

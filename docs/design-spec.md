@@ -388,38 +388,39 @@ in the interface.
 
 ### 3.10 Contact
 
-A **full-bleed band** at the top, in display type (700, `clamp(64px,13vw,190px)`, `line-height:.92`,
-`letter-spacing:-.03em`, uppercase): the phrase from `contact.band` — "Let's talk" / "Hablemos" —
-with its **words alternating** between solid `--fg` and outline (`-webkit-text-stroke:1.5px
-var(--acc-text)`, no fill), repeated **three** times inside each of the **two** copies the loop
-needs, sliding `-50%`. Per word, not per letter: an outline letter between two solid ones reads as a
-mistake rather than as a pattern. The parity carries on across the repetitions *and* into the second
-copy, so a one-word phrase still alternates and the seam where the track wraps never shows two solid
-words side by side.
+A **full-bleed band** at the top, on the accent band the marquee wears (`background:var(--acc)`,
+`--on-acc` for everything on it, 1px borders in `--acc`), in display type (700,
+`clamp(64px,13vw,190px)`, `line-height:.92`, `letter-spacing:-.03em`, uppercase): the phrase from
+`contact.band` — "Let's talk" / "Hablemos" — with its **words alternating** between solid `--on-acc`
+and outline (`-webkit-text-stroke:1.5px var(--on-acc)`, no fill), repeated **three** times inside each
+of the **two** copies the loop needs, sliding `-50%`. Per word, not per letter: an outline letter
+between two solid ones reads as a mistake rather than as a pattern. The parity carries on across the
+repetitions *and* into the second copy, so a one-word phrase still alternates and the seam where the
+track wraps never shows two solid words side by side.
 
-Behind it sits a **second band** of the same words, outline only in `--fg-3` at `opacity:.5`, a step
-higher (`margin-top:-.12em`) and drifting the **other way** (`animation-direction:reverse`). That is
-where the depth comes from.
+Behind it sits a **second band** of the same words, outline only in `--on-acc` at `opacity:.45`, a step
+higher (`margin-top:-.12em`) and travelling the **other way**. That is where the depth comes from.
 
-The slide is driven by the **scroll** (`animation-timeline: view()`), so the type travels as the
-section arrives and settles when it is centred; where scroll-driven animations are missing it falls
-back to `marquee 26s linear infinite`. Decorative: `aria-hidden`.
+It moves with the **scroll** and only with the scroll: `TalkBand` works out how far the band has
+crossed the viewport (0 when its top edge reaches the bottom of the screen, 1 when its bottom edge has
+left the top) and writes it to `--band-progress`, which the two layers read — the front forwards, the
+backwards one as `1 - progress`. It never moves on its own. Under `prefers-reduced-motion` the value
+is never written and the band sits at the start. Decorative: `aria-hidden`.
 
 Below it, an inner column carries the gutter and the 1180px cap the other sections use — the section
-itself has neither, because the band has to reach both edges. Inside: the heading, the headline
-(`clamp(26px,4vw,52px)`, 22ch, `text-wrap:balance`), the rows and the CTA.
+itself has neither, because the band has to reach both edges. Inside: the heading, the form, the rows
+and the CTA.
 
-**The rows**, one per network, separated by `--line`: the name in mono 10px uppercase `--fg-3`, the
-address below it (`github.com/krub-dev`, derived from the href), `clamp(22px,3.2vw,40px)` weight 700,
-and `↗` on the right spanning both lines. Hover turns the address and the arrow `--acc-text` and
-moves the arrow 3px up and right.
+**The rows**, separated by `--line`: the label in mono 10px uppercase `--fg-3`, the address below it
+(`kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev` — a network's address is
+derived from its href), `clamp(22px,3.2vw,40px)` weight 700, and `↗` on the right spanning both
+lines. Hover turns the address and the arrow `--acc-text` and moves the arrow 3px up and right.
 
 Then the main CTA "Let's talk ↗" (yellow, radius 999, `padding:12px 26px`, 19px, weight 600), which
 is the mailto; the form will sit beside it. On mobile the CTA row becomes a column and the inner
 column takes `padding-bottom:34px` so it does not collide with the fixed footer.
 
-Links: `mailto:krubioillan@gmail.com`, `github.com/krub-dev`, `linkedin.com/in/krub`,
-`x.com/krub_dev`.
+Links: `mailto:kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev`.
 
 ### 3.11 Footer (fixed)
 

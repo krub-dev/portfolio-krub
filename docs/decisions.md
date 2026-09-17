@@ -1254,16 +1254,19 @@ the 3D model and the project images once they exist.
 
 The section was rebuilt around a band, the networks written out, and (next) a form.
 
-**The band is CSS, not GSAP, and it is two bands.** The reference does two things, and neither needs
-a library: the words alternating between solid and outline is `-webkit-text-stroke` with a
-transparent fill, and "passing by" is the marquee the site already has under the hero — two copies
-and a `-50%` slide. What is new is only what drives it: `animation-timeline: view()` ties the slide
-to how far the band has crossed the viewport, so the type travels as the section arrives. That is a
-scroll-driven animation, which Chrome, Edge and recent Safari have; where it is missing, an
-`@supports not` block falls back to the same loop on a clock. GSAP would have been 50–70 KB for a
-keyframe and a transform, and it brings its own ticker, against a project whose rule is one
-`requestAnimationFrame` for everything that moves. A second copy of the words, outline only and a
-step higher, drifts the other way behind the first: that is what gives the band its depth.
+**The band is CSS and one scroll read, not GSAP, and it is two bands.** The reference does two
+things, and neither needs a library: the words alternating between solid and outline is
+`-webkit-text-stroke` with a transparent fill, and "passing by" is the marquee the site already has
+under the hero — two copies and a `-50%` slide. What is new is only what drives it, and that changed
+once: the first version used `animation-timeline: view()`, which is the elegant way, and its fallback
+for browsers without scroll-driven animations was the marquee's clock — so on those browsers the band
+moved **on its own**, which is exactly what the owner did not want. It now works out the progress in
+the component and writes it to `--band-progress`, and the transform stays in CSS. Fifteen lines, no
+new listener (it reads the one `useScroll` already owns), and the same behaviour in every browser.
+GSAP would have been 50–70 KB for a keyframe and a transform, and it brings its own ticker, against a
+project whose rule is one `requestAnimationFrame` for everything that moves. The band wears the
+accent background the marquee wears, at display size. A second copy of the words, outline only and a
+step higher, travels the other way behind the first: that is what gives the band its depth.
 
 **The alternation is by word, not by letter.** Per letter it read as noise — an outline `l` between
 two solid ones looks like a mistake rather than a pattern — and the first attempt at it was exactly

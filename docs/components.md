@@ -210,10 +210,10 @@ written out, derived from the href) and the mailto button. The section itself ca
 is the full-bleed container the band needs, and an inner column carries the measurements.
 
 ### TalkBand
-`text`. The "LET'S TALK" band at the top of Contact: display type with the letters alternating
-between solid and outline, sliding `-50%` on a `view()` timeline so it travels with the scroll, and
-falling back to the marquee keyframe where scroll-driven animations are missing. Decorative
-(`aria-hidden`).
+`text`. The band at the top of Contact: on the accent background, display type with the words
+alternating between solid and outline over a second, fainter copy travelling the other way. It moves
+with the scroll and only with the scroll — the component writes the band's progress into
+`--band-progress` and the two layers read it. Decorative (`aria-hidden`).
 
 ### BrandName
 The KIKO / RUBIO reveal at the top of the hero. A pure CSS animation — the letters are markup, not

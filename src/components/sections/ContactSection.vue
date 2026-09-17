@@ -1,7 +1,7 @@
 <script setup>
 /*
-  Section 03. The band, then the heading, the headline, the three networks as
-  full-width rows, and the mailto.
+  Section 03. The band, then the heading, the rows and the mailto. The form goes
+  between the heading and the rows.
 
   The section no longer carries the page gutter: it is the full-bleed container
   the band needs, and an inner column carries the measurements every other
@@ -10,9 +10,7 @@
 
   The rows replaced the three 46px icon buttons. They say the same thing with
   the address written out, which is what gives the end of the page its weight —
-  and the icons are still in the mobile menu and the footer, so nothing was
-  lost. The mailto button stays: the reference keeps a direct link beside its
-  form, and the form is the next step.
+  and the icons are still in the mobile menu, so nothing was lost.
 */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -20,17 +18,24 @@ import { useI18n } from 'vue-i18n'
 import BaseButton from '../base/BaseButton.vue'
 import SectionHeading from '../base/SectionHeading.vue'
 import TalkBand from './TalkBand.vue'
-import { useLang } from '../../composables/useLang'
-import { copy, email, socials } from '../../data'
+import { email, socials } from '../../data'
 import { formatUrl } from '../../utils/format'
 
-const { lang } = useLang()
 const { t } = useI18n()
 
-const contact = computed(() => copy.contact[lang.value])
-
-// The address as it is shown comes from the href, so a link is edited once.
-const rows = computed(() => socials.map((social) => ({ ...social, value: formatUrl(social.href) })))
+/*
+  The rows: the address first, then the networks. A network's visible text is
+  derived from its href, so a link is edited in one place and cannot drift.
+*/
+const rows = computed(() => [
+  { name: t('contact.email'), href: `mailto:${email}`, value: email, external: false },
+  ...socials.map((social) => ({
+    name: social.name,
+    href: social.href,
+    value: formatUrl(social.href),
+    external: true,
+  })),
+])
 </script>
 
 <template>
@@ -40,11 +45,14 @@ const rows = computed(() => socials.map((social) => ({ ...social, value: formatU
     <div class="inner">
       <SectionHeading index="03" :title="t('section.contact')" />
 
-      <p class="headline">{{ contact.body }}</p>
-
       <ul class="rows">
         <li v-for="row in rows" :key="row.name">
-          <a class="row" :href="row.href" target="_blank" rel="noopener">
+          <a
+            class="row"
+            :href="row.href"
+            :target="row.external ? '_blank' : undefined"
+            :rel="row.external ? 'noopener' : undefined"
+          >
             <span class="label">{{ row.name }}</span>
             <span class="value">{{ row.value }}</span>
             <span class="arrow" aria-hidden="true">↗</span>
@@ -65,7 +73,6 @@ const rows = computed(() => socials.map((social) => ({ ...social, value: formatU
 .contact {
   position: relative;
   z-index: 1;
-  border-top: 1px solid var(--line);
 }
 
 .inner {
@@ -75,16 +82,6 @@ const rows = computed(() => socials.map((social) => ({ ...social, value: formatU
   display: flex;
   flex-direction: column;
   gap: 30px;
-}
-
-.headline {
-  margin: 0;
-  font-size: clamp(26px, 4vw, 52px);
-  line-height: 1.06;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  max-width: 22ch;
-  text-wrap: balance;
 }
 
 /* One line per network, the label above the address and the arrow on the

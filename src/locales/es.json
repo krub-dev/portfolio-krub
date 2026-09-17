@@ -19,7 +19,8 @@
     "contact": "/contacto"
   },
   "contact": {
-    "band": "Hablemos"
+    "band": "Hablemos",
+    "email": "Correo"
   },
   "stack": {
     "g1": "Languages",

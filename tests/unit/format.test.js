@@ -49,7 +49,7 @@ describe('formatUrl', () => {
   })
 
   it('drops a trailing slash, and more than one', () => {
-    expect(formatUrl('https://x.com/krub_dev/')).toBe('x.com/krub_dev')
+    expect(formatUrl('https://example.com/a/')).toBe('example.com/a')
     expect(formatUrl('https://example.com//')).toBe('example.com')
   })
 

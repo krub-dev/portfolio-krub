@@ -2,8 +2,8 @@
   THE WORDS. This is the file to open when you want to reword the site.
 
   Everything here is prose you wrote: the hero headline, the About paragraphs,
-  the marquee phrases, the contact line. Both languages sit side by side so you
-  can change a sentence and its translation without leaving the file.
+  the marquee phrases. Both languages sit side by side so you can change a
+  sentence and its translation without leaving the file.
 
   Interface strings — nav paths, button labels, aria-labels — are NOT here.
   They live in src/locales/. The dividing line:
@@ -55,15 +55,6 @@ export const copy = {
   marquee: {
     en: ['Fullstack developer → backend', 'From Murcia, based in Barcelona · Spain'],
     es: ['Desarrollador fullstack → backend', 'De Murcia, afincado en Barcelona · España'],
-  },
-
-  contact: {
-    en: {
-      body: "Tell me the problem. I'll tell you how I'd solve it and how long it takes.",
-    },
-    es: {
-      body: 'Cuéntame el problema. Te digo cómo lo resolvería y cuánto tardo.',
-    },
   },
 
   // The 404 page. The title and the button label are interface strings and live

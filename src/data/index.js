@@ -5,7 +5,7 @@
   component contains a sentence, a URL or a project name. Change a file here
   and the page follows.
 
-    copy.js          hero headline, About paragraphs, marquee, contact line
+    copy.js          hero headline, About paragraphs, marquee
     projects.js      the project grid and the detail modals
     experience.js    the /experience tab
     education.js     the /education tab

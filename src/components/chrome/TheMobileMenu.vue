@@ -190,6 +190,10 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Both columns: with three things in the grid instead of four, the CTA is the
+     only one on its row and half a row of empty panel next to it reads as a
+     mistake. */
+  grid-column: 1 / -1;
   height: 46px;
   border-radius: 10px;
   background: var(--acc);

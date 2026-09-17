@@ -1,9 +1,9 @@
 /*
-  Social links. Used in three places: the Contact section icons, the mobile
-  menu grid, and (potentially) the footer.
+  Social links. Used in two places: the rows in the Contact section and the
+  mobile menu grid.
 
-    name  Visible label in the mobile menu, and the aria-label on the icon
-          button in Contact, which has no text of its own.
+    name  Visible label in the row and the mobile menu, and the aria-label on
+          the icon button, which has no text of its own.
     href  Full URL. Every one of these renders with target="_blank" and
           rel="noopener".
     icon  Which inline SVG the SocialLink component should draw. These are
@@ -15,13 +15,13 @@
   SocialLink. That is the one place this file cannot be self-contained.
 */
 export const socials = [
-  { name: 'GitHub', href: 'https://github.com/krub-dev', icon: 'github' },
   { name: 'LinkedIn', href: 'https://linkedin.com/in/krub', icon: 'linkedin' },
-  { name: 'X', href: 'https://x.com/krub_dev', icon: 'x' },
+  { name: 'GitHub', href: 'https://github.com/krub-dev', icon: 'github' },
 ]
 
-// The email behind every "Let's talk ↗" button on the page.
-export const email = 'krubioillan@gmail.com'
+// The address behind every "Let's talk ↗" button on the page, and the one the
+// contact form writes to.
+export const email = 'kikorubioillan@gmail.com'
 
 /*
   Paths to files in public/, kept here rather than written into a template.

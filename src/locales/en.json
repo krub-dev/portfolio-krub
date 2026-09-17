@@ -19,7 +19,8 @@
     "contact": "/contact"
   },
   "contact": {
-    "band": "Let's talk"
+    "band": "Let's talk",
+    "email": "Email"
   },
   "stack": {
     "g1": "Languages",

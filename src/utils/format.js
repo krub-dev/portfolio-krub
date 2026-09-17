@@ -42,7 +42,7 @@ export function wrapIndex(current, step, total) {
  * A link as it is shown in the contact rows: no protocol, no trailing slash.
  *
  *   'https://github.com/krub-dev' -> 'github.com/krub-dev'
- *   'https://x.com/krub_dev/'     -> 'x.com/krub_dev'
+ *   'https://example.com/a/'      -> 'example.com/a'
  *
  * Derived from the href rather than written next to it, so the two can never
  * drift apart and a link is changed in one place.

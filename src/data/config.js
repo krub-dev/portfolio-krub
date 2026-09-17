@@ -6,15 +6,13 @@ export const config = {
   /*
     Testimonials.
 
-    OFF because the quotes in testimonials.js are placeholders, written in
-    brackets so they could never be mistaken for real ones. The section was
-    visible during the build so it could be laid out and reviewed; it has no
-    business being visible to a visitor until the quotes are real.
-
-    Flip to true once the people I am asking have sent theirs. The section, the
-    cards and the layout are all still here waiting.
+    ON since 2026-09-17, and it should not ship like this: the quotes in
+    testimonials.js are still the bracketed placeholders, written so they could
+    never be mistaken for real ones. They are on so the section can be seen and
+    the real quotes dropped in one at a time. Turn it off again, or replace the
+    quotes, before this reaches main.
   */
-  showTestimonials: false,
+  showTestimonials: true,
 
   // Limonacho, the lemon mascot in the bottom-right corner.
   showLemon: true,
@@ -22,17 +20,14 @@ export const config = {
   /*
     The CV download button in About.
 
-    OFF because there is no file to download: the original PDF carried a phone
-    number and a home address, and shipping it would have put both at a
-    guessable public URL. It is waiting on an ATS-friendly rewrite without the
-    personal details, in both languages.
-
-    The button and its wiring are untouched — flip this to true once
-    public/uploads/ holds the new file and it comes straight back. A visible
-    button that 404s would be worse than no button: a recruiter clicks it once
-    and forms an opinion.
+    ON since 2026-09-17, and it needs the file to exist: public/uploads/ holds
+    no CV, so the button currently downloads nothing (a 404). The original PDF
+    carried a phone number and a home address and was purged from the git
+    history; the button is waiting on the ATS-friendly rewrite, in both
+    languages, at the path below. Turn it off again before this reaches main if
+    the file is not there yet.
   */
-  showCv: false,
+  showCv: true,
 
   // Timezone for the footer clock. Anything Intl accepts.
   timezone: 'Europe/Madrid',
