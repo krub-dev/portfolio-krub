@@ -1624,20 +1624,21 @@ projects grid, and it got the same answer — one at a time.
 - **And the quotes are quoted.** A testimonial is a quote, and the marks are what say so before anyone
   reads the attribution. The placeholders had them and the first real one did not, which is the tell
   that gave it away.
-- **The mark became a real SVG, and it is centred on the counter.** The first one was the `”` glyph from
-  the site's own face, in the box's top right. It read as a pair of brackets rather than as punctuation,
-  and it sat in a corner of its own instead of belonging to anything. It is now Material Symbols'
-  `format_quote` (Apache 2.0, inlined as a path), tilted `-7deg`, hanging off the counter so it moves with
-  the number it belongs to. Not a font glyph: the site self-hosts two faces and a third for one
-  decorative character is not worth the bytes, and the system serif that would have given the same shape
-  varies by platform. It is capped at `72px` because of a measurement: centred on a counter that sits
-  `18px` from the box's edge, anything wider had its right edge past the box and the box clipped it.
-- **On a phone the arrows go and a `swap_vert` icon takes their place.** The swipe is the gesture there
-  and the buttons only took width from the quote. Clipped, not removed: the drag is not something a
-  screen reader or a keyboard can do, and the entries that are not showing are `inert`, so removing them
-  from the accessibility tree as well would leave quotes 2 and 3 with no way in. They come back on
-  `:focus-within`. The cue is `display:none` on a pointer device, where the arrows already say it.
-- **The icon set is Material Symbols, Apache 2.0.** Both glyphs are inlined rather than fetched: two
-  paths in one component, and a request for them would cost more than they weigh. This is the first
-  icon source in the project that is not devicon or simple-icons, so the licence is written down here
-  rather than left in a file name.
+- **The mark stays a font glyph, and an SVG of it was tried and dropped.** The `”` from the site's own
+  face, large and faint in the box's top right, is not the most beautiful quote mark that could be
+  drawn — a calligraphic comma is. So Material Symbols' `format_quote` was inlined as a path, tilted and
+  hung under the counter. It read as clutter and the owner asked for the glyph back, which is the
+  answer: at `opacity:.08` the mark is a watermark, and the difference between a good comma and a
+  mediocre one is not worth a third typeface, a new licence to track, or the extra rules that came with
+  positioning it. The system serif that would have given the better shape for free varies by platform,
+  so it is not a candidate either.
+- **The label took the accent and the counter gave it back.** The header's two ends were both `--fg-3`
+  and then both `--acc-text`; in either case they read as one thing. The split is what separates them:
+  the label names the block and takes the colour, the counter is live information and stays quiet. Same
+  `--acc-text` that already clears AA at these sizes on both themes, so the label needed no new value.
+- **On a phone the arrows go, and nothing replaces them.** The swipe is the gesture there and the
+  buttons only took width from the quote. An icon was tried in the header as a cue — four of them, at
+  real size — and it read as clutter, so the header went back to two items. Clipped, not removed: the
+  drag is not something a screen reader or a keyboard can do, and the entries that are not showing are
+  `inert`, so removing them from the accessibility tree as well would leave quotes 2 and 3 with no way
+  in. They come back on `:focus-within`.

@@ -492,15 +492,13 @@ back.
 The box is `--surface` with a `--line` border and radius 18, and it carries **its own header**: the mono
 label and the `n / total` position, with a rule under them, the same header the stack groups and the
 contact rows use. The label floating above an empty box said nothing about what the box was; inside, the
-block reads as one object. The position is in `--acc-text`, the one live piece of metadata in an
-otherwise quiet header. Under it, and **centred on the counter**, a large quote mark in `--acc` at
-`opacity:.08`, tilted `-7deg` so it reads as punctuation and not as a pair of brackets. It is Material
-Symbols' `format_quote` (Apache 2.0) inlined as a path, not a font glyph: the site self-hosts two faces
-and a third for one decorative character is not worth the bytes, and the system serif that would render
-it otherwise varies by platform. It is sized `clamp(56px, 7vw, 72px)` for a measured reason — the
-counter sits `18px` from the box's edge, and anything wider put the mark's right edge past the box,
-which clipped it. It belongs to the box and not to an entry, so it is the one thing in the block that
-does not move. **The controls sit beside the box, not above it**: the rail already has a pair
+block reads as one object. **The label is in `--acc-text` and the counter is in `--fg-3`**, and the split
+is deliberate: with both ends of the header in the accent they stopped reading as two things. The label
+names the block and takes the colour; the counter is live information and stays quiet. The header also
+carries, in the window's top right, a large `”` in `--acc` at `opacity:.08` — a font glyph and not an
+SVG, because it is a watermark and the two faces the site self-hosts already have one. It belongs to the
+box and not to an entry, so it is the one thing in the block that does not move. **The controls sit
+beside the box, not above it**: the rail already has a pair
 of horizontal arrows over its head, and two pairs in one column of the page read as one control that lost
 its way. **The arrows are vertical** — up, then down — because the movement is: down brings the next
 quote up from below while the one showing leaves upwards. The window is `overflow:hidden` with a
@@ -509,15 +507,14 @@ mask does nothing, because the entries carry `22px` of vertical padding and the 
 edge. `transform` on the reel and `height` on the window ease at `.16` per frame in a loop and stop when
 they settle; under `prefers-reduced-motion` they jump.
 
-**On a phone the arrows go and the header carries the gesture instead.** The swipe is the interaction
-there, and two buttons beside the box only took width from the quote — which is also why they were the
-one thing on the screen sitting hard against the right edge. A `swap_vert` icon (Material Symbols, same
-licence) sits centred in the header, in `--fg-3` and bobbing `±2px` over `2.6s`, and is `display:none` on
-a pointer device, where the arrows already say it. The buttons are **clipped rather than removed**:
-visually hidden, they keep their place in the accessibility tree and their focus, and come back the
-moment one of them takes it. The drag is not something a screen reader or a keyboard can do, and the
-entries that are not showing are `inert`, so without them the other quotes would be unreachable. The
-breakpoint is the same `900px` the arrows' own sizing uses.
+**On a phone the arrows go and the swipe is the only gesture.** The swipe is the interaction there, and
+two buttons beside the box only took width from the quote — which is also why they were the one thing on
+the screen sitting hard against the right edge. There is no icon in their place: one was tried and it
+read as clutter. The buttons are **clipped rather than removed**: visually hidden, they keep their place
+in the accessibility tree and their focus, and come back the moment one of them takes it. The drag is not
+something a screen reader or a keyboard can do, and the entries that are not showing are `inert`, so
+without them the other quotes would be unreachable. The breakpoint is the same `900px` the arrows' own
+sizing uses.
 
 **It drags, with any pointer type**, the same as the projects rail: the mouse has no vertical gesture of
 its own and the pager is not a scroll container, so a phone has no swipe either. A drag that covers a

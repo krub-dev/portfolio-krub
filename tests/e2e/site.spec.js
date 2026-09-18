@@ -323,28 +323,25 @@ test('the testimonials page one at a time, and the window follows the quote', as
   await expect(prev).toBeDisabled()
 })
 
-test('the arrows give way to the swipe cue on a phone', async ({ page, isMobile }) => {
+test('the arrows are hidden on a phone, where the swipe is the gesture', async ({ page, isMobile }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
 
-  const hint = page.locator('#projects .hint')
   const controls = page.locator('#projects .pager-controls')
+  const next = page.getByRole('button', { name: 'Next testimonial' })
 
   if (!isMobile) {
-    await expect(hint).toBeHidden()
-    await expect(page.getByRole('button', { name: 'Next testimonial' })).toBeVisible()
+    await expect(next).toBeVisible()
     return
   }
-
-  await expect(hint).toBeVisible()
 
   /*
     Clipped rather than removed. The drag is not something a screen reader or a
     keyboard can do, and the entries that are not showing are inert, so the
     buttons are the only way to the other quotes — hiding them from the
-    accessibility tree too would strand them there.
+    accessibility tree as well would strand them there.
   */
-  await expect(page.getByRole('button', { name: 'Next testimonial' })).toHaveCount(1)
+  await expect(next).toHaveCount(1)
   const box = await controls.boundingBox()
   expect(box.width).toBeLessThan(2)
 })
