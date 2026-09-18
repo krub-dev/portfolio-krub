@@ -1743,7 +1743,14 @@ as a tile laid on top of the grid instead of the grid lighting up.
   while the pointer is outside the document — a `mouseleave` on it, or a `blur` when the window
   loses focus with the pointer still inside. Before that the dot and the cell froze at the last
   position they had inside the page, which reads as something stuck. It is two listeners and one
-  class toggle, no per-frame cost.
+  class toggle, no per-frame cost. The change is published straight from the event and not left to
+  the next frame: a window that loses focus has its rAF loop paused, so the frame that would have
+  hidden the cursor does not come until the window is back — which is why it only disappeared on the
+  next click.
+- **On touch it lights where you tap.** No cursor to follow, so the cell is placed on the tap and
+  fades out on its own after `700ms`, the same way Limonacho's pupils glance at where the finger
+  landed. One listener on the window and one timer, and only when `usePointer` would not have
+  subscribed anyway.
 - **The magnet is still on the table, and still expensive.** CSS cannot bend a line, so pulling the
   grid lines toward the cursor means rebuilding the grid as DOM or SVG and transforming each line
   per frame. Not done: the cell was the 80/20, and it can be revisited if it is not enough.

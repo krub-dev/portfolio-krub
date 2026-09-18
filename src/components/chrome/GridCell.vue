@@ -15,34 +15,76 @@
   `masked` mirrors the global grid's own mask once the hero is behind you: the
   grid fades out toward the bottom of the viewport, and a cell still glowing down
   there would be a light with nothing under it.
-*/
-import { ref } from 'vue'
 
-import { usePointer } from '../../composables/usePointer'
+  On touch there is no cursor, so the cell comes and goes with the tap instead —
+  the same way Limonacho's pupils glance at where the finger landed. It is shown
+  where the tap happened and fades out on its own.
+*/
+import { onMounted, onUnmounted, ref } from 'vue'
+
+import { isPointerDevice, usePointer } from '../../composables/usePointer'
 
 // The grid's own step. Design spec 3.12; keep in sync with BackgroundGrid's size.
 const SIZE = 72
+
+// How long a tapped cell stays lit before it fades. Long enough to be seen,
+// short enough not to sit under the next tap.
+const TAP_HOLD = 700
 
 defineProps({
   masked: { type: Boolean, default: false },
 })
 
+const enabled = isPointerDevice()
 const cell = ref(null)
 let idle = false
+let timer = null
 
-usePointer((pointer) => {
+function place(x, y) {
+  if (cell.value) cell.value.style.transform = `translate(${x}px, ${y}px)`
+}
+
+if (enabled) {
+  usePointer((pointer) => {
+    if (!cell.value) return
+
+    place(
+      Math.floor(pointer.x / SIZE) * SIZE,
+      Math.floor(pointer.y / SIZE) * SIZE,
+    )
+
+    /*
+      Only the state machine touches `idle` here. Removing the class on every
+      frame and re-adding it on the change would strip it one frame after the
+      leave: the flag is already true, so the guard would not put it back.
+    */
+    const away = !pointer.active
+    if (away !== idle) {
+      idle = away
+      cell.value.classList.toggle('idle', away)
+    }
+  })
+}
+
+function onTap(event) {
   if (!cell.value) return
+  place(
+    Math.floor(event.clientX / SIZE) * SIZE,
+    Math.floor(event.clientY / SIZE) * SIZE,
+  )
+  cell.value.classList.remove('idle')
+  if (timer) clearTimeout(timer)
+  timer = setTimeout(() => cell.value?.classList.add('idle'), TAP_HOLD)
+}
 
-  const x = Math.floor(pointer.x / SIZE) * SIZE
-  const y = Math.floor(pointer.y / SIZE) * SIZE
-  cell.value.style.transform = `translate(${x}px, ${y}px)`
+onMounted(() => {
+  if (enabled) return
+  window.addEventListener('pointerdown', onTap, { passive: true })
+})
 
-  // Gone with the cursor while the pointer is outside the page.
-  const away = !pointer.active
-  if (away !== idle) {
-    idle = away
-    cell.value.classList.toggle('idle', away)
-  }
+onUnmounted(() => {
+  window.removeEventListener('pointerdown', onTap)
+  if (timer) clearTimeout(timer)
 })
 </script>
 

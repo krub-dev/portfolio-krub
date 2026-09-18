@@ -266,6 +266,24 @@ test('the cursor and the grid cell hide when the pointer leaves the page', async
   await expect(cell).not.toHaveClass(/idle/)
 })
 
+test('on touch the grid cell lights where you tap', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'this is the path taken when there is no cursor')
+
+  await openSite(page)
+
+  const cell = page.locator('.grid-cell')
+  await page.touchscreen.tap(300, 400)
+
+  // Snapped to the 72px step: 300 -> 4 cells, 400 -> 5.
+  await expect
+    .poll(() => cell.evaluate((el) => el.style.transform))
+    .toBe('translate(288px, 360px)')
+  await expect(cell).not.toHaveClass(/idle/)
+
+  // And it fades out on its own, so it does not sit under the next tap.
+  await expect(cell).toHaveClass(/idle/, { timeout: 2000 })
+})
+
 test('the rail never fades the card it is parked on', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'only a phone has a position with a whole card either side')
 

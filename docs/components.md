@@ -314,7 +314,8 @@ The 72px cell of the background grid under the pointer, outlined with a 1px `--a
 `opacity:.45`. Fixed to the viewport rather than a child of a grid, because the hero grid scrolls and
 a cell inside it would drift off the cursor. Subscribes to `usePointer()` and snaps with `Math.floor`,
 so it reads as part of the grid and not as a second cursor. Hides with the cursor when the pointer
-leaves the page. Never mounts on touch or below 900px.
+leaves the page. On touch, where there is no cursor, it lights where you tap and fades on its own
+(700ms); the pointer subscription never happens there.
 
 ### ScrollProgress
 Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress from

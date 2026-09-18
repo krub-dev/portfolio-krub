@@ -46,20 +46,33 @@ function onMove(event) {
 */
 function onLeave() {
   pointer.active = false
+  publish()
 }
 
 function onEnter(event) {
   pointer.x = event.clientX
   pointer.y = event.clientY
   pointer.active = true
+  publish()
 }
 
 function onBlur() {
   pointer.active = false
+  publish()
+}
+
+/*
+  The subscribers are also called here, straight from the event, and not left to
+  the next frame. A window that loses focus has its rAF loop throttled or paused,
+  so the frame that would have hidden the cursor does not come until the window
+  is back — which is why it only disappeared on the next click.
+*/
+function publish() {
+  for (const run of subscribers) run(pointer)
 }
 
 function loop() {
-  for (const run of subscribers) run(pointer)
+  publish()
   frame = requestAnimationFrame(loop)
 }
 
