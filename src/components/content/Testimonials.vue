@@ -323,27 +323,27 @@ onUnmounted(() => {
             />
           </div>
         </div>
-      </div>
 
-      <div class="pager-controls">
-        <button
-          class="pager-arrow"
-          type="button"
-          :aria-label="t('a11y.prevTestimonial')"
-          :disabled="atStart"
-          @click="step(-1)"
-        >
-          ↑
-        </button>
-        <button
-          class="pager-arrow"
-          type="button"
-          :aria-label="t('a11y.nextTestimonial')"
-          :disabled="atEnd"
-          @click="step(1)"
-        >
-          ↓
-        </button>
+        <div class="pager-controls">
+          <button
+            class="pager-arrow"
+            type="button"
+            :aria-label="t('a11y.prevTestimonial')"
+            :disabled="atStart"
+            @click="step(-1)"
+          >
+            ↑
+          </button>
+          <button
+            class="pager-arrow"
+            type="button"
+            :aria-label="t('a11y.nextTestimonial')"
+            :disabled="atEnd"
+            @click="step(1)"
+          >
+            ↓
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -357,14 +357,14 @@ onUnmounted(() => {
 }
 
 /*
-  The controls beside the box and not above it: the rail already has a pair of
-  horizontal arrows over its head, and two pairs in the same column of the page
-  read as one control that lost its way.
+  The box is the whole block. The controls live inside it, in its bottom right
+  corner: beside it they were a pair of buttons hanging off the edge of the box
+  with nothing to belong to, and on a desktop the box is wide enough to hold
+  them. On a phone they go back to being clipped, see below.
 */
 .pager {
   display: flex;
   align-items: center;
-  gap: 14px;
 }
 
 .box {
@@ -474,9 +474,17 @@ onUnmounted(() => {
   will-change: transform;
 }
 
+/*
+  In the box's bottom right corner, not against the edge: 12px and 16px of air,
+  the same kind of margin the header's own contents keep. A row rather than the
+  column they were outside: in the corner of a wide box, two buttons stacked read
+  as a strip down the side, and side by side they read as one control.
+*/
 .pager-controls {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
   display: flex;
-  flex-direction: column;
   gap: 8px;
 }
 
@@ -505,12 +513,20 @@ onUnmounted(() => {
   cursor: default;
 }
 
-@media (max-width: 900px) {
-  .pager {
-    position: relative;
-    gap: 0;
+/*
+  Room for the controls in the box's bottom right, on the pane rather than on the
+  entries: the pane is the box's lower half and its padding is inside the clip, so
+  the window keeps its measured height and the quotes keep ending where they
+  ended, with the corner left empty for the arrows. Desktop only — on a phone
+  they are clipped and the room would be an empty strip for nothing.
+*/
+@media (min-width: 901px) {
+  .pane {
+    padding-bottom: 56px;
   }
+}
 
+@media (max-width: 900px) {
   /*
     The arrows go on a phone. The swipe is the gesture there and the two buttons
     beside the box only took width from the quote — which is also why they were

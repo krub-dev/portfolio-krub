@@ -1660,6 +1660,12 @@ projects grid, and it got the same answer — one at a time.
 - **The mark moves for the phone.** `44px`/`16px`/`104px` became `74px`/`6px`/`112px` under `900px`: lower,
   further right and bigger. In a window that narrow it lands behind the quote rather than behind the name,
   which is what a watermark should do — sit under the text, not beside the attribution.
+- **The arrows moved inside the box.** They were beside it, which on a desktop left a pair of buttons
+  hanging off the edge of a wide box with nothing to belong to. They now sit in the box's bottom right
+  corner, `12px` from the bottom and `16px` from the right, in a row: stacked in a corner they read as a
+  strip down the side. The room is the pane's `padding-bottom`, not the entries', so the window keeps its
+  measured height and the quotes keep ending where they ended. Desktop only, because on a phone they are
+  clipped and the room would be an empty strip for nothing.
 - **On a phone the arrows go, and nothing replaces them.** The swipe is the gesture there and the
   buttons only took width from the quote. An icon was tried in the header as a cue — four of them, at
   real size — and it read as clutter, so the header went back to two items. Clipped, not removed: the

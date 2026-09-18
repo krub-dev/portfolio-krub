@@ -516,19 +516,24 @@ and not an SVG, because it is a watermark and the two faces the site self-hosts 
 belongs to the box and not to an entry, so it is the one thing in the block that does not move. On a phone
 it drops, moves right and grows (`74px`, `6px`, `112px`): in a window that narrow it lands behind the quote
 instead of behind the name, which is where a watermark belongs — under the text rather than beside the
-attribution. **The controls sit
-beside the box, not above it**: the rail already has a pair
-of horizontal arrows over its head, and two pairs in one column of the page read as one control that lost
-its way. **The arrows are vertical** — up, then down — because the movement is: down brings the next
-quote up from below while the one showing leaves upwards. The window is `overflow:hidden` with a
+attribution. **The controls sit inside the box, in its bottom right corner**, on a desktop: beside it
+they were a pair of buttons hanging off the edge of the box with nothing to belong to, and a desktop box
+is wide enough to hold them. They are `12px` from the bottom and `16px` from the right — not against the
+edge — and in a row rather than the column they were outside, because stacked in the corner of a wide box
+they read as a strip down the side. The pane carries the room for them as `padding-bottom` (`56px`), which
+keeps the window's measured height and the quotes ending where they ended and leaves the corner empty. The
+rail already has a pair of horizontal arrows over its head, and two pairs in one column of the page read as
+one control that lost its way. **The arrows are vertical** — up, then down — because the movement is: down
+brings the next quote up from below while the one showing leaves upwards. The window is `overflow:hidden`
+with a
 `mask-image` fading its top and bottom `18px`, so a quote arrives and departs through a fade; at rest the
 mask does nothing, because the entries carry `22px` of vertical padding and the text never sits on the
 edge. `transform` on the reel and `height` on the window ease at `.16` per frame in a loop and stop when
 they settle; under `prefers-reduced-motion` they jump.
 
 **On a phone the arrows go and the swipe is the only gesture.** The swipe is the interaction there, and
-two buttons beside the box only took width from the quote — which is also why they were the one thing on
-the screen sitting hard against the right edge. There is no icon in their place: one was tried and it
+two buttons in the corner of a narrow box would only take width from the quote. There is no icon in their
+place: one was tried and it
 read as clutter. The buttons are **clipped rather than removed**: visually hidden, they keep their place
 in the accessibility tree and their focus, and come back the moment one of them takes it. The drag is not
 something a screen reader or a keyboard can do, and the entries that are not showing are `inert`, so

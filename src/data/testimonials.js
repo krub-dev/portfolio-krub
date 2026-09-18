@@ -47,13 +47,13 @@ export const testimonials = [
     avatar: null,
     en: {
       quote:
-        '[Third quote, deliberately longer than the others so the window has to grow: a paragraph of filler that runs on for a few lines, which is what a real quote does when someone has something to say and is not counting words. Replace it or delete it.]',
+        '[Third quote, deliberately long enough that it does not fit the four-line clamp on a desktop either, so the "read more" can be tried there and not only on a phone. A paragraph of filler that runs on for a few lines, which is what a real quote does when someone has something to say and is not counting words: it keeps going, adds a detail, comes back to the first thing, and only then stops. Replace it or delete it.]',
       name: 'Name Surname',
       role: 'COMPANY / ROLE',
     },
     es: {
       quote:
-        '[Tercera cita, a propósito más larga que las demás para que la ventana tenga que crecer: un párrafo de relleno que ocupa varias líneas, que es lo que hace una cita real cuando alguien tiene algo que contar y no va contando palabras. Sustitúyela o bórrala.]',
+        '[Tercera cita, a propósito lo bastante larga como para que tampoco quepa en el recorte de cuatro líneas en escritorio, y así poder probar el "leer más" ahí y no solo en el móvil. Un párrafo de relleno que ocupa varias líneas, que es lo que hace una cita real cuando alguien tiene algo que contar y no va contando palabras: sigue un poco más, añade un detalle, vuelve a lo primero y solo entonces termina. Sustitúyela o bórrala.]',
       name: 'Nombre Apellido',
       role: 'EMPRESA / ROL',
     },

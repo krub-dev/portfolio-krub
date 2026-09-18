@@ -180,7 +180,7 @@ window: the card emits `toggle` and reads the state back as a prop. See decision
 The block at the end of the Projects rail: a filled accent header carrying the label and a `n / total`,
 and a vertical pager, one quote at a time. The window is as tall as the tallest entry and every entry is
 padded to it, so a short quote cannot show the next one through the gap; the entries that are not showing
-are `inert`. The arrows sit beside the box on a pointer device and are clipped to the accessibility tree
+are `inert`. The arrows sit in the box's bottom right corner on a pointer device and are clipped to the accessibility tree
 on a phone, where the swipe is the gesture. Gated by `config` in ProjectsSection. See decisions.md 64.
 
 ---
