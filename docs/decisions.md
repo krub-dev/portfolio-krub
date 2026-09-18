@@ -21,8 +21,9 @@ new number to its range when a decision is appended.
   navbar, self-hosted fonts, and the soft 404.
 - **Interaction, theme and Limonacho — 47–53.** The softer magnetic pull, accent as its own axis, the
   iOS toolbar, the "acho", the stage glow and the menu dots.
-- **Sections and copy — 54–64.** The contact band, testimonials inside Projects, the contact endpoint,
-  the Stack spotlight, the projects rail, the navbar's click band, em dashes, the fade, and the pager.
+- **Sections and copy — 54–65.** The contact band, testimonials inside Projects and then below the
+  Stack, the contact endpoint, the Stack spotlight, the projects rail, the navbar's click band, em
+  dashes, the fade, and the pager.
 
 ---
 
@@ -1331,7 +1332,10 @@ the button is the mailto, and the form joins it rather than replacing it.
 
 ### 56. The testimonials go inside Projects, not beside them
 
-**Date:** 2026-09-17 · **Status:** active
+**Date:** 2026-09-17 · **Status:** active — placement moved by 65
+
+**Updated:** decision 65 moved the block out of Projects, to between the Stack and Contact. The rest of
+this — no number, no destination, a `content/` piece — still stands.
 
 The section existed with an `id` and a heading and no number, which read as an orphan: the numbering
 runs 00–03 across the four permanent sections, and the testimonials can disappear entirely
@@ -1694,3 +1698,23 @@ projects grid, and it got the same answer — one at a time.
   drag is not something a screen reader or a keyboard can do, and the entries that are not showing are
   `inert`, so removing them from the accessibility tree as well would leave quotes 2 and 3 with no way
   in. They come back on `:focus-within`.
+
+### 65. The testimonials moved out of Projects, below the Stack
+
+**Date:** 2026-09-18 · **Status:** active
+
+Since 56 the block sat at the end of the Projects rail. Tried and kept: between the Stack and Contact
+it reads as a beat of its own before the closing section, instead of as an afterthought of a rail that
+has already scrolled past.
+
+The reasons 56 gave still hold — no number, no navbar destination, a `content/` piece — so this is a
+move, not a reversal of the shape. Two consequences:
+
+- The block no longer inherits the page gutter and the `1180px` cap from `ProjectsSection`, so it
+  carries them itself, plus its own `margin-top` on top of the Stack's bottom padding.
+- The e2e selectors moved from `#projects .pane` to `.testimonials .pane`, which is the more honest
+  scope anyway: the block is not part of Projects.
+
+The scroll spy has no link for it, so while it is on screen the Stack stays active until Contact
+crosses the line. Accepted: it is an unnumbered block, and the alternative would be inventing a
+destination for something that can disappear.

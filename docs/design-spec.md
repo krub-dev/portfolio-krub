@@ -481,11 +481,12 @@ This section has **no footnote**.
 
 ### 3.9 Testimonials (optional)
 
-Shown or hidden by config, and it lives at the **end of the Projects rail**, not as a section of its
-own: it is about that work, and a fifth destination would break the 00–03 numbering for something
+Shown or hidden by config, and it lives **between the Stack and Contact**, not as a section of its
+own: it is about the work, and a fifth destination would break the 00–03 numbering for something
 that can disappear. It carries the same mono label the contact rows use (`/testimonials`, 13px,
-uppercase) instead of a heading, and a `margin-top` of its own on top of the section's gap.
-See decisions.md 56 and 64.
+uppercase) instead of a heading. It is not inside a section any more, so it carries the page gutter
+and the `1180px` cap itself, plus a `margin-top` of its own on top of the Stack's bottom padding.
+See decisions.md 56, 64 and 65.
 
 **One at a time, in a pager.** A column grows: measured, one entry is `214px` on a phone, so three made
 the block `678px` and the section nearly two screens — the problem the projects grid had, and the same

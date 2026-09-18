@@ -24,19 +24,14 @@
 
   The sliver of the next card is still the whole affordance: it says there is
   more without a dot or a counter.
-
-  The testimonials sit at the end of the rail: they are about this work, and they
-  are a block rather than a section, so they add no destination and no number.
-  See docs/decisions.md 56.
 */
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SectionHeading from '../base/SectionHeading.vue'
 import ProjectCard from '../content/ProjectCard.vue'
-import Testimonials from '../content/Testimonials.vue'
 import { useLang } from '../../composables/useLang'
-import { config, projects } from '../../data'
+import { projects } from '../../data'
 
 // How far a drag has to travel before it counts as one. Under this it is a click
 // and the card opens; over it the click is swallowed, because nobody means to
@@ -337,8 +332,6 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
-
-    <Testimonials v-if="config.showTestimonials" />
   </section>
 </template>
 

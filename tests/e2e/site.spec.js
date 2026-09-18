@@ -295,9 +295,9 @@ test('on touch the rail marks the card it is parked on', async ({ page, isMobile
 test('the testimonials page one at a time, and the window follows the quote', async ({ page, isMobile }) => {
   await openSite(page, { reduced: true })
 
-  const pane = page.locator('#projects .pane')
-  const first = page.locator('#projects .entry').first()
-  const count = page.locator('#projects .position')
+  const pane = page.locator('.testimonials .pane')
+  const first = page.locator('.testimonials .entry').first()
+  const count = page.locator('.testimonials .position')
   const prev = page.getByRole('button', { name: 'Previous testimonial' })
   const next = page.getByRole('button', { name: 'Next testimonial' })
 
@@ -333,8 +333,8 @@ test('the testimonials page one at a time, and the window follows the quote', as
 test('the next quote never peeks under the one on show', async ({ page }) => {
   await openSite(page, { reduced: true })
 
-  const pane = page.locator('#projects .pane')
-  const entries = page.locator('#projects .entry')
+  const pane = page.locator('.testimonials .pane')
+  const entries = page.locator('.testimonials .entry')
 
   /*
     The room for the arrows used to be the pane's own padding. Overflow clips at
@@ -350,7 +350,7 @@ test('the next quote never peeks under the one on show', async ({ page }) => {
 test('the arrows are hidden on a phone, where the swipe is the gesture', async ({ page, isMobile }) => {
   await openSite(page, { reduced: true })
 
-  const controls = page.locator('#projects .pager-controls')
+  const controls = page.locator('.testimonials .pager-controls')
   const next = page.getByRole('button', { name: 'Next testimonial' })
 
   if (!isMobile) {
@@ -376,11 +376,11 @@ test('collapsing a quote brings the window back down', async ({ page }) => {
   */
   await openSite(page, { reduced: true, width: 420, height: 900 })
 
-  const pane = page.locator('#projects .pane')
+  const pane = page.locator('.testimonials .pane')
   const height = () => pane.evaluate((el) => el.clientHeight)
 
   const clamped = await height()
-  const more = page.locator('#projects .entry:not([inert]) .more')
+  const more = page.locator('.testimonials .entry:not([inert]) .more')
 
   await expect(more).toBeVisible()
   await more.click()

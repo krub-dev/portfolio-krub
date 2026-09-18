@@ -1,6 +1,6 @@
 <script setup>
 /*
-  What people say, at the end of the Projects rail: one at a time, in a pager.
+  What people say, between the Stack and Contact: one at a time, in a pager.
 
   It used to be a column, and a column grows. Measured: one entry is 214px on a
   phone, so three of them made the block 678px and the section nearly two
@@ -23,8 +23,8 @@
   fade rather than a hard cut. At rest the mask does nothing, because the entries
   carry their own vertical padding and the text never sits on the edge.
 
-  config.showTestimonials is checked by ProjectsSection, not here: the parent
-  decides whether the block exists at all.
+  config.showTestimonials is checked by HomeView, not here: the page decides
+  whether the block exists at all.
 */
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -350,10 +350,16 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/*
+  The block sits between the Stack and Contact, so it carries the page gutter and
+  the 1180px cap every section uses: it is not inside one any more. The top
+  margin is on top of the Stack's own bottom padding — the block is not a section
+  and still needs its own air to read as separate from the grid above it.
+*/
 .testimonials {
-  /* Air before the block, on top of the section's own gap: the rail and the
-     quotes are two different things and were sitting too close to tell. */
-  margin-top: clamp(28px, 4vw, 56px);
+  max-width: 1180px;
+  margin: clamp(28px, 4vw, 56px) auto 0;
+  padding: 0 var(--gutter-r) 0 var(--gutter-l);
 }
 
 /*

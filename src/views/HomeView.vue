@@ -14,6 +14,7 @@
 import { computed, ref } from 'vue'
 
 import ProjectModal from '../components/content/ProjectModal.vue'
+import Testimonials from '../components/content/Testimonials.vue'
 import AboutSection from '../components/sections/AboutSection.vue'
 import ContactSection from '../components/sections/ContactSection.vue'
 import HeroSection from '../components/sections/HeroSection.vue'
@@ -21,7 +22,7 @@ import MarqueeBar from '../components/sections/MarqueeBar.vue'
 import ProjectsSection from '../components/sections/ProjectsSection.vue'
 import StackSection from '../components/sections/StackSection.vue'
 import { useLang } from '../composables/useLang'
-import { copy, projects } from '../data'
+import { config, copy, projects } from '../data'
 
 const { lang } = useLang()
 const marqueeItems = computed(() => copy.marquee[lang.value])
@@ -48,6 +49,7 @@ const openProject = computed(() => (openIndex.value === null ? null : projects[o
     <AboutSection />
     <ProjectsSection @open="openIndex = $event" />
     <StackSection />
+    <Testimonials v-if="config.showTestimonials" />
     <ContactSection />
 
     <ProjectModal
