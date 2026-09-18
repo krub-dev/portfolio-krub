@@ -5,6 +5,25 @@ behind them. Newest at the bottom. If a decision here contradicts
 [`design-spec.md`](design-spec.md), this file wins — the spec is the visual contract, this is
 the record of where I have moved away from it.
 
+## Index
+
+A map, not a second copy — the log stays chronological and newest-last. Add the
+new number to its range when a decision is appended.
+
+- **Foundations — 1–13.** Assets in `public/`, language, title, line endings, `box-sizing`,
+  `/preview`, no HTML in the dictionaries, the theme bootstrap, the accent tokens, `data/` vs
+  `locales/`, and `config.js`.
+- **Chrome and motion — 14–26.** The hero's height escape, the single rAF loop, the cursor,
+  Limonacho's colours, the scroll spy, the two grid layers, the modal, focus and reduced motion.
+- **Accessibility and build — 27–34.** Contrast, the card's semantics, Lighthouse, the icons, Open
+  Graph, and why there are two test runners.
+- **Responsive, mobile and the 404 — 35–46.** The footer's height, safe areas, landscape, the compact
+  navbar, self-hosted fonts, and the soft 404.
+- **Interaction, theme and Limonacho — 47–53.** The softer magnetic pull, accent as its own axis, the
+  iOS toolbar, the "acho", the stage glow and the menu dots.
+- **Sections and copy — 54–64.** The contact band, testimonials inside Projects, the contact endpoint,
+  the Stack spotlight, the projects rail, the navbar's click band, em dashes, the fade, and the pager.
+
 ---
 
 ### 1. Static assets live in `public/`, not `src/assets/`

@@ -1,22 +1,37 @@
 import { expect, test } from '@playwright/test'
 
+import {
+  bringIntoView,
+  openSite,
+  pressWhenHidden,
+  scrollTo,
+  scrollToBottom,
+  scrollToTopOf,
+  touchDrag,
+  trackShift,
+} from './helpers.js'
+
 /*
   These flows. Each one is here because it could not be verified any other way —
   they all depend on scroll events, animation frames or CSS transitions
   actually advancing.
+
+  The setup they share — reduced motion, the instant scrolls, the touch
+  dispatch — lives in helpers.js: a test says what it checks, not how the
+  browser had to be coaxed into checking it.
 */
 
 test.describe('chrome reacts to scrolling', () => {
   test.skip(({ isMobile }) => isMobile, 'the desktop navbar is hidden below 900px')
 
   test('the navbar goes compact and shrinks to its own contents', async ({ page }) => {
-    await page.goto('/')
+    await openSite(page)
     const capsule = page.locator('.capsule')
 
     const wide = (await capsule.boundingBox()).width
     expect(wide).toBeGreaterThan(1000)
 
-    await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }))
+    await scrollTo(page, 600)
     // The capsule animates its max-width over 0.55s; wait for the end state
     // rather than for a fixed delay.
     await expect(capsule).toHaveClass(/compact/)
@@ -26,21 +41,14 @@ test.describe('chrome reacts to scrolling', () => {
   })
 
   test('the footer slides in and never covers the last section', async ({ page }) => {
-    await page.goto('/')
+    await openSite(page)
     const footer = page.locator('footer')
     const viewport = page.viewportSize().height
 
     // Off-screen at the top of the page.
     expect((await footer.boundingBox()).y).toBeGreaterThanOrEqual(viewport - 1)
 
-    /*
-      Instant. `html { scroll-behavior: smooth }` is global, so a plain scrollTo
-      animates — and under parallel workers that animation outran the 2s the poll
-      below allows, which is what made this test flake.
-    */
-    await page.evaluate(() =>
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }),
-    )
+    await scrollToBottom(page)
     await expect(footer).toHaveClass(/shown/)
     await expect
       .poll(async () => (await footer.boundingBox()).y, { timeout: 2000 })
@@ -54,26 +62,20 @@ test.describe('chrome reacts to scrolling', () => {
   })
 
   test('exactly one nav link is highlighted, and it follows the scroll', async ({ page }) => {
-    await page.goto('/')
+    await openSite(page)
     const active = page.locator('.link.active')
 
     // At the top nothing is active: the hero has no nav link.
     await expect(active).toHaveCount(0)
 
     for (const id of ['me', 'projects', 'stack', 'contact']) {
-      // Deliberately deterministic: scrollIntoViewIfNeeded may not scroll at
-      // all when the element is already partly visible, which leaves the
-      // section short of the spy's 35%-of-viewport line. Put its top edge at a
-      // known 100px instead — and instantly, because the page scrolls smoothly
-      // by default and this assertion is about where the mark lands, not about
-      // the animation getting there.
-      await page.evaluate((sectionId) => {
-        const el = document.getElementById(sectionId)
-        window.scrollTo({
-          top: el.getBoundingClientRect().top + window.scrollY - 100,
-          behavior: 'instant',
-        })
-      }, id)
+      /*
+        Deliberately deterministic: put the section's top edge at a known 100px
+        rather than trusting scrollIntoViewIfNeeded, which may not scroll at all
+        when the element is already partly visible and leaves the section short
+        of the spy's 35%-of-viewport line.
+      */
+      await scrollToTopOf(page, `#${id}`, 100)
       await expect(active).toHaveCount(1)
       await expect(active).toHaveAttribute('href', `/#${id}`)
     }
@@ -81,7 +83,7 @@ test.describe('chrome reacts to scrolling', () => {
 })
 
 test('the project modal traps focus, closes on Escape and gives focus back', async ({ page }) => {
-  await page.goto('/')
+  await openSite(page)
 
   const card = page.locator('.card .open').first()
   const name = await card.textContent()
@@ -118,8 +120,8 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
 })
 
 test('a click on the card opens the project, not just the keyboard', async ({ page }) => {
-  await page.goto('/')
-  await page.locator('#projects .viewport').scrollIntoViewIfNeeded()
+  await openSite(page)
+  await bringIntoView(page.locator('#projects .viewport'))
   await page.waitForTimeout(300)
 
   const box = await page.locator('#projects .card').first().boundingBox()
@@ -137,8 +139,8 @@ test('a click on the card opens the project, not just the keyboard', async ({ pa
 
 test('the parked card fills its arrow where there is no hover', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'only a touch device marks the parked card')
-  await page.goto('/')
-  await page.locator('#projects .viewport').scrollIntoViewIfNeeded()
+  await openSite(page)
+  await bringIntoView(page.locator('#projects .viewport'))
 
   // The marker is the border AND the arrow. The fill lived in the hover block,
   // so on a phone the card was marked and its arrow was not.
@@ -148,21 +150,10 @@ test('the parked card fills its arrow where there is no hover', async ({ page, i
 })
 
 test('the project rail pages with its arrows, and stops at both ends', async ({ page }) => {
-  /*
-    Reduced motion, so the transform lands instantly and the assertions do not
-    race the curve. It is the same code with the transition switched off.
-  */
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/')
+  await openSite(page, { reduced: true })
 
   const track = page.locator('#projects .track')
-  // The rail is moved by transform, so where it is is the matrix's translateX:
-  // zero at the start, negative as it moves on.
-  const shift = () =>
-    track.evaluate((el) => {
-      const value = getComputedStyle(el).transform
-      return value === 'none' ? 0 : Math.round(new DOMMatrixReadOnly(value).m41)
-    })
+  const shift = () => trackShift(track)
 
   const prev = page.getByRole('button', { name: 'Previous project' })
   const next = page.getByRole('button', { name: 'Next project' })
@@ -207,10 +198,10 @@ test('the project rail pages with its arrows, and stops at both ends', async ({ 
 })
 
 test('the navbar only takes clicks where the capsule is', async ({ page }) => {
-  await page.goto('/')
+  await openSite(page)
 
   // Past 60px the capsule compacts and shrinks to hug its own contents.
-  await page.evaluate(() => window.scrollTo({ top: 400, behavior: 'instant' }))
+  await scrollTo(page, 400)
   await expect(page.locator('.capsule')).toHaveClass(/compact/)
 
   /*
@@ -241,8 +232,7 @@ test('the navbar only takes clicks where the capsule is', async ({ page }) => {
 test('the rail never fades the card it is parked on', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'only a phone has a position with a whole card either side')
 
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/')
+  await openSite(page, { reduced: true })
 
   const viewport = page.locator('#projects .viewport')
 
@@ -256,20 +246,13 @@ test('the rail never fades the card it is parked on', async ({ page, isMobile })
 })
 
 test('the project rail drags with the mouse, and a drag does not open a card', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/')
+  await openSite(page, { reduced: true })
 
   const viewport = page.locator('#projects .viewport')
   const track = page.locator('#projects .track')
-  const shift = () =>
-    track.evaluate((el) => {
-      const value = getComputedStyle(el).transform
-      return value === 'none' ? 0 : Math.round(new DOMMatrixReadOnly(value).m41)
-    })
+  const shift = () => trackShift(track)
 
-  // Instant, because html { scroll-behavior: smooth } would still be travelling
-  // when the box is read and the mouse would land nowhere near the rail.
-  await viewport.evaluate((el) => el.scrollIntoView({ behavior: 'instant', block: 'center' }))
+  await bringIntoView(viewport)
 
   const box = await viewport.boundingBox()
   const middle = box.y + box.height / 2
@@ -295,8 +278,7 @@ test('the project rail drags with the mouse, and a drag does not open a card', a
 test('on touch the rail marks the card it is parked on', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'the marker exists because there is no hover to mark it')
 
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/')
+  await openSite(page, { reduced: true })
 
   const cards = page.locator('#projects .card')
 
@@ -311,8 +293,7 @@ test('on touch the rail marks the card it is parked on', async ({ page, isMobile
 })
 
 test('the testimonials page one at a time, and the window follows the quote', async ({ page, isMobile }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/')
+  await openSite(page, { reduced: true })
 
   const pane = page.locator('#projects .pane')
   const first = page.locator('#projects .entry').first()
@@ -320,12 +301,8 @@ test('the testimonials page one at a time, and the window follows the quote', as
   const prev = page.getByRole('button', { name: 'Previous testimonial' })
   const next = page.getByRole('button', { name: 'Next testimonial' })
 
-  /*
-    On a phone the arrows are visually hidden — the swipe is the gesture there —
-    so they are pressed through the DOM. This test is about what paging does,
-    not about where the button is.
-  */
-  const press = (button) => (isMobile ? button.evaluate((el) => el.click()) : button.click())
+  // Visually hidden on a phone, so pressed through the DOM there.
+  const press = (button) => pressWhenHidden(button, isMobile)
 
   await expect(prev).toBeDisabled()
   await expect(next).toBeEnabled()
@@ -354,8 +331,7 @@ test('the testimonials page one at a time, and the window follows the quote', as
 })
 
 test('the next quote never peeks under the one on show', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/')
+  await openSite(page, { reduced: true })
 
   const pane = page.locator('#projects .pane')
   const entries = page.locator('#projects .entry')
@@ -372,8 +348,7 @@ test('the next quote never peeks under the one on show', async ({ page }) => {
 })
 
 test('the arrows are hidden on a phone, where the swipe is the gesture', async ({ page, isMobile }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/')
+  await openSite(page, { reduced: true })
 
   const controls = page.locator('#projects .pager-controls')
   const next = page.getByRole('button', { name: 'Next testimonial' })
@@ -395,13 +370,11 @@ test('the arrows are hidden on a phone, where the swipe is the gesture', async (
 })
 
 test('collapsing a quote brings the window back down', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   /*
     A phone-width viewport on both projects: on a wide one the real quote fits
     inside the four-line clamp and there is no "read more" to press.
   */
-  await page.setViewportSize({ width: 420, height: 900 })
-  await page.goto('/')
+  await openSite(page, { reduced: true, width: 420, height: 900 })
 
   const pane = page.locator('#projects .pane')
   const height = () => pane.evaluate((el) => el.clientHeight)
@@ -425,41 +398,28 @@ test('collapsing a quote brings the window back down', async ({ page }) => {
 test('the project rail drags with a finger too', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'there is no finger on a desktop')
 
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/')
+  await openSite(page, { reduced: true })
 
   const viewport = page.locator('#projects .viewport')
   const track = page.locator('#projects .track')
-  const shift = () =>
-    track.evaluate((el) => {
-      const value = getComputedStyle(el).transform
-      return value === 'none' ? 0 : Math.round(new DOMMatrixReadOnly(value).m41)
-    })
+  const shift = () => trackShift(track)
 
-  await viewport.evaluate((el) => el.scrollIntoView({ behavior: 'instant', block: 'center' }))
+  await bringIntoView(viewport)
   const box = await viewport.boundingBox()
 
   // Dispatched as real touch events, starting over a CARD rather than the gap
   // between two, and short enough that the nearest-card rule would undo it.
-  const client = await page.context().newCDPSession(page)
-  const y = box.y + box.height / 2
-  const from = box.x + 120
-  const at = (x) => [{ x, y, radiusX: 6, radiusY: 6, force: 1, id: 1 }]
-
-  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: at(from) })
-  for (let step = 1; step <= 8; step += 1) {
-    await client.send('Input.dispatchTouchEvent', {
-      type: 'touchMove',
-      touchPoints: at(from - (100 * step) / 8),
-    })
-  }
-  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await touchDrag(page, {
+    from: box.x + 120,
+    to: box.x + 20,
+    y: box.y + box.height / 2,
+  })
 
   await expect.poll(shift).toBeLessThan(-100)
 })
 
 test('an unknown path shows the 404, chrome and all, and offers a way back', async ({ page, isMobile }) => {
-  await page.goto('/no-such-page')
+  await openSite(page, { path: '/no-such-page' })
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('[404]')
   await expect(page.locator('meta[name="robots"][content="noindex"]')).toHaveCount(1)
@@ -502,7 +462,7 @@ test('an unknown path shows the 404, chrome and all, and offers a way back', asy
 })
 
 test('theme and language survive a reload', async ({ page }) => {
-  await page.goto('/')
+  await openSite(page)
   const html = page.locator('html')
 
   await expect(html).not.toHaveAttribute('data-theme', 'light')
@@ -529,7 +489,7 @@ test('theme and language survive a reload', async ({ page }) => {
 })
 
 test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
-  await page.goto('/')
+  await openSite(page)
   const html = page.locator('html')
   await expect(html).toHaveAttribute('data-accent', 'yellow')
 
@@ -555,7 +515,7 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
 
   // Compact: the bar hands the controls over — to the settings button on
   // desktop, to the menu on a phone.
-  await page.evaluate(() => window.scrollTo({ top: 400, behavior: 'instant' }))
+  await scrollTo(page, 400)
   await expect(page.locator('.capsule')).toHaveClass(/compact/)
   if (isMobile) {
     await expect(page.locator('.controls.mobile .full')).toBeHidden()
@@ -566,7 +526,7 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
     await page.locator('.settings .trigger').click()
     await expect(page.locator('.settings-panel .lang-btn')).toBeVisible()
     // A scroll closes it, as it does the mobile menu.
-    await page.evaluate(() => window.scrollTo({ top: 800, behavior: 'instant' }))
+    await scrollTo(page, 800)
     await expect(page.locator('.settings-panel')).toHaveCount(0)
   }
 
@@ -585,11 +545,10 @@ test('Limonacho greets you on the first poke of a visit, and only on that one', 
     }
   })
 
-  await page.goto('/')
+  await openSite(page)
 
   // He is parked off-screen until the hero is behind you.
-  const bringHimIn = () =>
-    page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }))
+  const bringHimIn = () => scrollToBottom(page)
   const lemon = page.locator('.lemon')
   const bubble = page.locator('.bubble')
   const plays = () => page.evaluate(() => window.__acho)
@@ -646,7 +605,7 @@ test('Limonacho greets you on the first poke of a visit, and only on that one', 
 test('the hero glow turns, and stops turning under reduced motion', async ({ page, isMobile }) => {
   test.skip(isMobile, 'the stage is not rendered below 900px')
 
-  await page.goto('/')
+  await openSite(page)
 
   /*
     Reading the animated custom property is the only way to see the rotation
@@ -676,12 +635,10 @@ test('the hero glow turns, and stops turning under reduced motion', async ({ pag
 test('the stack is monochrome until the pointer reaches a tile', async ({ page, isMobile }) => {
   test.skip(isMobile, 'there is no pointer below 900px')
 
-  await page.goto('/')
+  await openSite(page)
 
   const tile = page.locator('#stack .tile').first()
-  // Instant, because html { scroll-behavior: smooth } would still be travelling
-  // when the mouse lands, and the box would be read mid-flight.
-  await tile.evaluate((el) => el.scrollIntoView({ behavior: 'instant', block: 'center' }))
+  await bringIntoView(tile)
 
   const colour = tile.locator('.colour')
   const opacity = () => colour.evaluate((el) => Number(el.style.opacity || 0))
@@ -718,13 +675,13 @@ test('the stack is monochrome until the pointer reaches a tile', async ({ page, 
 test('on touch the stack lights with the scroll, and a tap names a tile', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'this is the path taken when there is no pointer')
 
-  await page.goto('/')
+  await openSite(page)
 
   // The light is the scroll, and it comes on group by group from a grey base:
   // with the first group in the middle of the screen, the last one has not been
   // reached yet.
   const tile = page.locator('#stack .tile').first()
-  await tile.evaluate((el) => el.scrollIntoView({ behavior: 'instant', block: 'center' }))
+  await bringIntoView(tile)
 
   // Polled, because a scroll event is delivered a frame after the scroll
   // itself, so a plain read can land before the sweep has run.
@@ -764,11 +721,8 @@ test('the contact form asks for what is missing, then sends', async ({ page }) =
     })
   })
 
-  await page.goto('/')
-  await page.evaluate(() => {
-    const form = document.querySelector('.form')
-    window.scrollTo({ top: form.getBoundingClientRect().top + window.scrollY - 150, behavior: 'instant' })
-  })
+  await openSite(page)
+  await scrollToTopOf(page, '.form', 150)
 
   const send = page.locator('.form button[type="submit"]')
 
