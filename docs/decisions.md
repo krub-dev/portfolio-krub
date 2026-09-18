@@ -1749,11 +1749,12 @@ as a tile laid on top of the grid instead of the grid lighting up.
   masked over the full viewport would fade later than the lines behind it and outlive them. Without
   it, a cell still glowed in the strip where the grid was already gone.
 - **It goes when the pointer sits still.** `usePointer` publishes `active`, false after two seconds
-  without a `mousemove`. The first version watched the window instead — `mouseleave` on the
-  document, `blur` on the window — and it was not reliable: the cursor stayed parked wherever it had
-  last been inside the page and only went on the next click. An idle timeout needs no window
-  boundary at all, and it is deliberately not instant, so the cursor does not vanish the moment you
-  stop to read.
+  without activity — a `mousemove` **or a scroll**, because a wheel fires no mouse event and the cell
+  was going while the page was still moving. The first version watched the window instead —
+  `mouseleave` on the document, `blur` on the window — and it was not reliable: the cursor stayed
+  parked wherever it had last been inside the page and only went on the next click. An idle timeout
+  needs no window boundary at all, and it is deliberately not instant, so the cursor does not vanish
+  the moment you stop to read.
 - **On touch it lights where you tap, and stays.** No cursor to follow, so the cell is placed on the
   tap and a scroll clears it — staying is deliberate, because a cell that fades on a timer reads as
   a glitch, and clearing on scroll is what stops it being left behind, marked, while the page moves

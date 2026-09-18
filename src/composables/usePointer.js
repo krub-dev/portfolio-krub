@@ -38,6 +38,14 @@ export function isPointerDevice() {
   return window.matchMedia('(hover: hover)').matches && window.innerWidth > 900
 }
 
+function restartIdle() {
+  if (idleTimer) clearTimeout(idleTimer)
+  idleTimer = setTimeout(() => {
+    pointer.active = false
+    publish()
+  }, IDLE_MS)
+}
+
 function onMove(event) {
   pointer.x = event.clientX
   pointer.y = event.clientY
@@ -47,11 +55,16 @@ function onMove(event) {
     publish()
   }
 
-  if (idleTimer) clearTimeout(idleTimer)
-  idleTimer = setTimeout(() => {
-    pointer.active = false
-    publish()
-  }, IDLE_MS)
+  restartIdle()
+}
+
+/*
+  Scrolling is activity too. Without this the cell went while the page was still
+  moving, because the pointer had not — the idle timer only counted `mousemove`,
+  and a wheel or a trackpad scroll fires none.
+*/
+function onScroll() {
+  if (pointer.active) restartIdle()
 }
 
 function publish() {
@@ -66,6 +79,7 @@ function loop() {
 function start() {
   if (!listening) {
     window.addEventListener('mousemove', onMove, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
     listening = true
   }
   if (frame === null) frame = requestAnimationFrame(loop)
@@ -73,6 +87,7 @@ function start() {
 
 function stop() {
   window.removeEventListener('mousemove', onMove)
+  window.removeEventListener('scroll', onScroll)
   if (idleTimer) clearTimeout(idleTimer)
   idleTimer = null
   listening = false

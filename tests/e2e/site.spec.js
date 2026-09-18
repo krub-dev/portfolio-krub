@@ -290,6 +290,30 @@ test('the cursor and the grid cell go when the pointer sits still', async ({ pag
   await expect(cell).not.toHaveClass(/idle/)
 })
 
+test('a scroll counts as movement, so the cursor does not go while the page moves', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'there is no cursor below 900px')
+
+  await openSite(page)
+  const cell = page.locator('.grid-cell')
+
+  await page.mouse.move(900, 400)
+
+  /*
+    Scrolled repeatedly rather than once. A single scroll early on is racy under
+    a loaded parallel run: if the page is slow to process it, the idle timer can
+    fire first and this goes red for the wrong reason. The last scroll lands just
+    before the assertion, so the timer is freshly restarted; without counting the
+    scroll at all, the cell is gone by 2s and the assertion sees it idle.
+  */
+  await page.waitForTimeout(1200)
+  for (let i = 0; i < 6; i += 1) {
+    await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), 100 + i * 10)
+    await page.waitForTimeout(200)
+  }
+
+  await expect(cell).not.toHaveClass(/idle/)
+})
+
 test('on touch the grid cell lights where you tap, and a scroll clears it', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'this is the path taken when there is no cursor')
 
