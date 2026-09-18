@@ -308,6 +308,13 @@ because with no tail centred over him it reads as sitting on his leaf.
 ### BackgroundGrid
 Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the crossfade).
 
+### GridCell
+Prop: `masked` (boolean — mirrors the global grid's downward fade once the hero is behind you).
+The 72px cell of the background grid under the pointer, filled with `--acc` at `opacity:.08`.
+Fixed to the viewport rather than a child of a grid, because the hero grid scrolls and a cell
+inside it would drift off the cursor. Subscribes to `usePointer()` and snaps with `Math.floor`,
+so it reads as part of the grid and not as a second cursor. Never mounts on touch or below 900px.
+
 ### ScrollProgress
 Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress from
 `useScroll()` rather than taking it as a prop.

@@ -19,6 +19,7 @@ import { useRoute } from 'vue-router'
 
 import BackgroundGrid from './components/chrome/BackgroundGrid.vue'
 import CursorFx from './components/chrome/CursorFx.vue'
+import GridCell from './components/chrome/GridCell.vue'
 import LemonPet from './components/chrome/LemonPet.vue'
 import ScrollProgress from './components/chrome/ScrollProgress.vue'
 import TheFooter from './components/chrome/TheFooter.vue'
@@ -55,6 +56,7 @@ function goTop() {
   <div class="app" data-hide-cursor>
     <BackgroundGrid variant="hero" :visible="!pastHero" />
     <BackgroundGrid variant="global" :visible="pastHero" />
+    <GridCell :masked="pastHero" />
 
     <TheNavbar :active-id="activeId" :menu-open="menuOpen" @toggle-menu="menuOpen = !menuOpen" />
 

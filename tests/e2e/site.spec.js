@@ -229,6 +229,20 @@ test('the navbar only takes clicks where the capsule is', async ({ page }) => {
   expect(onCapsule).toBe(true)
 })
 
+test('the grid cell under the pointer lights up', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'there is no pointer below 900px')
+
+  await openSite(page)
+
+  const cell = page.locator('.grid-cell')
+  await page.mouse.move(1000, 400)
+
+  // Snapped to the 72px step, not eased: 1000 -> 13 cells, 400 -> 5.
+  await expect
+    .poll(() => cell.evaluate((el) => el.style.transform))
+    .toBe('translate(936px, 360px)')
+})
+
 test('the rail never fades the card it is parked on', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'only a phone has a position with a whole card either side')
 

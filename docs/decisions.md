@@ -21,9 +21,9 @@ new number to its range when a decision is appended.
   navbar, self-hosted fonts, and the soft 404.
 - **Interaction, theme and Limonacho — 47–53.** The softer magnetic pull, accent as its own axis, the
   iOS toolbar, the "acho", the stage glow and the menu dots.
-- **Sections and copy — 54–65.** The contact band, testimonials inside Projects and then below the
+- **Sections and copy — 54–66.** The contact band, testimonials inside Projects and then below the
   Stack, the contact endpoint, the Stack spotlight, the projects rail, the navbar's click band, em
-  dashes, the fade, and the pager.
+  dashes, the fade, the pager, and the grid cell under the pointer.
 
 ---
 
@@ -1718,3 +1718,29 @@ move, not a reversal of the shape. Two consequences:
 The scroll spy has no link for it, so while it is on screen the Stack stays active until Contact
 crosses the line. Accepted: it is an unnumbered block, and the alternative would be inventing a
 destination for something that can disappear.
+
+### 66. The grid cell under the pointer lights up
+
+**Date:** 2026-09-18 · **Status:** active
+
+The background grid was pure texture. Now the 72px cell the pointer is over fills with `--acc` at
+`opacity:.08`, snapped with `Math.floor` so it reads as part of the pattern rather than as a second
+cursor.
+
+- **The cell, not the ripple.** A click ripple was the other candidate. It was dropped because it
+  needs a listener on a page full of real buttons and links, and it only exists for the instant
+  after a click; the cell is passive and always there.
+- **The cell, not the glow.** A radial spotlight on the grid lines was the cheapest version, but
+  the cell is more distinctive and costs the same: one element, one `transform` per frame.
+- **A fixed element of its own, not a child of a grid.** The hero grid is absolute and scrolls
+  away, so a cell inside it would drift off the cursor the moment the page moved. Fixed to the
+  viewport it is always the cell the pointer is really over, whichever of the two grids is showing.
+- **It takes the global grid's mask** once the hero is behind you (`masked`), because the grid
+  fades out toward the bottom of the viewport and a cell still glowing down there would be a light
+  with nothing under it.
+- **The magnet is still on the table, and still expensive.** CSS cannot bend a line, so pulling the
+  grid lines toward the cursor means rebuilding the grid as DOM or SVG and transforming each line
+  per frame. Not done: the cell was the 80/20, and it can be revisited if it is not enough.
+
+It rides `usePointer`, the app's single rAF loop, and never mounts on touch or below 900px, like
+every other cursor effect.

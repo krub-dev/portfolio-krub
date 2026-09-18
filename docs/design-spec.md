@@ -684,6 +684,13 @@ Two layers, always `pointer-events:none`, `z-index:0`, 72px pattern:
 When the top edge of the "about" section reaches 60% of the viewport, a `.35s` crossfade runs:
 the hero layer drops to 0 and the global one rises to 1.
 
+**The cell under the pointer lights up**, on pointer devices only: one 72px square in `--acc` at
+`opacity:.08`, snapped to the grid with `Math.floor` so it reads as part of the pattern. It is a
+fixed element of its own, not a child of either grid — the hero grid is absolute and scrolls, so a
+cell inside it would drift off the cursor — and once the hero is behind you it takes the global
+grid's own downward mask, so the light never hangs where the grid has faded out. It rides the app's
+single rAF loop. See decision 66.
+
 ### 3.13 Custom cursor
 
 Pointer devices only (`@media (hover:hover)`) and above 900px. The native cursor is hidden

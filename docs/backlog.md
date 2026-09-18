@@ -189,3 +189,11 @@ Not tasks. No urgency and no order — written down so they do not evaporate.
 - A blog?
 - A photo that follows the cursor, like Limonacho but my profile picture.
 - Frosted glass on the 3D slot, with the grid behind it.
+- An interactive background grid. **The cell under the pointer is built** (decision 66): one 72px
+  square in `--acc` at `opacity:.08`, snapped to the grid, riding the app's single rAF loop. What is
+  left of the idea is the rest: the glow is cheap (an accent copy of the pattern under a radial mask
+  that follows the pointer, two custom properties, no new listeners), and the magnet is not (CSS
+  cannot bend a line, so pulling the lines toward the cursor means rebuilding the grid as ~33 DOM or
+  SVG lines and transforming them per frame, plus a decision about the two crossfading instances and
+  the mask). A click ripple is the other candidate, dropped for now because it needs a listener on a
+  page full of real buttons and links.
