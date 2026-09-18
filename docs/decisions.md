@@ -1736,6 +1736,13 @@ as a tile laid on top of the grid instead of the grid lighting up.
 - **A fixed element of its own, not a child of a grid.** The hero grid is absolute and scrolls
   away, so a cell inside it would drift off the cursor the moment the page moved. Fixed to the
   viewport it is always the cell the pointer is really over, whichever of the two grids is showing.
+- **It snaps to the grid that is actually on screen.** Fixed to the viewport, it was snapping to the
+  viewport's lines — which are the global layer's, and only line up with the hero layer at scroll
+  zero. Scrolled a little, the cell sat between the hero layer's lines and read as "descuadrado".
+  `masked` is the switch: while the hero layer is the visible one the cell snaps in page
+  coordinates (`-scrollY + floor((y + scrollY) / 72) * 72`), and once the fixed layer takes over it
+  snaps to the viewport. A scroll also takes it away, because the grid moves under a cell that is
+  fixed and the two would drift apart; moving the pointer again is what puts it back, on the line.
 - **It takes the global grid's mask** once the hero is behind you (`masked`), because the grid
   fades out toward the bottom of the viewport and a cell still glowing down there would be a light
   with nothing under it.
@@ -1748,9 +1755,12 @@ as a tile laid on top of the grid instead of the grid lighting up.
 - **On touch it lights where you tap, and stays.** No cursor to follow, so the cell is placed on the
   tap and a scroll clears it — staying is deliberate, because a cell that fades on a timer reads as
   a glitch, and clearing on scroll is what stops it being left behind, marked, while the page moves
-  under it. It also sits back on touch (`opacity:.22` against the pointer's `.45`): with no cursor it
-  is a mark left on the paper, and at the pointer's weight it shouted over a grid whose lines are
-  about 4% white.
+  under it. A **tap and not a press**: the first version lit it on `pointerdown`, so every scroll
+  flashed a cell at the finger before the page moved; now it waits for `pointerup` and only lights if
+  the finger travelled less than 10px, and a `pointercancel` (the browser taking the gesture for a
+  scroll) never lights anything. It also sits back on touch (`opacity:.22` against the pointer's
+  `.45`): with no cursor it is a mark left on the paper, and at the pointer's weight it shouted over
+  a grid whose lines are about 4% white.
 - **The magnet is still on the table, and still expensive.** CSS cannot bend a line, so pulling the
   grid lines toward the cursor means rebuilding the grid as DOM or SVG and transforming each line
   per frame. Not done: the cell was the 80/20, and it can be revisited if it is not enough.
@@ -1760,5 +1770,5 @@ as a tile laid on top of the grid instead of the grid lighting up.
   function. The cheap cousin, painting cells by sweeping with the button held, has the same problem in
   smaller form. Left in the backlog.
 
-It rides `usePointer`, the app's single rAF loop, and never mounts on touch or below 900px, like
-every other cursor effect.
+It rides `usePointer`, the app's single rAF loop, and never subscribes to it on touch or below
+900px, where the tap path takes over instead.

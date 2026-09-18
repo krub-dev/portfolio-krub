@@ -685,14 +685,15 @@ When the top edge of the "about" section reaches 60% of the viewport, a `.35s` c
 the hero layer drops to 0 and the global one rises to 1.
 
 **The cell under the pointer lights up**, on pointer devices, and on touch it lights where you tap
-and stays until a scroll clears it — there is no cursor to follow. One 72px square outlined with a
-1px `--acc` border, `opacity:.45` with a pointer and `.22` on touch, snapped to the grid with
-`Math.floor` so it reads as part of the pattern. An outline and not a fill — the cell is the grid
-lighting up, not a tile laid on top of it. It is a fixed element of its own, not a child of either
-grid — the hero grid is absolute and scrolls, so a cell inside it would drift off the cursor — and
-once the hero is behind you it takes the global grid's own downward mask, so the light never hangs
-where the grid has faded out. It rides the app's single rAF loop, and the cursor and the cell both
-go after two seconds without a `mousemove`. See decision 66.
+and stays until a scroll clears it — there is no cursor to follow, and a tap is told from a scroll by
+how far the finger travelled. One 72px square outlined with a 1px `--acc` border, `opacity:.45` with
+a pointer and `.22` on touch, snapped with `Math.floor` so it reads as part of the pattern. An
+outline and not a fill — the cell is the grid lighting up, not a tile laid on top of it. It is a
+fixed element of its own, not a child of either grid, and it snaps to whichever layer is showing:
+page coordinates while the absolute hero layer is visible, the viewport once the fixed global layer
+takes over. It takes that layer's downward mask too, so the light never hangs where the grid has
+faded out. A scroll takes it away; moving the pointer brings it back. It rides the app's single rAF
+loop, and the cursor and the cell both go after two seconds without a `mousemove`. See decision 66.
 
 ### 3.13 Custom cursor
 

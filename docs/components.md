@@ -309,13 +309,16 @@ because with no tail centred over him it reads as sitting on his leaf.
 Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the crossfade).
 
 ### GridCell
-Prop: `masked` (boolean — mirrors the global grid's downward fade once the hero is behind you).
+Prop: `masked` (boolean — which layer is showing: false while the absolute hero grid is visible, true
+once the fixed global one takes over; it also gates that layer's downward mask).
 The 72px cell of the background grid under the pointer, outlined with a 1px `--acc` border at
 `opacity:.45` (`.22` on touch). Fixed to the viewport rather than a child of a grid, because the hero
 grid scrolls and a cell inside it would drift off the cursor. Subscribes to `usePointer()` and snaps
-with `Math.floor`, so it reads as part of the grid and not as a second cursor. It goes with the
-cursor after two seconds without a `mousemove`. On touch, where there is no cursor, it lights where
-you tap and stays until a scroll clears it; the pointer subscription never happens there.
+with `Math.floor` to whichever layer is visible — page coordinates for the hero layer, the viewport
+for the fixed one. A scroll hides it; the next move brings it back. It goes with the cursor after two
+seconds without a `mousemove`. On touch, where there is no cursor, it lights on a tap (told from a
+scroll by the finger's travel) and stays until a scroll clears it; the pointer subscription never
+happens there.
 
 ### ScrollProgress
 Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress from

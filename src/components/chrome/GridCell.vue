@@ -12,15 +12,23 @@
   reads as part of the grid and not as a second cursor. An outline and not a fill:
   the cell should be the grid lighting up, not a tile laid on top of it.
 
-  `masked` mirrors the global grid's own mask once the hero is behind you: the
-  grid fades out toward the bottom of the viewport, and a cell still glowing down
-  there would be a light with nothing under it.
+  The grid it belongs to is not always the viewport. While the hero layer is the
+  visible one it is absolute and scrolls, so the cell has to snap in page
+  coordinates — otherwise it sits on the fixed grid's lines and comes apart from
+  the ones you can see. `masked` is exactly the switch: true once the global
+  (fixed) layer has taken over.
+
+  `masked` also mirrors that layer's own downward fade, so the cell never glows
+  where the grid has faded out.
+
+  Scrolling hides it, because the grid moves under a cell that is fixed to the
+  viewport and the two would drift apart; moving the pointer again is what puts it
+  back, on the right line.
 
   On touch there is no cursor, so the cell follows the finger instead: it lights
-  where you tap and stays, and a scroll clears it. Staying is deliberate — a cell
-  that fades on a timer reads as a glitch, and on a phone the tap is the only way
-  to light it at all. Clearing on scroll is what stops it being left behind,
-  marked, while the page moves under it.
+  on a tap and stays, and a scroll clears it. A tap and not a press: the finger
+  has to lift without travelling, or the start of every scroll would flash a cell
+  before the page moved.
 */
 import { onMounted, onUnmounted, ref } from 'vue'
 
@@ -29,62 +37,101 @@ import { isPointerDevice, usePointer } from '../../composables/usePointer'
 // The grid's own step. Design spec 3.12; keep in sync with BackgroundGrid's size.
 const SIZE = 72
 
-defineProps({
+// How far a finger can travel and still be a tap rather than a scroll.
+const TAP_SLOP = 10
+
+const props = defineProps({
   masked: { type: Boolean, default: false },
 })
 
 const enabled = isPointerDevice()
 const cell = ref(null)
-let idle = false
+let hidden = false
+let scrolled = false
+let lastX = null
+let lastY = null
+let downX = 0
+let downY = 0
+let downId = null
 
-function place(x, y) {
-  if (cell.value) cell.value.style.transform = `translate(${x}px, ${y}px)`
+// Where the visible grid starts, in viewport coordinates: 0 for the fixed layer,
+// minus the scroll for the hero layer, which scrolls with the page.
+function gridTop() {
+  return props.masked ? 0 : -window.scrollY
+}
+
+function place(clientX, clientY) {
+  if (!cell.value) return
+  const top = gridTop()
+  const x = Math.floor(clientX / SIZE) * SIZE
+  const y = top + Math.floor((clientY - top) / SIZE) * SIZE
+  cell.value.style.transform = `translate(${x}px, ${y}px)`
+}
+
+function setHidden(value) {
+  if (value === hidden || !cell.value) return
+  hidden = value
+  cell.value.classList.toggle('idle', value)
 }
 
 if (enabled) {
   usePointer((pointer) => {
     if (!cell.value) return
 
-    place(
-      Math.floor(pointer.x / SIZE) * SIZE,
-      Math.floor(pointer.y / SIZE) * SIZE,
-    )
-
-    /*
-      Only the state machine touches `idle` here. Removing the class on every
-      frame and re-adding it on the change would strip it one frame after the
-      pointer goes: the flag is already true, so the guard would not put it back.
-    */
-    const away = !pointer.active
-    if (away !== idle) {
-      idle = away
-      cell.value.classList.toggle('idle', away)
+    // A move is what clears the scroll state; the position is what tells them
+    // apart, because the pointer object is shared and has no "moved" flag.
+    if (pointer.x !== lastX || pointer.y !== lastY) {
+      lastX = pointer.x
+      lastY = pointer.y
+      scrolled = false
     }
+
+    place(pointer.x, pointer.y)
+    setHidden(!pointer.active || scrolled)
   })
 }
 
-function onTap(event) {
-  if (!cell.value) return
-  place(
-    Math.floor(event.clientX / SIZE) * SIZE,
-    Math.floor(event.clientY / SIZE) * SIZE,
-  )
-  cell.value.classList.remove('idle')
+function onDown(event) {
+  downX = event.clientX
+  downY = event.clientY
+  downId = event.pointerId
+}
+
+function onUp(event) {
+  if (downId === null || event.pointerId !== downId) return
+  downId = null
+
+  // A scroll travels before the finger lifts; only a tap lights the cell.
+  if (Math.hypot(event.clientX - downX, event.clientY - downY) > TAP_SLOP) return
+
+  place(event.clientX, event.clientY)
+  setHidden(false)
+}
+
+// The browser takes the gesture over for a scroll and cancels it, so a cancel is
+// never a tap and must not light anything.
+function onCancel() {
+  downId = null
 }
 
 function onScroll() {
-  cell.value?.classList.add('idle')
+  scrolled = true
+  setHidden(true)
 }
 
 onMounted(() => {
-  if (enabled) return
-  window.addEventListener('pointerdown', onTap, { passive: true })
   window.addEventListener('scroll', onScroll, { passive: true })
+  if (enabled) return
+  window.addEventListener('pointerdown', onDown, { passive: true })
+  window.addEventListener('pointerup', onUp, { passive: true })
+  window.addEventListener('pointercancel', onCancel, { passive: true })
 })
 
 onUnmounted(() => {
-  window.removeEventListener('pointerdown', onTap)
   window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('pointerdown', onDown)
+  window.removeEventListener('pointerup', onUp)
+  window.removeEventListener('pointercancel', onCancel)
 })
 </script>
 
