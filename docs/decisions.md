@@ -1662,10 +1662,13 @@ projects grid, and it got the same answer — one at a time.
   which is what a watermark should do — sit under the text, not beside the attribution.
 - **The arrows moved inside the box.** They were beside it, which on a desktop left a pair of buttons
   hanging off the edge of a wide box with nothing to belong to. They now sit in the box's bottom right
-  corner, `12px` from the bottom and `16px` from the right, in a row: stacked in a corner they read as a
-  strip down the side. The room is the pane's `padding-bottom`, not the entries', so the window keeps its
-  measured height and the quotes keep ending where they ended. Desktop only, because on a phone they are
-  clipped and the room would be an empty strip for nothing.
+   corner, `12px` from the bottom and `16px` from the right, in a row: stacked in a corner they read as a
+   strip down the side. The room is the pane's `--pane-room` (`56px`), spent as bottom padding on the
+   entries and not on the pane: overflow clips at the padding edge, so padding on the window left the next
+   entry inside the clip and its attribution showed through the empty strip — and more height would not
+   have fixed it either, for the same reason. On the entry it is part of the measured height, so the next
+   quote starts exactly where the window ends. Desktop only, because on a phone they are clipped and the
+   room would be an empty strip for nothing.
 - **On a phone the arrows go, and nothing replaces them.** The swipe is the gesture there and the
   buttons only took width from the quote. An icon was tried in the header as a cue — four of them, at
   real size — and it read as clutter, so the header went back to two items. Clipped, not removed: the

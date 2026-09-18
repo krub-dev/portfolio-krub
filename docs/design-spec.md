@@ -520,8 +520,10 @@ attribution. **The controls sit inside the box, in its bottom right corner**, on
 they were a pair of buttons hanging off the edge of the box with nothing to belong to, and a desktop box
 is wide enough to hold them. They are `12px` from the bottom and `16px` from the right — not against the
 edge — and in a row rather than the column they were outside, because stacked in the corner of a wide box
-they read as a strip down the side. The pane carries the room for them as `padding-bottom` (`56px`), which
-keeps the window's measured height and the quotes ending where they ended and leaves the corner empty. The
+they read as a strip down the side. The room for them is the pane's `--pane-room` (`56px`), spent as
+bottom padding on the entries and not on the pane: overflow clips at the padding edge, so padding on the
+window left the next entry inside the clip and its attribution showed through the empty strip. On the entry
+it is part of the measured height, so the next quote starts below the clip and the corner is left empty. The
 rail already has a pair of horizontal arrows over its head, and two pairs in one column of the page read as
 one control that lost its way. **The arrows are vertical** — up, then down — because the movement is: down
 brings the next quote up from below while the one showing leaves upwards. The window is `overflow:hidden`

@@ -353,6 +353,24 @@ test('the testimonials page one at a time, and the window follows the quote', as
   await expect(prev).toBeDisabled()
 })
 
+test('the next quote never peeks under the one on show', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+
+  const pane = page.locator('#projects .pane')
+  const entries = page.locator('#projects .entry')
+
+  /*
+    The room for the arrows used to be the pane's own padding. Overflow clips at
+    the padding edge, so the next entry was still inside the clip and its
+    attribution showed through the empty strip. The room belongs to the entry:
+    the next one now starts exactly where the window ends.
+  */
+  const paneBottom = await pane.evaluate((el) => el.getBoundingClientRect().bottom)
+  const nextTop = await entries.nth(1).evaluate((el) => el.getBoundingClientRect().top)
+  expect(nextTop).toBeGreaterThanOrEqual(paneBottom - 1)
+})
+
 test('the arrows are hidden on a phone, where the swipe is the gesture', async ({ page, isMobile }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')

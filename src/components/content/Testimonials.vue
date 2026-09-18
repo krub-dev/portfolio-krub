@@ -514,15 +514,19 @@ onUnmounted(() => {
 }
 
 /*
-  Room for the controls in the box's bottom right, on the pane rather than on the
-  entries: the pane is the box's lower half and its padding is inside the clip, so
-  the window keeps its measured height and the quotes keep ending where they
-  ended, with the corner left empty for the arrows. Desktop only — on a phone
-  they are clipped and the room would be an empty strip for nothing.
+  Room for the controls in the box's bottom right, published to the entries as a
+  variable instead of kept as the pane's own padding.
+
+  It has to live on the entry. Overflow clips at the padding edge, so with the
+  room on the pane the quote stacked under it was still inside the clip and the
+  next attribution showed through the empty strip — the fix is not more height
+  either, for the same reason. On the entry the room is part of the measured
+  height, so the next entry starts below the clip. Desktop only: on a phone the
+  arrows are clipped and the room would be an empty strip for nothing.
 */
 @media (min-width: 901px) {
   .pane {
-    padding-bottom: 56px;
+    --pane-room: 56px;
   }
 }
 
