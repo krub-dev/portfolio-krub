@@ -1490,8 +1490,18 @@ likely to be skimming.
   hard vertical edge where a card is clipped reads as a mistake rather than as "there is more this
   way" — but only on that side: at the start the first card's rounded corner sits on the edge and
   fading it would eat it. The width is **derived from the rail's own geometry**, not a flat number:
-  the first attempt used `56px` and the peek is `45px` on a phone, so the fade reached 11px into the
-  card you were reading and smudged its edge instead of softening the next one's.
+   the first attempt used `56px` and the peek is `45px` on a phone, so the fade reached 11px into the
+   card you were reading and smudged its edge instead of softening the next one's.
+- **The viewport keeps a room for the magnetic pull, on every side.** The pull moves a card up to `10px`
+  toward the cursor, and a card at either end of the rail was pushed past the viewport's own edge, where
+  the clip took its border and its rounded corner off. A few pixels, and the owner saw it. The one-line
+  answer would be `overflow-clip-margin`, and it is out: **WebKit does not support it** — checked in
+  Playwright's WebKit rather than assumed, `CSS.supports` says no — and WebKit is what the owner carries.
+  So the room is `padding`, taken straight back with a negative margin: the content box is unchanged, so
+  the cards keep the width they were measured at and still line up with the section's gutter, and only the
+  clip is wider. Two consequences, both handled: the fade adds the room to its length, or the extra strip
+  shows unfaded and the hard edge just moves inward, and `sync()` takes the padding back out of
+  `clientWidth` when it works out `maxOffset`, or the rail stops a room short of its last card.
 - **Hover is guarded by `hover: hover`, and touch gets a position marker.** A tap leaves `:hover`
   stuck on whatever it touched, so the yellow border was there or not depending on where the last
   finger landed — the owner read that as the marking being unreliable. The hover styles now live

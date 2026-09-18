@@ -323,8 +323,9 @@ Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`,
 
 ### 3.6 Projects
 
-A **horizontal rail**: a clipped viewport (`overflow:hidden`, `padding:12px 0` to leave the magnetic pull
-its 10px, `touch-action:pan-y`) holding a `flex` track with `gap:20px`, moved by
+A **horizontal rail**: a clipped viewport (`overflow:hidden`, `padding:12px var(--rail-room)` to leave the
+magnetic pull its 10px on every side, taken back with a negative margin so the content box is unchanged,
+`touch-action:pan-y`) holding a `flex` track with `gap:20px`, moved by
 `transform: translate3d(-offset, 0, 0)` with `will-change:transform`. **The travel is a loop in the
 script, not a CSS transition**, because the fade has to know the position it is passing through: a
 transition runs in the compositor where nothing can read it, so the fade could only be decided from the
@@ -333,6 +334,15 @@ target under `prefers-reduced-motion`. **Three cards and the sliver of a fourth*
 and a sliver** below 900px, which is the whole affordance: the sliver says there is more, without a dot
 or a counter. The card width is `calc((100% - 2 * var(--rail-gap) - var(--rail-peek)) / 3)` — the two
 gaps and the peek — and `calc(100% - var(--rail-peek))` on a phone.
+
+**The room on the sides is the magnetic pull's, not the layout's.** The pull moves a card up to `10px`
+toward the cursor, and a card at either end of the rail was pushed past the viewport's own edge, where
+the clip took its border and its rounded corner off — a few pixels, but the eye catches a broken corner.
+`overflow-clip-margin` would be the one-line answer and **WebKit does not support it** (checked, not
+assumed), so the room is padding taken straight back with a negative margin: the content box is the same,
+the cards keep the width they were measured at and still line up with the section's gutter, and only the
+clip is wider. The fade adds the room to its length, or the extra strip would show unfaded and the hard
+edge would simply move inward.
 
 The rail travels one card per step and stops with the last card flush to the right edge, so the last
 position shows cards 2–4 rather than card 4 alone. **The two arrows above it disable at the ends**,
@@ -357,8 +367,8 @@ behind is exactly off the edge. The right at the start, the left at the end, bot
 everything fits — and because it reads the offset rather than the destination, it is right at every
 frame. A hard vertical edge where a card is cut reads as a mistake rather than as "there is more this
 way", and the side with nothing to continue is left alone: at the start the first card's rounded corner
-sits on the edge, and fading it would eat it. **The fade is the peek**, derived from the same two
-variables the card width is, so it stops exactly where the card you are reading begins. A flat `56px`
+sits on the edge, and fading it would eat it. **The fade is the peek plus the room**, derived from the
+same variables the card width is, so it stops exactly where the card you are reading begins. A flat `56px`
 did not: the peek is `45px` on a phone, so the fade reached 11px into the visible card and smudged its
 right edge instead of softening the next one.
 

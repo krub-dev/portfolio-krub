@@ -151,9 +151,19 @@ function sync(snap) {
 
   const gap = parseFloat(getComputedStyle(rail).columnGap) || 0
   const card = rail.firstElementChild?.getBoundingClientRect().width ?? 0
+
+  /*
+    The room the viewport keeps so the magnetic pull has somewhere to move a card
+    is padding, so clientWidth is two rooms wider than the strip the cards
+    actually travel in. Without taking it back here the rail would stop short of
+    its last card by exactly that much.
+  */
+  const room = parseFloat(getComputedStyle(view).paddingLeft) || 0
+  const visible = view.clientWidth - room * 2
+
   cardWidth = card
   step = card + gap
-  maxOffset = Math.max(0, rail.scrollWidth - view.clientWidth)
+  maxOffset = Math.max(0, rail.scrollWidth - visible)
 
   const last = step > 0 ? Math.ceil(maxOffset / step) : 0
   index = Math.min(Math.max(index, 0), last)
@@ -166,7 +176,7 @@ function sync(snap) {
 
   parked.value = items.value.map((_, i) => {
     const left = i * step - offset
-    return left + card <= 0 || left >= view.clientWidth
+    return left + card <= 0 || left >= visible
   })
 
   paint()
@@ -380,11 +390,27 @@ onUnmounted(() => {
   smudged rather than the next one looking cut.
 */
 .viewport {
+  /*
+    The magnetic pull moves a card up to 10px toward the cursor, and a card at
+    either end of the rail would be pushed past the viewport's own edge — its
+    border and its rounded corner clipped off, which is the one thing the eye
+    catches. So the clip keeps a room of padding, taken straight back with a
+    negative margin: the content box is unchanged, so the cards still line up
+    with the section's gutter and keep the width they were measured at, and only
+    the clip is wider.
+  */
+  --rail-room: 10px;
   --rail-gap: 20px;
   --rail-peek: 68px;
-  --rail-fade: calc(var(--rail-peek) - var(--rail-gap));
+  /*
+    The visible peek is the peek minus the gap, so the fade covers it exactly.
+    Plus the room, or the extra strip would show unfaded and the cut would come
+    back as a hard edge further in.
+  */
+  --rail-fade: calc(var(--rail-peek) - var(--rail-gap) + var(--rail-room));
   overflow: hidden;
-  padding: 12px 0;
+  padding: 12px var(--rail-room);
+  margin: 0 calc(-1 * var(--rail-room));
   touch-action: pan-y;
   cursor: grab;
 }
