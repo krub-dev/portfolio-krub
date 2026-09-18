@@ -354,11 +354,13 @@ onUnmounted(() => {
   The block sits between the Stack and Contact, so it carries the page gutter and
   the 1180px cap every section uses: it is not inside one any more. The top
   margin is on top of the Stack's own bottom padding — the block is not a section
-  and still needs its own air to read as separate from the grid above it.
+  and still needs its own air to read as separate from the grid above it. The
+  bottom margin is what keeps the card off Contact's separator: without it the
+  hairline landed right under the box, which is the one thing it must not do.
 */
 .testimonials {
   max-width: 1180px;
-  margin: clamp(28px, 4vw, 56px) auto 0;
+  margin: clamp(28px, 4vw, 56px) auto clamp(56px, 8vw, 110px);
   padding: 0 var(--gutter-r) 0 var(--gutter-l);
 }
 
