@@ -1739,18 +1739,18 @@ as a tile laid on top of the grid instead of the grid lighting up.
 - **It takes the global grid's mask** once the hero is behind you (`masked`), because the grid
   fades out toward the bottom of the viewport and a cell still glowing down there would be a light
   with nothing under it.
-- **It goes when the pointer goes, and so does the cursor.** `usePointer` publishes `active`, false
-  while the pointer is outside the document — a `mouseleave` on it, or a `blur` when the window
-  loses focus with the pointer still inside. Before that the dot and the cell froze at the last
-  position they had inside the page, which reads as something stuck. It is two listeners and one
-  class toggle, no per-frame cost. The change is published straight from the event and not left to
-  the next frame: a window that loses focus has its rAF loop paused, so the frame that would have
-  hidden the cursor does not come until the window is back — which is why it only disappeared on the
-  next click.
-- **On touch it lights where you tap.** No cursor to follow, so the cell is placed on the tap and
-  fades out on its own after `700ms`, the same way Limonacho's pupils glance at where the finger
-  landed. One listener on the window and one timer, and only when `usePointer` would not have
-  subscribed anyway.
+- **It goes when the pointer sits still.** `usePointer` publishes `active`, false after two seconds
+  without a `mousemove`. The first version watched the window instead — `mouseleave` on the
+  document, `blur` on the window — and it was not reliable: the cursor stayed parked wherever it had
+  last been inside the page and only went on the next click. An idle timeout needs no window
+  boundary at all, and it is deliberately not instant, so the cursor does not vanish the moment you
+  stop to read.
+- **On touch it lights where you tap, and stays.** No cursor to follow, so the cell is placed on the
+  tap and a scroll clears it — staying is deliberate, because a cell that fades on a timer reads as
+  a glitch, and clearing on scroll is what stops it being left behind, marked, while the page moves
+  under it. It also sits back on touch (`opacity:.22` against the pointer's `.45`): with no cursor it
+  is a mark left on the paper, and at the pointer's weight it shouted over a grid whose lines are
+  about 4% white.
 - **The magnet is still on the table, and still expensive.** CSS cannot bend a line, so pulling the
   grid lines toward the cursor means rebuilding the grid as DOM or SVG and transforming each line
   per frame. Not done: the cell was the 80/20, and it can be revisited if it is not enough.

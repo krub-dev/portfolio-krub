@@ -16,9 +16,11 @@
   grid fades out toward the bottom of the viewport, and a cell still glowing down
   there would be a light with nothing under it.
 
-  On touch there is no cursor, so the cell comes and goes with the tap instead —
-  the same way Limonacho's pupils glance at where the finger landed. It is shown
-  where the tap happened and fades out on its own.
+  On touch there is no cursor, so the cell follows the finger instead: it lights
+  where you tap and stays, and a scroll clears it. Staying is deliberate — a cell
+  that fades on a timer reads as a glitch, and on a phone the tap is the only way
+  to light it at all. Clearing on scroll is what stops it being left behind,
+  marked, while the page moves under it.
 */
 import { onMounted, onUnmounted, ref } from 'vue'
 
@@ -27,10 +29,6 @@ import { isPointerDevice, usePointer } from '../../composables/usePointer'
 // The grid's own step. Design spec 3.12; keep in sync with BackgroundGrid's size.
 const SIZE = 72
 
-// How long a tapped cell stays lit before it fades. Long enough to be seen,
-// short enough not to sit under the next tap.
-const TAP_HOLD = 700
-
 defineProps({
   masked: { type: Boolean, default: false },
 })
@@ -38,7 +36,6 @@ defineProps({
 const enabled = isPointerDevice()
 const cell = ref(null)
 let idle = false
-let timer = null
 
 function place(x, y) {
   if (cell.value) cell.value.style.transform = `translate(${x}px, ${y}px)`
@@ -56,7 +53,7 @@ if (enabled) {
     /*
       Only the state machine touches `idle` here. Removing the class on every
       frame and re-adding it on the change would strip it one frame after the
-      leave: the flag is already true, so the guard would not put it back.
+      pointer goes: the flag is already true, so the guard would not put it back.
     */
     const away = !pointer.active
     if (away !== idle) {
@@ -73,18 +70,21 @@ function onTap(event) {
     Math.floor(event.clientY / SIZE) * SIZE,
   )
   cell.value.classList.remove('idle')
-  if (timer) clearTimeout(timer)
-  timer = setTimeout(() => cell.value?.classList.add('idle'), TAP_HOLD)
+}
+
+function onScroll() {
+  cell.value?.classList.add('idle')
 }
 
 onMounted(() => {
   if (enabled) return
   window.addEventListener('pointerdown', onTap, { passive: true })
+  window.addEventListener('scroll', onScroll, { passive: true })
 })
 
 onUnmounted(() => {
   window.removeEventListener('pointerdown', onTap)
-  if (timer) clearTimeout(timer)
+  window.removeEventListener('scroll', onScroll)
 })
 </script>
 
@@ -126,5 +126,16 @@ onUnmounted(() => {
 
 .grid-cell.idle {
   opacity: 0;
+}
+
+/*
+  On touch it sits back. With no cursor the cell is not a pointer, it is a mark
+  left on the paper, and it stays until the next scroll — at the pointer's own
+  weight it shouted over a grid whose lines are about 4% white.
+*/
+@media (hover: none) {
+  .grid-cell {
+    opacity: 0.22;
+  }
 }
 </style>

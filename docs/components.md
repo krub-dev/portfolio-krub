@@ -311,11 +311,11 @@ Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the
 ### GridCell
 Prop: `masked` (boolean — mirrors the global grid's downward fade once the hero is behind you).
 The 72px cell of the background grid under the pointer, outlined with a 1px `--acc` border at
-`opacity:.45`. Fixed to the viewport rather than a child of a grid, because the hero grid scrolls and
-a cell inside it would drift off the cursor. Subscribes to `usePointer()` and snaps with `Math.floor`,
-so it reads as part of the grid and not as a second cursor. Hides with the cursor when the pointer
-leaves the page. On touch, where there is no cursor, it lights where you tap and fades on its own
-(700ms); the pointer subscription never happens there.
+`opacity:.45` (`.22` on touch). Fixed to the viewport rather than a child of a grid, because the hero
+grid scrolls and a cell inside it would drift off the cursor. Subscribes to `usePointer()` and snaps
+with `Math.floor`, so it reads as part of the grid and not as a second cursor. It goes with the
+cursor after two seconds without a `mousemove`. On touch, where there is no cursor, it lights where
+you tap and stays until a scroll clears it; the pointer subscription never happens there.
 
 ### ScrollProgress
 Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress from
@@ -334,7 +334,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener |
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
 | `useMagnetic()` | registers the magnetic hover loop for `[data-magnetic]` |
-| `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) and `active`, which goes false while the pointer is outside the page |
+| `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) and `active`, which goes false after two seconds without a `mousemove` |
 | `useFooterHeight(el)` | thin wrapper that publishes the footer's `--footer-h` |
 | `useElementHeight(el, prop)` | the mechanism behind it, shared with the navbar's `--navbar-h`. Observes the border box and re-reads on a `visualViewport` resize, because the iOS toolbar changes the footer's padding and a ResizeObserver can miss that |
 | `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it, and it is true from the start on a route with no hero (the 404) |

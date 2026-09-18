@@ -243,7 +243,7 @@ test('the grid cell under the pointer lights up', async ({ page, isMobile }) => 
     .toBe('translate(936px, 360px)')
 })
 
-test('the cursor and the grid cell hide when the pointer leaves the page', async ({ page, isMobile }) => {
+test('the cursor and the grid cell go when the pointer sits still', async ({ page, isMobile }) => {
   test.skip(isMobile, 'there is no cursor below 900px')
 
   await openSite(page)
@@ -255,10 +255,9 @@ test('the cursor and the grid cell hide when the pointer leaves the page', async
   await expect(dot).not.toHaveClass(/idle/)
   await expect(cell).not.toHaveClass(/idle/)
 
-  // Leaving the document is a mouseleave on it; switching window is a blur.
-  await page.evaluate(() => document.dispatchEvent(new MouseEvent('mouseleave')))
-  await expect(dot).toHaveClass(/idle/)
-  await expect(cell).toHaveClass(/idle/)
+  // The idle timeout is 2s, and it is deliberately not instant.
+  await expect(dot).toHaveClass(/idle/, { timeout: 4000 })
+  await expect(cell).toHaveClass(/idle/, { timeout: 4000 })
 
   // And back, on the next move.
   await page.mouse.move(900, 300)
@@ -266,7 +265,7 @@ test('the cursor and the grid cell hide when the pointer leaves the page', async
   await expect(cell).not.toHaveClass(/idle/)
 })
 
-test('on touch the grid cell lights where you tap', async ({ page, isMobile }) => {
+test('on touch the grid cell lights where you tap, and a scroll clears it', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'this is the path taken when there is no cursor')
 
   await openSite(page)
@@ -280,8 +279,13 @@ test('on touch the grid cell lights where you tap', async ({ page, isMobile }) =
     .toBe('translate(288px, 360px)')
   await expect(cell).not.toHaveClass(/idle/)
 
-  // And it fades out on its own, so it does not sit under the next tap.
-  await expect(cell).toHaveClass(/idle/, { timeout: 2000 })
+  // It stays: no timer takes it away.
+  await page.waitForTimeout(1200)
+  await expect(cell).not.toHaveClass(/idle/)
+
+  // A scroll is what clears it, so it is not left behind while the page moves.
+  await page.evaluate(() => window.scrollTo({ top: 300, behavior: 'instant' }))
+  await expect(cell).toHaveClass(/idle/)
 })
 
 test('the rail never fades the card it is parked on', async ({ page, isMobile }) => {

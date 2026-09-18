@@ -24,8 +24,15 @@ import { onMounted, onUnmounted } from 'vue'
 const pointer = { x: -200, y: -200, active: false } // offscreen until the mouse first moves
 const subscribers = new Set()
 
+// How long the pointer can sit still before the cursor and the grid cell go.
+// Not immediate — a cursor that vanishes the instant you stop reading is
+// confusing — and not tied to entering or leaving the window, which never fired
+// reliably and left the cursor parked wherever it had last been inside.
+const IDLE_MS = 2000
+
 let frame = null
 let listening = false
+let idleTimer = null
 
 export function isPointerDevice() {
   return window.matchMedia('(hover: hover)').matches && window.innerWidth > 900
@@ -34,39 +41,19 @@ export function isPointerDevice() {
 function onMove(event) {
   pointer.x = event.clientX
   pointer.y = event.clientY
-  pointer.active = true
+
+  if (!pointer.active) {
+    pointer.active = true
+    publish()
+  }
+
+  if (idleTimer) clearTimeout(idleTimer)
+  idleTimer = setTimeout(() => {
+    pointer.active = false
+    publish()
+  }, IDLE_MS)
 }
 
-/*
-  `active` is false while the pointer is outside the document: the browser's own
-  chrome, another screen, or another window (that last one is a blur, and the
-  pointer may still be over this window when it happens). Without it the cursor
-  and the grid cell freeze at the last position they had inside the page, which
-  reads as something stuck rather than as something gone.
-*/
-function onLeave() {
-  pointer.active = false
-  publish()
-}
-
-function onEnter(event) {
-  pointer.x = event.clientX
-  pointer.y = event.clientY
-  pointer.active = true
-  publish()
-}
-
-function onBlur() {
-  pointer.active = false
-  publish()
-}
-
-/*
-  The subscribers are also called here, straight from the event, and not left to
-  the next frame. A window that loses focus has its rAF loop throttled or paused,
-  so the frame that would have hidden the cursor does not come until the window
-  is back — which is why it only disappeared on the next click.
-*/
 function publish() {
   for (const run of subscribers) run(pointer)
 }
@@ -79,9 +66,6 @@ function loop() {
 function start() {
   if (!listening) {
     window.addEventListener('mousemove', onMove, { passive: true })
-    document.addEventListener('mouseleave', onLeave)
-    document.addEventListener('mouseenter', onEnter)
-    window.addEventListener('blur', onBlur)
     listening = true
   }
   if (frame === null) frame = requestAnimationFrame(loop)
@@ -89,9 +73,8 @@ function start() {
 
 function stop() {
   window.removeEventListener('mousemove', onMove)
-  document.removeEventListener('mouseleave', onLeave)
-  document.removeEventListener('mouseenter', onEnter)
-  window.removeEventListener('blur', onBlur)
+  if (idleTimer) clearTimeout(idleTimer)
+  idleTimer = null
   listening = false
   if (frame !== null) cancelAnimationFrame(frame)
   frame = null
