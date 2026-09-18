@@ -243,6 +243,29 @@ test('the grid cell under the pointer lights up', async ({ page, isMobile }) => 
     .toBe('translate(936px, 360px)')
 })
 
+test('the cursor and the grid cell hide when the pointer leaves the page', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'there is no cursor below 900px')
+
+  await openSite(page)
+
+  const dot = page.locator('.cursor-dot')
+  const cell = page.locator('.grid-cell')
+
+  await page.mouse.move(1000, 400)
+  await expect(dot).not.toHaveClass(/idle/)
+  await expect(cell).not.toHaveClass(/idle/)
+
+  // Leaving the document is a mouseleave on it; switching window is a blur.
+  await page.evaluate(() => document.dispatchEvent(new MouseEvent('mouseleave')))
+  await expect(dot).toHaveClass(/idle/)
+  await expect(cell).toHaveClass(/idle/)
+
+  // And back, on the next move.
+  await page.mouse.move(900, 300)
+  await expect(dot).not.toHaveClass(/idle/)
+  await expect(cell).not.toHaveClass(/idle/)
+})
+
 test('the rail never fades the card it is parked on', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'only a phone has a position with a whole card either side')
 

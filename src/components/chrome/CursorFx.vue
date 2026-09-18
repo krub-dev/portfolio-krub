@@ -34,10 +34,22 @@ const ring = ref(null)
 // The ring's open/closed state changes rarely, so it is a class toggle rather
 // than a style write every frame.
 let over = false
+let idle = false
 
 usePointer((pointer) => {
   const move = `translate3d(${pointer.x}px, ${pointer.y}px, 0)`
   if (dot.value) dot.value.style.transform = move
+
+  /*
+    Gone, not frozen, while the pointer is outside the page. Both elements hide
+    together through one class, and only when the state actually changes.
+  */
+  const away = !pointer.active
+  if (away !== idle) {
+    idle = away
+    dot.value?.classList.toggle('idle', away)
+    ring.value?.classList.toggle('idle', away)
+  }
 
   /*
     What is under the cursor? elementFromPoint is a hit test, which is cheap,
@@ -83,6 +95,7 @@ usePointer((pointer) => {
   background: var(--acc);
   border-radius: 50%;
   z-index: 301;
+  transition: opacity 0.15s ease;
 }
 
 .cursor-ring {
@@ -100,6 +113,13 @@ usePointer((pointer) => {
 
 .cursor-ring.hot {
   opacity: 1;
+}
+
+/* After .hot on purpose: with equal specificity, this is the rule that wins
+   while the pointer is outside the page, whatever the ring was over before. */
+.cursor-dot.idle,
+.cursor-ring.idle {
+  opacity: 0;
 }
 
 /*

@@ -21,7 +21,7 @@ import { onMounted, onUnmounted } from 'vue'
   and the design switches all of this off there anyway.
 */
 
-const pointer = { x: -200, y: -200 } // offscreen until the mouse first moves
+const pointer = { x: -200, y: -200, active: false } // offscreen until the mouse first moves
 const subscribers = new Set()
 
 let frame = null
@@ -34,6 +34,28 @@ export function isPointerDevice() {
 function onMove(event) {
   pointer.x = event.clientX
   pointer.y = event.clientY
+  pointer.active = true
+}
+
+/*
+  `active` is false while the pointer is outside the document: the browser's own
+  chrome, another screen, or another window (that last one is a blur, and the
+  pointer may still be over this window when it happens). Without it the cursor
+  and the grid cell freeze at the last position they had inside the page, which
+  reads as something stuck rather than as something gone.
+*/
+function onLeave() {
+  pointer.active = false
+}
+
+function onEnter(event) {
+  pointer.x = event.clientX
+  pointer.y = event.clientY
+  pointer.active = true
+}
+
+function onBlur() {
+  pointer.active = false
 }
 
 function loop() {
@@ -44,6 +66,9 @@ function loop() {
 function start() {
   if (!listening) {
     window.addEventListener('mousemove', onMove, { passive: true })
+    document.addEventListener('mouseleave', onLeave)
+    document.addEventListener('mouseenter', onEnter)
+    window.addEventListener('blur', onBlur)
     listening = true
   }
   if (frame === null) frame = requestAnimationFrame(loop)
@@ -51,6 +76,9 @@ function start() {
 
 function stop() {
   window.removeEventListener('mousemove', onMove)
+  document.removeEventListener('mouseleave', onLeave)
+  document.removeEventListener('mouseenter', onEnter)
+  window.removeEventListener('blur', onBlur)
   listening = false
   if (frame !== null) cancelAnimationFrame(frame)
   frame = null

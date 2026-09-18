@@ -1723,9 +1723,10 @@ destination for something that can disappear.
 
 **Date:** 2026-09-18 · **Status:** active
 
-The background grid was pure texture. Now the 72px cell the pointer is over fills with `--acc` at
-`opacity:.08`, snapped with `Math.floor` so it reads as part of the pattern rather than as a second
-cursor.
+The background grid was pure texture. Now the 72px cell the pointer is over is outlined with a 1px
+`--acc` border at `opacity:.45`, snapped with `Math.floor` so it reads as part of the pattern rather
+than as a second cursor. An outline and not a fill: tried as a filled square first, and the fill read
+as a tile laid on top of the grid instead of the grid lighting up.
 
 - **The cell, not the ripple.** A click ripple was the other candidate. It was dropped because it
   needs a listener on a page full of real buttons and links, and it only exists for the instant
@@ -1738,9 +1739,19 @@ cursor.
 - **It takes the global grid's mask** once the hero is behind you (`masked`), because the grid
   fades out toward the bottom of the viewport and a cell still glowing down there would be a light
   with nothing under it.
+- **It goes when the pointer goes, and so does the cursor.** `usePointer` publishes `active`, false
+  while the pointer is outside the document — a `mouseleave` on it, or a `blur` when the window
+  loses focus with the pointer still inside. Before that the dot and the cell froze at the last
+  position they had inside the page, which reads as something stuck. It is two listeners and one
+  class toggle, no per-frame cost.
 - **The magnet is still on the table, and still expensive.** CSS cannot bend a line, so pulling the
   grid lines toward the cursor means rebuilding the grid as DOM or SVG and transforming each line
   per frame. Not done: the cell was the 80/20, and it can be revisited if it is not enough.
+- **Multi-cell selection is not the next step.** The Windows-style rubber band was tried in a lab.
+  It works, but on the site it would need a full-viewport layer claiming `pointerdown` — which steals
+  clicks from every button and fights text selection and the rails' own drags — for something with no
+  function. The cheap cousin, painting cells by sweeping with the button held, has the same problem in
+  smaller form. Left in the backlog.
 
 It rides `usePointer`, the app's single rAF loop, and never mounts on touch or below 900px, like
 every other cursor effect.
