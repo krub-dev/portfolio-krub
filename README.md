@@ -31,22 +31,24 @@ npm run dev
 | `npm run build` | production bundle into `dist/` |
 | `npm run preview` | serve that bundle locally |
 | `npm run test` | unit tests (Vitest) |
+| `npm run test:watch` | the same, in watch mode |
 | `npm run test:e2e` | end-to-end tests (Playwright, real Chromium) |
 
 ## Tests
 
-Twenty unit tests and six end-to-end flows across two viewports.
+Forty-one unit tests and thirty end-to-end flows, the latter run across two viewports.
 
-Vitest covers the pure logic and the composables that touch storage: how a timeline period is
-formatted, how the carousel index wraps, and that the theme and language survive a reload,
-reject junk values and cope with `localStorage` throwing.
+Vitest covers the pure functions — how a timeline period is formatted, how the carousel index
+wraps, how a URL is tidied — the contact validation and its endpoint, and the composables that
+touch storage: theme, language and accent survive a reload, reject junk values and cope with
+`localStorage` throwing.
 
 Playwright exists for a narrower reason. Scroll events, animation frames and CSS transitions
-cannot be verified by reading the DOM — you need a browser that actually paints. So it covers
-the navbar going compact and shrinking to its contents, the footer sliding in without covering
-the last section, exactly one nav link being highlighted, the modal trapping focus and handing
-it back, the 404 fitting one viewport with its chrome and a way back, and theme and language
-surviving a reload. It runs against the production build.
+cannot be verified by reading the DOM — you need a browser that actually paints. So it covers the
+chrome (the navbar compacting, the footer sliding in, the scroll spy), the projects rail paging and
+dragging, the testimonials pager, the stack lighting up and Limonacho naming a tile, the contact
+form validating and sending, the 404 fitting one viewport, and the custom cursor. It runs against
+the production build.
 
 It earned its keep on the first run by finding a real bug: the footer was measured with the
 content box instead of the border box, so the page reserved 18px too little and the fixed
@@ -62,8 +64,9 @@ E2E_BASE_URL=https://example.vercel.app npx playwright test
 ## Layout
 
 ```
-public/            served as-is: logo, photo, og banner, stack icons, fonts, favicon,
-                   apple touch icon, robots, sitemap
+public/            served as-is: logo, photo, og banner, stack icons, self-hosted fonts
+                   (with their OFL licences), the acho clip, favicon, apple touch icon,
+                   robots, sitemap
 docs/              the spec, the component contracts, the roadmap, the decision log, the backlog
 tests/
 ├─ unit/           Vitest
