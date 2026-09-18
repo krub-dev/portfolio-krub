@@ -59,12 +59,17 @@ function onMove(event) {
 }
 
 /*
-  Scrolling is activity too. Without this the cell went while the page was still
-  moving, because the pointer had not — the idle timer only counted `mousemove`,
-  and a wheel or a trackpad scroll fires none.
+  Scrolling is activity too, and it wakes the pointer as well as keeping it
+  awake. Without the first part the cursor stayed gone while the page moved under
+  it, because only a `mousemove` brought it back and a wheel fires none; without
+  the second it went while the page was still moving.
 */
 function onScroll() {
-  if (pointer.active) restartIdle()
+  if (!pointer.active) {
+    pointer.active = true
+    publish()
+  }
+  restartIdle()
 }
 
 function publish() {

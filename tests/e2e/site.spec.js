@@ -314,6 +314,20 @@ test('a scroll counts as movement, so the cursor does not go while the page move
   await expect(cell).not.toHaveClass(/idle/)
 })
 
+test('a scroll brings the cursor back after it has gone', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'there is no cursor below 900px')
+
+  await openSite(page)
+  const cell = page.locator('.grid-cell')
+
+  await page.mouse.move(900, 400)
+  await expect(cell).toHaveClass(/idle/, { timeout: 4000 })
+
+  // No mousemove: the wheel alone is enough.
+  await page.evaluate(() => window.scrollTo({ top: 100, behavior: 'instant' }))
+  await expect(cell).not.toHaveClass(/idle/)
+})
+
 test('on touch the grid cell lights where you tap, and a scroll clears it', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'this is the path taken when there is no cursor')
 
