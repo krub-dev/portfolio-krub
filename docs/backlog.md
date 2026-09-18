@@ -64,6 +64,12 @@ section, folded together where they overlapped.
 - [ ] **Update Vercel's DNS records.** The domain answers on the legacy records and Vercel says
   they will keep working; the dashboard shows an amber "DNS Change Recommended". Optional,
   five minutes. **(owner)**
+- [ ] **Re-measure Lighthouse once `dev` is on `main`.** The numbers so far are not the ones that
+  count: the deployed `krub.dev` is an older build (still loading Google Fonts; mobile 84 / desktop
+  98) and the `dev` figures came from a local preview (mobile 84–85 / desktop 99). Run it against
+  the real deployment after the merge, together with the pre-publication documentation review. The
+  one thing that got worse is the TBT — the bundle grew with the new sections — so it is worth a
+  second look then. **(owner)**
 
 ## Design and sections
 
