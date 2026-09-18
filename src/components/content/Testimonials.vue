@@ -403,19 +403,27 @@ onUnmounted(() => {
   user-select: none;
 }
 
-/* The block's own header, inside the box: the mono label and the position, with
-   the rule the stack groups and the contact rows use. */
+/*
+  The block's own header, inside the box: the mono label and the position. It is
+  a filled band, the marquee's and the contact band's own treatment —
+  `background: var(--acc)` with `--on-acc` on top — rather than a rule and two
+  grey strings. It is the box's top edge, so the block opens with the accent
+  instead of with a line, and it is the only place in the block that is filled.
+  The box's radius clips its two top corners.
+*/
 .head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
   padding: 14px clamp(18px, 2.6vw, 26px);
-  border-bottom: 1px solid var(--line);
+  background: var(--acc);
+  color: var(--on-acc);
 }
 
-/* The header's label, in the accent: it names the block and it is the one piece
-   of the header that is not live information. */
+/* On the fill there is one text colour, --on-acc, and the hierarchy comes from
+   opacity instead of from a second token: the label names the block, the
+   counter is a number and sits back. */
 .label {
   margin: 0;
   font-family: var(--font-mono);
@@ -423,16 +431,13 @@ onUnmounted(() => {
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--acc-text);
 }
 
-/* The counter back to the quiet grey: the label took the accent, and with both
-   ends of the header in the same colour they stopped reading as two things. Mono
-   and 11px, so it reads as a counter and not as a heading. */
+/* Mono and 11px, so it reads as a counter and not as a heading. */
 .position {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--fg-3);
+  opacity: 0.62;
   white-space: nowrap;
 }
 
@@ -536,6 +541,18 @@ onUnmounted(() => {
     border: 1px solid var(--line);
     border-radius: 14px;
     background: var(--surface);
+  }
+
+  /*
+    The mark drops and moves right on a phone, and grows. In a window this
+    narrow it lands behind the quote instead of behind the name, which is where
+    a watermark belongs: it reads as something under the text rather than as a
+    second attribution.
+  */
+  .mark {
+    top: 74px;
+    right: 6px;
+    font-size: 112px;
   }
 }
 

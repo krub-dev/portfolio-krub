@@ -1571,7 +1571,7 @@ projects grid, and it got the same answer — one at a time.
   horizontal arrows over its head, and two pairs in one column of the page read as one control that lost
   its way. The `n / total` went with them, out from between the two arrows: with a counter wedged in the
   middle the pair read as two separate things, one of them pushed right. The mono label went inside the
-  box, over a rule — the same header the stack groups and the contact rows use — because floating above
+  box — since then a filled band, see below — because floating above
   an empty box it said nothing about what the box was.
 - **The clamp came back, and it is what makes the height predictable.** Removing it was right for a
   moment: with one quote at a time there is nothing hidden. But a real quote is long, and on a phone the
@@ -1632,10 +1632,16 @@ projects grid, and it got the same answer — one at a time.
   mediocre one is not worth a third typeface, a new licence to track, or the extra rules that came with
   positioning it. The system serif that would have given the better shape for free varies by platform,
   so it is not a candidate either.
-- **The label took the accent and the counter gave it back.** The header's two ends were both `--fg-3`
-  and then both `--acc-text`; in either case they read as one thing. The split is what separates them:
-  the label names the block and takes the colour, the counter is live information and stays quiet. Same
-  `--acc-text` that already clears AA at these sizes on both themes, so the label needed no new value.
+- **The header became a filled band.** It was a rule and two grey strings, then two accent strings; the
+  owner asked for the whole strip in the theme colour, and the answer was already in the project — the
+  marquee and the contact band are `background: var(--acc)` with `--on-acc` on top, so the header took the
+  same treatment rather than a new one. It also gives the block a proper opening: the box now starts with
+  the accent instead of with a hairline. On a fill there is one text colour, so the label and the counter
+  are separated by opacity (`.62`) and not by a second token — a second colour on the accent would have
+  meant inventing a value, and the palette has none.
+- **The mark moves for the phone.** `44px`/`16px`/`104px` became `74px`/`6px`/`112px` under `900px`: lower,
+  further right and bigger. In a window that narrow it lands behind the quote rather than behind the name,
+  which is what a watermark should do — sit under the text, not beside the attribution.
 - **On a phone the arrows go, and nothing replaces them.** The swipe is the gesture there and the
   buttons only took width from the quote. An icon was tried in the header as a cue — four of them, at
   real size — and it read as clutter, so the header went back to two items. Clipped, not removed: the

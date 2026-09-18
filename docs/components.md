@@ -171,14 +171,17 @@ owns its own index state, wrapping around) and `SpecList` (props `role`, `year`,
 resolves its own Role / Year / Stack labels through i18n).
 
 ### TestimonialCard
-`quote`, `name`, `role`, `avatar`. One entry as the pager's content: the attribution first, then the
-quote in quotation marks. No box of its own and no clamp — the pager's window is the box and shows one
-quote whole. See decisions.md 56 and 64.
+`quote`, `name`, `role`, `avatar`, `open`. One entry as the pager's content: the attribution first, then
+the quote, clamped to four lines with a read more when there is more of it. No box of its own — the
+pager's window is the box. Whether it is open belongs to the pager, which is the one that sizes the
+window: the card emits `toggle` and reads the state back as a prop. See decisions.md 56 and 64.
 
 ### Testimonials
-The block at the end of the Projects rail: a mono label and a vertical pager, one quote at a time, with
-the arrows and a `n / total` beside the box. The window is sized to the quote on show and the entries
-that are not showing are `inert`. Gated by `config` in ProjectsSection. See decisions.md 64.
+The block at the end of the Projects rail: a filled accent header carrying the label and a `n / total`,
+and a vertical pager, one quote at a time. The window is as tall as the tallest entry and every entry is
+padded to it, so a short quote cannot show the next one through the gap; the entries that are not showing
+are `inert`. The arrows sit beside the box on a pointer device and are clipped to the accessibility tree
+on a phone, where the swipe is the gesture. Gated by `config` in ProjectsSection. See decisions.md 64.
 
 ---
 

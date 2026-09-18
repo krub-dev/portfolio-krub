@@ -471,7 +471,7 @@ This section has **no footnote**.
 Shown or hidden by config, and it lives at the **end of the Projects rail**, not as a section of its
 own: it is about that work, and a fifth destination would break the 00–03 numbering for something
 that can disappear. It carries the same mono label the contact rows use (`/testimonials`, 13px,
-uppercase, `--fg-3`) instead of a heading, and a `margin-top` of its own on top of the section's gap.
+uppercase) instead of a heading, and a `margin-top` of its own on top of the section's gap.
 See decisions.md 56 and 64.
 
 **One at a time, in a pager.** A column grows: measured, one entry is `214px` on a phone, so three made
@@ -490,14 +490,20 @@ closed the two heights are equal, the button decides there is nothing to reveal,
 back.
 
 The box is `--surface` with a `--line` border and radius 18, and it carries **its own header**: the mono
-label and the `n / total` position, with a rule under them, the same header the stack groups and the
-contact rows use. The label floating above an empty box said nothing about what the box was; inside, the
-block reads as one object. **The label is in `--acc-text` and the counter is in `--fg-3`**, and the split
-is deliberate: with both ends of the header in the accent they stopped reading as two things. The label
-names the block and takes the colour; the counter is live information and stays quiet. The header also
-carries, in the window's top right, a large `”` in `--acc` at `opacity:.08` — a font glyph and not an
-SVG, because it is a watermark and the two faces the site self-hosts already have one. It belongs to the
-box and not to an entry, so it is the one thing in the block that does not move. **The controls sit
+label and the `n / total` position. The label floating above an empty box said nothing about what the box
+was; inside, the block reads as one object. **The header is a filled band** — `background: var(--acc)`
+with `--on-acc` on top, the same treatment the marquee and the contact band wear — and it is the box's top
+edge, so the block opens with the accent instead of with a rule, and it is the only filled thing in the
+block. On a fill there is one text colour and the hierarchy comes from opacity rather than from a second
+token: the label names the block at full strength, the counter is a number and sits at `.62`. The box's
+radius clips the band's two top corners.
+
+The band also carries, in the window's top right, a large `”` in `--acc` at `opacity:.08` — a font glyph
+and not an SVG, because it is a watermark and the two faces the site self-hosts already have one. It
+belongs to the box and not to an entry, so it is the one thing in the block that does not move. On a phone
+it drops, moves right and grows (`74px`, `6px`, `112px`): in a window that narrow it lands behind the quote
+instead of behind the name, which is where a watermark belongs — under the text rather than beside the
+attribution. **The controls sit
 beside the box, not above it**: the rail already has a pair
 of horizontal arrows over its head, and two pairs in one column of the page read as one control that lost
 its way. **The arrows are vertical** — up, then down — because the movement is: down brings the next
