@@ -250,23 +250,22 @@ test('the grid cell follows the hero grid once the page scrolls', async ({ page,
   const cell = page.locator('.grid-cell')
 
   await page.mouse.move(900, 400)
-  await expect(cell).not.toHaveClass(/idle/)
-
-  // A scroll takes it away: the grid moves under a cell fixed to the viewport.
-  await page.evaluate(() => window.scrollTo({ top: 150, behavior: 'instant' }))
-  await expect(cell).toHaveClass(/idle/)
-
-  /*
-    Moving again puts it back, on the hero layer's line. The hero layer is
-    absolute, so its lines move up with the page while the cell stays fixed;
-    snapped to the viewport it came apart from the grid you can see, so it snaps
-    in page coordinates until the fixed layer takes over. At scroll 150 and
-    y 400: -150 + floor(550 / 72) * 72 = 354.
-  */
-  await page.mouse.move(700, 400)
   await expect
     .poll(() => cell.evaluate((el) => el.style.transform))
-    .toBe('translate(648px, 354px)')
+    .toBe('translate(864px, 360px)')
+
+  /*
+    The hero layer is absolute, so its lines move up with the page while the cell
+    stays fixed to the viewport. Snapped to the viewport it came apart from the
+    grid you can see; it snaps in page coordinates until the fixed layer takes
+    over, and it does so without the pointer moving. At scroll 150 and y 400:
+    -150 + floor(550 / 72) * 72 = 354.
+  */
+  await page.evaluate(() => window.scrollTo({ top: 150, behavior: 'instant' }))
+  await expect(cell).not.toHaveClass(/idle/)
+  await expect
+    .poll(() => cell.evaluate((el) => el.style.transform))
+    .toBe('translate(864px, 354px)')
 })
 
 test('the cursor and the grid cell go when the pointer sits still', async ({ page, isMobile }) => {

@@ -19,11 +19,13 @@
   (fixed) layer has taken over.
 
   `masked` also mirrors that layer's own downward fade, so the cell never glows
-  where the grid has faded out.
+  where the grid has faded out — and the field is cut to the same box the grid
+  uses (`bottom: var(--footer-h)`), or the fade lands lower on the cell than on
+  the lines behind it and the cell outlives the grid.
 
-  Scrolling hides it, because the grid moves under a cell that is fixed to the
-  viewport and the two would drift apart; moving the pointer again is what puts it
-  back, on the right line.
+  Scrolling does not take it away: it stays, and the page-coordinate snapping is
+  what keeps it on the hero layer's lines while that layer slides up. The touch
+  mark is the exception, because it is not following anything.
 
   On touch there is no cursor, so the cell follows the finger instead: it lights
   on a tap and stays, and a scroll clears it. A tap and not a press: the finger
@@ -47,9 +49,6 @@ const props = defineProps({
 const enabled = isPointerDevice()
 const cell = ref(null)
 let hidden = false
-let scrolled = false
-let lastX = null
-let lastY = null
 let downX = 0
 let downY = 0
 let downId = null
@@ -77,17 +76,8 @@ function setHidden(value) {
 if (enabled) {
   usePointer((pointer) => {
     if (!cell.value) return
-
-    // A move is what clears the scroll state; the position is what tells them
-    // apart, because the pointer object is shared and has no "moved" flag.
-    if (pointer.x !== lastX || pointer.y !== lastY) {
-      lastX = pointer.x
-      lastY = pointer.y
-      scrolled = false
-    }
-
     place(pointer.x, pointer.y)
-    setHidden(!pointer.active || scrolled)
+    setHidden(!pointer.active)
   })
 }
 
@@ -114,24 +104,25 @@ function onCancel() {
   downId = null
 }
 
+// A mark left on the paper has to go when the paper moves; the cursor's cell does
+// not, because the cursor is still where it was.
 function onScroll() {
-  scrolled = true
   setHidden(true)
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', onScroll, { passive: true })
   if (enabled) return
   window.addEventListener('pointerdown', onDown, { passive: true })
   window.addEventListener('pointerup', onUp, { passive: true })
   window.addEventListener('pointercancel', onCancel, { passive: true })
+  window.addEventListener('scroll', onScroll, { passive: true })
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
   window.removeEventListener('pointerdown', onDown)
   window.removeEventListener('pointerup', onUp)
   window.removeEventListener('pointercancel', onCancel)
+  window.removeEventListener('scroll', onScroll)
 })
 </script>
 
@@ -144,16 +135,22 @@ onUnmounted(() => {
 <style scoped>
 .grid-cell-field {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* The same box the global grid covers, footer strip and all, so the mask below
+     fades the cell exactly where the grid fades. */
+  bottom: var(--footer-h, 52px);
   z-index: 0;
   pointer-events: none;
 }
 
 /* The same mask the global grid carries, and the #000 stops are alpha, not a
-   colour — see BackgroundGrid.vue. */
+   colour — see BackgroundGrid.vue. no-repeat so a cell placed under the field's
+   own bottom edge is masked away instead of showing through a tiled mask. */
 .masked {
-  -webkit-mask: linear-gradient(#000 0%, #000 15%, transparent 65%);
-  mask: linear-gradient(#000 0%, #000 15%, transparent 65%);
+  -webkit-mask: linear-gradient(#000 0%, #000 15%, transparent 65%) no-repeat;
+  mask: linear-gradient(#000 0%, #000 15%, transparent 65%) no-repeat;
 }
 
 .grid-cell {

@@ -49,6 +49,26 @@ function goTop() {
   // scroll-behavior:smooth in tokens.css animates this; under
   // prefers-reduced-motion it jumps instead, which is the point.
   window.scrollTo({ top: 0 })
+
+  /*
+    A smooth scroll can stop a few pixels short when the layout settles under it
+    — the fixed footer sliding out, the iOS toolbar coming back — and on a phone
+    that sliver of the next section is visible. Wait for the position to stop
+    changing and then snap the last of it, which does not cut the animation
+    short because it lets it finish first.
+  */
+  let last = -1
+  const settle = () => {
+    const y = window.scrollY
+    if (y === 0) return
+    if (y === last) {
+      window.scrollTo({ top: 0, behavior: 'auto' })
+      return
+    }
+    last = y
+    requestAnimationFrame(settle)
+  }
+  requestAnimationFrame(settle)
 }
 </script>
 

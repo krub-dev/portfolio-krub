@@ -691,9 +691,10 @@ a pointer and `.22` on touch, snapped with `Math.floor` so it reads as part of t
 outline and not a fill — the cell is the grid lighting up, not a tile laid on top of it. It is a
 fixed element of its own, not a child of either grid, and it snaps to whichever layer is showing:
 page coordinates while the absolute hero layer is visible, the viewport once the fixed global layer
-takes over. It takes that layer's downward mask too, so the light never hangs where the grid has
-faded out. A scroll takes it away; moving the pointer brings it back. It rides the app's single rAF
-loop, and the cursor and the cell both go after two seconds without a `mousemove`. See decision 66.
+takes over, so a scroll does not take it off the lines. It takes that layer's downward mask over the
+same box the grid covers, so the light never outlives the grid it belongs to. It rides the app's
+single rAF loop, and the cursor and the cell both go after two seconds without a `mousemove`. See
+decision 66.
 
 ### 3.13 Custom cursor
 

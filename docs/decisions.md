@@ -21,9 +21,9 @@ new number to its range when a decision is appended.
   navbar, self-hosted fonts, and the soft 404.
 - **Interaction, theme and Limonacho — 47–53.** The softer magnetic pull, accent as its own axis, the
   iOS toolbar, the "acho", the stage glow and the menu dots.
-- **Sections and copy — 54–66.** The contact band, testimonials inside Projects and then below the
+- **Sections and copy — 54–67.** The contact band, testimonials inside Projects and then below the
   Stack, the contact endpoint, the Stack spotlight, the projects rail, the navbar's click band, em
-  dashes, the fade, the pager, and the grid cell under the pointer.
+  dashes, the fade, the pager, the grid cell under the pointer, and the way back to the top.
 
 ---
 
@@ -1741,11 +1741,13 @@ as a tile laid on top of the grid instead of the grid lighting up.
   zero. Scrolled a little, the cell sat between the hero layer's lines and read as "descuadrado".
   `masked` is the switch: while the hero layer is the visible one the cell snaps in page
   coordinates (`-scrollY + floor((y + scrollY) / 72) * 72`), and once the fixed layer takes over it
-  snaps to the viewport. A scroll also takes it away, because the grid moves under a cell that is
-  fixed and the two would drift apart; moving the pointer again is what puts it back, on the line.
-- **It takes the global grid's mask** once the hero is behind you (`masked`), because the grid
-  fades out toward the bottom of the viewport and a cell still glowing down there would be a light
-  with nothing under it.
+  snaps to the viewport. That is also why a scroll does **not** take it away: the page-coordinate
+  snapping keeps it on the hero layer's lines while that layer slides up under it. The touch mark is
+  the exception — it is not following anything, so a scroll clears it.
+- **It takes the global grid's mask**, and the field is cut to the same box the grid covers
+  (`bottom: var(--footer-h)`), because the grid fades out toward the bottom of its own box and a cell
+  masked over the full viewport would fade later than the lines behind it and outlive them. Without
+  it, a cell still glowed in the strip where the grid was already gone.
 - **It goes when the pointer sits still.** `usePointer` publishes `active`, false after two seconds
   without a `mousemove`. The first version watched the window instead — `mouseleave` on the
   document, `blur` on the window — and it was not reliable: the cursor stayed parked wherever it had
@@ -1772,3 +1774,21 @@ as a tile laid on top of the grid instead of the grid lighting up.
 
 It rides `usePointer`, the app's single rAF loop, and never subscribes to it on touch or below
 900px, where the tap path takes over instead.
+
+### 67. The way back to the top lands exactly at zero
+
+**Date:** 2026-09-18 · **Status:** active
+
+The footer's TOP button and the logo both go back to the top of the page, and on a phone the smooth
+scroll could stop a few pixels short, leaving a sliver of the next section visible under the hero.
+
+- **`goTop` waits and snaps.** A smooth scroll can end early when the layout settles under it — the
+  fixed footer sliding out, the iOS toolbar coming back — so after starting it, `goTop` watches the
+  scroll position and, once it stops changing, forces the last of it with `behavior:'auto'`. It lets
+  the animation finish instead of cutting it, and it costs one short-lived rAF loop.
+- **The hero wrapper got an `id="top"`.** The logo points at `/#top` and the router's
+  `scrollBehavior` returns `{ el: '#top' }`; with no element by that name, the selector matched
+  nothing. Now the hero wrapper is the anchor and it sits at zero.
+
+Not reproduced in the emulator — there the scroll already ended at zero — so this is the fix for the
+phone case the owner hit, and it should be re-checked on the device.

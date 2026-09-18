@@ -41,7 +41,7 @@ const openProject = computed(() => (openIndex.value === null ? null : projects[o
 
 <template>
   <main>
-    <div class="hero-wrap" data-hero-wrap>
+    <div id="top" class="hero-wrap" data-hero-wrap>
       <HeroSection />
       <MarqueeBar :items="marqueeItems" />
     </div>
