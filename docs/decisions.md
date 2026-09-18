@@ -1506,7 +1506,15 @@ likely to be skimming.
   stuck on whatever it touched, so the yellow border was there or not depending on where the last
   finger landed — the owner read that as the marking being unreliable. The hover styles now live
   under `@media (hover:hover)`, and where there is no hover the same border marks the card the rail
-  is parked on, moving with the rail rather than with the finger.
+  is parked on, moving with the rail rather than with the finger. The arrow fills with it too: the
+  fill stayed behind in the hover block, so on a phone the card was marked and its arrow was not,
+  which read as the marker half-applied.
+- **The pointer is captured once the drag has proved itself, not on pointerdown.** Captured on
+  pointerdown, the pointerup is retargeted to the viewport, and the click that follows is dispatched at
+  the common ancestor of the two — the viewport — so the card's own button never received it and **no
+  card opened with a mouse**. The keyboard was the only working path, which is exactly why the modal test
+  never caught it: it opens with focus and Enter, and a test that never clicks is not a test of clicking.
+  The same fix went into the testimonials pager, which had the same bug for the same reason.
 - **Measured after:** 1010px on a phone, 1134px on a desktop.
 
 ### 61. The navbar was swallowing every click in its band

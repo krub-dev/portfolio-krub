@@ -101,6 +101,7 @@ let index = 0
 let startX = 0
 let startOffset = 0
 let travelled = 0
+let pointerId = null
 let frame = null
 
 /*
@@ -204,25 +205,39 @@ function onPointerDown(event) {
   startX = event.clientX
   startOffset = offset
   target = offset
+  pointerId = event.pointerId
   // The pointer is in charge, so any travel still running is abandoned.
   if (frame) {
     cancelAnimationFrame(frame)
     frame = null
   }
   viewport.value.style.userSelect = 'none'
-  viewport.value.setPointerCapture(event.pointerId)
+  /*
+    Deliberately NOT capturing here. Capturing on pointerdown makes the viewport
+    the target of the pointerup, and the click that follows is dispatched at the
+    common ancestor of the two — the viewport — so the card's own button never
+    sees it and no card opens with a mouse. Capture is taken in the move, once
+    the gesture has proved it is a drag and not a click.
+  */
 }
 
 function onPointerMove(event) {
-  if (!dragging.value) return
+  if (pointerId === null || pointerId !== event.pointerId) return
   const delta = event.clientX - startX
   travelled = Math.max(travelled, Math.abs(delta))
+
+  if (!viewport.value?.hasPointerCapture(event.pointerId)) {
+    if (travelled <= DRAG_SLOP) return
+    viewport.value?.setPointerCapture(event.pointerId)
+  }
+
   offset = Math.min(Math.max(startOffset - delta, 0), maxOffset)
   paint()
 }
 
 function onPointerUp(event) {
-  if (!dragging.value) return
+  if (pointerId === null || pointerId !== event.pointerId) return
+  pointerId = null
   dragging.value = false
 
   if (viewport.value) {

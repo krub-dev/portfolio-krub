@@ -102,11 +102,19 @@ const { t } = useI18n()
 /*
   And where there is no hover, the same border marks where you are instead: the
   card the rail is parked on, moving as you scroll the rail rather than as you
-  touch it.
+  touch it. The arrow fills with it too — it is the same "this is the one"
+  treatment, and leaving the fill behind in the hover block made the marker look
+  half-applied on a phone.
 */
 @media (hover: none) {
   .card.current {
     border-color: var(--acc-text);
+  }
+
+  .card.current .arrow {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: var(--on-acc);
   }
 }
 

@@ -117,6 +117,36 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
   await expect(card).toBeFocused()
 })
 
+test('a click on the card opens the project, not just the keyboard', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('#projects .viewport').scrollIntoViewIfNeeded()
+  await page.waitForTimeout(300)
+
+  const box = await page.locator('#projects .card').first().boundingBox()
+  /*
+    Away from the title, on the card's own surface: the overlay is what makes the
+    whole card the button's target, and it was the mouse path that was broken.
+    The rail captured the pointer on pointerdown, so the pointerup went to the
+    viewport and the click landed on the viewport too, and no card ever opened.
+    The keyboard was the only path that worked, which is why the modal test above
+    never caught it: it opens with focus and Enter.
+  */
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height - 90)
+  await expect(page.getByRole('dialog')).toBeVisible()
+})
+
+test('the parked card fills its arrow where there is no hover', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'only a touch device marks the parked card')
+  await page.goto('/')
+  await page.locator('#projects .viewport').scrollIntoViewIfNeeded()
+
+  // The marker is the border AND the arrow. The fill lived in the hover block,
+  // so on a phone the card was marked and its arrow was not.
+  const arrow = page.locator('#projects .card.current .arrow')
+  await expect(arrow).toHaveCSS('background-color', 'rgb(255, 200, 0)')
+  await expect(arrow).toHaveCSS('color', 'rgb(12, 12, 13)')
+})
+
 test('the project rail pages with its arrows, and stops at both ends', async ({ page }) => {
   /*
     Reduced motion, so the transform lands instantly and the assertions do not

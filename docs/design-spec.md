@@ -358,7 +358,10 @@ more than a fifth of a card takes the **next card in the direction it was going*
 shorter falls back to the nearest. Without that fifth, a phone swipe had to travel more than half a
 card — 160px — before anything happened, which reads as the rail refusing to budge. A drag that
 travels more than `6px` swallows the click in the capture phase, because nobody means to open a card
-they just dragged.
+they just dragged. The viewport takes pointer capture **once the gesture has proved itself a drag**, in
+the move and not on pointerdown: captured on pointerdown, the pointerup is retargeted to the viewport and
+the click that follows is dispatched at the common ancestor of the two — the viewport — so the card's own
+button never sees it and no card opens with a mouse.
 
 **The edge the clip cuts gets a soft one**, and **the fade follows the live position**: a side is faded
 only while a card is actually hanging off it, which is what the offset within the current step says —
