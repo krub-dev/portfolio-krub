@@ -17,6 +17,28 @@ not tasks and have no checkbox.
 This merges the pending list of 2026-09-16 with what used to live in the roadmap's "Later"
 section, folded together where they overlapped.
 
+## Where things stand — 2026-09-20
+
+A short snapshot so resuming work does not mean reading the whole file. The checklist below is
+the source of truth; this is the index into it.
+
+`main` is what `krub.dev` serves: the step-12 build. `dev` is well ahead of it and holds
+everything built since launch — the accent palettes and the appearance control, the reworked
+Stack and Contact, the contact form, the projects rail, the testimonials pager, the 404, the
+self-hosted fonts, the interactive grid cell, and the CV pipeline (four PDFs, light and dark).
+None of it is published yet (`git log main..dev` lists it).
+
+**Before `dev` can become `main`:**
+
+1. Replace or delete the two placeholder testimonials, or turn `config.showTestimonials` off.
+2. Set `WEB3FORMS_KEY` in the Vercel project, or the form answers 500 in production.
+3. The pre-publication documentation review.
+4. Re-measure Lighthouse against the merged deployment.
+
+**The substantial work still open:** the 3D logo (the largest; needs the Blender export first),
+Limonacho that answers, the OG banner and structured-data refresh, the LinkedIn update, the
+prose reread, Bing Webmaster Tools, the Vercel DNS change, and making the repository public.
+
 ---
 
 ## Content, CV and SEO
