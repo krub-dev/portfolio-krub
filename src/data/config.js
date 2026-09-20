@@ -20,12 +20,11 @@ export const config = {
   /*
     The CV download button in About.
 
-    ON since 2026-09-17, and it needs the file to exist: public/uploads/ holds
-    no CV, so the button currently downloads nothing (a 404). The original PDF
-    carried a phone number and a home address and was purged from the git
-    history; the button is waiting on the ATS-friendly rewrite, in both
-    languages, at the path below. Turn it off again before this reaches main if
-    the file is not there yet.
+  ON since 2026-09-17. Four PDFs live in public/uploads/, one per theme and
+  language (cv-{es,en}.pdf for light, cv-{es,en}-dark.pdf for dark), generated
+  by the standalone cv tool kept outside this repository. The button links to
+  the pair matching the page theme and language. The original PDF carried a
+  phone number and a home address and was purged from the git history.
   */
   showCv: true,
 

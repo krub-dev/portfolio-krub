@@ -21,15 +21,23 @@ section, folded together where they overlapped.
 
 ## Content, CV and SEO
 
-- [ ] **Rewrite the CV.** ATS-friendly, in both languages, without the phone number and home
-  address the original carried. The button is now **on** (`config.showCv` is true, since
-  2026-09-17) so it can be seen, but `public/uploads/` holds no file, so it currently downloads
-  nothing: **drop the PDF at the path below, or turn the switch off again, before this reaches
-  `main`.** The original was pulled from the deployment and purged from the git history. **(owner)**
-- [x] **Real testimonials.** Closed on 2026-09-17 with the first real quote, from Lourdes Campuzano of
-  CreandoMientras, and her own mark in the avatar circle. Long quotes are clamped to three lines with a
-  "read more", which is what makes the length a non-issue. The bracketed placeholders and the second
-  entry are gone, so nothing blocks `main` here any more.
+- [x] **Review the CV.** Done 2026-09-20: the owner approved the content, and the plain-text
+  sources and generator were moved out of this repository (decision 69). The four compiled PDFs
+  (light and dark, per language) stay in `public/uploads/`. ATS-friendly: one column, Arial,
+  standard headings, no phone number and no home address.
+- [ ] **Finish the testimonials.** The first real quote is in — Lourdes Campuzano of
+  CreandoMientras, with her own mark in the avatar circle — but the pager still carries **two
+  bracketed placeholders** ("Name Surname"), kept so it could be seen with more than one entry.
+  **Replace or delete them before this reaches `main`**, or turn `config.showTestimonials` off.
+  Long quotes are clamped to four lines with a "read more", which is what makes the length a
+  non-issue.
+- [ ] **Refresh the Open Graph image and the structured data.** `og-banner.png` is from the first
+  build and predates the sections that exist now; the JSON-LD `workLocation` still says Barcelona
+  while the owner is in Murcia; and the `sameAs` list carries `x.com/krub_dev` from before X was
+  dropped from the site. Regenerate the banner and bring the metadata in line. **(owner)**
+- [ ] **Update LinkedIn to match the CV and the site.** The headline, the location (it says
+  Barcelona, the owner is in Murcia) and the dates should agree with the CV and the site. Also the
+  new banner. **(owner)**
 - [ ] **Reread the prose.** Every sentence lives in `src/data/`, both languages side by side, one
   file per kind of content. It was always going to be iterated after launch rather than
   written once. **(owner)**

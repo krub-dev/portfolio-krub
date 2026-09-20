@@ -15,10 +15,12 @@ import SectionHeading from '../base/SectionHeading.vue'
 import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
 import { useLang } from '../../composables/useLang'
+import { useTheme } from '../../composables/useTheme'
 import { config, copy, cvPath, education, experience, photoPath } from '../../data'
 import { formatPeriod } from '../../utils/format'
 
 const { lang } = useLang()
+const { theme } = useTheme()
 const { t } = useI18n()
 
 const tab = ref('exp')
@@ -64,7 +66,7 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
           size="md"
           magnetic
           external
-          :href="cvPath"
+          :href="cvPath[theme][lang]"
           class="cv"
         >
           {{ t('actions.cv') }}

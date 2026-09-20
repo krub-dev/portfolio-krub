@@ -26,6 +26,10 @@ On this machine PowerShell blocks the unsigned `npm.ps1` shim, so `npm.cmd` and 
 workaround there. Commands handed to the owner must run in both a bash terminal and Windows
 PowerShell 5.1: no `&&`, no `printf`, no POSIX heredocs.
 
+The CV is not built from this repository. Its plain-text sources and the generator live outside it
+(a sibling `cv/` folder, run with `node build-cv.mjs`); the only CV artefacts here are the four
+compiled PDFs in `public/uploads/` — light and dark, one per language.
+
 `api/contact.js` is the same handler Vercel runs; `vite.config.js` mounts it in development. It reads
 `WEB3FORMS_KEY` from `.env.local` — deliberately **not** `VITE_`-prefixed, so the key never reaches
 the bundle. Production sets the variable in Vercel.

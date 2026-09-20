@@ -34,6 +34,13 @@ npm run dev
 | `npm run test:watch` | the same, in watch mode |
 | `npm run test:e2e` | end-to-end tests (Playwright, real Chromium) |
 
+The CV is not built from this repository. Its plain-text sources and generator live in a sibling
+`cv/` folder outside it, run with `node build-cv.mjs`; that script turns each file into LaTeX and
+compiles it with [tectonic](https://tectonic-typesetting.github.io), a single binary rather than a
+full TeX distribution. Put it on your `PATH`; on Windows the script also looks in
+`%LOCALAPPDATA%\Programs\tectonic`. It writes four PDFs — light and dark, one per language — into
+this repository's `public/uploads/`.
+
 ## Tests
 
 Forty-one unit tests and thirty end-to-end flows, the latter run across two viewports.
@@ -65,8 +72,8 @@ E2E_BASE_URL=https://example.vercel.app npx playwright test
 
 ```
 public/            served as-is: logo, photo, og banner, stack icons, self-hosted fonts
-                   (with their OFL licences), the acho clip, favicon, apple touch icon,
-                   robots, sitemap
+                   (with their OFL licences), the acho clip, the CV PDFs, favicon,
+                   apple touch icon, robots, sitemap
 docs/              the spec, the component contracts, the roadmap, the decision log, the backlog
 tests/
 ├─ unit/           Vitest

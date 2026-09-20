@@ -21,9 +21,11 @@ new number to its range when a decision is appended.
   navbar, self-hosted fonts, and the soft 404.
 - **Interaction, theme and Limonacho — 47–53.** The softer magnetic pull, accent as its own axis, the
   iOS toolbar, the "acho", the stage glow and the menu dots.
-- **Sections and copy — 54–67.** The contact band, testimonials inside Projects and then below the
+- **Sections and copy — 54–68.** The contact band, testimonials inside Projects and then below the
   Stack, the contact endpoint, the Stack spotlight, the projects rail, the navbar's click band, em
-  dashes, the fade, the pager, the grid cell under the pointer, and the way back to the top.
+  dashes, the fade, the pager, the grid cell under the pointer, the way back to the top, and the CV
+  pipeline.
+- **The CV tool and its themes — 69.** The generator moved out of the repository, and the dark PDF.
 
 ---
 
@@ -1795,3 +1797,69 @@ scroll could stop a few pixels short, leaving a sliver of the next section visib
 
 Not reproduced in the emulator — there the scroll already ended at zero — so this is the fix for the
 phone case the owner hit, and it should be re-checked on the device.
+
+### 68. The CV is plain text in `cv/`, built with tectonic
+
+**Date:** 2026-09-18 · **Status:** active
+
+The About button links to a CV, and `public/uploads/` held no file: it downloaded a 404. The CV is
+now two plain-text files in `cv/` — `cv-es.txt` and `cv-en.txt` — and `npm run build:cv` turns each
+into LaTeX and compiles it with tectonic to `public/uploads/cv-es.pdf` and `cv-en.pdf`.
+
+- **Plain text as the source, not `.tex`.** The first version was LaTeX the owner was expected to
+  edit, and before that HTML. Neither is what he wants to touch. The `.txt` is words and a few line
+  markers (`#`, `## Title @@ Dates`, `~`, `-`), so he edits sentences and the generator handles the
+  escaping (`&`, `_`, `%`…) and the layout. It never changes the case: what is typed is printed.
+- **The generated `.tex` is disposable.** The generator writes it into `node_modules/.cache/cv`, so
+  the tree carries only the sources and the PDFs.
+- **tectonic, not a full TeX distribution.** One binary that fetches only the packages a document
+  needs, so there is no multi-gigabyte install. It runs XeTeX, so the font comes through `fontspec`.
+- **Arial, ligatures off, hyphenation off, ragged right.** Arial is on the ATS safe list.
+  `Ligatures=NoCommon` stops `fi`/`fl` extracting as an empty glyph; `hyphenat`'s `none` stops LaTeX
+  breaking *documentación* into *docu-mentación*, which a parser searching the word would miss; and
+  the text is left-aligned, not justified, because justification stretched lines into wide gaps.
+- **One column, standard headings, no tables or graphics, no photo, no phone number and no home
+  address.** The original carried a phone and an address and was purged from the history.
+- **The extraction is the test.** `pdfjs-dist` in a scratch folder reads the compiled PDF back the
+  way a parser would. That is how the ligature, the middle-dot codepoint and the hyphenation were
+  caught — each one silently breaks a keyword the ATS is looking for.
+- **One file per language.** The owner edits the Spanish; the English is kept in step by hand. Both
+  go through the same generator, so the two never drift in layout.
+- **The path is per language.** `cvPath` in `src/data/socials.js` is an object, and About links to
+  `cvPath[lang]`, so an English visitor gets the English CV.
+
+Needs tectonic installed (see the README). The wording is drafted from the site's data and the CV he
+sent, and it is his document to approve.
+
+### 69. The CV tool moved out of the repository, and the CV now comes in two themes
+
+**Date:** 2026-09-20 · **Status:** active
+
+Decision 68 put the CV's plain-text sources in `cv/` and its generator in `scripts/build-cv.mjs`.
+Both are gone from the repository. They live in a sibling folder outside it — `../cv/`, next to the
+repository rather than inside it — and the generator is run directly with `node build-cv.mjs`.
+
+**Why out.** The generator is a small, self-contained text-to-PDF tool: a parser for a handful of
+line markers and a LaTeX preamble. It is not part of the website, and keeping it here mixed a
+personal document tool into a public front-end repository. Nothing about the site depends on it at
+build or run time — the site only ever ships the compiled PDFs.
+
+**What stayed.** The four compiled PDFs, in `public/uploads/`: the light pair (`cv-es.pdf`,
+`cv-en.pdf`) for print and email, and the dark pair (`cv-es-dark.pdf`, `cv-en-dark.pdf`) to match
+the site on screen. They are still committed, because they are what the visitor downloads.
+
+**The dark variant.** The CV's only colour is the brand rule, and a PDF's colours are baked in, so a
+themed CV means one file per theme. The dark page reuses the site's own values — `#0C0C0D` for the
+page (`--ink`) and `#F2F0EA` for the text (`--fg`), with the brand yellow unchanged — via the
+`pagecolor` package. Two files per language, four in total, all produced in one run.
+
+**Served by theme and language.** `cvPath` in `src/data/socials.js` is now
+`{ dark: { en, es }, light: { en, es } }`, and About links to `cvPath[theme][lang]`. The light file
+keeps its original name so nothing that pointed at it breaks.
+
+**Rejected: generating on the fly.** Colouring a PDF at request time would need a LaTeX toolchain on
+the server, which a Vercel deploy does not have, and a viewer cannot recolour what is already baked
+in. Build-time variants are the only option that stays static.
+
+**Trade-off:** the dark PDF is heavier on ink and pointless to print, which is why the light pair
+stays the default for anything but the site itself.
