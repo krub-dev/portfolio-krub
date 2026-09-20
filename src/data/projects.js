@@ -153,11 +153,11 @@ export const projects = [
     en: {
       name: 'Showroom',
       tag: 'BOOTCAMP',
-      role: 'Fullstack',
+      role: 'Full Stack',
       year: '2025',
       repoLabel: '/repo',
       liveLabel: '/live ↗',
-      summary: 'Fullstack app to manage and show projects: full CRUD, search and an admin panel.',
+      summary: 'Full stack app to manage and show projects: full CRUD, search and an admin panel.',
       lead: 'Ironhack Module 3 final project: a portfolio that administers itself.',
       body: 'Vue 3 frontend with Composition API and Vue Router; Express backend with PostgreSQL and Prisma ORM. Full CRUD, featured-projects system, search by title and technologies, and server-side pagination. Write operations are protected by an API key.',
       body2:
@@ -166,12 +166,12 @@ export const projects = [
     es: {
       name: 'Showroom',
       tag: 'BOOTCAMP',
-      role: 'Fullstack',
+      role: 'Full Stack',
       year: '2025',
       repoLabel: '/repo',
       liveLabel: '/live ↗',
       summary:
-        'App fullstack para gestionar y mostrar proyectos: CRUD completo, buscador y panel de administración.',
+        'App full stack para gestionar y mostrar proyectos: CRUD completo, buscador y panel de administración.',
       lead: 'Proyecto final del Módulo 3 de Ironhack: un portfolio que se administra a sí mismo.',
       body: 'Frontend en Vue 3 con Composition API y Vue Router; backend en Express con PostgreSQL y Prisma ORM. CRUD completo, sistema de proyectos destacados, búsqueda por título y tecnologías, y paginación en servidor. Las operaciones de escritura van protegidas por API key.',
       body2:

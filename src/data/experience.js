@@ -19,11 +19,11 @@ export const experience = [
     to: '2026',
     current: false,
     en: {
-      title: 'Fullstack developer (freelance) · CreandoMientras',
+      title: 'Full Stack developer (freelance) · CreandoMientras',
       body: 'Public site and self-service admin panel for a handmade macramé business. Vue 3 with Vue Router and its own design system, content edited through a Git-based headless CMS (Sveltia), and automatic deployment on Vercel with image optimisation in CI.',
     },
     es: {
-      title: 'Desarrollador fullstack (freelance) · CreandoMientras',
+      title: 'Desarrollador full stack (freelance) · CreandoMientras',
       body: 'Web pública y panel de autogestión para un negocio artesano de macramé. Vue 3 con Vue Router y design system propio, contenidos editables con un CMS headless sobre Git (Sveltia), y despliegue automático en Vercel con optimización de imágenes en CI.',
     },
   },
@@ -32,11 +32,11 @@ export const experience = [
     to: null,
     current: true,
     en: {
-      title: 'Fullstack developer · personal and collaborative projects',
+      title: 'Full Stack developer · personal and collaborative projects',
       body: 'REST APIs in Java Spring Boot and Node.js with relational databases, Vue SPAs wired to the backend, Git and agile practices. Peer-to-peer technical challenges at 42 Barcelona.',
     },
     es: {
-      title: 'Desarrollador fullstack · proyectos propios y colaborativos',
+      title: 'Desarrollador full stack · proyectos propios y colaborativos',
       body: 'APIs REST en Java Spring Boot y Node.js con bases de datos relacionales, SPAs en Vue conectadas al backend, Git y metodologías ágiles. Retos técnicos peer-to-peer en 42 Barcelona.',
     },
   },
