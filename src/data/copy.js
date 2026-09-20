@@ -40,13 +40,13 @@ export const copy = {
   about: {
     en: {
       p1: 'I came from 3D and ended up programming: same thing, fewer twelve-hour renders.',
-      p2: 'Six years modelling and texturing for games, apps and e-commerce taught me to ship on time and to sweat the details. Now I do the same with REST APIs in Java 17 with Spring Boot and in Node/Express over relational databases, and Vue SPAs on the front, with tests and documentation as part of the job.',
-      p3: 'Based in Murcia, open to Barcelona and remote. Looking for a team where I can grow into backend while still poking at odd things in C on weekends.',
+      p2: 'Six years modelling and texturing for games, apps and e-commerce taught me to ship on time and to sweat the details. I bring the same to the code: careful, tested, documented, and delivered when I said it would be.',
+      p3: 'Looking for a team where I can grow into backend while still poking at odd things in C on weekends.',
     },
     es: {
       p1: 'Vengo del 3D y acabé programando, que es lo mismo pero con menos renders de doce horas.',
-      p2: 'Seis años modelando y texturizando para videojuegos, apps y e-commerce me enseñaron a entregar a tiempo y a mirar el detalle. Ahora hago lo mismo con APIs REST en Java 17 con Spring Boot y en Node/Express sobre bases de datos relacionales, y SPAs en Vue delante, con tests y documentación como parte del trabajo.',
-      p3: 'Con base en Murcia, abierto a Barcelona y remoto. Busco equipo donde crecer hacia backend sin dejar de tocar cosas raras en C los fines de semana.',
+      p2: 'Seis años modelando y texturizando para videojuegos, apps y e-commerce me enseñaron a entregar a tiempo y a mirar el detalle. Traigo eso mismo al código: cuidado, probado, documentado y entregado cuando dije que lo estaría.',
+      p3: 'Busco equipo donde crecer hacia backend sin dejar de tocar cosas raras en C los fines de semana.',
     },
   },
 

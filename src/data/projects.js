@@ -106,42 +106,6 @@ export const projects = [
     },
   },
   {
-    slug: 'ironbooking',
-    shotLabel: 'SHOT · IRONBOOKING',
-    image: null,
-    slides: 3,
-    repo: 'https://github.com/krub-dev/IronBooking',
-    live: 'https://github.com/krub-dev/IronBooking#readme',
-    stack: ['Java 17', 'Spring Boot', 'Spring Data JPA', 'PostgreSQL', 'JUnit'],
-    en: {
-      name: 'IronBooking',
-      tag: 'TEAM',
-      role: 'Backend',
-      year: '2025',
-      repoLabel: '/repo',
-      liveLabel: '/readme ↗',
-      summary: 'Spring Boot REST API for spaces, bookings and reviews, built in a team of five with Gitflow.',
-      lead: 'Booking backend built with four others: a Spring Boot REST API to manage spaces, bookings and reviews.',
-      body: '30 endpoints over 5 related entities, with 20 tests. Built in a team of five using Gitflow: a branch per feature and pull requests reviewed between peers before merging.',
-      body2:
-        'Spring Data JPA over PostgreSQL, with the API tested at the controller and service level. The team work is the point: a shared branch model, code review and integration through pull requests.',
-    },
-    es: {
-      name: 'IronBooking',
-      tag: 'EQUIPO',
-      role: 'Backend',
-      year: '2025',
-      repoLabel: '/repo',
-      liveLabel: '/readme ↗',
-      summary:
-        'API REST en Spring Boot para espacios, reservas y reseñas, hecha en equipo de cinco con Gitflow.',
-      lead: 'Backend de reservas hecho con otras cuatro personas: una API REST en Spring Boot para gestionar espacios, reservas y reseñas.',
-      body: '30 endpoints sobre 5 entidades relacionadas, con 20 tests. Construido en equipo de cinco con Gitflow: una rama por funcionalidad y pull requests revisadas entre pares antes de integrar.',
-      body2:
-        'Spring Data JPA sobre PostgreSQL, con la API probada a nivel de controlador y de servicio. Lo importante es el trabajo en equipo: modelo de ramas compartido, revisión de código e integración por pull requests.',
-    },
-  },
-  {
     slug: 'krub-dev',
     shotLabel: 'SHOT · KRUB.DEV',
     image: null,

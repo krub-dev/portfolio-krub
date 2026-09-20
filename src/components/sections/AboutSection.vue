@@ -16,7 +16,7 @@ import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
 import { useLang } from '../../composables/useLang'
 import { useTheme } from '../../composables/useTheme'
-import { config, copy, cvPath, education, experience, photoPath } from '../../data'
+import { certifications, config, copy, cvPath, education, experience, photoPath } from '../../data'
 import { formatPeriod } from '../../utils/format'
 
 const { lang } = useLang()
@@ -28,8 +28,13 @@ const about = computed(() => copy.about[lang.value])
 const options = computed(() => [
   { value: 'exp', label: t('tab.exp') },
   { value: 'edu', label: t('tab.edu') },
+  { value: 'cert', label: t('tab.cert') },
 ])
-const entries = computed(() => (tab.value === 'exp' ? experience : education))
+const entries = computed(() => {
+  if (tab.value === 'exp') return experience
+  if (tab.value === 'edu') return education
+  return certifications
+})
 
 // A null `to` means still going, so the row stays correct as years pass
 // without anyone editing the data. See src/utils/format.js.

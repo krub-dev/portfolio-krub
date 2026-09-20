@@ -9,7 +9,8 @@
   },
   "tab": {
     "exp": "/experience",
-    "edu": "/education"
+    "edu": "/education",
+    "cert": "/certifications"
   },
   "section": {
     "me": "/me",

@@ -34,6 +34,7 @@
       const hero = computed(() => copy.hero[lang.value])
 */
 export { accents } from './accents.js'
+export { certifications } from './certifications.js'
 export { config } from './config.js'
 export { copy } from './copy.js'
 export { education } from './education.js'
