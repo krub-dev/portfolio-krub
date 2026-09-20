@@ -86,9 +86,9 @@ export const projects = [
       liveLabel: '/docs ↗',
       summary: 'Java Spring Boot REST API to manage and customise 3D assets for the web.',
       lead: 'Java and Spring Boot REST API to manage and customise 3D assets (t-shirts, mugs, mouse pads) for web visualisation.',
-      body: 'Domain model with users, admins, customers, assets, scenes and designs: an authenticated user creates scenes, links assets and defines designs on specific parts of a model, with colours, materials, logos and text. Spring Data JPA over MySQL, DTOs per entity, pagination and search, plus centralised error handling.',
+      body: 'Domain model with users, admins, customers, assets, scenes and designs: an authenticated user creates scenes, links assets and defines designs on specific parts of a model, with colours, materials, logos and text. 42 endpoints over 6 related entities and 18 DTOs, with Spring Data JPA over MySQL, pagination, search and centralised error handling.',
       body2:
-        'Spring Security with role-based access, hashed passwords, Swagger/OpenAPI docs and a Postman collection for the demo. Controller tests with MockMvc and service tests with Mockito. On the roadmap: JWT, cloud image storage, design versioning and the 3D integration on the front end.',
+        'Spring Security with role-based access, hashed passwords, Swagger/OpenAPI docs and a Postman collection for the demo. 112 tests — controllers with MockMvc, services with Mockito — at 81% line coverage. On the roadmap: JWT, cloud image storage, design versioning and the 3D integration on the front end.',
     },
     es: {
       name: 'sideForge',
@@ -100,9 +100,45 @@ export const projects = [
       summary:
         'API REST en Java con Spring Boot para gestionar y personalizar assets 3D en la web.',
       lead: 'API REST en Java y Spring Boot para gestionar y personalizar assets 3D (camisetas, tazas, alfombrillas) de cara a visualizarlos en web.',
-      body: 'Modelo de dominio con usuarios, admins, clientes, assets, escenas y diseños: un usuario autenticado crea escenas, asocia assets y define diseños por partes concretas del modelo, con colores, materiales, logos y textos. Spring Data JPA sobre MySQL, DTOs por entidad, paginación y búsqueda, y manejo de errores centralizado.',
+      body: 'Modelo de dominio con usuarios, admins, clientes, assets, escenas y diseños: un usuario autenticado crea escenas, asocia assets y define diseños por partes concretas del modelo, con colores, materiales, logos y textos. 42 endpoints sobre 6 entidades relacionadas y 18 DTOs, con Spring Data JPA sobre MySQL, paginación, búsqueda y manejo de errores centralizado.',
       body2:
-        'Spring Security con acceso por rol, contraseñas hasheadas, documentación en Swagger/OpenAPI y colección de Postman para la demo. Tests de controladores con MockMvc y de servicios con Mockito. En la hoja de ruta: JWT, almacenamiento de imágenes en la nube, versionado de diseños y la integración 3D en el front.',
+        'Spring Security con acceso por rol, contraseñas hasheadas, documentación en Swagger/OpenAPI y colección de Postman para la demo. 112 tests — controladores con MockMvc, servicios con Mockito — con un 81 % de cobertura de líneas. En la hoja de ruta: JWT, almacenamiento de imágenes en la nube, versionado de diseños y la integración 3D en el front.',
+    },
+  },
+  {
+    slug: 'ironbooking',
+    shotLabel: 'SHOT · IRONBOOKING',
+    image: null,
+    slides: 3,
+    repo: 'https://github.com/krub-dev/IronBooking',
+    live: 'https://github.com/krub-dev/IronBooking#readme',
+    stack: ['Java 17', 'Spring Boot', 'Spring Data JPA', 'PostgreSQL', 'JUnit'],
+    en: {
+      name: 'IronBooking',
+      tag: 'TEAM',
+      role: 'Backend',
+      year: '2025',
+      repoLabel: '/repo',
+      liveLabel: '/readme ↗',
+      summary: 'Spring Boot REST API for spaces, bookings and reviews, built in a team of five with Gitflow.',
+      lead: 'Booking backend built with four others: a Spring Boot REST API to manage spaces, bookings and reviews.',
+      body: '30 endpoints over 5 related entities, with 20 tests. Built in a team of five using Gitflow: a branch per feature and pull requests reviewed between peers before merging.',
+      body2:
+        'Spring Data JPA over PostgreSQL, with the API tested at the controller and service level. The team work is the point: a shared branch model, code review and integration through pull requests.',
+    },
+    es: {
+      name: 'IronBooking',
+      tag: 'EQUIPO',
+      role: 'Backend',
+      year: '2025',
+      repoLabel: '/repo',
+      liveLabel: '/readme ↗',
+      summary:
+        'API REST en Spring Boot para espacios, reservas y reseñas, hecha en equipo de cinco con Gitflow.',
+      lead: 'Backend de reservas hecho con otras cuatro personas: una API REST en Spring Boot para gestionar espacios, reservas y reseñas.',
+      body: '30 endpoints sobre 5 entidades relacionadas, con 20 tests. Construido en equipo de cinco con Gitflow: una rama por funcionalidad y pull requests revisadas entre pares antes de integrar.',
+      body2:
+        'Spring Data JPA sobre PostgreSQL, con la API probada a nivel de controlador y de servicio. Lo importante es el trabajo en equipo: modelo de ramas compartido, revisión de código e integración por pull requests.',
     },
   },
   {

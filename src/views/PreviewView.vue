@@ -337,8 +337,8 @@ onMounted(readTokens)
         <div class="anim">
           <div class="anim-stage marquee-stage">
             <div class="marquee-track">
-              <span>FULLSTACK DEVELOPER → BACKEND // FROM MURCIA, BASED IN BARCELONA · SPAIN //&nbsp;</span>
-              <span>FULLSTACK DEVELOPER → BACKEND // FROM MURCIA, BASED IN BARCELONA · SPAIN //&nbsp;</span>
+              <span>FULLSTACK DEVELOPER → BACKEND // MURCIA · BARCELONA · REMOTE · SPAIN //&nbsp;</span>
+              <span>FULLSTACK DEVELOPER → BACKEND // MURCIA · BARCELONA · REMOTE · SPAIN //&nbsp;</span>
             </div>
           </div>
           <code class="anim-name">marquee 26s linear infinite</code>

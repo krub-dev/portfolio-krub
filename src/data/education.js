@@ -2,19 +2,21 @@
   The /education tab of the About section, newest first. Same shape as
   experience.js — see the comment there for what each field does.
 
-  To add the DAW higher-level qualification when it starts, copy this block to
-  the top of the list and fill it in. `to: null` makes the timeline print
-  "2026 — now" using the translated word, so it stays correct on its own:
-
-    {
-      from: '2026',
-      to: null,
-      current: true,
-      en: { title: '', body: '' },
-      es: { title: '', body: '' },
-    },
 */
 export const education = [
+  {
+    from: '2026',
+    to: null,
+    current: true,
+    en: {
+      title: 'Higher Vocational Diploma (DAW) · IES Francisco de Goya',
+      body: 'Official Higher Technician qualification, EQF level 5, distance learning from Murcia. First year under way, compatible with a job, and open to a company internship through the school.',
+    },
+    es: {
+      title: 'Grado Superior de FP (DAW) · IES Francisco de Goya',
+      body: 'Título oficial de Técnico Superior, nivel 5 del EQF, a distancia desde Murcia. Primer curso en marcha, compatible con trabajar y abierto a prácticas mediante convenio con el centro.',
+    },
+  },
   {
     from: '2024',
     to: '2026',

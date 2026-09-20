@@ -24,7 +24,7 @@ export const copy = {
       line3pre: 'on the ',
       accent: 'backend',
       line3post: '.',
-      body: 'Fullstack developer in Barcelona, leaning into backend: Java with Spring Boot, Node and databases. Vue on the front when needed. I used to do 3D, and it still shows in how I look at things.',
+      body: 'Fullstack developer in Murcia, open to Barcelona and remote, leaning into backend: Java 17 with Spring Boot, Node and Express, and relational databases. Vue on the front when needed. I used to do 3D, and it still shows in how I look at things.',
     },
     es: {
       badge: 'Disponible para trabajar',
@@ -33,28 +33,28 @@ export const copy = {
       line3pre: 'el ',
       accent: 'backend',
       line3post: '.',
-      body: 'Desarrollador fullstack en Barcelona, girando hacia backend: Java con Spring Boot, Node y bases de datos. Frontend en Vue cuando toca. Antes hacía 3D, y todavía se me nota en el ojo.',
+      body: 'Desarrollador fullstack en Murcia, abierto a Barcelona y remoto, girando hacia backend: Java 17 con Spring Boot, Node y Express, y bases de datos relacionales. Frontend en Vue cuando toca. Antes hacía 3D, y todavía se me nota en el ojo.',
     },
   },
 
   about: {
     en: {
       p1: 'I came from 3D and ended up programming: same thing, fewer twelve-hour renders.',
-      p2: 'Six years modelling and texturing for games, apps and e-commerce taught me to ship on time and to sweat the details. Now I do the same with REST APIs in Java Spring Boot and Node, relational databases and Vue SPAs.',
-      p3: 'From Murcia, living in Barcelona. Looking for a team where I can grow into backend while still poking at odd things in C on weekends.',
+      p2: 'Six years modelling and texturing for games, apps and e-commerce taught me to ship on time and to sweat the details. Now I do the same with REST APIs in Java 17 with Spring Boot and in Node/Express over relational databases, and Vue SPAs on the front, with tests and documentation as part of the job.',
+      p3: 'Based in Murcia, open to Barcelona and remote. Looking for a team where I can grow into backend while still poking at odd things in C on weekends.',
     },
     es: {
       p1: 'Vengo del 3D y acabé programando, que es lo mismo pero con menos renders de doce horas.',
-      p2: 'Seis años modelando y texturizando para videojuegos, apps y e-commerce me enseñaron a entregar a tiempo y a mirar el detalle. Ahora hago lo mismo con APIs REST en Java Spring Boot y Node, bases de datos relacionales y SPAs en Vue.',
-      p3: 'De Murcia, en Barcelona. Busco equipo donde crecer hacia backend sin dejar de tocar cosas raras en C los fines de semana.',
+      p2: 'Seis años modelando y texturizando para videojuegos, apps y e-commerce me enseñaron a entregar a tiempo y a mirar el detalle. Ahora hago lo mismo con APIs REST en Java 17 con Spring Boot y en Node/Express sobre bases de datos relacionales, y SPAs en Vue delante, con tests y documentación como parte del trabajo.',
+      p3: 'Con base en Murcia, abierto a Barcelona y remoto. Busco equipo donde crecer hacia backend sin dejar de tocar cosas raras en C los fines de semana.',
     },
   },
 
   // The marquee loops these two phrases forever, joined by the separator.
   // Add or remove entries freely; the band duplicates whatever it is given.
   marquee: {
-    en: ['Fullstack developer → backend', 'From Murcia, based in Barcelona · Spain'],
-    es: ['Desarrollador fullstack → backend', 'De Murcia, afincado en Barcelona · España'],
+    en: ['Fullstack developer → backend', 'Murcia · Barcelona · remote · Spain'],
+    es: ['Desarrollador fullstack → backend', 'Murcia · Barcelona · remoto · España'],
   },
 
   // The 404 page. The title and the button label are interface strings and live
