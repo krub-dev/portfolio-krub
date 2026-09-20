@@ -27,8 +27,9 @@ workaround there. Commands handed to the owner must run in both a bash terminal 
 PowerShell 5.1: no `&&`, no `printf`, no POSIX heredocs.
 
 The CV is not built from this repository. Its plain-text sources and the generator live outside it
-(a sibling `cv/` folder, run with `node build-cv.mjs`); the only CV artefacts here are the four
-compiled PDFs in `public/uploads/` — light and dark, one per language.
+(a sibling `cv/` folder, run with `node build-cv.mjs`, writing to its own `out/`); the only CV
+artefacts here are the four compiled PDFs in `public/uploads/` — light and dark, one per language —
+copied in by hand when they change.
 
 `api/contact.js` is the same handler Vercel runs; `vite.config.js` mounts it in development. It reads
 `WEB3FORMS_KEY` from `.env.local` — deliberately **not** `VITE_`-prefixed, so the key never reaches

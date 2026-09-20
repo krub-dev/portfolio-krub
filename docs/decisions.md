@@ -1846,7 +1846,9 @@ build or run time — the site only ever ships the compiled PDFs.
 
 **What stayed.** The four compiled PDFs, in `public/uploads/`: the light pair (`cv-es.pdf`,
 `cv-en.pdf`) for print and email, and the dark pair (`cv-es-dark.pdf`, `cv-en-dark.pdf`) to match
-the site on screen. They are still committed, because they are what the visitor downloads.
+the site on screen. They are still committed, because they are what the visitor downloads. The
+generator writes to its own `out/` folder and never touches the repository; the owner copies the
+four files in when they change.
 
 **The dark variant.** The CV's only colour is the brand rule, and a PDF's colours are baked in, so a
 themed CV means one file per theme. The dark page reuses the site's own values — `#0C0C0D` for the

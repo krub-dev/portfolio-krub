@@ -39,7 +39,7 @@ The CV is not built from this repository. Its plain-text sources and generator l
 compiles it with [tectonic](https://tectonic-typesetting.github.io), a single binary rather than a
 full TeX distribution. Put it on your `PATH`; on Windows the script also looks in
 `%LOCALAPPDATA%\Programs\tectonic`. It writes four PDFs — light and dark, one per language — into
-this repository's `public/uploads/`.
+its own `out/` folder; copy them into this repository's `public/uploads/` to publish a change.
 
 ## Tests
 
