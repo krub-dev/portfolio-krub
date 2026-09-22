@@ -142,7 +142,8 @@ function onClickCapture(event) {
   left: 0;
   right: 0;
   bottom: -1px;
-  height: 2px;
+  height: 3px;
+  border-radius: 3px;
   background: var(--acc);
 }
 </style>

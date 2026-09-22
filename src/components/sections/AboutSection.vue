@@ -7,7 +7,7 @@
   what was clicked, this section decides what that means. That is the "a
   component that only paints does not own state" rule from COMPONENTS.md.
 */
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../base/BaseButton.vue'
@@ -40,26 +40,52 @@ const entries = computed(() => {
 // without anyone editing the data. See src/utils/format.js.
 const period = (entry) => formatPeriod(entry, t('time.now'))
 
+// Which way the content slides when the tab changes, for the transition.
+const direction = ref('left')
+
+watch(tab, (next, previous) => {
+  const values = options.value.map((option) => option.value)
+  direction.value = values.indexOf(next) > values.indexOf(previous) ? 'left' : 'right'
+})
+
 /*
-  A sideways swipe on the content moves to the next or previous tab. It only
-  fires when the gesture is clearly horizontal (longer than it is tall, and past
-  a threshold), so a normal vertical scroll is left alone. The listeners are
-  passive: nothing here needs to cancel the scroll.
+  A sideways swipe on the content moves to the next or previous tab, and the
+  content slides the way the finger went. It only takes over once the gesture is
+  clearly horizontal (longer than it is tall), so a vertical scroll is left to
+  the page; from that point it cancels the scroll, because otherwise the content
+  slid and the page scrolled at the same time.
 */
 let touchX = 0
 let touchY = 0
+let horizontal = false
 
 function onTouchStart(event) {
   const point = event.changedTouches[0]
   touchX = point.clientX
   touchY = point.clientY
+  horizontal = false
 }
 
-function onTouchEnd(event) {
+function onTouchMove(event) {
+  if (horizontal) {
+    event.preventDefault()
+    return
+  }
   const point = event.changedTouches[0]
   const dx = point.clientX - touchX
   const dy = point.clientY - touchY
-  if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return
+  if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    horizontal = true
+    event.preventDefault()
+  }
+}
+
+function onTouchEnd(event) {
+  if (!horizontal) return
+  horizontal = false
+  const point = event.changedTouches[0]
+  const dx = point.clientX - touchX
+  if (Math.abs(dx) < 48) return
 
   const values = options.value.map((option) => option.value)
   const next = values.indexOf(tab.value) + (dx < 0 ? 1 : -1)
@@ -79,17 +105,25 @@ function onTouchEnd(event) {
 
         <TabSwitch v-model="tab" :options="options" class="tabs" />
 
-        <ol class="timeline" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
-          <li v-for="(entry, i) in entries" :key="entry.from + entry[lang].title">
-            <TimelineItem
-              :period="period(entry)"
-              :current="entry.current"
-              :title="entry[lang].title"
-              :body="entry[lang].body"
-              :is-last="i === entries.length - 1"
-            />
-          </li>
-        </ol>
+        <Transition :name="`tab-slide-${direction}`" mode="out-in">
+          <ol
+            :key="tab"
+            class="timeline"
+            @touchstart="onTouchStart"
+            @touchmove="onTouchMove"
+            @touchend="onTouchEnd"
+          >
+            <li v-for="(entry, i) in entries" :key="entry.from + entry[lang].title">
+              <TimelineItem
+                :period="period(entry)"
+                :current="entry.current"
+                :title="entry[lang].title"
+                :body="entry[lang].body"
+                :is-last="i === entries.length - 1"
+              />
+            </li>
+          </ol>
+        </Transition>
 
         <BaseButton
           v-if="config.showCv"
@@ -176,6 +210,46 @@ function onTouchEnd(event) {
    would double it. */
 .timeline :deep(li:first-child .row) {
   border-top: 0;
+}
+
+/* The content slides the way the tab did. out-in so the two panels do not sit
+   on top of each other while they cross. */
+.tab-slide-left-enter-active,
+.tab-slide-left-leave-active,
+.tab-slide-right-enter-active,
+.tab-slide-right-leave-active {
+  transition:
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.24s ease;
+}
+
+.tab-slide-left-enter-from {
+  transform: translateX(44px);
+  opacity: 0;
+}
+
+.tab-slide-left-leave-to {
+  transform: translateX(-44px);
+  opacity: 0;
+}
+
+.tab-slide-right-enter-from {
+  transform: translateX(-44px);
+  opacity: 0;
+}
+
+.tab-slide-right-leave-to {
+  transform: translateX(44px);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-slide-left-enter-active,
+  .tab-slide-left-leave-active,
+  .tab-slide-right-enter-active,
+  .tab-slide-right-leave-active {
+    transition: none;
+  }
 }
 
 .cv {
