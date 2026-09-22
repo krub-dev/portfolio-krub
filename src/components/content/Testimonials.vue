@@ -185,6 +185,27 @@ async function goTo(next) {
 }
 
 /*
+  The wheel pages it too, so a desktop does not have to drag. It only takes the
+  gesture while there is somewhere to go: at either end the wheel is left to the
+  page, so the pager never traps the scroll. A short lock stops one flick from
+  running through several quotes.
+*/
+let wheelLock = 0
+
+function onWheel(event) {
+  if (Math.abs(event.deltaY) < 4) return
+  const direction = event.deltaY > 0 ? 1 : -1
+  const next = index.value + direction
+  if (next < 0 || next > offsets.length - 1) return
+
+  event.preventDefault()
+  const now = performance.now()
+  if (now - wheelLock < 450) return
+  wheelLock = now
+  goTo(next)
+}
+
+/*
   Dragging. One set of handlers for every pointer type: a mouse has no vertical
   gesture of its own, and the pager is not a scroll container, so a phone has no
   swipe either. The pane claims both axes, which is the cost of a vertical pager:
@@ -301,6 +322,7 @@ onUnmounted(() => {
             @pointerup="onPointerUp"
             @pointercancel="onPointerUp"
             @click.capture="onClickCapture"
+            @wheel="onWheel"
           >
             <div ref="reel" class="reel">
               <TestimonialCard
@@ -384,9 +406,8 @@ onUnmounted(() => {
 .mark {
   position: absolute;
   /* Below the header's rule, not across it: the counter lives up there, and the
-     two glyphs on top of each other read as a mistake rather than as a mark.
-     Pulled up close under it, because lower down it sat behind the attribution. */
-  top: 34px;
+     two glyphs on top of each other read as a mistake rather than as a mark. */
+  top: 44px;
   right: 16px;
   font-family: var(--font-sans);
   font-size: clamp(76px, 8vw, 104px);
@@ -540,7 +561,7 @@ onUnmounted(() => {
     second attribution.
   */
   .mark {
-    top: 74px;
+    top: 52px;
     right: 6px;
     font-size: 112px;
   }

@@ -1,6 +1,6 @@
 <script setup>
 /*
-  The /experience — /education switch.
+  The /me switch: /experience, /education, /certifications.
 
   Uses v-model, so the parent writes `v-model="tab"` and never thinks about
   events. That is what the `modelValue` prop plus the `update:modelValue`
@@ -8,17 +8,66 @@
 
   role="tablist" + aria-selected tells a screen reader these are alternative
   views of the same region rather than three unrelated buttons.
+
+  On a phone the three pills do not fit, so the row slides sideways instead of
+  wrapping or stacking — the same gesture as the projects rail. It is a native
+  scroll container with snap (touch and trackpad do the work) plus a small
+  drag-to-scroll so a mouse can move it too, and a click guard so a drag does
+  not pick a tab it ends over.
 */
+import { ref } from 'vue'
+
 defineProps({
   options: { type: Array, required: true }, // [{ value, label }]
   modelValue: { type: String, required: true },
 })
 
 defineEmits(['update:modelValue'])
+
+const el = ref(null)
+let down = false
+let startX = 0
+let startScroll = 0
+let moved = 0
+
+function onDown(event) {
+  down = true
+  moved = 0
+  startX = event.clientX
+  startScroll = el.value?.scrollLeft ?? 0
+}
+
+function onMove(event) {
+  if (!down || !el.value) return
+  const delta = event.clientX - startX
+  moved = Math.max(moved, Math.abs(delta))
+  if (moved > 6) el.value.scrollLeft = startScroll - delta
+}
+
+function onUp() {
+  down = false
+}
+
+// A drag that ends over a tab must not pick it.
+function onClickCapture(event) {
+  if (moved <= 6) return
+  moved = 0
+  event.stopPropagation()
+  event.preventDefault()
+}
 </script>
 
 <template>
-  <div class="tabs" role="tablist">
+  <div
+    ref="el"
+    class="tabs"
+    role="tablist"
+    @pointerdown="onDown"
+    @pointermove="onMove"
+    @pointerup="onUp"
+    @pointercancel="onUp"
+    @click.capture="onClickCapture"
+  >
     <button
       v-for="option in options"
       :key="option.value"
@@ -40,10 +89,24 @@ defineEmits(['update:modelValue'])
   flex-wrap: nowrap;
   gap: 8px;
   min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  cursor: grab;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs:active {
+  cursor: grabbing;
 }
 
 .tab {
   flex: 0 0 auto;
+  scroll-snap-align: start;
   border-radius: 999px;
   padding: 9px 16px;
   cursor: pointer;
@@ -69,22 +132,5 @@ defineEmits(['update:modelValue'])
   background: var(--acc);
   color: var(--on-acc);
   border-color: var(--acc);
-}
-
-/*
-  On a phone the three pills stack, one full-width row each. Three do not fit a
-  phone's width — "/certificaciones" alone is wider than a third of it — and a
-  sideways scroll left the third cut off at the edge, which read as broken rather
-  than as something to swipe. Stacked, all three are visible and easy to tap.
-*/
-@media (max-width: 900px) {
-  .tabs {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .tab {
-    text-align: left;
-  }
 }
 </style>
