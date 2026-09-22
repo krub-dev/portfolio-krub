@@ -39,6 +39,32 @@ const entries = computed(() => {
 // A null `to` means still going, so the row stays correct as years pass
 // without anyone editing the data. See src/utils/format.js.
 const period = (entry) => formatPeriod(entry, t('time.now'))
+
+/*
+  A sideways swipe on the content moves to the next or previous tab. It only
+  fires when the gesture is clearly horizontal (longer than it is tall, and past
+  a threshold), so a normal vertical scroll is left alone. The listeners are
+  passive: nothing here needs to cancel the scroll.
+*/
+let touchX = 0
+let touchY = 0
+
+function onTouchStart(event) {
+  const point = event.changedTouches[0]
+  touchX = point.clientX
+  touchY = point.clientY
+}
+
+function onTouchEnd(event) {
+  const point = event.changedTouches[0]
+  const dx = point.clientX - touchX
+  const dy = point.clientY - touchY
+  if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return
+
+  const values = options.value.map((option) => option.value)
+  const next = values.indexOf(tab.value) + (dx < 0 ? 1 : -1)
+  if (next >= 0 && next < values.length) tab.value = values[next]
+}
 </script>
 
 <template>
@@ -53,7 +79,7 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
 
         <TabSwitch v-model="tab" :options="options" class="tabs" />
 
-        <ol class="timeline">
+        <ol class="timeline" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
           <li v-for="(entry, i) in entries" :key="entry.from + entry[lang].title">
             <TimelineItem
               :period="period(entry)"
@@ -144,6 +170,12 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
   list-style: none;
   display: flex;
   flex-direction: column;
+}
+
+/* The tab row already draws a rule under itself, so the timeline's first row
+   would double it. */
+.timeline :deep(li:first-child .row) {
+  border-top: 0;
 }
 
 .cv {

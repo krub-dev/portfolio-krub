@@ -35,6 +35,9 @@ let startScroll = 0
 let moved = 0
 
 function onDown(event) {
+  // Mouse only. On touch the native scroll already moves the row, and driving
+  // scrollLeft as well made the two fight — the row slid vertically.
+  if (event.pointerType !== 'mouse') return
   down = true
   moved = 0
   startX = event.clientX

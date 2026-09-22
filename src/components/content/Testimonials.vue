@@ -71,6 +71,7 @@ let frame = null
 let startY = 0
 let startOffset = 0
 let travelled = 0
+let lastExcess = 0
 let pointerId = null
 let observer = null
 
@@ -185,27 +186,6 @@ async function goTo(next) {
 }
 
 /*
-  The wheel pages it too, so a desktop does not have to drag. It only takes the
-  gesture while there is somewhere to go: at either end the wheel is left to the
-  page, so the pager never traps the scroll. A short lock stops one flick from
-  running through several quotes.
-*/
-let wheelLock = 0
-
-function onWheel(event) {
-  if (Math.abs(event.deltaY) < 4) return
-  const direction = event.deltaY > 0 ? 1 : -1
-  const next = index.value + direction
-  if (next < 0 || next > offsets.length - 1) return
-
-  event.preventDefault()
-  const now = performance.now()
-  if (now - wheelLock < 450) return
-  wheelLock = now
-  goTo(next)
-}
-
-/*
   Dragging. One set of handlers for every pointer type: a mouse has no vertical
   gesture of its own, and the pager is not a scroll container, so a phone has no
   swipe either. The pane claims both axes, which is the cost of a vertical pager:
@@ -214,6 +194,7 @@ function onWheel(event) {
 function onPointerDown(event) {
   if (!reel.value || !pane.value) return
   travelled = 0
+  lastExcess = 0
   startY = event.clientY
   startOffset = offset
   target = offset
@@ -241,7 +222,21 @@ function onPointerMove(event) {
     pane.value?.setPointerCapture(event.pointerId)
   }
 
-  offset = Math.min(Math.max(startOffset - delta, 0), maxOffset)
+  const desired = startOffset - delta
+  const clamped = Math.min(Math.max(desired, 0), maxOffset)
+
+  /*
+    Past either end the drag is not swallowed: the excess becomes a page scroll.
+    The pane claims the touch (touch-action: none) so it can follow the finger,
+    which means the browser will not scroll the page on its own — so a drag that
+    runs out of quotes has to hand the rest of the gesture to window.scrollBy,
+    or the page stops dead at the last testimonial.
+  */
+  const excess = desired - clamped
+  if (excess !== 0) window.scrollBy(0, excess - lastExcess)
+  lastExcess = excess
+
+  offset = clamped
   paint()
 }
 
@@ -322,7 +317,6 @@ onUnmounted(() => {
             @pointerup="onPointerUp"
             @pointercancel="onPointerUp"
             @click.capture="onClickCapture"
-            @wheel="onWheel"
           >
             <div ref="reel" class="reel">
               <TestimonialCard

@@ -88,6 +88,7 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 */
 let step = 0 // one card plus one gap, in px
 let cardWidth = 0 // one card, in px
+let visibleWidth = 0 // how much of the rail the viewport shows
 let maxOffset = 0 // how far the rail can travel before the last card is in
 let offset = 0 // where it is, which is what gets painted
 let target = 0 // where it is going
@@ -111,6 +112,18 @@ const EASING = 0.16
 function paint() {
   if (track.value) track.value.style.transform = `translate3d(${-offset}px, 0, 0)`
   syncFade()
+
+  /*
+    The marker and the tab order are computed from the live offset, not from the
+    settled index. Written only on settle, a card dragged into view kept its
+    "parked" state — dimmed by the edge fade and out of the tab order — for the
+    half second the rail took to arrive.
+  */
+  if (step > 0) current.value = Math.round(offset / step)
+  parked.value = items.value.map((_, i) => {
+    const left = i * step - offset
+    return left + cardWidth <= 0 || left >= visibleWidth
+  })
 }
 
 function settle() {
@@ -158,6 +171,7 @@ function sync(snap) {
 
   cardWidth = card
   step = card + gap
+  visibleWidth = visible
   maxOffset = Math.max(0, rail.scrollWidth - visible)
 
   const last = step > 0 ? Math.ceil(maxOffset / step) : 0
@@ -165,13 +179,6 @@ function sync(snap) {
   positions.value = last + 1
   target = Math.min(index * step, maxOffset)
   if (snap) offset = target
-
-  current.value = index
-
-  parked.value = items.value.map((_, i) => {
-    const left = i * step - offset
-    return left + card <= 0 || left >= visible
-  })
 
   paint()
 }

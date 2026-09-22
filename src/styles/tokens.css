@@ -104,9 +104,9 @@
    both --ink and --surface. Still clearly the quietest text on the page.
    See docs/decisions.md. */
 [data-theme='light'] {
-  --ink: #f5f3ee;
+  --ink: #f2f3f2;
   --surface: #ffffff;
-  --surface-2: #edeae2;
+  --surface-2: #e9e9e7;
   --line: rgba(12, 12, 13, 0.13);
   --fg: #141416;
   --fg-2: #5a5955;

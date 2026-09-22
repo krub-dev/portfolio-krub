@@ -593,7 +593,7 @@ test('theme and language survive a reload', async ({ page }) => {
   const painted = await page.evaluate(
     () => getComputedStyle(document.body).backgroundColor,
   )
-  expect(painted).toBe('rgb(245, 243, 238)')
+  expect(painted).toBe('rgb(242, 243, 242)')
 })
 
 test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
