@@ -24,7 +24,7 @@ export const copy = {
       line3pre: 'on the ',
       accent: 'backend',
       line3post: '.',
-      body: 'Full Stack developer in Murcia, open to Barcelona and remote, leaning into backend: Java 17 with Spring Boot, Node and Express, and relational databases. Vue on the front when needed. I used to do 3D, and it still shows in how I look at things.',
+      body: 'Full Stack Developer in Murcia, open to Barcelona and remote, leaning into backend: Java 17 with Spring Boot, Node and Express, and relational databases. Vue on the front when needed. I used to do 3D, and it still shows in how I look at things.',
     },
     es: {
       badge: 'Disponible para trabajar',
@@ -33,7 +33,7 @@ export const copy = {
       line3pre: 'el ',
       accent: 'backend',
       line3post: '.',
-      body: 'Desarrollador full stack en Murcia, abierto a Barcelona y remoto, girando hacia backend: Java 17 con Spring Boot, Node y Express, y bases de datos relacionales. Frontend en Vue cuando toca. Antes hacía 3D, y todavía se me nota en el ojo.',
+      body: 'Desarrollador Full Stack en Murcia, abierto a Barcelona y remoto, girando hacia backend: Java 17 con Spring Boot, Node y Express, y bases de datos relacionales. Frontend en Vue cuando toca. Antes hacía 3D, y todavía se me nota en el ojo.',
     },
   },
 
