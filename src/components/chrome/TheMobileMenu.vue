@@ -16,7 +16,7 @@ import SocialLink from '../base/SocialLink.vue'
 import LangButton from '../base/LangButton.vue'
 import AppearanceControl from './AppearanceControl.vue'
 import { useScroll } from '../../composables/useScroll'
-import { email, sections, socials } from '../../data'
+import { sections, socials } from '../../data'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -80,7 +80,7 @@ onUnmounted(() => {
 
     <div class="quick">
       <SocialLink v-for="s in socials" :key="s.name" v-bind="s" class="quick-social" />
-      <a class="quick-cta" :href="`mailto:${email}`">{{ t('actions.talk') }}</a>
+      <a class="quick-cta" href="/#contact" @click="emit('close')">{{ t('actions.talk') }}</a>
     </div>
 
     <nav class="list">

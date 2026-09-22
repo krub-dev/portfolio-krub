@@ -63,13 +63,6 @@ export function trackShift(track) {
   })
 }
 
-/* The pager's arrows are visually hidden on a phone — the swipe is the gesture
-   there — so they are pressed through the DOM. What the test is about is what
-   paging does, not where the button is. */
-export function pressWhenHidden(button, isMobile) {
-  return isMobile ? button.evaluate((el) => el.click()) : button.click()
-}
-
 /* A finger, dispatched as real touch events. Playwright's own tap is a pointer
    event and does not exercise `touch-action`, and the drag has to start over a
    card rather than the gap between two. */

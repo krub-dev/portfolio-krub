@@ -18,6 +18,15 @@ export const config = {
   showLemon: true,
 
   /*
+    The grid cell that lights up under the pointer (GridCell.vue).
+
+    Off for now: with everything else moving, the cell reads as busy. Flip it to
+    true to bring the effect back — the component mounts and subscribes on its
+    own, so nothing else has to change.
+  */
+  showGridCell: false,
+
+  /*
     The CV download button in About.
 
   ON since 2026-09-17. Four PDFs live in public/uploads/, one per theme and

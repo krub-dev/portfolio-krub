@@ -16,7 +16,7 @@ import { useI18n } from 'vue-i18n'
 import AvailabilityBadge from '../base/AvailabilityBadge.vue'
 import BaseButton from '../base/BaseButton.vue'
 import { useLang } from '../../composables/useLang'
-import { copy, email } from '../../data'
+import { copy } from '../../data'
 import BrandName from './BrandName.vue'
 import LogoStage from './LogoStage.vue'
 
@@ -71,7 +71,7 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
         <p class="body">{{ hero.body }}</p>
 
         <div class="ctas">
-          <BaseButton variant="solid" size="lg" magnetic :href="`mailto:${email}`">
+          <BaseButton variant="solid" size="lg" magnetic href="#contact">
             {{ t('actions.talk') }}
           </BaseButton>
           <BaseButton variant="outline" size="md" mono magnetic href="#projects" class="secondary">

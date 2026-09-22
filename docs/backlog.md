@@ -143,7 +143,8 @@ the Vercel DNS change, and making the repository public.
 - [ ] **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
   carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the
   inner grid, so a Three.js scene replaces the `.mark` element and nothing else has to move.
-  Needs the model out of Blender first, exported as glTF/GLB. Read the mobile note below
+  Built with **TresJS** (github.com/Tresjs/tres), the Vue wrapper around Three.js, rather than
+  Three.js directly. Needs the model out of Blender first, exported as glTF/GLB. Read the mobile note below
   before starting. When it lands, its download is the only one on this site worth reporting: a real
   percentage from `THREE.LoadingManager` inside the stage, and a delayed shimmer while it arrives —
   see the skeleton note below and decision 54.

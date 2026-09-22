@@ -26,6 +26,7 @@ new number to its range when a decision is appended.
   dashes, the fade, the pager, the grid cell under the pointer, the way back to the top, and the CV
   pipeline.
 - **The CV tool and its themes — 69.** The generator moved out of the repository, and the dark PDF.
+- **A UI pass — 70.** The testimonial dots, the grid cell off, scrollable tabs and the CTAs.
 
 ---
 
@@ -1865,3 +1866,29 @@ in. Build-time variants are the only option that stays static.
 
 **Trade-off:** the dark PDF is heavier on ink and pointless to print, which is why the light pair
 stays the default for anything but the site itself.
+
+### 70. A UI pass: testimonial dots, the grid cell off, scrollable tabs and the CTAs
+
+**Date:** 2026-09-22 · **Status:** active
+
+Five changes from one review, none of them in the spec as it stood. Where this contradicts the
+design spec, this wins.
+
+- **The testimonials' arrows are vertical dots.** The pager moves vertically, so its indicator
+  does too: a column of dots on the box's right edge, and the one you are on is a longer pill
+  rather than a differently coloured dot — the shape says where you are, not the colour. Each dot
+  is a `28px` button with an `8px` mark drawn inside it, so it stays tappable on a phone. The
+  arrows were also two pairs in one page column (the projects rail has its own), which read as one
+  control that lost its way. The `--pane-room` the arrows needed is gone.
+- **The grid cell under the pointer is off**, behind `config.showGridCell`. With the marquee, the
+  glow, the cursor and the lemon all moving, the cell read as busy. `GridCell` mounts and
+  subscribes on its own, so flipping the flag back on is the whole change; its six e2e flows skip
+  while it is off and come back with it.
+- **The `/me` tabs scroll sideways** instead of wrapping. Three pills do not fit a phone's width —
+  `/certificaciones` alone is wider than a third of it — and the third wrapped onto a line of its
+  own, which read as a mistake rather than as a choice.
+- **Every "Let's talk" goes to the contact section, not to `mailto:`.** The address is already in
+  Contact, as a row and behind the form, so the CTA scrolling there is one action instead of a
+  mail client opening. The navbar, the mobile menu and the hero all point at `#contact` now.
+- **The `/me` photo is in colour.** It was grayscale; the new photo is the 42 portrait and its
+  colour is the point.

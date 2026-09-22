@@ -3,7 +3,6 @@ import { expect, test } from '@playwright/test'
 import {
   bringIntoView,
   openSite,
-  pressWhenHidden,
   scrollTo,
   scrollToBottom,
   scrollToTopOf,
@@ -233,6 +232,7 @@ test('the grid cell under the pointer lights up', async ({ page, isMobile }) => 
   test.skip(isMobile, 'there is no pointer below 900px')
 
   await openSite(page)
+  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
 
   const cell = page.locator('.grid-cell')
   await page.mouse.move(1000, 400)
@@ -247,6 +247,8 @@ test('the grid cell follows the hero grid once the page scrolls', async ({ page,
   test.skip(isMobile, 'the hero layer is not the one being followed there')
 
   await openSite(page)
+  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
+
   const cell = page.locator('.grid-cell')
 
   await page.mouse.move(900, 400)
@@ -272,6 +274,7 @@ test('the cursor and the grid cell go when the pointer sits still', async ({ pag
   test.skip(isMobile, 'there is no cursor below 900px')
 
   await openSite(page)
+  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
 
   const dot = page.locator('.cursor-dot')
   const cell = page.locator('.grid-cell')
@@ -294,6 +297,7 @@ test('a scroll counts as movement, so the cursor does not go while the page move
   test.skip(isMobile, 'there is no cursor below 900px')
 
   await openSite(page)
+  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
   const cell = page.locator('.grid-cell')
 
   await page.mouse.move(900, 400)
@@ -318,6 +322,7 @@ test('a scroll brings the cursor back after it has gone', async ({ page, isMobil
   test.skip(isMobile, 'there is no cursor below 900px')
 
   await openSite(page)
+  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
   const cell = page.locator('.grid-cell')
 
   await page.mouse.move(900, 400)
@@ -332,6 +337,7 @@ test('on touch the grid cell lights where you tap, and a scroll clears it', asyn
   test.skip(!isMobile, 'this is the path taken when there is no cursor')
 
   await openSite(page)
+  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
 
   const cell = page.locator('.grid-cell')
   await page.touchscreen.tap(300, 400)
@@ -414,28 +420,25 @@ test('on touch the rail marks the card it is parked on', async ({ page, isMobile
   await expect(cards.nth(0)).not.toHaveClass(/current/)
 })
 
-test('the testimonials page one at a time, and the window follows the quote', async ({ page, isMobile }) => {
+test('the testimonials page one at a time, and the window follows the quote', async ({ page }) => {
   await openSite(page, { reduced: true })
 
   const pane = page.locator('.testimonials .pane')
   const first = page.locator('.testimonials .entry').first()
   const count = page.locator('.testimonials .position')
-  const prev = page.getByRole('button', { name: 'Previous testimonial' })
-  const next = page.getByRole('button', { name: 'Next testimonial' })
+  const dots = page.locator('.testimonials .dot')
 
-  // Visually hidden on a phone, so pressed through the DOM there.
-  const press = (button) => pressWhenHidden(button, isMobile)
-
-  await expect(prev).toBeDisabled()
-  await expect(next).toBeEnabled()
+  await expect(dots).toHaveCount(3)
+  await expect(dots.nth(0)).toHaveClass(/active/)
   await expect(count).toHaveText('1 / 3')
   await expect(first).not.toHaveAttribute('inert')
 
   const tallest = await pane.evaluate((el) => el.clientHeight)
-  await press(next)
+  await dots.nth(1).click()
 
   await expect(count).toHaveText('2 / 3')
-  await expect(prev).toBeEnabled()
+  await expect(dots.nth(1)).toHaveClass(/active/)
+  await expect(dots.nth(0)).not.toHaveClass(/active/)
 
   // Out of the tab order while it is not showing, in the DOM all the same.
   await expect(first).toHaveAttribute('inert')
@@ -447,9 +450,9 @@ test('the testimonials page one at a time, and the window follows the quote', as
   */
   await expect.poll(() => pane.evaluate((el) => el.clientHeight)).toBe(tallest)
 
-  await press(prev)
+  await dots.nth(0).click()
   await expect(count).toHaveText('1 / 3')
-  await expect(prev).toBeDisabled()
+  await expect(dots.nth(0)).toHaveClass(/active/)
 })
 
 test('the next quote never peeks under the one on show', async ({ page }) => {
@@ -469,26 +472,16 @@ test('the next quote never peeks under the one on show', async ({ page }) => {
   expect(nextTop).toBeGreaterThanOrEqual(paneBottom - 1)
 })
 
-test('the arrows are hidden on a phone, where the swipe is the gesture', async ({ page, isMobile }) => {
+test('the testimonial dots are visible and tappable on every viewport', async ({ page }) => {
   await openSite(page, { reduced: true })
 
-  const controls = page.locator('.testimonials .pager-controls')
-  const next = page.getByRole('button', { name: 'Next testimonial' })
+  const dots = page.locator('.testimonials .dot')
+  await expect(dots).toHaveCount(3)
+  await expect(dots.first()).toBeVisible()
 
-  if (!isMobile) {
-    await expect(next).toBeVisible()
-    return
-  }
-
-  /*
-    Clipped rather than removed. The drag is not something a screen reader or a
-    keyboard can do, and the entries that are not showing are inert, so the
-    buttons are the only way to the other quotes — hiding them from the
-    accessibility tree as well would strand them there.
-  */
-  await expect(next).toHaveCount(1)
-  const box = await controls.boundingBox()
-  expect(box.width).toBeLessThan(2)
+  // A comfortable target, not a hairline: the mark is 8px, the button is 28.
+  const box = await dots.first().boundingBox()
+  expect(box.width).toBeGreaterThanOrEqual(24)
 })
 
 test('collapsing a quote brings the window back down', async ({ page }) => {

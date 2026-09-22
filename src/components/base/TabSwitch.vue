@@ -35,13 +35,27 @@ defineEmits(['update:modelValue'])
 </template>
 
 <style scoped>
+/*
+  One row that scrolls sideways rather than wrapping. Three pills do not fit a
+  phone's width — "/certificaciones" alone is wider than a third of it — and
+  wrapping left the third on a line of its own, which read as a mistake. The
+  scrollbar is hidden; the cut-off pill is the affordance.
+*/
 .tabs {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
+  flex: 0 0 auto;
   border-radius: 999px;
   padding: 9px 16px;
   cursor: pointer;

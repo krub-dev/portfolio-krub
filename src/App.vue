@@ -76,7 +76,7 @@ function goTop() {
   <div class="app" data-hide-cursor>
     <BackgroundGrid variant="hero" :visible="!pastHero" />
     <BackgroundGrid variant="global" :visible="pastHero" />
-    <GridCell :masked="pastHero" />
+    <GridCell v-if="config.showGridCell" :masked="pastHero" />
 
     <TheNavbar :active-id="activeId" :menu-open="menuOpen" @toggle-menu="menuOpen = !menuOpen" />
 

@@ -96,8 +96,7 @@
     "prevProject": "Previous project",
     "nextProject": "Next project",
     "projectsRail": "Projects",
-    "prevTestimonial": "Previous testimonial",
-    "nextTestimonial": "Next testimonial",
+    "goToTestimonial": "Go to testimonial {n}",
     "backToTop": "Back to top",
     "openProject": "Open project: {name}"
   }

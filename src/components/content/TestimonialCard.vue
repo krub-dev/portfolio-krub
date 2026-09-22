@@ -110,11 +110,8 @@ onUnmounted(() => window.removeEventListener('resize', measure))
   min-height: var(--pane-h, 0);
   /* Vertical padding only: the pager's window is the box, and the entries are
      stacked inside it with no gap, so this is what separates one quote from the
-     next as it slides past. The extra bottom room is the pager's --pane-room,
-     the corner its arrows sit in: it belongs to the entry and not to the window,
-     because the window's padding is still inside the clip and the next quote
-     showed through it. */
-  padding: 22px 0 calc(22px + var(--pane-room, 0px));
+     next as it slides past. */
+  padding: 22px 0;
 }
 
 .quote {

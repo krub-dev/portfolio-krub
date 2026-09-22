@@ -25,7 +25,7 @@ import SettingsMenu from './SettingsMenu.vue'
 import { useElementHeight } from '../../composables/useElementHeight'
 import { useLang } from '../../composables/useLang'
 import { useScroll } from '../../composables/useScroll'
-import { email, sections } from '../../data'
+import { sections } from '../../data'
 
 const props = defineProps({
   activeId: { type: String, default: '' },
@@ -177,7 +177,7 @@ watch(lang, async () => {
           <LangButton />
         </div>
         <SettingsMenu class="settings" :visible="compact" />
-        <a class="cta" :href="`mailto:${email}`">{{ t('actions.talk') }}</a>
+        <a class="cta" href="/#contact">{{ t('actions.talk') }}</a>
       </div>
 
       <div class="controls mobile">

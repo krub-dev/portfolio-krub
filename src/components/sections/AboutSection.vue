@@ -156,7 +156,6 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
   object-fit: cover;
   border-radius: 18px;
   border: 1px solid var(--line);
-  filter: grayscale(1) contrast(1.05);
 }
 
 @media (max-width: 900px) {

@@ -53,8 +53,6 @@ const pane = ref(null)
 const reel = ref(null)
 const index = ref(0)
 const open = ref(-1)
-const atStart = ref(true)
-const atEnd = ref(false)
 const hidden = ref([])
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -144,8 +142,6 @@ function apply(snap) {
   view.style.setProperty('--pane-h', `${floor}px`)
   view.style.height = `${Math.max(...heights)}px`
 
-  atStart.value = index.value <= 0
-  atEnd.value = index.value >= offsets.length - 1
   hidden.value = offsets.map((_, i) => i !== index.value)
 
   paint()
@@ -186,10 +182,6 @@ async function goTo(next) {
   index.value = wanted
   apply(false)
   settle()
-}
-
-function step(direction) {
-  goTo(index.value + direction)
 }
 
 /*
@@ -324,25 +316,17 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <div class="pager-controls">
+        <div class="dots" role="group" :aria-label="t('section.test')">
           <button
-            class="pager-arrow"
+            v-for="(item, i) in items"
+            :key="i"
+            class="dot"
+            :class="{ active: i === index }"
             type="button"
-            :aria-label="t('a11y.prevTestimonial')"
-            :disabled="atStart"
-            @click="step(-1)"
-          >
-            ↑
-          </button>
-          <button
-            class="pager-arrow"
-            type="button"
-            :aria-label="t('a11y.nextTestimonial')"
-            :disabled="atEnd"
-            @click="step(1)"
-          >
-            ↓
-          </button>
+            :aria-label="t('a11y.goToTestimonial', { n: i + 1 })"
+            :aria-current="i === index ? 'true' : undefined"
+            @click="goTo(i)"
+          />
         </div>
       </div>
     </div>
@@ -460,7 +444,9 @@ onUnmounted(() => {
   overflow: hidden;
   touch-action: none;
   cursor: grab;
-  padding: 0 clamp(18px, 2.6vw, 26px);
+  /* Extra room on the right for the dot column, so a long quote does not run
+     under it. */
+  padding: 0 calc(clamp(18px, 2.6vw, 26px) + 26px) 0 clamp(18px, 2.6vw, 26px);
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
@@ -483,94 +469,58 @@ onUnmounted(() => {
 }
 
 /*
-  In the box's bottom right corner, not against the edge: 12px and 16px of air,
-  the same kind of margin the header's own contents keep. A row rather than the
-  column they were outside: in the corner of a wide box, two buttons stacked read
-  as a strip down the side, and side by side they read as one control.
+  The position indicator: a vertical column of dots on the right of the box. The
+  one you are on is a longer pill rather than a differently coloured dot — the
+  shape says where you are, not the colour. Each dot is a 28px button with an 8px
+  mark drawn inside it, so the target is comfortable on a phone while the mark
+  stays small.
 */
-.pager-controls {
+.dots {
   position: absolute;
-  right: 16px;
-  bottom: 12px;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
 }
 
-.pager-arrow {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 auto;
-  border-radius: 12px;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--fg);
+.dot {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
   cursor: pointer;
-  font-size: 15px;
+}
+
+.dot::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  border-radius: 999px;
+  background: var(--fg-3);
   transition:
-    border-color 0.16s ease,
-    color 0.16s ease;
+    top 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.16s ease;
 }
 
-.pager-arrow:hover:not(:disabled) {
-  border-color: var(--acc-text);
-  color: var(--acc-text);
+.dot:hover::before {
+  background: var(--fg-2);
 }
 
-.pager-arrow:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-/*
-  Room for the controls in the box's bottom right, published to the entries as a
-  variable instead of kept as the pane's own padding.
-
-  It has to live on the entry. Overflow clips at the padding edge, so with the
-  room on the pane the quote stacked under it was still inside the clip and the
-  next attribution showed through the empty strip — the fix is not more height
-  either, for the same reason. On the entry the room is part of the measured
-  height, so the next entry starts below the clip. Desktop only: on a phone the
-  arrows are clipped and the room would be an empty strip for nothing.
-*/
-@media (min-width: 901px) {
-  .pane {
-    --pane-room: 56px;
-  }
+.dot.active::before {
+  top: 4px;
+  bottom: 4px;
 }
 
 @media (max-width: 900px) {
-  /*
-    The arrows go on a phone. The swipe is the gesture there and the two buttons
-    beside the box only took width from the quote — which is also why they were
-    the only thing on the screen sitting hard against the right edge.
-
-    They are not removed, though: visually hidden, they stay in the
-    accessibility tree and keep their focus. The drag is not something a screen
-    reader or a keyboard can do, so without them the other quotes would be
-    unreachable, and the `inert` on the entries that are not showing means there
-    is no other way in. They come back the moment one of them takes focus.
-  */
-  .pager-controls {
-    position: absolute;
-    right: 8px;
-    bottom: 8px;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  .pager-controls:focus-within {
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip-path: none;
-    padding: 6px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: var(--surface);
-  }
-
   /*
     The mark drops and moves right on a phone, and grows. In a window this
     narrow it lands behind the quote instead of behind the name, which is where
@@ -585,7 +535,8 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pane {
+  .pane,
+  .dot::before {
     transition: none;
   }
 }
