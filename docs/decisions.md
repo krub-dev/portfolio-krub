@@ -1874,19 +1874,24 @@ stays the default for anything but the site itself.
 Five changes from one review, none of them in the spec as it stood. Where this contradicts the
 design spec, this wins.
 
-- **The testimonials' arrows are vertical dots.** The pager moves vertically, so its indicator
-  does too: a column of dots on the box's right edge, and the one you are on is a longer pill
-  rather than a differently coloured dot — the shape says where you are, not the colour. Each dot
-  is a `28px` button with an `8px` mark drawn inside it, so it stays tappable on a phone. The
-  arrows were also two pairs in one page column (the projects rail has its own), which read as one
-  control that lost its way. The `--pane-room` the arrows needed is gone.
+- **The testimonials' arrows are dots, and so are the projects'.** Both pagers now share one
+  indicator: a dot per position, the one you are on a longer pill in `--acc`. The testimonials'
+  is a vertical column on the window's right edge, centred on the window and not on the whole box
+  (which includes the header, and pushed it high); the projects' is a horizontal row under the
+  rail. Each dot is a `20px` button with an `8px` mark drawn inside it, so it stays tappable on a
+  phone. The `--pane-room` the testimonial arrows needed is gone, and so are the projects' arrow
+  buttons.
+- **The projects' dot count follows the width.** The rail has two parking spots on a desktop
+  (three cards and a peek) and four on a phone (one card and a peek), so the dots are recomputed
+  on every measure rather than fixed to the number of projects.
 - **The grid cell under the pointer is off**, behind `config.showGridCell`. With the marquee, the
   glow, the cursor and the lemon all moving, the cell read as busy. `GridCell` mounts and
   subscribes on its own, so flipping the flag back on is the whole change; its six e2e flows skip
   while it is off and come back with it.
-- **The `/me` tabs scroll sideways** instead of wrapping. Three pills do not fit a phone's width —
-  `/certificaciones` alone is wider than a third of it — and the third wrapped onto a line of its
-  own, which read as a mistake rather than as a choice.
+- **The `/me` tabs stack on a phone.** Three pills do not fit a phone's width — `/certificaciones`
+  alone is wider than a third of it — and both wrapping and a sideways scroll left the third cut
+  off or orphaned, which read as broken. Stacked, one full-width row each, all three are visible
+  and easy to tap.
 - **Every "Let's talk" goes to the contact section, not to `mailto:`.** The address is already in
   Contact, as a row and behind the form, so the CTA scrolling there is one action instead of a
   mail client opening. The navbar, the mobile menu and the hero all point at `#contact` now.

@@ -292,41 +292,43 @@ onUnmounted(() => {
           <span class="position">{{ index + 1 }} / {{ items.length }}</span>
         </div>
 
-        <div
-          ref="pane"
-          class="pane"
-          @pointerdown="onPointerDown"
-          @pointermove="onPointerMove"
-          @pointerup="onPointerUp"
-          @pointercancel="onPointerUp"
-          @click.capture="onClickCapture"
-        >
-          <div ref="reel" class="reel">
-            <TestimonialCard
+        <div class="body">
+          <div
+            ref="pane"
+            class="pane"
+            @pointerdown="onPointerDown"
+            @pointermove="onPointerMove"
+            @pointerup="onPointerUp"
+            @pointercancel="onPointerUp"
+            @click.capture="onClickCapture"
+          >
+            <div ref="reel" class="reel">
+              <TestimonialCard
+                v-for="(item, i) in items"
+                :key="i"
+                :quote="item.quote"
+                :name="item.name"
+                :role="item.role"
+                :avatar="item.avatar"
+                :open="open === i"
+                :inert="hidden[i] || undefined"
+                @toggle="toggle(i)"
+              />
+            </div>
+          </div>
+
+          <div class="dots" role="group" :aria-label="t('section.test')">
+            <button
               v-for="(item, i) in items"
               :key="i"
-              :quote="item.quote"
-              :name="item.name"
-              :role="item.role"
-              :avatar="item.avatar"
-              :open="open === i"
-              :inert="hidden[i] || undefined"
-              @toggle="toggle(i)"
+              class="dot"
+              :class="{ active: i === index }"
+              type="button"
+              :aria-label="t('a11y.goToTestimonial', { n: i + 1 })"
+              :aria-current="i === index ? 'true' : undefined"
+              @click="goTo(i)"
             />
           </div>
-        </div>
-
-        <div class="dots" role="group" :aria-label="t('section.test')">
-          <button
-            v-for="(item, i) in items"
-            :key="i"
-            class="dot"
-            :class="{ active: i === index }"
-            type="button"
-            :aria-label="t('a11y.goToTestimonial', { n: i + 1 })"
-            :aria-current="i === index ? 'true' : undefined"
-            @click="goTo(i)"
-          />
         </div>
       </div>
     </div>
@@ -382,8 +384,9 @@ onUnmounted(() => {
 .mark {
   position: absolute;
   /* Below the header's rule, not across it: the counter lives up there, and the
-     two glyphs on top of each other read as a mistake rather than as a mark. */
-  top: 44px;
+     two glyphs on top of each other read as a mistake rather than as a mark.
+     Pulled up close under it, because lower down it sat behind the attribution. */
+  top: 34px;
   right: 16px;
   font-family: var(--font-sans);
   font-size: clamp(76px, 8vw, 104px);
@@ -440,13 +443,22 @@ onUnmounted(() => {
   the edge. touch-action:none is what lets a vertical drag work on a phone — the
   cost is that the page is scrolled by starting the touch anywhere else.
 */
+/*
+  The window and the dots side by side, so the dots centre on the window and not
+  on the whole box — which includes the header band, and made them sit high.
+*/
+.body {
+  display: flex;
+  align-items: center;
+}
+
 .pane {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   touch-action: none;
   cursor: grab;
-  /* Extra room on the right for the dot column, so a long quote does not run
-     under it. */
-  padding: 0 calc(clamp(18px, 2.6vw, 26px) + 26px) 0 clamp(18px, 2.6vw, 26px);
+  padding: 0 clamp(18px, 2.6vw, 26px);
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
@@ -476,20 +488,17 @@ onUnmounted(() => {
   stays small.
 */
 .dots {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  z-index: 1;
+  padding-right: 6px;
 }
 
 .dot {
   position: relative;
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   border: 0;
   background: none;
@@ -499,25 +508,28 @@ onUnmounted(() => {
 .dot::before {
   content: '';
   position: absolute;
-  top: 10px;
-  right: 10px;
-  bottom: 10px;
-  left: 10px;
+  top: 6px;
+  right: 6px;
+  bottom: 6px;
+  left: 6px;
   border-radius: 999px;
   background: var(--fg-3);
   transition:
-    top 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    bottom 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.16s ease;
+    top 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.3s ease;
 }
 
 .dot:hover::before {
   background: var(--fg-2);
 }
 
+/* The one you are on is a longer pill AND the accent colour — the shape is the
+   main cue, the colour confirms it. */
 .dot.active::before {
-  top: 4px;
-  bottom: 4px;
+  top: 2px;
+  bottom: 2px;
+  background: var(--acc);
 }
 
 @media (max-width: 900px) {

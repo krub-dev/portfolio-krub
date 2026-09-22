@@ -35,23 +35,11 @@ defineEmits(['update:modelValue'])
 </template>
 
 <style scoped>
-/*
-  One row that scrolls sideways rather than wrapping. Three pills do not fit a
-  phone's width — "/certificaciones" alone is wider than a third of it — and
-  wrapping left the third on a line of its own, which read as a mistake. The
-  scrollbar is hidden; the cut-off pill is the affordance.
-*/
 .tabs {
   display: flex;
   flex-wrap: nowrap;
   gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.tabs::-webkit-scrollbar {
-  display: none;
+  min-width: 0;
 }
 
 .tab {
@@ -81,5 +69,22 @@ defineEmits(['update:modelValue'])
   background: var(--acc);
   color: var(--on-acc);
   border-color: var(--acc);
+}
+
+/*
+  On a phone the three pills stack, one full-width row each. Three do not fit a
+  phone's width — "/certificaciones" alone is wider than a third of it — and a
+  sideways scroll left the third cut off at the edge, which read as broken rather
+  than as something to swipe. Stacked, all three are visible and easy to tap.
+*/
+@media (max-width: 900px) {
+  .tabs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tab {
+    text-align: left;
+  }
 }
 </style>

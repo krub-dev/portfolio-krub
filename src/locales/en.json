@@ -93,10 +93,9 @@
     "closeModal": "Close project",
     "prevImage": "Previous image",
     "nextImage": "Next image",
-    "prevProject": "Previous project",
-    "nextProject": "Next project",
     "projectsRail": "Projects",
     "goToTestimonial": "Go to testimonial {n}",
+    "goToProject": "Go to project {n}",
     "backToTop": "Back to top",
     "openProject": "Open project: {name}"
   }

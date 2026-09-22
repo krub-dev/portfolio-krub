@@ -148,19 +148,18 @@ test('the parked card fills its arrow where there is no hover', async ({ page, i
   await expect(arrow).toHaveCSS('color', 'rgb(12, 12, 13)')
 })
 
-test('the project rail pages with its arrows, and stops at both ends', async ({ page }) => {
+test('the project rail pages to the end with its dots', async ({ page }) => {
   await openSite(page, { reduced: true })
 
   const track = page.locator('#projects .track')
   const shift = () => trackShift(track)
-
-  const prev = page.getByRole('button', { name: 'Previous project' })
-  const next = page.getByRole('button', { name: 'Next project' })
+  const dots = page.locator('#projects .dots .dot')
   const viewport = page.locator('#projects .viewport')
 
-  // Nothing behind you at the start.
-  await expect(prev).toBeDisabled()
-  await expect(next).toBeEnabled()
+  // One dot per parking spot, and the first is the one you start on.
+  const count = await dots.count()
+  expect(count).toBeGreaterThan(1)
+  await expect(dots.first()).toHaveClass(/active/)
   expect(await shift()).toBe(0)
 
   /*
@@ -170,22 +169,11 @@ test('the project rail pages with its arrows, and stops at both ends', async ({ 
   */
   await expect(viewport).toHaveClass(/fade-right/)
 
-  await next.click()
+  // Jump to the last spot.
+  await dots.last().click()
   await expect.poll(shift).toBeLessThan(0)
-  await expect(prev).toBeEnabled()
-
-  await prev.click()
-  await expect.poll(shift).toBe(0)
-  await expect(prev).toBeDisabled()
-
-  // Page to the end: the arrow says when there is nowhere left to go.
-  for (let i = 0; i < 6; i += 1) {
-    if (await next.isDisabled()) break
-    const before = await shift()
-    await next.click()
-    await expect.poll(shift).not.toBe(before)
-  }
-  await expect(next).toBeDisabled()
+  await expect(dots.last()).toHaveClass(/active/)
+  await expect(dots.first()).not.toHaveClass(/active/)
 
   // At the far end it is the other way round: the last card sits on the right.
   await expect(viewport).toHaveClass(/fade-left/)
@@ -194,6 +182,11 @@ test('the project rail pages with its arrows, and stops at both ends', async ({ 
   const last = await page.locator('#projects .card').last().boundingBox()
   const rail = await page.locator('#projects .viewport').boundingBox()
   expect(last.x + last.width).toBeLessThanOrEqual(rail.x + rail.width + 1)
+
+  // Back to the start.
+  await dots.first().click()
+  await expect.poll(shift).toBe(0)
+  await expect(dots.first()).toHaveClass(/active/)
 })
 
 test('the navbar only takes clicks where the capsule is', async ({ page }) => {
@@ -368,7 +361,7 @@ test('the rail never fades the card it is parked on', async ({ page, isMobile })
   // travel — so there is nothing on that side to soften, and the card the rail
   // is parked on must not be faded. Reading "has the rail moved" instead of "is
   // a card hanging off it" faded its left edge, which is what this guards.
-  await page.getByRole('button', { name: 'Next project' }).click()
+  await page.locator('#projects .dots .dot').nth(1).click()
   await expect(viewport).toHaveClass(/fade-right/)
   await expect(viewport).not.toHaveClass(/fade-both/)
 })
@@ -415,7 +408,7 @@ test('on touch the rail marks the card it is parked on', async ({ page, isMobile
   await expect(cards.nth(1)).not.toHaveClass(/current/)
 
   // And it moves with the rail, not with the finger.
-  await page.getByRole('button', { name: 'Next project' }).click()
+  await page.locator('#projects .dots .dot').nth(1).click()
   await expect(cards.nth(1)).toHaveClass(/current/)
   await expect(cards.nth(0)).not.toHaveClass(/current/)
 })
@@ -479,9 +472,9 @@ test('the testimonial dots are visible and tappable on every viewport', async ({
   await expect(dots).toHaveCount(3)
   await expect(dots.first()).toBeVisible()
 
-  // A comfortable target, not a hairline: the mark is 8px, the button is 28.
+  // A comfortable target, not a hairline: the mark is 8px, the button is 20.
   const box = await dots.first().boundingBox()
-  expect(box.width).toBeGreaterThanOrEqual(24)
+  expect(box.width).toBeGreaterThanOrEqual(18)
 })
 
 test('collapsing a quote brings the window back down', async ({ page }) => {

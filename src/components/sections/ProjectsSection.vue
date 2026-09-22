@@ -57,10 +57,9 @@ const items = computed(() =>
 const viewport = ref(null)
 const track = ref(null)
 const dragging = ref(false)
-const atStart = ref(true)
-const atEnd = ref(false)
 const parked = ref([]) // per card: fully out of the rail, so out of the tab order
 const current = ref(0) // the card the rail is parked on, which touch marks
+const positions = ref(1) // parking spots at this width: 2 on desktop, 4 on a phone
 const fade = ref('fade-right') // which edges the clip softens
 
 /*
@@ -163,11 +162,10 @@ function sync(snap) {
 
   const last = step > 0 ? Math.ceil(maxOffset / step) : 0
   index = Math.min(Math.max(index, 0), last)
+  positions.value = last + 1
   target = Math.min(index * step, maxOffset)
   if (snap) offset = target
 
-  atStart.value = index <= 0
-  atEnd.value = target >= maxOffset - 1
   current.value = index
 
   parked.value = items.value.map((_, i) => {
@@ -178,9 +176,9 @@ function sync(snap) {
   paint()
 }
 
-function page(direction) {
+function goTo(wanted) {
   const last = step > 0 ? Math.ceil(maxOffset / step) : 0
-  const next = Math.min(Math.max(index + direction, 0), last)
+  const next = Math.min(Math.max(wanted, 0), last)
   if (next === index) return
   index = next
   sync(false)
@@ -282,27 +280,6 @@ onUnmounted(() => {
     <SectionHeading index="01" :title="t('section.projects')" :count="items.length" />
 
     <div class="rail">
-      <div class="controls">
-        <button
-          class="arrow"
-          type="button"
-          :aria-label="t('a11y.prevProject')"
-          :disabled="atStart"
-          @click="page(-1)"
-        >
-          ←
-        </button>
-        <button
-          class="arrow"
-          type="button"
-          :aria-label="t('a11y.nextProject')"
-          :disabled="atEnd"
-          @click="page(1)"
-        >
-          →
-        </button>
-      </div>
-
       <div
         ref="viewport"
         class="viewport"
@@ -331,6 +308,19 @@ onUnmounted(() => {
           />
         </div>
       </div>
+
+      <div class="dots" role="group" :aria-label="t('a11y.projectsRail')">
+        <button
+          v-for="i in positions"
+          :key="i"
+          class="dot"
+          :class="{ active: i - 1 === current }"
+          type="button"
+          :aria-label="t('a11y.goToProject', { n: i })"
+          :aria-current="i - 1 === current ? 'true' : undefined"
+          @click="goTo(i - 1)"
+        />
+      </div>
     </div>
   </section>
 </template>
@@ -354,34 +344,56 @@ onUnmounted(() => {
   gap: 16px;
 }
 
-.controls {
+/*
+  One dot per parking spot, centred under the rail. The one you are on is a
+  longer pill in the accent — the same indicator the testimonials use, laid on
+  its side because this rail travels sideways.
+*/
+.dots {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  justify-content: center;
+  gap: 2px;
 }
 
-.arrow {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--fg);
+.dot {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: none;
   cursor: pointer;
-  font-size: 16px;
+}
+
+.dot::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  border-radius: 999px;
+  background: var(--fg-3);
   transition:
-    border-color 0.16s ease,
-    color 0.16s ease;
+    left 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    right 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.3s ease;
 }
 
-.arrow:hover:not(:disabled) {
-  border-color: var(--acc-text);
-  color: var(--acc-text);
+.dot:hover::before {
+  background: var(--fg-2);
 }
 
-.arrow:disabled {
-  opacity: 0.35;
-  cursor: default;
+.dot.active::before {
+  left: 2px;
+  right: 2px;
+  background: var(--acc);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot::before {
+    transition: none;
+  }
 }
 
 /*
