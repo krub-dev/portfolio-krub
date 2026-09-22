@@ -39,11 +39,11 @@ export const projects = [
       repoLabel: '/panel',
       liveLabel: '/live ↗',
       summary:
-        'Site and admin panel for a handmade macramé business. Vue 3 with a Git-based headless CMS.',
+        'Site and self-managed panel for a handmade macramé business, with no subscription: Vue 3 on a Git-based CMS.',
       lead: "Public site and self-service admin panel for CreandoMientras, Lourdes Campuzano's handmade macramé business.",
-      body: 'Vue 3 SPA with Vue Router and its own CSS design system. Content is edited at /admin through a self-hosted Sveltia CMS: every save commits JSON to the repo and Vercel ships in about a minute, so there’s history and rollback with no server to maintain.',
+      body: 'Vue 3 SPA with Vue Router and its own CSS design system, plus pieces built for the business: an events calendar, a gallery and a link manager. Content is edited at /admin through a self-hosted Sveltia CMS on Git — no subscription, no server, and the client owns the content: every save commits JSON to the repo and Vercel ships in about a minute, with history and rollback.',
       body2:
-        'Events sort themselves by comparing dates, and images are optimised in CI with Sharp: WebP and AVIF at three widths, hash-skipping anything unchanged. Contact form on Web3Forms with honeypot, hCaptcha and GDPR consent. PageSpeed 99 on desktop, 100 on accessibility, best practices and SEO.',
+        'The panel is simple enough that Lourdes runs it herself. Images are optimised in CI with Sharp: WebP and AVIF at three widths, hash-skipping anything unchanged. Contact form on Web3Forms with honeypot, hCaptcha and GDPR consent. PageSpeed 99 on desktop, 100 on accessibility, best practices and SEO.',
     },
     es: {
       name: 'CreandoMientras',
@@ -53,11 +53,11 @@ export const projects = [
       repoLabel: '/panel',
       liveLabel: '/live ↗',
       summary:
-        'Web y panel de gestión para un negocio artesano de macramé. Vue 3 con CMS headless sobre Git.',
+        'Web y panel autogestionable para un negocio artesano de macramé, sin suscripción: Vue 3 sobre un CMS en Git.',
       lead: 'Web pública y panel de autogestión para CreandoMientras, el negocio de macramé artesanal de Lourdes Campuzano.',
-      body: 'SPA en Vue 3 con Vue Router y un design system propio en CSS. Los contenidos se editan desde /admin con Sveltia CMS autoalojado: cada guardado hace commit de JSON al repositorio y Vercel despliega en un minuto, así que hay historial y rollback sin mantener servidor.',
+      body: 'SPA en Vue 3 con Vue Router y un design system propio en CSS, más piezas hechas a medida para el negocio: un calendario de eventos, una galería y un gestor de enlaces. Los contenidos se editan desde /admin con Sveltia CMS autoalojado sobre Git: sin suscripción, sin servidor y con el contenido en propiedad de la clienta; cada guardado hace commit de JSON al repositorio y Vercel despliega en un minuto, con historial y rollback.',
       body2:
-        'Los eventos se clasifican solos comparando fechas, y las fotos se optimizan en CI con Sharp: WebP y AVIF en tres anchos, saltando por hash lo que no ha cambiado. Formulario con Web3Forms, honeypot, hCaptcha y consentimiento RGPD. PageSpeed 99 en escritorio y 100 en accesibilidad, best practices y SEO.',
+        'El panel es tan sencillo que Lourdes lo lleva ella sola. Las fotos se optimizan en CI con Sharp: WebP y AVIF en tres anchos, saltando por hash lo que no ha cambiado. Formulario con Web3Forms, honeypot, hCaptcha y consentimiento RGPD. PageSpeed 99 en escritorio y 100 en accesibilidad, best practices y SEO.',
     },
   },
   {

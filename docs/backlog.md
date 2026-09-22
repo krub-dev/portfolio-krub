@@ -17,7 +17,7 @@ not tasks and have no checkbox.
 This merges the pending list of 2026-09-16 with what used to live in the roadmap's "Later"
 section, folded together where they overlapped.
 
-## Where things stand — 2026-09-20
+## Where things stand — 2026-09-22
 
 A short snapshot so resuming work does not mean reading the whole file. The checklist below is
 the source of truth; this is the index into it.
@@ -25,19 +25,23 @@ the source of truth; this is the index into it.
 `main` is what `krub.dev` serves: the step-12 build. `dev` is well ahead of it and holds
 everything built since launch — the accent palettes and the appearance control, the reworked
 Stack and Contact, the contact form, the projects rail, the testimonials pager, the 404, the
-self-hosted fonts, the interactive grid cell, and the CV pipeline (four PDFs, light and dark).
-None of it is published yet (`git log main..dev` lists it).
+self-hosted fonts, the interactive grid cell, the CV pipeline (four PDFs, light and dark), and
+the refreshed site content with the certifications tab. None of it is published yet
+(`git log main..dev` lists it).
 
 **Before `dev` can become `main`:**
 
-1. Replace or delete the two placeholder testimonials, or turn `config.showTestimonials` off.
-2. Set `WEB3FORMS_KEY` in the Vercel project, or the form answers 500 in production.
-3. The pre-publication documentation review.
-4. Re-measure Lighthouse against the merged deployment.
+1. Replace or delete the two placeholder testimonials, or turn `config.showTestimonials` off. The
+   owner is reworking that section first, so it waits on that.
+2. The pre-publication documentation review.
+3. Re-measure Lighthouse against the merged deployment.
+
+`WEB3FORMS_KEY` is set in Vercel, so the contact form works in production.
 
 **The substantial work still open:** the 3D logo (the largest; needs the Blender export first),
-Limonacho that answers, the OG banner and structured-data refresh, the LinkedIn update, the
-prose reread, Bing Webmaster Tools, the Vercel DNS change, and making the repository public.
+the OG banner and structured-data refresh, the LinkedIn update, the GitHub profile README, the
+prose reread, project screenshots, the compact CV and a base cover letter, Bing Webmaster Tools,
+the Vercel DNS change, and making the repository public.
 
 ---
 
@@ -47,12 +51,28 @@ prose reread, Bing Webmaster Tools, the Vercel DNS change, and making the reposi
   sources and generator were moved out of this repository (decision 69). The four compiled PDFs
   (light and dark, per language) stay in `public/uploads/`. ATS-friendly: one column, Arial,
   standard headings, no phone number and no home address.
+- [ ] **Enrich the CreandoMientras case.** Say what was actually solved, because it is the part a
+  client cares about: no subscription (a Git-based CMS, so zero monthly cost and the client owns
+  the content), a panel the client runs herself, image optimisation in CI, and how easy it is to
+  use. Plus the custom components built for it — calendar, gallery, links.
+- [ ] **A base cover letter.** Generated like the CV, from a plain-text source through the same
+  external tool, so it can be iterated and tailored per application. **(owner)**
+- [ ] **A compact one-page CV.** Not urgent: a shorter variant for applications that ask for one
+  page, produced by the same generator.
+- [ ] **A new photo for /me.** Replace the current one. **(owner)**
+- [ ] **Real screenshots for the projects.** CreandoMientras, Showroom, sideForge (backend only, so
+  its logo will do) and krub.dev, dropped into the `image` and `slides` fields the model already
+  has. **(owner)**
+- [ ] **A final banner for LinkedIn and the GitHub profile README.** Same artwork as the Open Graph
+  refresh below, so it comes with it.
+- [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
+  in it. **(owner)**
 - [ ] **Finish the testimonials.** The first real quote is in — Lourdes Campuzano of
   CreandoMientras, with her own mark in the avatar circle — but the pager still carries **two
   bracketed placeholders** ("Name Surname"), kept so it could be seen with more than one entry.
   **Replace or delete them before this reaches `main`**, or turn `config.showTestimonials` off.
   Long quotes are clamped to four lines with a "read more", which is what makes the length a
-  non-issue.
+  non-issue. Part of the same rework: the vertical arrows should go, replaced by scrollable dots.
 - [ ] **Refresh the Open Graph image and the structured data.** `og-banner.png` is from the first
   build and predates the sections that exist now; the JSON-LD `workLocation` still says Barcelona
   while the owner is in Murcia; and the `sameAs` list carries `x.com/krub_dev` from before X was
@@ -65,7 +85,8 @@ prose reread, Bing Webmaster Tools, the Vercel DNS change, and making the reposi
   written once. **(owner)**
 - [ ] **Bing Webmaster Tools.** The same five minutes as Google Search Console, which is done and
   has the sitemap submitted. Bing also feeds DuckDuckGo. **(owner)**
-- [ ] **Make the repository public.** When the pending work is done. **(owner)**
+- [ ] **Make the repository public.** When the pending work is done. The v1 portfolio repository is
+  archived and its links redirect here. **(owner)**
 - [x] **Audit the documentation against the code.** Every `.md` here plus the README. It has
   drifted once already — four claims in the README were untrue and two files described
   components and composables that do not exist. Worth doing while the build is still fresh in
@@ -205,6 +226,9 @@ prose reread, Bing Webmaster Tools, the Vercel DNS change, and making the reposi
   ever written down as pending: the footer no longer sits in the layout from the first frame
   below 900px, and it shares `usePastHero` with the lemon, so the two arrive together at the end
   of the hero wrapper.
+- [ ] **The certifications tab on a phone.** The three-tab switch or the long certification names
+  read badly on a small screen. Decide between a scrollable list, a horizontal swipe, or something
+  else, after seeing exactly what breaks.
 
 All three were real when the roadmap's "Later" list was written and are closed now; the group is
 kept as the record rather than deleted.
