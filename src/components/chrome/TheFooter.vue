@@ -107,7 +107,7 @@ const shown = usePastHero()
   gap: 20px;
   flex-wrap: wrap;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1;
   letter-spacing: 0.12em;
   color: var(--fg-3);
@@ -160,7 +160,7 @@ const shown = usePastHero()
   color: var(--on-acc);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.16em;
   white-space: nowrap;
   transition:

@@ -139,7 +139,7 @@ const { t } = useI18n()
 
 .shot-label {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   color: var(--fg-3);
 }
@@ -197,7 +197,7 @@ const { t } = useI18n()
 
 .tag {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.1em;
   color: var(--acc-text);
   white-space: nowrap;

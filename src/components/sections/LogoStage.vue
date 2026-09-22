@@ -61,11 +61,10 @@ function clamp(value) {
 
 <style scoped>
 /*
-  The frame exists for one reason: the glow has to be painted BEHIND the stage.
-  A pseudo-element on .stage itself would land inside it — the stage clips with
-  overflow:hidden — and the stage's own background is opaque, so it would hide
-  the very thing it was meant to show. So the box that used to be .stage lives
-  here, the stage fills it, and the magnetic pull came up with it.
+  The frame holds the magnetic pull, so the pull moves the whole stage rather
+  than the logo inside it. The turning glow that used to live here (a conic
+  gradient on two pseudo-elements) is gone: it read as decoration rather than as
+  light, and it competed with the logo it was meant to frame.
 */
 .frame {
   position: relative;
@@ -74,40 +73,6 @@ function clamp(value) {
   justify-self: center;
   width: 100%;
   max-width: 520px;
-}
-
-/*
-  The glow: one conic gradient painted twice, 2px larger than the stage on every
-  side, so what shows is a ring and its halo — the stage covers the middle. The
-  first copy is crisp and reads as the border; the second is blurred and reads
-  as the bloom.
-
-  Every stop comes from the accent tokens, so the ring follows the palette and
-  the theme like everything else on the page. The dim stop has to stay clearly
-  visible and not fade into the page: the light has to be seen travelling the
-  whole way round, and a border that disappears except for its bright arc does
-  not read as one.
-*/
-.frame::before,
-.frame::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 26px; /* the stage's 24px, plus the 2px it overhangs */
-  background: conic-gradient(
-    from var(--glow-angle),
-    var(--glow-dim),
-    var(--acc-solid) 25%,
-    var(--glow-dim) 55%
-  );
-  animation: glowSpin 6s linear infinite;
-}
-
-/* The bloom, kept close to the edge: a wide halo reads as a lamp behind the
-   box, and the reference is a lit border. */
-.frame::after {
-  filter: blur(10px);
-  opacity: 0.35;
 }
 
 .stage {
@@ -156,14 +121,6 @@ function clamp(value) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* The glow stays and simply stops turning. Handled here rather than in
-     tokens.css because the animation lives on a pseudo-element, and the global
-     [data-motion="decorative"] rule can only reach elements. */
-  .frame::before,
-  .frame::after {
-    animation: none;
-  }
-
   .mark {
     transition: none;
   }

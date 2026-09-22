@@ -125,7 +125,7 @@ const rows = computed(() => [
 .label {
   grid-column: 1;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;

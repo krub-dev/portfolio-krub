@@ -9,11 +9,15 @@
   role="tablist" + aria-selected tells a screen reader these are alternative
   views of the same region rather than three unrelated buttons.
 
-  On a phone the three pills do not fit, so the row slides sideways instead of
-  wrapping or stacking — the same gesture as the projects rail. It is a native
-  scroll container with snap (touch and trackpad do the work) plus a small
-  drag-to-scroll so a mouse can move it too, and a click guard so a drag does
-  not pick a tab it ends over.
+  It reads as a row of folders: plain labels on a hairline track, the one you are
+  on in the accent with a short accent rule under it. No pills — a row of capsule
+  buttons is the default shape, and it competes with the content.
+
+  On a phone the three labels do not fit, so the row slides sideways instead of
+  wrapping — the same gesture as the projects rail. It is a native scroll
+  container with snap (touch and trackpad do the work) plus a small
+  drag-to-scroll so a mouse can move it too, and a click guard so a drag does not
+  pick a tab it ends over.
 */
 import { ref } from 'vue'
 
@@ -86,9 +90,9 @@ function onClickCapture(event) {
 <style scoped>
 .tabs {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
+  gap: clamp(18px, 3vw, 34px);
   min-width: 0;
+  border-bottom: 1px solid var(--line);
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -105,32 +109,37 @@ function onClickCapture(event) {
 }
 
 .tab {
+  position: relative;
   flex: 0 0 auto;
   scroll-snap-align: start;
-  border-radius: 10px;
-  padding: 9px 16px;
+  padding: 0 0 12px;
+  border: 0;
+  background: none;
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  background: transparent;
+  font-size: 13px;
+  letter-spacing: 0.04em;
   color: var(--fg-2);
-  border: 1px solid var(--line);
-  transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    color 0.16s ease;
+  white-space: nowrap;
+  transition: color 0.16s ease;
 }
 
 .tab:hover:not(.active) {
-  color: var(--acc-text);
-  border-color: var(--acc-text);
+  color: var(--fg);
 }
 
-/* Active is a fill, so --acc stays put in both themes with --on-acc on top. */
+/* The folder edge: a short rule in the accent, sitting on the track. */
 .tab.active {
+  color: var(--acc-text);
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
   background: var(--acc);
-  color: var(--on-acc);
-  border-color: var(--acc);
 }
 </style>

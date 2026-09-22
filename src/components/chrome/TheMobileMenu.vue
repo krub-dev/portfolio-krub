@@ -170,7 +170,7 @@ onUnmounted(() => {
 
 .sub {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--fg-3);
@@ -230,7 +230,7 @@ onUnmounted(() => {
 }
 
 .row-index {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.1em;
   color: var(--fg-3);
 }
@@ -251,7 +251,7 @@ onUnmounted(() => {
   color: var(--on-acc);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.16em;
   transition:
     background-color 0.16s ease,

@@ -48,7 +48,7 @@ const { progress, atEnd } = useScroll()
 .label {
   writing-mode: vertical-rl;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--fg-3);

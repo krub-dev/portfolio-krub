@@ -53,7 +53,7 @@ const { t } = useI18n()
 }
 
 .term {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--fg-3);

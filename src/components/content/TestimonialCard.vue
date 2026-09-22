@@ -110,8 +110,9 @@ onUnmounted(() => window.removeEventListener('resize', measure))
   min-height: var(--pane-h, 0);
   /* Vertical padding only: the pager's window is the box, and the entries are
      stacked inside it with no gap, so this is what separates one quote from the
-     next as it slides past. */
-  padding: 22px 0;
+     next as it slides past. The bottom is deeper so the "read more" button sits
+     clear of the window's bottom fade instead of inside it. */
+  padding: 22px 0 34px;
 }
 
 .quote {
