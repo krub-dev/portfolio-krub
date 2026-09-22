@@ -407,7 +407,7 @@ onUnmounted(() => {
   position: absolute;
   /* Below the header's rule, not across it: the counter lives up there, and the
      two glyphs on top of each other read as a mistake rather than as a mark. */
-  top: 44px;
+  top: 50px;
   right: 16px;
   font-family: var(--font-sans);
   font-size: clamp(76px, 8vw, 104px);

@@ -243,7 +243,7 @@ onUnmounted(() => {
   align-self: center;
   height: 28px;
   padding: 0 16px;
-  border-radius: 999px;
+  border-radius: 8px;
   /* Filled with the accent, like the footer's TOP button, so it does not
      disappear into the panel. */
   background: var(--acc);

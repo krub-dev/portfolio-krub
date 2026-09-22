@@ -152,7 +152,7 @@ const shown = usePastHero()
   gap: 8px;
   height: 30px;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: 8px;
   /* Filled with the accent so it does not disappear into the footer's own
      background. --on-acc on top, like every other filled control. */
   background: var(--acc);

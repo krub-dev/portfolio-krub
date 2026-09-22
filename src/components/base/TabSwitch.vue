@@ -107,7 +107,7 @@ function onClickCapture(event) {
 .tab {
   flex: 0 0 auto;
   scroll-snap-align: start;
-  border-radius: 999px;
+  border-radius: 10px;
   padding: 9px 16px;
   cursor: pointer;
   font-family: var(--font-mono);

@@ -41,7 +41,7 @@ export const projects = [
       summary:
         'Site and self-managed panel for a handmade macramé business, with no subscription: Vue 3 on a Git-based CMS.',
       lead: "Public site and self-service admin panel for CreandoMientras, Lourdes Campuzano's handmade macramé business.",
-      body: 'Vue 3 SPA with Vue Router and its own CSS design system, plus pieces built for the business: an events calendar, a gallery and a link manager. Content is edited at /admin through a self-hosted Sveltia CMS on Git — no subscription, no server, and the client owns the content: every save commits JSON to the repo and Vercel ships in about a minute, with history and rollback.',
+      body: 'Vue 3 SPA with Vue Router and its own CSS design system, plus pieces built for the business: an events calendar, a gallery and a link manager. Content is edited at /admin through a self-hosted Sveltia CMS on Git, with no subscription and no server to keep, and the client owns it: every save commits JSON to the repo and Vercel ships in about a minute, with history and rollback.',
       body2:
         'The panel is simple enough that Lourdes runs it herself. Images are optimised in CI with Sharp: WebP and AVIF at three widths, hash-skipping anything unchanged. Contact form on Web3Forms with honeypot, hCaptcha and GDPR consent. PageSpeed 99 on desktop, 100 on accessibility, best practices and SEO.',
     },
@@ -88,7 +88,7 @@ export const projects = [
       lead: 'Java and Spring Boot REST API to manage and customise 3D assets (t-shirts, mugs, mouse pads) for web visualisation.',
       body: 'Domain model with users, admins, customers, assets, scenes and designs: an authenticated user creates scenes, links assets and defines designs on specific parts of a model, with colours, materials, logos and text. 42 endpoints over 6 related entities and 18 DTOs, with Spring Data JPA over MySQL, pagination, search and centralised error handling.',
       body2:
-        'Spring Security with role-based access, hashed passwords, Swagger/OpenAPI docs and a Postman collection for the demo. 112 tests — controllers with MockMvc, services with Mockito — at 81% line coverage. On the roadmap: JWT, cloud image storage, design versioning and the 3D integration on the front end.',
+        'Spring Security with role-based access, hashed passwords, Swagger/OpenAPI docs and a Postman collection for the demo. 112 tests (controllers with MockMvc, services with Mockito) at 81% line coverage. On the roadmap: JWT, cloud image storage, design versioning and the 3D integration on the front end.',
     },
     es: {
       name: 'sideForge',
@@ -102,7 +102,7 @@ export const projects = [
       lead: 'API REST en Java y Spring Boot para gestionar y personalizar assets 3D (camisetas, tazas, alfombrillas) de cara a visualizarlos en web.',
       body: 'Modelo de dominio con usuarios, admins, clientes, assets, escenas y diseños: un usuario autenticado crea escenas, asocia assets y define diseños por partes concretas del modelo, con colores, materiales, logos y textos. 42 endpoints sobre 6 entidades relacionadas y 18 DTOs, con Spring Data JPA sobre MySQL, paginación, búsqueda y manejo de errores centralizado.',
       body2:
-        'Spring Security con acceso por rol, contraseñas hasheadas, documentación en Swagger/OpenAPI y colección de Postman para la demo. 112 tests — controladores con MockMvc, servicios con Mockito — con un 81 % de cobertura de líneas. En la hoja de ruta: JWT, almacenamiento de imágenes en la nube, versionado de diseños y la integración 3D en el front.',
+        'Spring Security con acceso por rol, contraseñas hasheadas, documentación en Swagger/OpenAPI y colección de Postman para la demo. 112 tests (controladores con MockMvc, servicios con Mockito) con un 81 % de cobertura de líneas. En la hoja de ruta: JWT, almacenamiento de imágenes en la nube, versionado de diseños y la integración 3D en el front.',
     },
   },
   {

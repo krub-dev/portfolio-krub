@@ -109,9 +109,10 @@ const magneticAttr = computed(() => (props.magnetic ? '' : undefined))
   font-weight: 500;
 }
 
-/* Shape */
+/* Shape. The pill is a rounded rectangle now, not a capsule: fully-round
+   buttons read as the default AI shape. */
 .s-pill {
-  border-radius: 999px;
+  border-radius: 10px;
 }
 
 .s-square {

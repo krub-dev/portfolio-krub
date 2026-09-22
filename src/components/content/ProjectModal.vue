@@ -239,7 +239,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 }
 
 .link {
-  border-radius: 999px;
+  border-radius: 10px;
   padding: 12px 22px;
   font-family: var(--font-mono);
   font-size: 14px;

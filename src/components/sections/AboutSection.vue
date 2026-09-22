@@ -108,6 +108,12 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
   display: flex;
   flex-direction: column;
   gap: 22px;
+  /*
+    Without this the /me tab row, which is a scroll container, still forced this
+    grid item to its content's width and the whole column overflowed the page
+    instead of the tabs scrolling inside it.
+  */
+  min-width: 0;
 }
 
 .lead {
