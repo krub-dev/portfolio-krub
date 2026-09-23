@@ -260,8 +260,10 @@ function onCardClick(event) {
   transition: height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* The one quote at a time, swapped sideways: the way it moves says whether you
-   went forward or back. out-in so the two never sit on top of each other. */
+/* The one quote at a time, swapped vertically: the way it moves says whether you
+   went forward or back. Forward carries the old quote up and brings the next one
+   in from below; back does the opposite. out-in so the two never sit on top of
+   each other. */
 .quote-next-enter-active,
 .quote-next-leave-active,
 .quote-prev-enter-active,
@@ -272,22 +274,22 @@ function onCardClick(event) {
 }
 
 .quote-next-enter-from {
-  transform: translateX(40px);
+  transform: translateY(40px);
   opacity: 0;
 }
 
 .quote-next-leave-to {
-  transform: translateX(-40px);
+  transform: translateY(-40px);
   opacity: 0;
 }
 
 .quote-prev-enter-from {
-  transform: translateX(-40px);
+  transform: translateY(-40px);
   opacity: 0;
 }
 
 .quote-prev-leave-to {
-  transform: translateX(40px);
+  transform: translateY(40px);
   opacity: 0;
 }
 

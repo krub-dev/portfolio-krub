@@ -248,6 +248,16 @@ Not tasks. No urgency and no order — written down so they do not evaporate.
 - Logo appearance animation.
 - A 3D business card with my details.
 - A blog?
+- **Migrate the source to TypeScript.** Vue 3 supports it first-class (`<script setup lang="ts">`,
+  `defineProps` by type, `vue-tsc` for the check), and because the types are erased at build the
+  runtime — and with it the performance and the accessibility — would not change at all. It is not a
+  big-bang rewrite: with `allowJs: true` the files move over one at a time, keeping build + unit +
+  e2e green at every step. The real work is typing the props and emits, `src/data/`, the composables
+  (`useLang`, `useTheme`, the `localStorage` ones), the i18n messages and `api/contact.js`; under
+  `strict` it surfaces assumptions that are implicit today, which is the point. Rough size: about a
+  day of careful work across several commits. **It reverses non-negotiable #4 of `AGENTS.md`
+  ("JavaScript, not TypeScript"), so it is a deliberate decision and not a neutral refactor** — that
+  rule and a `decisions.md` entry would have to change with it.
 - A photo that follows the cursor, like Limonacho but my profile picture.
 - Frosted glass on the 3D slot, with the grid behind it.
 - An interactive background grid. **The cell under the pointer is built** (decision 66): a 72px
