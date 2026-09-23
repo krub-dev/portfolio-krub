@@ -17,7 +17,7 @@ not tasks and have no checkbox.
 This merges the pending list of 2026-09-16 with what used to live in the roadmap's "Later"
 section, folded together where they overlapped.
 
-## Where things stand — 2026-09-22
+## Where things stand — 2026-09-23
 
 A short snapshot so resuming work does not mean reading the whole file. The checklist below is
 the source of truth; this is the index into it.
@@ -32,7 +32,8 @@ the refreshed site content with the certifications tab. None of it is published 
 **Before `dev` can become `main`:**
 
 1. Replace or delete the two placeholder testimonials, or turn `config.showTestimonials` off. The
-   owner is reworking that section first, so it waits on that.
+   pager itself is reworked now (one quote at a time, dots instead of the arrows, read-more); only
+   the content is left.
 2. The pre-publication documentation review.
 3. Re-measure Lighthouse against the merged deployment.
 
@@ -51,10 +52,12 @@ the Vercel DNS change, and making the repository public.
   sources and generator were moved out of this repository (decision 69). The four compiled PDFs
   (light and dark, per language) stay in `public/uploads/`. ATS-friendly: one column, Arial,
   standard headings, no phone number and no home address.
-- [ ] **Enrich the CreandoMientras case.** Say what was actually solved, because it is the part a
-  client cares about: no subscription (a Git-based CMS, so zero monthly cost and the client owns
-  the content), a panel the client runs herself, image optimisation in CI, and how easy it is to
-  use. Plus the custom components built for it — calendar, gallery, links.
+- [x] **Enrich the CreandoMientras case.** Done 2026-09-23: the summary leads with the
+  no-subscription angle and the modal body carries the rest — a self-hosted Sveltia CMS on Git (no
+  subscription, the client owns the content), a panel Lourdes runs herself, images optimised in CI
+  with Sharp (WebP and AVIF at three widths, hash-skipping what has not changed), the contact form
+  stack, and the pieces built for the business: the events calendar, the gallery and the link
+  manager.
 - [ ] **A base cover letter.** Generated like the CV, from a plain-text source through the same
   external tool, so it can be iterated and tailored per application. **(owner)**
 - [ ] **A compact one-page CV.** Not urgent: a shorter variant for applications that ask for one
