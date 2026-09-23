@@ -29,27 +29,39 @@ defineEmits(['update:modelValue'])
 
 <template>
   <div class="tabs" role="tablist">
-    <button
-      v-for="option in options"
-      :key="option.value"
-      class="tab"
-      :class="{ active: option.value === modelValue }"
-      type="button"
-      role="tab"
-      :aria-selected="option.value === modelValue"
-      @click="$emit('update:modelValue', option.value)"
-    >
-      {{ option.label }}
-    </button>
+    <template v-for="(option, i) in options" :key="option.value">
+      <span v-if="i > 0" class="sep" aria-hidden="true" />
+      <button
+        class="tab"
+        :class="{ active: option.value === modelValue }"
+        type="button"
+        role="tab"
+        :aria-selected="option.value === modelValue"
+        @click="$emit('update:modelValue', option.value)"
+      >
+        {{ option.label }}
+      </button>
+    </template>
   </div>
 </template>
 
 <style scoped>
 .tabs {
+  --tab-gap: clamp(14px, 3vw, 30px);
   display: flex;
-  gap: clamp(14px, 3vw, 34px);
+  align-items: stretch;
+  gap: var(--tab-gap);
   min-width: 0;
   border-bottom: 1px solid var(--line);
+}
+
+/* A hairline between the tabs, the same one the navbar uses. */
+.sep {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 1px;
+  height: 15px;
+  background: var(--line);
 }
 
 .tab {
@@ -76,15 +88,22 @@ defineEmits(['update:modelValue'])
   color: var(--acc-text);
 }
 
+/* The folder edge: a rule in the accent that runs from the tab to the hairline
+   separator, so the two meet. */
 .tab.active::after {
   content: '';
   position: absolute;
   left: 0;
-  right: 0;
+  right: calc(-1 * var(--tab-gap));
   bottom: -1px;
   height: 3px;
   border-radius: 3px;
   background: var(--acc);
+}
+
+/* The last tab has no separator to reach, so its rule stops at the label. */
+.tab:last-child.active::after {
+  right: 0;
 }
 
 /*

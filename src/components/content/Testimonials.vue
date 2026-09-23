@@ -80,9 +80,32 @@ onMounted(() => {
 onUnmounted(() => observer?.disconnect())
 
 /*
-  A sideways swipe on the card pages it, the same gesture the /me tabs use. It is
-  horizontal on purpose: a vertical one is a scroll, and reading a scroll as a
-  swipe made the page jump between quotes while you were just moving down.
+  Desktop: the wheel pages it. It only takes the gesture while there is somewhere
+  to go — at either end the page keeps the scroll — and a short lock stops one
+  flick running through several quotes. While a quote is open and taller than the
+  box, the wheel is left to scroll that quote instead.
+*/
+let wheelLock = 0
+
+function onWheel(event) {
+  const el = pane.value
+  if (open.value && el && el.scrollHeight > el.clientHeight + 1) return
+  if (Math.abs(event.deltaY) < 4) return
+  const next = index.value + (event.deltaY > 0 ? 1 : -1)
+  if (next < 0 || next >= items.value.length) return
+
+  event.preventDefault()
+  const now = performance.now()
+  if (now - wheelLock < 480) return
+  wheelLock = now
+  goTo(next)
+}
+
+/*
+  Touch: a vertical swipe pages it, and the page keeps its own scroll. The swipe
+  is read on touchend without cancelling anything — the pager is not a scroll
+  container, so there is nothing to claim — and it only fires when the gesture is
+  clearly vertical and long enough, which leaves a normal scroll alone.
 */
 let touchX = 0
 let touchY = 0
@@ -97,8 +120,8 @@ function onTouchEnd(event) {
   const point = event.changedTouches[0]
   const dx = point.clientX - touchX
   const dy = point.clientY - touchY
-  if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return
-  goTo(index.value + (dx < 0 ? 1 : -1))
+  if (Math.abs(dy) < 56 || Math.abs(dy) < Math.abs(dx) * 1.4) return
+  goTo(index.value + (dy < 0 ? 1 : -1))
 }
 </script>
 
@@ -114,7 +137,13 @@ function onTouchEnd(event) {
         </div>
 
         <div class="body">
-          <div ref="pane" class="pane" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
+          <div
+            ref="pane"
+            class="pane"
+            @touchstart.passive="onTouchStart"
+            @touchend.passive="onTouchEnd"
+            @wheel="onWheel"
+          >
             <Transition :name="`quote-${direction}`" mode="out-in" @after-enter="watchCard">
               <TestimonialCard
                 :key="index"
@@ -238,9 +267,17 @@ function onTouchEnd(event) {
 .pane {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
+  /* overflow-x hidden clips the sideways swap; overflow-y auto lets an open quote
+     taller than the box be scrolled, which the wheel hands over to it. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
   padding: 0 clamp(18px, 2.6vw, 26px);
   transition: height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pane::-webkit-scrollbar {
+  display: none;
 }
 
 /* The one quote at a time, swapped sideways: the way it moves says whether you
