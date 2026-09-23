@@ -378,10 +378,15 @@ onUnmounted(() => {
   gap: 2px;
 }
 
+/*
+  A 24px target with an 8px mark inside it: WCAG 2.2 asks for 24px, and the old
+  20px button failed it. The mark keeps its size by taking an 8px inset, and the
+  active pill keeps its 16px width by ending 4px in from each side.
+*/
 .dot {
   position: relative;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
   background: none;
@@ -391,10 +396,10 @@ onUnmounted(() => {
 .dot::before {
   content: '';
   position: absolute;
-  top: 6px;
-  bottom: 6px;
-  left: 6px;
-  right: 6px;
+  top: 8px;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
   border-radius: 999px;
   background: var(--fg-3);
   transition:
@@ -408,8 +413,8 @@ onUnmounted(() => {
 }
 
 .dot.active::before {
-  left: 2px;
-  right: 2px;
+  left: 4px;
+  right: 4px;
   background: var(--acc);
 }
 

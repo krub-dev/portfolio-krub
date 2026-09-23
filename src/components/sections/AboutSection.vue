@@ -24,6 +24,8 @@ const { theme } = useTheme()
 const { t } = useI18n()
 
 const tab = ref('exp')
+// The id that ties the tab row to the panel it switches, for the ARIA tablist.
+const panelId = 'me-tabs'
 const about = computed(() => copy.about[lang.value])
 const options = computed(() => [
   { value: 'exp', label: t('tab.exp') },
@@ -104,26 +106,38 @@ function onTouchEnd(event) {
         <p class="para">{{ about.p3 }}</p>
 
         <div class="switcher">
-          <TabSwitch v-model="tab" :options="options" class="tabs" />
+          <TabSwitch v-model="tab" :options="options" :panel-id="panelId" class="tabs" />
 
           <Transition :name="`tab-slide-${direction}`" mode="out-in">
-            <ol
+            <!--
+              role="tabpanel" on the wrapper and not on the <ol>: a non-list role
+              on the list itself takes the list role off it, and the <li> rows
+              below stop being list items.
+            -->
+            <div
               :key="tab"
-              class="timeline"
-              @touchstart="onTouchStart"
-              @touchmove="onTouchMove"
-              @touchend="onTouchEnd"
+              :id="panelId"
+              role="tabpanel"
+              :aria-labelledby="`${panelId}-tab-${tab}`"
+              tabindex="0"
             >
-              <li v-for="(entry, i) in entries" :key="entry.from + entry[lang].title">
-                <TimelineItem
-                  :period="period(entry)"
-                  :current="entry.current"
-                  :title="entry[lang].title"
-                  :body="entry[lang].body"
-                  :is-last="i === entries.length - 1"
-                />
-              </li>
-            </ol>
+              <ol
+                class="timeline"
+                @touchstart="onTouchStart"
+                @touchmove="onTouchMove"
+                @touchend="onTouchEnd"
+              >
+                <li v-for="(entry, i) in entries" :key="entry.from + entry[lang].title">
+                  <TimelineItem
+                    :period="period(entry)"
+                    :current="entry.current"
+                    :title="entry[lang].title"
+                    :body="entry[lang].body"
+                    :is-last="i === entries.length - 1"
+                  />
+                </li>
+              </ol>
+            </div>
           </Transition>
         </div>
 

@@ -129,6 +129,7 @@ function onCardClick(event) {
           <div
             ref="pane"
             class="pane"
+            aria-live="polite"
             @pointerdown="onPressDown"
             @click="onCardClick"
           >
@@ -295,8 +296,9 @@ function onCardClick(event) {
 
 /*
   The position indicator: a vertical column of dots on the right of the box. The
-  one you are on is a longer pill in the accent. Each dot is a 20px button with
-  an 8px mark drawn inside it, so it stays tappable on a phone.
+  one you are on is a longer pill in the accent. Each dot is a 24px button with
+  an 8px mark drawn inside it: the target clears the 24px WCAG 2.2 asks for
+  without the mark itself growing.
 */
 .dots {
   flex: 0 0 auto;
@@ -308,8 +310,8 @@ function onCardClick(event) {
 
 .dot {
   position: relative;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
   background: none;
@@ -319,10 +321,10 @@ function onCardClick(event) {
 .dot::before {
   content: '';
   position: absolute;
-  top: 6px;
-  right: 6px;
-  bottom: 6px;
-  left: 6px;
+  top: 8px;
+  right: 8px;
+  bottom: 8px;
+  left: 8px;
   border-radius: 999px;
   background: var(--fg-3);
   transition:
@@ -336,8 +338,8 @@ function onCardClick(event) {
 }
 
 .dot.active::before {
-  top: 2px;
-  bottom: 2px;
+  top: 4px;
+  bottom: 4px;
   background: var(--acc);
 }
 

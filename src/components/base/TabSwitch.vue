@@ -6,8 +6,11 @@
   events. That is what the `modelValue` prop plus the `update:modelValue`
   emit mean: Vue wires them together behind that one directive.
 
-  role="tablist" + aria-selected tells a screen reader these are alternative
-  views of the same region rather than three unrelated buttons.
+  A real tablist, not just the roles: the active tab is the only one in the tab
+  order (roving tabindex) and the arrows move between them, which is what a
+  screen reader expects once it has announced "tab". `panelId` is the id of the
+  region they switch, so aria-controls points somewhere and the panel can point
+  back with aria-labelledby.
 
   It reads as a row of folders: plain labels on a hairline track, the one you are
   on in the accent with a short accent rule under it. No pills — a row of capsule
@@ -19,25 +22,54 @@
   to fit a phone's width, and the content is what slides — by tap or by a
   sideways swipe on it.
 */
-defineProps({
+import { nextTick, ref } from 'vue'
+
+const props = defineProps({
   options: { type: Array, required: true }, // [{ value, label }]
   modelValue: { type: String, required: true },
+  panelId: { type: String, required: true },
 })
 
-defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
+
+const tabs = ref([])
+
+/*
+  The arrows walk the row and wrap at the ends; Home and End jump to the corners.
+  Selecting with an arrow also moves the focus, which is what makes it feel like
+  one control rather than three buttons that happen to be next to each other.
+*/
+function onKeydown(event, i) {
+  const last = props.options.length - 1
+  let next = null
+  if (event.key === 'ArrowRight') next = i === last ? 0 : i + 1
+  else if (event.key === 'ArrowLeft') next = i === 0 ? last : i - 1
+  else if (event.key === 'Home') next = 0
+  else if (event.key === 'End') next = last
+  if (next === null) return
+
+  event.preventDefault()
+  emit('update:modelValue', props.options[next].value)
+  nextTick(() => tabs.value[next]?.focus())
+}
 </script>
 
 <template>
   <div class="tabs" role="tablist">
     <button
-      v-for="option in options"
+      v-for="(option, i) in options"
       :key="option.value"
+      ref="tabs"
       class="tab"
       :class="{ active: option.value === modelValue }"
       type="button"
       role="tab"
+      :id="`${panelId}-tab-${option.value}`"
+      :aria-controls="panelId"
       :aria-selected="option.value === modelValue"
+      :tabindex="option.value === modelValue ? 0 : -1"
       @click="$emit('update:modelValue', option.value)"
+      @keydown="onKeydown($event, i)"
     >
       {{ option.label }}
     </button>

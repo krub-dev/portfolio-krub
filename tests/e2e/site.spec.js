@@ -474,9 +474,32 @@ test('the testimonial dots are visible and tappable on every viewport', async ({
   await expect(dots).toHaveCount(3)
   await expect(dots.first()).toBeVisible()
 
-  // A comfortable target, not a hairline: the mark is 8px, the button is 20.
+  // WCAG 2.2 asks for 24px: the mark is 8px, the button that carries it is 24.
   const box = await dots.first().boundingBox()
-  expect(box.width).toBeGreaterThanOrEqual(18)
+  expect(box.width).toBeGreaterThanOrEqual(24)
+})
+
+test('the about tabs are a real tablist', async ({ page }) => {
+  await openSite(page, { reduced: true })
+
+  const tabs = page.locator('.about [role="tab"]')
+  await expect(tabs).toHaveCount(3)
+
+  // Roving tabindex: only the selected tab is in the tab order.
+  await expect(tabs.nth(0)).toHaveAttribute('tabindex', '0')
+  await expect(tabs.nth(1)).toHaveAttribute('tabindex', '-1')
+
+  // The arrows move the selection and take the focus with them.
+  await tabs.nth(0).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true')
+  await expect(tabs.nth(1)).toBeFocused()
+
+  // The panel points back at the tab it belongs to.
+  await expect(page.locator('.about [role="tabpanel"]')).toHaveAttribute(
+    'aria-labelledby',
+    'me-tabs-tab-edu',
+  )
 })
 
 test('opening a quote reveals the rest, and closing hides it again', async ({ page }) => {
