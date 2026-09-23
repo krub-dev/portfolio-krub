@@ -77,6 +77,14 @@ function measure() {
 
 function onScroll() {
   syncIndex()
+  /*
+    Scrolling away from an open quote closes it. Left open, it stays the tallest
+    entry, so the window stays tall and the next quote shows through the gap.
+  */
+  if (open.value !== -1 && open.value !== index.value) {
+    open.value = -1
+    nextTick(measure)
+  }
 }
 
 function goTo(wanted) {

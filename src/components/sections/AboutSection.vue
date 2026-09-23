@@ -103,27 +103,29 @@ function onTouchEnd(event) {
         <p class="para">{{ about.p2 }}</p>
         <p class="para">{{ about.p3 }}</p>
 
-        <TabSwitch v-model="tab" :options="options" class="tabs" />
+        <div class="switcher">
+          <TabSwitch v-model="tab" :options="options" class="tabs" />
 
-        <Transition :name="`tab-slide-${direction}`" mode="out-in">
-          <ol
-            :key="tab"
-            class="timeline"
-            @touchstart="onTouchStart"
-            @touchmove="onTouchMove"
-            @touchend="onTouchEnd"
-          >
-            <li v-for="(entry, i) in entries" :key="entry.from + entry[lang].title">
-              <TimelineItem
-                :period="period(entry)"
-                :current="entry.current"
-                :title="entry[lang].title"
-                :body="entry[lang].body"
-                :is-last="i === entries.length - 1"
-              />
-            </li>
-          </ol>
-        </Transition>
+          <Transition :name="`tab-slide-${direction}`" mode="out-in">
+            <ol
+              :key="tab"
+              class="timeline"
+              @touchstart="onTouchStart"
+              @touchmove="onTouchMove"
+              @touchend="onTouchEnd"
+            >
+              <li v-for="(entry, i) in entries" :key="entry.from + entry[lang].title">
+                <TimelineItem
+                  :period="period(entry)"
+                  :current="entry.current"
+                  :title="entry[lang].title"
+                  :body="entry[lang].body"
+                  :is-last="i === entries.length - 1"
+                />
+              </li>
+            </ol>
+          </Transition>
+        </div>
 
         <BaseButton
           v-if="config.showCv"
@@ -198,12 +200,24 @@ function onTouchEnd(event) {
   padding-top: 6px;
 }
 
+/* The tab row and the content are one block, no gap: the tab track sits right
+   on the content, and the timeline's first row drops its own top border so the
+   two rules do not double. */
+.switcher {
+  display: flex;
+  flex-direction: column;
+}
+
 .timeline {
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
+}
+
+.timeline :deep(li:first-child .row) {
+  border-top: 0;
 }
 
 /* The content slides the way the tab did. out-in so the two panels do not sit

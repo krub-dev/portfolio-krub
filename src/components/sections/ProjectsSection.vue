@@ -72,11 +72,22 @@ const fade = ref('fade-right') // which edges the clip softens
   edge, and that is what the offset within the current step says.
 */
 function syncFade() {
+  const view = viewport.value
+  if (!view) return
+
   const at = step > 0 ? offset % step : 0
   const left = at > 0 && at < cardWidth
   const right = offset < maxOffset - 1
   const next = left && right ? 'fade-both' : left ? 'fade-left' : right ? 'fade-right' : 'none'
   if (next !== fade.value) fade.value = next
+
+  /*
+    The mask width is driven by the live offset, so the fade ramps in and out
+    with the rail. Four fixed gradients that flipped the instant a card crossed
+    the edge made it snap — the last card went from faded to clear in one frame.
+  */
+  view.style.setProperty('--fade-l', `${left ? Math.min(at, fadeMax) : 0}px`)
+  view.style.setProperty('--fade-r', `${right ? Math.min(maxOffset - offset, fadeMax) : 0}px`)
 }
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -89,6 +100,7 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 let step = 0 // one card plus one gap, in px
 let cardWidth = 0 // one card, in px
 let visibleWidth = 0 // how much of the rail the viewport shows
+let fadeMax = 0 // how wide the edge fade can get — the peek, in px
 let maxOffset = 0 // how far the rail can travel before the last card is in
 let offset = 0 // where it is, which is what gets painted
 let target = 0 // where it is going
@@ -173,6 +185,10 @@ function sync(snap) {
   step = card + gap
   visibleWidth = visible
   maxOffset = Math.max(0, rail.scrollWidth - visible)
+
+  // The peek: what is left of `visible` after the whole cards and the gaps.
+  const whole = Math.max(1, Math.round((visible - gap) / step))
+  fadeMax = Math.max(0, visible - whole * step + gap)
 
   const last = step > 0 ? Math.ceil(maxOffset / step) : 0
   index = Math.min(Math.max(index, 0), last)
@@ -434,31 +450,20 @@ onUnmounted(() => {
     Plus the room, or the extra strip would show unfaded and the cut would come
     back as a hard edge further in.
   */
-  --rail-fade: calc(var(--rail-peek) - var(--rail-gap) + var(--rail-room));
+  /*
+    The fade widths are written per frame from the rail's offset, so a card the
+    clip cuts gets a soft edge that grows and shrinks with it instead of a fixed
+    gradient that flips.
+  */
+  --fade-l: 0px;
+  --fade-r: 0px;
   overflow: hidden;
   padding: 12px var(--rail-room);
   margin: 0 calc(-1 * var(--rail-room));
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
   touch-action: pan-y;
   cursor: grab;
-}
-
-/*
-  A card the clip cuts in half gets a soft edge instead of a hard one, and only
-  on the side the rail continues on.
-*/
-.fade-right {
-  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--rail-fade)), transparent 100%);
-  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--rail-fade)), transparent 100%);
-}
-
-.fade-left {
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--rail-fade), #000 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 var(--rail-fade), #000 100%);
-}
-
-.fade-both {
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--rail-fade), #000 calc(100% - var(--rail-fade)), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 var(--rail-fade), #000 calc(100% - var(--rail-fade)), transparent 100%);
 }
 
 .viewport.dragging {
