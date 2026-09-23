@@ -27,6 +27,8 @@ new number to its range when a decision is appended.
   pipeline.
 - **The CV tool and its themes — 69.** The generator moved out of the repository, and the dark PDF.
 - **A UI pass — 70.** The testimonial dots, the grid cell off, scrollable tabs and the CTAs.
+- **Polish and accessibility — 71–74.** The cooler light grey and the glow gone, the one-quote
+  vertical pager, the `/me` tabs as a real tablist, and the 24px dots with the live region.
 
 ---
 
@@ -1897,3 +1899,80 @@ design spec, this wins.
   mail client opening. The navbar, the mobile menu and the hero all point at `#contact` now.
 - **The `/me` photo is in colour.** It was grayscale; the new photo is the 42 portrait and its
   colour is the point.
+
+### 71. The light theme is a cooler grey, and the stage glow is gone
+
+**Date:** 2026-09-23 · **Status:** active
+
+Two reversals from the same review, both of them things the spec still described the old way.
+
+- **The light page is `#F2F3F2`, not the cream `#F5F3EE`.** The cream was warm and read as a paper
+  tint next to the accent; the cool grey is neutral, so the yellow and the pastel palettes are the
+  only colour on the page. `--surface-2` moves with it, to `#E9E9E7`. Every contrast figure in the
+  spec was re-measured against the new value and still clears AA — `--fg-3` light on `--ink` is the
+  tightest at 4.52:1.
+- **The rotating glow around the hero stage is gone.** Decision 52 built it and this takes it back:
+  with the marquee, the cursor and the lemon all moving, the stage was the fourth thing turning and
+  it read as noise around an empty box. The stage keeps its border, its radius, its radial gradient
+  and its magnetic pull. `--glow-dim`, `--glow-angle` and `@keyframes glowSpin` are deleted; the
+  `.frame` wrapper the glow needed stays, because the magnetic pull and the clip still live on it.
+
+### 72. The testimonials are one quote at a time, sliding vertically
+
+**Date:** 2026-09-23 · **Status:** active
+
+The pager decision 65 built — a reel of entries in a window, dragged with any pointer type — was
+replaced. It worked, but it was a scroll container in disguise: the drag, the wheel and the page's
+own scroll kept colliding, and the window needed two measured heights (`--pane-h` for the floor, its
+own for the ceiling) to behave.
+
+- **One quote in the DOM.** The current one, swapped on change. Nothing is stacked, so there is no
+  scroll to fight, no window to keep a fixed height and no entry sliding past the one on show.
+- **The height is animated to the card on show.** `fit()` measures the incoming card and writes it
+  onto the pane; a `ResizeObserver` on the card re-measures when the fonts land and the clamp
+  resolves.
+- **The swap is vertical** — forward carries the old quote up and brings the next one in from below
+  — and `mode="out-in"` keeps the two from sitting on top of each other.
+- **The arrows are gone**, replaced by the vertical dot column decision 70 introduced. No mask
+  either.
+- **A click on the card advances, and wraps.** It is a shortcut, not the control: the dots are. It
+  ignores the "read more" and a drag that selects the quote (the pointer's travel is measured), and
+  the wrap is forced to slide as "next" rather than jumping back.
+- **The pager never claims the page's scroll.** The wheel and a swipe belong to the page. Two
+  earlier attempts — a wheel pager and a touch swipe — were tried and removed: both fought the
+  scroll and neither earned its keep.
+
+### 73. The `/me` tabs are a row again, and a real tablist
+
+**Date:** 2026-09-23 · **Status:** active
+
+Decision 70 stacked the three tabs on a phone, because three pills did not fit. The pills were the
+problem, not the row: as plain folder labels on a hairline track the three fit a phone at 12px with
+no tracking, so they are a row at every width again — a short rule in `--acc-text` under the active
+label, no capsule, no scroll container.
+
+**And the tablist is real now, not just the roles.** It had `role="tablist"` and `role="tab"` with
+nothing behind them, so a screen reader announced "tab" and the arrow keys did nothing. It has roving
+`tabindex` (only the selected tab is in the tab order), ArrowLeft/ArrowRight with wrap, Home/End,
+`aria-controls` on each tab, and the panel is a `role="tabpanel"` with `aria-labelledby`.
+
+**The `tabpanel` role goes on a wrapper, not on the `<ol>`.** A non-list role on the list itself takes
+the list role off it and its `<li>` rows stop being list items — Lighthouse's `listitem` audit caught
+it. The panel is a `<div role="tabpanel">` around the `<ol>`.
+
+### 74. The dots are 24px, and the pagers announce themselves
+
+**Date:** 2026-09-23 · **Status:** active
+
+An accessibility pass — axe, a manual contrast sweep and Lighthouse — came back with one real finding
+on each pager.
+
+- **The dots were 20px, under WCAG 2.2's 24px minimum.** Lighthouse's `target-size` audit flagged
+  both sets. They are 24px now, with the mark still 8px: the inset grows from 6 to 8 so the target can
+  grow without the dot changing, and the active pill keeps its 16px by ending 4px in from each side.
+- **The testimonial pager had no live region.** Swapping the quote changed the DOM with nothing to
+  announce it, so the pane is now `aria-live="polite"`. The dots already carried `aria-current`.
+- **Everything else passed.** axe reported no violations, and every text pair clears AA against the
+  new light background (measured: `--fg` 16–17:1, `--fg-2` 6.3–7.7:1, `--fg-3` 4.52–5.29:1,
+  `--acc-text` 4.56–12.6:1). Lighthouse is 100 on accessibility and best practices in both themes;
+  the only audit still red is `bf-cache`, which Chrome reports as "not actionable".

@@ -18,7 +18,7 @@ vertical order:
 | 00 | `me` | About | Three paragraphs, experience/education tabs, CV button, photo |
 | 01 | `projects` | Projects | Horizontal rail of cards; clicking one opens a detail modal |
 | 02 | `stack` | Stack | Four groups of technology icons, two per row |
-| — | `testimonials` | Testimonials | Two quotes. **Optional section**, toggled by config |
+| — | `testimonials` | Testimonials | One quote at a time, in a vertical pager. **Optional section**, toggled by config |
 | 03 | `contact` | Contact | Large headline, email CTA, three social icons |
 | — | — | Footer | Pinned to the bottom: credit, copyright, TOP button, city and Madrid clock |
 
@@ -55,9 +55,9 @@ These live in one global stylesheet and are the only source of colour in the pro
 ### Light theme (`[data-theme="light"]` on `<html>`)
 
 ```css
---ink:       #F5F3EE;
+--ink:       #F2F3F2;
 --surface:   #FFFFFF;
---surface-2: #EDEAE2;
+--surface-2: #E9E9E7;
 --line:      rgba(12,12,13,.13);
 --fg:        #141416;
 --fg-2:      #5A5955;
@@ -113,7 +113,6 @@ the same stylesheet. A palette swaps the accent tokens and nothing else:
 | `--on-acc` | the text painted on the fill |
 | `--mark` | the logo, footer heart and cursor ring |
 | `--acc-solid` | the accent at full saturation, the same in both themes — Limonacho |
-| `--glow-dim` | the dim stop of the hero stage's glow. Derived from the accent, so it follows every palette, but its value differs by theme (see §3.14) |
 
 The four non-default palettes — aqua, rose, mint, violet — swap exactly these tokens. Violet is
 the exception among them: its dark value is the solid `#8B5CF6`, not a pastel, because the pastel
@@ -122,7 +121,7 @@ read washed out, so light and dark share the fill and only the text and `--mark`
 The four non-default palettes — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, violet `#D8C7FF` —
 are pastels made for a dark background: as text they read straight away (aqua 17.7:1, mint 16.3:1
 on `--ink`). On the light theme those pastels are nearly invisible **as fills** (`#C3FFFC` is
-1.00:1 on the cream page), so each has a more saturated light-theme counterpart for `--acc`, and
+1.00:1 on the light page), so each has a more saturated light-theme counterpart for `--acc`, and
 every palette's accent text darkens in light exactly as the yellow's does. See decisions.md.
 
 ### Typography
@@ -199,7 +198,7 @@ Required `@keyframes`: `marquee`, `lemonShake`, `dotHalo`, `bubbleIn`.
 A `position:fixed` container at the top, `padding:14px clamp(14px,4vw,40px)`, centred, and
 `pointer-events:none` with `pointer-events:auto` on the capsule inside it. The strip is full width but
 only the capsule is a control: without that, the empty half of the bar swallowed every click that
-landed in its band, which is anything scrolling up behind the compact capsule — the project arrows,
+landed in its band, which is anything scrolling up behind the compact capsule — the project dots,
 the appearance controls, any button. Inside it a **capsule** with `max-width:1180px`,
 `padding:12px 16px`, transparent border, transparent background and `border-radius:16px`.
 
@@ -260,15 +259,8 @@ Left column: top mono label, a three-line headline with the key word in `--acc`,
 Right column, the **square stage**: `aspect-ratio:1/1`, `max-height:min(58vh,520px)`,
 `max-width:520px`, border `--line`, radius 24, a `radial-gradient` from `--surface` to `--ink`,
 and a **40px** inner grid — not the page's 72px, which reads as noise inside a 520px box. The
-whole stage is magnetic — the pull is on the frame that holds it, so the glow travels with it —
-and only the logo inside it tilts. Inside:
+whole stage is magnetic, and only the logo inside it tilts. Inside:
 
-- **Rotating glow** around the box: a conic gradient painted **2px larger** than the stage on every
-  side, so what shows is a ring and its halo and the opaque stage covers the middle. The stops are
-  `--glow-dim` and `--acc-solid`, and it turns with `glowSpin 6s linear infinite`. Drawn twice: the
-  crisp copy is the border, a `blur(10px)` copy at `opacity:.35` is the bloom. The stage itself is
-  `box-sizing: border-box`, so it fills its frame exactly and the ring is even on all four sides.
-  Decorative: reduced motion stops the turn and leaves the ring.
 - The logo at 58% of the width, as a mask over `var(--mark)`, with **3D parallax**: it
   follows the mouse with `perspective(700px) rotateY(±14deg) rotateX(∓10deg)`, proportional
   to the cursor's distance from the centre of the stage.
@@ -290,8 +282,8 @@ A full-bleed band, background `--acc`, text `--on-acc`, `padding:13px 0`, top an
 borders in the same yellow. Mono text 13px, weight 700, `letter-spacing:.22em`, uppercase.
 Two identical blocks in a row (`gap:38px`, `padding-right:38px`) animated with
 `marquee 26s linear infinite`, which translates `-50%`: the loop is seamless because the
-content is duplicated. Phrases: "Fullstack developer → backend" and "From Murcia, based in
-Barcelona · Spain", separated by `//`.
+content is duplicated. Phrases: "Fullstack developer → backend" and "Murcia · Barcelona ·
+remote · Spain", separated by `//`.
 
 ### 3.4 Section heading (reusable pattern)
 
@@ -307,9 +299,11 @@ weight 700, yellow, `vertical-align:super`).
 ### 3.5 About
 
 Grid `1.3fr .7fr` (one column on mobile). Left: lead paragraph + two secondary paragraphs +
-**tabs** `/experience` and `/education` (mono 12px; active: background `--acc`, text
-`--on-acc`, border `--acc`; inactive: transparent, text `--fg-2`, border `--line`) + the
-matching timeline + a "Download CV (PDF)" button (outlined pill).
+**tabs** `/experience`, `/education` and `/certifications` — a row of folder labels (mono 13px,
+12px on a phone) on a hairline track, the active one in `--acc-text` with a 3px `--acc` rule
+under it; no pills + the matching timeline + a "Download CV (PDF)" button (outlined pill). It is
+a real ARIA tablist: roving `tabindex`, `aria-controls`, a `role="tabpanel"` on the panel, and
+the arrows move the selection and the focus.
 
 Each timeline row: `display:grid`, columns `minmax(90px,130px) 1fr`,
 `gap: clamp(14px,3vw,32px)`, `padding:22px 0`, `border-top:1px solid var(--line)` (the last
@@ -317,13 +311,12 @@ one also gets `border-bottom`). Left column: the year range in mono 12px — yel
 current period, `--fg-3` if it is past. Right: title 18px weight 600 + description 15px
 `--fg-2` at 60ch. On mobile it collapses to one column with `gap:8px`.
 
-Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`, filter
-`grayscale(1) contrast(1.05)`. **No caption.** On mobile it is capped at 210px wide with
-`aspect-ratio:4/5`.
+Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`. **No caption.**
+On mobile it is capped at 210px wide with `aspect-ratio:4/5`.
 
 ### 3.6 Projects
 
-A **horizontal rail**: a clipped viewport (`overflow:hidden`, `padding:12px var(--rail-room)` to leave the
+A **horizontal rail**: a clipped viewport (`overflow:hidden`, `padding:20px var(--rail-room)` to leave the
 magnetic pull its 10px on every side, taken back with a negative margin so the content box is unchanged,
 `touch-action:pan-y`) holding a `flex` track with `gap:20px`, moved by
 `transform: translate3d(-offset, 0, 0)` with `will-change:transform`. **The travel is a loop in the
@@ -345,8 +338,9 @@ clip is wider. The fade adds the room to its length, or the extra strip would sh
 edge would simply move inward.
 
 The rail travels one card per step and stops with the last card flush to the right edge, so the last
-position shows cards 2–4 rather than card 4 alone. **The two arrows above it disable at the ends**,
-which is also how the reader learns how much is left, and the transform is instant under
+position shows cards 2–4 rather than card 4 alone. **A row of dots under the rail** marks the
+parking spots — one per spot, recomputed per width, the one you are on a longer pill in `--acc` —
+and each is a 24px button with an 8px mark inside it. The transform is instant under
 `prefers-reduced-motion`.
 
 **Dragging** covers every pointer type — a mouse has no horizontal gesture, and the rail is not a
@@ -486,11 +480,18 @@ own: it is about the work, and a fifth destination would break the 00–03 numbe
 that can disappear. It carries the same mono label the contact rows use (`/testimonials`, 13px,
 uppercase) instead of a heading. It is not inside a section any more, so it carries the page gutter
 and the `1180px` cap itself, plus a `margin-top` of its own on top of the Stack's bottom padding.
-See decisions.md 56, 64 and 65.
+See decisions.md 56, 64, 65 and 72.
 
-**One at a time, in a pager.** A column grows: measured, one entry is `214px` on a phone, so three made
-the block `678px` and the section nearly two screens — the problem the projects grid had, and the same
-answer. The block shows a single quote and keeps the height of one however many arrive.
+**One at a time, in a pager.** Measured, one entry is `214px` on a phone, so three made the block
+`678px` and the section nearly two screens — the problem the projects grid had, and the same answer.
+**One quote is in the DOM at all** — the current one — and changing swaps it, so the block never grows
+with the number of quotes. That is the point: the pager is not a scroll container and nothing is
+stacked, so there is no scroll to fight and no window to keep a fixed height.
+
+**The box height is animated to the quote on show.** Left to itself the pane's height is its content,
+so swapping the card changed it in a single frame — the text slid but the box jumped. `fit()` writes
+the new card's measured height onto the pane, and a `ResizeObserver` on the card re-measures after it
+lands, because its height also changes once the fonts swap and the clamp resolves.
 
 **The quote is clamped to four lines**, with a mono uppercase "Read more" in `--acc-text`, underlined
 and set to the right, under the end of the quote it belongs to. That is what makes the height
@@ -517,56 +518,32 @@ and not an SVG, because it is a watermark and the two faces the site self-hosts 
 belongs to the box and not to an entry, so it is the one thing in the block that does not move. On a phone
 it drops, moves right and grows (`74px`, `6px`, `112px`): in a window that narrow it lands behind the quote
 instead of behind the name, which is where a watermark belongs — under the text rather than beside the
-attribution. **The controls sit inside the box, in its bottom right corner**, on a desktop: beside it
-they were a pair of buttons hanging off the edge of the box with nothing to belong to, and a desktop box
-is wide enough to hold them. They are `12px` from the bottom and `16px` from the right — not against the
-edge — and in a row rather than the column they were outside, because stacked in the corner of a wide box
-they read as a strip down the side. The room for them is the pane's `--pane-room` (`56px`), spent as
-bottom padding on the entries and not on the pane: overflow clips at the padding edge, so padding on the
-window left the next entry inside the clip and its attribution showed through the empty strip. On the entry
-it is part of the measured height, so the next quote starts below the clip and the corner is left empty. The
-rail already has a pair of horizontal arrows over its head, and two pairs in one column of the page read as
-one control that lost its way. **The arrows are vertical** — up, then down — because the movement is: down
-brings the next quote up from below while the one showing leaves upwards. The window is `overflow:hidden`
-with a
-`mask-image` fading its top and bottom `18px`, so a quote arrives and departs through a fade; at rest the
-mask does nothing, because the entries carry `22px` of vertical padding and the text never sits on the
-edge. `transform` on the reel and `height` on the window ease at `.16` per frame in a loop and stop when
-they settle; under `prefers-reduced-motion` they jump.
+attribution. **The indicator is a vertical column of dots** on the window's right edge, centred on the window and
+not on the whole box (which includes the header, and pushed it high). One per quote, the one you are
+on a longer pill in `--acc`; each is a 24px button with an 8px mark drawn inside it, so it clears the
+24px WCAG 2.2 asks for without the mark growing. Tapping one goes straight to that quote.
 
-**On a phone the arrows go and the swipe is the only gesture.** The swipe is the interaction there, and
-two buttons in the corner of a narrow box would only take width from the quote. There is no icon in their
-place: one was tried and it
-read as clutter. The buttons are **clipped rather than removed**: visually hidden, they keep their place
-in the accessibility tree and their focus, and come back the moment one of them takes it. The drag is not
-something a screen reader or a keyboard can do, and the entries that are not showing are `inert`, so
-without them the other quotes would be unreachable. The breakpoint is the same `900px` the arrows' own
-sizing uses.
+**The swap is vertical.** Forward carries the old quote up and brings the next one in from below;
+back does the opposite. `mode="out-in"` so the two never sit on top of each other, and the pane's
+`overflow:hidden` clips the movement. Under `prefers-reduced-motion` the swap and the height change
+are instant.
 
-**It drags, with any pointer type**, the same as the projects rail: the mouse has no vertical gesture of
-its own and the pager is not a scroll container, so a phone has no swipe either. A drag that covers a
-fifth of the window takes the next quote in the direction it was going; anything shorter falls back to
-the **nearest entry, found by comparing offsets** — dividing the offset by a height sent a short drag to
-the wrong quote as soon as the first entry was longer than the others. A drag that ends over the "read
-more" swallows the click rather than pressing it. The pane takes pointer capture **once the gesture has
-proved itself a drag**, in the move and not on pointerdown: captured on pointerdown, the pointerup is
-retargeted to the pane and the click that follows lands on the pane, so the "read more" under the finger
-never saw it. **The rail's drag could leave the vertical axis to the
-page; this one cannot**, so the pane claims both axes (`touch-action:none`) and the page is scrolled by
-starting the touch anywhere else on the screen — the price of a vertical pager.
+**A click on the card goes to the next quote, and wraps** from the last to the first. It is a shortcut,
+not the only way in: the dots are the control and this adds nothing to the tab order. Two clicks are not
+that click — the "read more" button (or any link), and a drag that selects the quote — so the pointer's
+travel is measured between down and up and interactive elements are left alone. The wrap slides as
+"next" rather than jumping back the other way.
 
-**The window is as tall as the tallest entry, and every entry is padded to the tallest one that is
-closed.** Two heights, not one, and the difference is the whole thing. The window is the tallest entry,
-so it grows while a quote is open and comes back down when it closes. The floor — what the entries take
-as `min-height`, through a `--pane-h` the window sets — is read from the entries that are *not* open.
-Fed from the tallest including the open one, the floor rose with the expansion and stayed there:
-collapsing a quote left the block at the expanded size for good. Paging closes whatever was open before
-it moves, for the same reason — an open entry holds the window at the expanded size, and a short quote
-under it would leave the gap that lets the next one show through. Where each entry sits is still
-measured, because expanding one makes it taller: a uniform step would be wrong the moment a quote is
-longer than another, and a `ResizeObserver` on the reel re-measures when that happens or when the fonts
-land. The entries that are not showing carry `inert`, so Tab cannot walk into a quote nobody can see.
-Same rule as the rail.
+**The pager announces itself.** The pane is an `aria-live="polite"` region, so a screen reader hears
+the new quote when it arrives, and the dots carry `aria-current`.
+
+**No scroll container and no drag.** The pager is not a scroll container and never claims the gesture:
+the wheel and a swipe belong to the page, which is what the earlier versions got wrong — they fought the
+scroll. The entries that are not showing are not in the DOM at all, so nothing needs `inert`.
+
+**Paging closes whatever was open**, so a quote never arrives half-expanded, and `open` resets on every
+change. `fit()` runs again on `nextTick` when the clamp is put back, and `@after-enter` re-observes the
+card, so the height follows the card through both the swap and the expand/collapse.
 
 Each entry is `figure` → `figcaption` → `blockquote`: **the attribution first**, and on two lines — a
 `48px` avatar circle when there is one, and beside it the name in `--fg-2` over the company in `--fg-3`
@@ -779,7 +756,7 @@ A panel below the menu button (`top:74px; right:16px`, `z-index:150`),
 `gap:12px`, shadow `0 24px 60px rgba(0,0,0,.45)`. It holds: a header with "Menu", a mono subtitle
 and — on the right of that same row — the appearance and language controls, which appear here only
 once the bar has compacted (before that they are still in the navbar); a 2×2 grid with Github,
-LinkedIn, X and "Let's talk ↗" (this last one in yellow); a list of four navigation links, each
+LinkedIn, GitHub and "Let's talk ↗" (this last one in yellow); a list of four navigation links, each
 with its `[00]`…`[03]` mono index (the active section's in yellow) and its path; and a centred
 "↑ back to top" pill filled with the accent. Every link closes the menu when pressed.
 
@@ -829,7 +806,7 @@ scroll and when the bar expands again.
 | Lemon bubble | boolean | local to the lemon | turns itself off after 4s |
 | Show testimonials | boolean | config | |
 | Show lemon | boolean | config | only on a route with a hero |
-| Show CV | boolean | config | currently off — no file yet |
+| Show CV | boolean | config | on; four PDFs, one per theme and language |
 
 Derived effects: while the modal is open, `body { overflow:hidden }`; on a language change the
 footer and the navbar capsule must be re-measured, because the text changes width.
@@ -851,16 +828,16 @@ None of this belongs inside a template, and there are two homes for it (decision
 - **Copy** (`copy.js`): `hero`, `about`, `marquee`, `contact`, `lemon`, `notFound`.
 - **Projects** (`projects.js`): each entry has `slug`, `shotLabel`, `image`, `slides` (image
   count), `repo`, `live`, `stack`, and an `en` / `es` object with `name`, `tag`, `role`, `year`,
-  `repoLabel`, `liveLabel`, `summary`, `lead`, `body`, `body2`. Three today:
-  `creandomientras`, `showroom`, `sideforge`.
+  `repoLabel`, `liveLabel`, `summary`, `lead`, `body`, `body2`. Four today:
+  `creandomientras`, `sideforge`, `krub-dev`, `showroom`.
 - **Timelines** (`experience.js`, `education.js`): two and four entries. Each has `from`, `to`
   (`null` for "still going"), a `current` flag that paints the years in `--acc-text`, and an
   `en` / `es` object with `title` and `body`.
 - **Stack** (`stack.js`): four groups with a name and a list of technologies; each technology
   with a name, an icon file and whether it needs inverting in dark theme.
 - **Socials** (`socials.js`): name, URL and icon, plus `email`, `cvPath` and `photoPath`.
-- **Testimonials** (`testimonials.js`): quote, name, role, avatar. Placeholders; the section is
-  off by default.
+- **Testimonials** (`testimonials.js`): quote, name, role, avatar. One real quote and two
+  placeholders; the section is on.
 
 ---
 
@@ -871,8 +848,8 @@ None of this belongs inside a template, and there are two homes for it (decision
   Aspect ratio **1.682**.
 - `public/assets/img/krub-pfp.jpeg` — profile photo.
 - `public/icons/<technology>/<file>.svg` — technology icons (Devicon).
-- `public/uploads/cv-es.pdf` — the CV linked from About. Not shipped yet: `config.showCv` is off
-  until the ATS-friendly rewrite exists, so the file is absent and the button is hidden.
+- `public/uploads/cv-{es,en}.pdf` and `cv-{es,en}-dark.pdf` — the CV linked from About, one per
+  theme and language, generated by the standalone cv tool outside this repository.
 - `public/fonts/<family>-latin.woff2` — the two self-hosted variable fonts, with their OFL
   licences beside them.
 
@@ -892,7 +869,8 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
   texture dots, separators.
 - Text-free buttons (theme, language, menu, close, carousel arrows) carry an `aria-label`.
 - Touch targets: 44px or more on mobile (carousel arrows 44px, social icons 46px, navbar
-  buttons 36px with spacing).
+  buttons 36px with spacing), and the pagers' dots are 24px — the WCAG 2.2 minimum — with an 8px
+  mark drawn inside, so the target can grow without the dot growing.
 - External links get `target="_blank"` and `rel="noopener"`.
 
 ---

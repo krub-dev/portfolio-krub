@@ -76,10 +76,11 @@ the Vercel DNS change, and making the repository public.
   **Replace or delete them before this reaches `main`**, or turn `config.showTestimonials` off.
   Long quotes are clamped to four lines with a "read more", which is what makes the length a
   non-issue. Part of the same rework: the vertical arrows should go, replaced by scrollable dots.
-- [ ] **Refresh the Open Graph image and the structured data.** `og-banner.png` is from the first
-  build and predates the sections that exist now; the JSON-LD `workLocation` still says Barcelona
-  while the owner is in Murcia; and the `sameAs` list carries `x.com/krub_dev` from before X was
-  dropped from the site. Regenerate the banner and bring the metadata in line. **(owner)**
+- [ ] **Refresh the Open Graph image.** `og-banner.png` is from the first build and predates the
+  sections that exist now, so it is the owner's artwork to regenerate. The structured data beside it
+  is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in `sameAs` and in the
+  `twitter:` tags on purpose — it ties the domain to the profile even though X is no longer a link
+  on the site. **(owner)**
 - [ ] **Update LinkedIn to match the CV and the site.** The headline, the location (it says
   Barcelona, the owner is in Murcia) and the dates should agree with the CV and the site. Also the
   new banner. **(owner)**
