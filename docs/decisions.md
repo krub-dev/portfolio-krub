@@ -644,6 +644,11 @@ the image finishes downloading.
 banner. That is inherent to social images — they are rendered artifacts — but it is worth
 knowing rather than discovering.
 
+**Where the generator lives (2026-09-23):** `build-og.mjs`, in the cv tool beside this repository
+(`../cv/`), not here — it is a personal document tool that borrows the site's fonts, mark and
+tokens, and the owner copies the PNG in by hand. The banner itself is unchanged in behaviour: the
+hero rendered at 1200x630 by a real Chromium, because the typography has to be the site's own.
+
 Unused assets removed along the way: `krub-icon.png` (replaced by the new favicon),
 `krub-logo.webp` (referenced by nothing), and `banner-krub.png`.
 
