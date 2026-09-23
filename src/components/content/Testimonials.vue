@@ -1,27 +1,20 @@
 <script setup>
 /*
-  What people say, between the Stack and Contact: one at a time, in a pager.
+  What people say, between the Stack and Contact: one at a time.
 
-  The pager is a native scroll container with snap, not a transform rail. That is
-  what makes the scroll behave like scroll: the wheel and the finger move it, and
-  at either end the page takes over on its own — overscroll chaining — instead of
-  the block swallowing the gesture. A custom transform drag could follow the
-  finger, but it had to claim the touch (touch-action: none), and then the page
-  stopped dead at the first and last quote.
+  ONE testimonial is in the DOM — the current one — and changing swaps it with a
+  vertical <Transition>. That is the whole point: the pager is not a scroll
+  container and nothing is stacked, so there is no scroll to fight, no window to
+  keep a fixed height, and no entry sliding past the one on show. Each quote is
+  its own block and is created when it is needed.
 
-  The window is a fixed height — the tallest quote — so the block does not jump
-  as you page, and every entry is padded up to it (`--pane-h`) so a short quote
-  cannot let the next one show through the gap. Opening a quote grows the window.
-
-  The box carries its own header — the mono label and the position — because the
-  label floating above an empty box said nothing about what the box was. Inside,
-  with a rule under it, it is the same header the stack groups and the contact
-  rows use.
+  Navigation is the dots and a vertical swipe on the card. The page scrolls
+  normally over the block: the pager never claims the gesture.
 
   config.showTestimonials is checked by HomeView, not here: the page decides
   whether the block exists at all.
 */
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import TestimonialCard from './TestimonialCard.vue'
@@ -33,74 +26,42 @@ const { t } = useI18n()
 
 const items = computed(() => testimonials.map((entry) => ({ ...entry, ...entry[lang.value] })))
 
-const pane = ref(null)
 const index = ref(0)
-const open = ref(-1)
-const hidden = ref([])
+const open = ref(false)
+const direction = ref('next')
 
-let heights = []
-
-/*
-  Which quote is showing is read from the scroll position, so the dots and the
-  counter follow a wheel or a swipe without anything having to drive them.
-*/
-function syncIndex() {
-  const el = pane.value
-  if (!el) return
-  const entries = Array.from(el.children)
-  let best = 0
-  for (let i = 1; i < entries.length; i += 1) {
-    if (entries[i].offsetTop <= el.scrollTop + 4) best = i
-  }
-  index.value = best
-  hidden.value = entries.map((_, i) => i !== best)
-}
-
-/*
-  The window is the tallest CLOSED entry, and it stays that size. Opening a quote
-  does not grow it: the open entry is taller than the window and scrolls inside
-  it. Letting the window grow was what made scrolling away jump — closing the
-  open quote shrank the layout under the scroll and the next one slid past.
-*/
-function measure() {
-  const el = pane.value
-  if (!el) return
-  const entries = Array.from(el.children)
-  heights = entries.map((entry) => entry.getBoundingClientRect().height)
-
-  const rest = heights.filter((_, i) => i !== open.value)
-  const floor = rest.length ? Math.max(...rest) : Math.max(...heights)
-  el.style.setProperty('--pane-h', `${floor}px`)
-  el.style.height = `${floor}px`
-  syncIndex()
-}
-
-function onScroll() {
-  syncIndex()
-}
+const current = computed(() => items.value[index.value])
 
 function goTo(wanted) {
-  const el = pane.value
-  if (!el) return
-  const entries = Array.from(el.children)
-  const next = Math.min(Math.max(wanted, 0), entries.length - 1)
-  if (open.value !== -1 && open.value !== next) open.value = -1
-  el.scrollTo({ top: entries[next].offsetTop, behavior: 'smooth' })
+  const next = Math.min(Math.max(wanted, 0), items.value.length - 1)
+  if (next === index.value) return
+  direction.value = next > index.value ? 'next' : 'prev'
+  index.value = next
+  open.value = false
 }
 
-function toggle(i) {
-  open.value = open.value === i ? -1 : i
-  nextTick(measure)
+/*
+  A vertical swipe on the card pages it. It only takes the gesture once it is
+  clearly vertical (longer than it is wide), so a horizontal one is left alone,
+  and it never cancels the scroll — there is nothing to cancel, the pager is not
+  a scroll container.
+*/
+let touchX = 0
+let touchY = 0
+
+function onTouchStart(event) {
+  const point = event.changedTouches[0]
+  touchX = point.clientX
+  touchY = point.clientY
 }
 
-onMounted(() => {
-  measure()
-  // And again once the fonts have landed: a reflow changes what fits.
-  document.fonts?.ready.then(measure)
-  window.addEventListener('resize', measure, { passive: true })
-})
-
-onUnmounted(() => window.removeEventListener('resize', measure))
+function onTouchEnd(event) {
+  const point = event.changedTouches[0]
+  const dx = point.clientX - touchX
+  const dy = point.clientY - touchY
+  if (Math.abs(dy) < 48 || Math.abs(dy) < Math.abs(dx)) return
+  goTo(index.value + (dy < 0 ? 1 : -1))
+}
 </script>
 
 <template>
@@ -115,18 +76,18 @@ onUnmounted(() => window.removeEventListener('resize', measure))
         </div>
 
         <div class="body">
-          <div ref="pane" class="pane" @scroll.passive="onScroll">
-            <TestimonialCard
-              v-for="(item, i) in items"
-              :key="i"
-              :quote="item.quote"
-              :name="item.name"
-              :role="item.role"
-              :avatar="item.avatar"
-              :open="open === i"
-              :inert="hidden[i] || undefined"
-              @toggle="toggle(i)"
-            />
+          <div class="pane" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
+            <Transition :name="`quote-${direction}`" mode="out-in">
+              <TestimonialCard
+                :key="index"
+                :quote="current.quote"
+                :name="current.name"
+                :role="current.role"
+                :avatar="current.avatar"
+                :open="open"
+                @toggle="open = !open"
+              />
+            </Transition>
           </div>
 
           <div class="dots" role="group" :aria-label="t('section.test')">
@@ -176,13 +137,11 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 
 /*
   A quote mark in the accent, large and faint, in the window's top right. It
-  belongs to the box and not to an entry, so it stays put while the quotes move
-  through it. --acc and not --acc-text: this is a fill, not text.
+  belongs to the box and not to a quote, so it stays put while they swap.
+  --acc and not --acc-text: this is a fill, not text.
 */
 .mark {
   position: absolute;
-  /* Below the header's rule, not across it: the counter lives up there, and the
-     two glyphs on top of each other read as a mistake rather than as a mark. */
   top: 50px;
   right: 16px;
   font-family: var(--font-sans);
@@ -196,9 +155,9 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 }
 
 /*
-  The block's own header, inside the box: the mono label and the position, as a
-  filled band — the marquee's and the contact band's own treatment. It is the
-  box's top edge, so the block opens with the accent instead of with a line.
+  The block's own header: the mono label and the position, as a filled band —
+  the marquee's and the contact band's own treatment. It is the box's top edge,
+  so the block opens with the accent instead of with a line.
 */
 .head {
   display: flex;
@@ -233,47 +192,41 @@ onUnmounted(() => window.removeEventListener('resize', measure))
   align-items: center;
 }
 
-/*
-  The window. A native scroll container with vertical snap: the wheel and the
-  finger move it and it settles on a quote by itself. The mask turns the arrival
-  and departure into a fade, and it is invisible at rest because the entries
-  carry their own vertical padding. overflow-y: auto and touch-action: auto are
-  the whole point — at either end the gesture chains to the page.
-*/
 .pane {
-  position: relative;
   flex: 1;
   min-width: 0;
-  overflow-y: auto;
-  /* proximity, not mandatory: an open quote is taller than the window and has to
-     be scrollable inside it. */
-  scroll-snap-type: y proximity;
-  scrollbar-width: none;
   padding: 0 clamp(18px, 2.6vw, 26px);
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 18px,
-    #000 calc(100% - 18px),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 18px,
-    #000 calc(100% - 18px),
-    transparent 100%
-  );
-  transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.pane::-webkit-scrollbar {
-  display: none;
+/* The one quote at a time, swapped vertically: the way it moves says whether you
+   went forward or back. out-in so the two never sit on top of each other. */
+.quote-next-enter-active,
+.quote-next-leave-active,
+.quote-prev-enter-active,
+.quote-prev-leave-active {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s ease;
 }
 
-.pane :deep(.entry) {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+.quote-next-enter-from {
+  transform: translateY(26px);
+  opacity: 0;
+}
+
+.quote-next-leave-to {
+  transform: translateY(-26px);
+  opacity: 0;
+}
+
+.quote-prev-enter-from {
+  transform: translateY(-26px);
+  opacity: 0;
+}
+
+.quote-prev-leave-to {
+  transform: translateY(26px);
+  opacity: 0;
 }
 
 /*
@@ -338,9 +291,11 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pane {
+  .quote-next-enter-active,
+  .quote-next-leave-active,
+  .quote-prev-enter-active,
+  .quote-prev-leave-active {
     transition: none;
-    scroll-behavior: auto;
   }
 
   .dot::before {

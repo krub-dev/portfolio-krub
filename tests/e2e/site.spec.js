@@ -413,56 +413,30 @@ test('on touch the rail marks the card it is parked on', async ({ page, isMobile
   await expect(cards.nth(0)).not.toHaveClass(/current/)
 })
 
-test('the testimonials page one at a time, and the window follows the quote', async ({ page }) => {
+test('the testimonials page one at a time', async ({ page }) => {
   await openSite(page, { reduced: true })
 
-  const pane = page.locator('.testimonials .pane')
-  const first = page.locator('.testimonials .entry').first()
   const count = page.locator('.testimonials .position')
+  const quote = page.locator('.testimonials .quote')
   const dots = page.locator('.testimonials .dot')
 
   await expect(dots).toHaveCount(3)
   await expect(dots.nth(0)).toHaveClass(/active/)
   await expect(count).toHaveText('1 / 3')
-  await expect(first).not.toHaveAttribute('inert')
 
-  const tallest = await pane.evaluate((el) => el.clientHeight)
+  // Only the current quote is in the DOM at all.
+  await expect(page.locator('.testimonials .entry')).toHaveCount(1)
+  const first = await quote.textContent()
+
   await dots.nth(1).click()
-
   await expect(count).toHaveText('2 / 3')
   await expect(dots.nth(1)).toHaveClass(/active/)
   await expect(dots.nth(0)).not.toHaveClass(/active/)
-
-  // Out of the tab order while it is not showing, in the DOM all the same.
-  await expect(first).toHaveAttribute('inert')
-
-  /*
-    And the window does NOT resize. Sized to the quote on show it changed height
-    every time you paged, which moved everything under it; it is as tall as the
-    tallest entry instead.
-  */
-  await expect.poll(() => pane.evaluate((el) => el.clientHeight)).toBe(tallest)
+  await expect(quote).not.toHaveText(first)
 
   await dots.nth(0).click()
   await expect(count).toHaveText('1 / 3')
   await expect(dots.nth(0)).toHaveClass(/active/)
-})
-
-test('the next quote never peeks under the one on show', async ({ page }) => {
-  await openSite(page, { reduced: true })
-
-  const pane = page.locator('.testimonials .pane')
-  const entries = page.locator('.testimonials .entry')
-
-  /*
-    The room for the arrows used to be the pane's own padding. Overflow clips at
-    the padding edge, so the next entry was still inside the clip and its
-    attribution showed through the empty strip. The room belongs to the entry:
-    the next one now starts exactly where the window ends.
-  */
-  const paneBottom = await pane.evaluate((el) => el.getBoundingClientRect().bottom)
-  const nextTop = await entries.nth(1).evaluate((el) => el.getBoundingClientRect().top)
-  expect(nextTop).toBeGreaterThanOrEqual(paneBottom - 1)
 })
 
 test('the testimonial dots are visible and tappable on every viewport', async ({ page }) => {
@@ -477,30 +451,24 @@ test('the testimonial dots are visible and tappable on every viewport', async ({
   expect(box.width).toBeGreaterThanOrEqual(18)
 })
 
-test('opening a quote scrolls inside the window, it does not grow it', async ({ page }) => {
+test('opening a quote reveals the rest, and closing hides it again', async ({ page }) => {
   /*
     A phone-width viewport on both projects: on a wide one the real quote fits
     inside the four-line clamp and there is no "read more" to press.
   */
   await openSite(page, { reduced: true, width: 420, height: 900 })
 
-  const pane = page.locator('.testimonials .pane')
-  const height = () => pane.evaluate((el) => el.clientHeight)
-  const scrollHeight = () => pane.evaluate((el) => el.scrollHeight)
+  const quote = page.locator('.testimonials .quote')
+  const height = () => quote.evaluate((el) => el.clientHeight)
+  const more = page.locator('.testimonials .entry .more')
 
-  const fixed = await height()
-  const more = page.locator('.testimonials .entry:not([inert]) .more')
-
+  const clamped = await height()
   await expect(more).toBeVisible()
   await more.click()
+  await expect.poll(height).toBeGreaterThan(clamped)
 
-  /*
-    The window keeps its size and the open quote is taller than it, so it scrolls
-    inside. Growing the window was what made scrolling away jump: closing the
-    open quote shrank the layout under the scroll and the next one slid past.
-  */
-  expect(await height()).toBe(fixed)
-  await expect.poll(scrollHeight).toBeGreaterThan(fixed)
+  await more.click()
+  await expect.poll(height).toBe(clamped)
 })
 
 test('the project rail drags with a finger too', async ({ page, isMobile }) => {
