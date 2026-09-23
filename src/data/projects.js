@@ -14,9 +14,11 @@
               carousel label. Lowercase, no spaces.
     shotLabel Placeholder text drawn over the striped frame until there is a
               real screenshot. Drop it once `image` is set.
-    image     Path under public/, or null while there is no screenshot.
-    slides    How many images the modal carousel shows. Placeholder count for
-              now; becomes the length of a real image list later.
+    image     Path under public/ for the card's frame, or null while there is
+              no screenshot.
+    images    Real screenshots for the modal carousel, in order. When it is
+              empty the modal falls back to `slides` and the striped frame.
+    slides    Placeholder image count, used only while `images` is empty.
     repo      Repository or admin panel URL.
     live      Live site or docs URL.
     stack     Full technology list. The card shows the first three joined by ·;
@@ -26,7 +28,13 @@ export const projects = [
   {
     slug: 'creandomientras',
     shotLabel: 'SHOT · CREANDOMIENTRAS',
-    image: null,
+    image: '/assets/img/creando/hero.jpg',
+    images: [
+      '/assets/img/creando/hero.jpg',
+      '/assets/img/creando/galeria.jpg',
+      '/assets/img/creando/eventos.jpg',
+      '/assets/img/creando/enlaces.jpg',
+    ],
     slides: 4,
     repo: 'https://creandomientras.com/admin',
     live: 'https://creandomientras.com',

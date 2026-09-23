@@ -7,8 +7,9 @@
   the arrows never dead-end; `(i + n) % n` rather than plain `%` because
   JavaScript's modulo keeps the sign and -1 % 4 is -1, not 3.
 
-  The striped frame is a placeholder until there are real screenshots. Slides
-  are still just a count in src/data/projects.js.
+  With `images` it shows the real screenshots; without them it falls back to the
+  striped frame and a `slides` count, which is still what the projects without
+  screenshots use.
 */
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -16,8 +17,10 @@ import { useI18n } from 'vue-i18n'
 import { wrapIndex } from '../../utils/format'
 
 const props = defineProps({
-  slides: { type: Number, default: 1 },
+  images: { type: Array, default: () => [] }, // real screenshots, in order
+  slides: { type: Number, default: 1 }, // placeholder count when there are none
   slug: { type: String, required: true },
+  name: { type: String, default: '' },
 })
 
 const { t } = useI18n()
@@ -26,17 +29,21 @@ const index = ref(0)
 // Back to the first image whenever a different project opens.
 watch(() => props.slug, () => (index.value = 0))
 
+const total = computed(() => props.images.length || props.slides)
+
 const label = computed(
-  () => `${t('modal.image')} ${index.value + 1} / ${props.slides} · ${props.slug.toUpperCase()}`,
+  () => `${t('modal.image')} ${index.value + 1} / ${total.value} · ${props.slug.toUpperCase()}`,
 )
 
 function go(step) {
-  index.value = wrapIndex(index.value, step, props.slides)
+  index.value = wrapIndex(index.value, step, total.value)
 }
 </script>
 
 <template>
-  <div class="carousel">
+  <div class="carousel" :class="{ shot: images.length }">
+    <img v-if="images.length" class="image" :src="images[index]" :alt="name" />
+
     <span class="label">{{ label }}</span>
 
     <button class="arrow left" type="button" :aria-label="t('a11y.prevImage')" @click="go(-1)">
@@ -47,7 +54,7 @@ function go(step) {
     </button>
 
     <div class="dots" aria-hidden="true">
-      <span v-for="n in slides" :key="n" class="dot" :class="{ on: n - 1 === index }" />
+      <span v-for="n in total" :key="n" class="dot" :class="{ on: n - 1 === index }" />
     </div>
   </div>
 </template>
@@ -81,6 +88,30 @@ function go(step) {
   font-size: 11px;
   letter-spacing: 0.14em;
   color: var(--fg-3);
+}
+
+/* With real screenshots the stripes go, and the label sits over the image on a
+   small dark chip so it stays readable whatever the shot looks like. */
+.carousel.shot {
+  background: var(--ink);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+
+.carousel.shot .label {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: var(--fg-2);
 }
 
 .arrow {

@@ -94,7 +94,12 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
           </button>
         </header>
 
-        <MediaCarousel :slides="project.slides" :slug="project.slug" />
+        <MediaCarousel
+          :images="project.images ?? []"
+          :slides="project.slides"
+          :slug="project.slug"
+          :name="content.name"
+        />
 
         <div class="body" data-two-col>
           <div class="main">
