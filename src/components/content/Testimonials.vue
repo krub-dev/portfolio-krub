@@ -2,26 +2,21 @@
 /*
   What people say, between the Stack and Contact: one at a time, in a pager.
 
-  It used to be a column, and a column grows. Measured: one entry is 214px on a
-  phone, so three of them made the block 678px and the section nearly two
-  screens — the same problem the projects grid had, and the same answer.
+  The pager is a native scroll container with snap, not a transform rail. That is
+  what makes the scroll behave like scroll: the wheel and the finger move it, and
+  at either end the page takes over on its own — overscroll chaining — instead of
+  the block swallowing the gesture. A custom transform drag could follow the
+  finger, but it had to claim the touch (touch-action: none), and then the page
+  stopped dead at the first and last quote.
+
+  The window is a fixed height — the tallest quote — so the block does not jump
+  as you page, and every entry is padded up to it (`--pane-h`) so a short quote
+  cannot let the next one show through the gap. Opening a quote grows the window.
 
   The box carries its own header — the mono label and the position — because the
   label floating above an empty box said nothing about what the box was. Inside,
   with a rule under it, it is the same header the stack groups and the contact
-  rows use, and the block reads as one object instead of a label and a mystery.
-
-  The movement is vertical, so the arrows are: up above, down below, at the side.
-  It drags with any pointer type, the same as the projects rail — the mouse has
-  no vertical gesture of its own and the pager is not a scroll container — and a
-  drag that travels far enough takes the next quote in the direction it was
-  going. The rail's drag could leave the vertical axis to the page; this one
-  cannot, so the pane claims both axes and the page is scrolled by starting the
-  touch anywhere else on the screen.
-
-  The window is masked at its two edges, so a quote arrives and departs through a
-  fade rather than a hard cut. At rest the mask does nothing, because the entries
-  carry their own vertical padding and the text never sits on the edge.
+  rows use.
 
   config.showTestimonials is checked by HomeView, not here: the page decides
   whether the block exists at all.
@@ -33,268 +28,79 @@ import TestimonialCard from './TestimonialCard.vue'
 import { useLang } from '../../composables/useLang'
 import { testimonials } from '../../data'
 
-// How far a drag has to travel before it counts as one. Under this it is a click
-// and whatever is under it opens; over it the click is swallowed.
-const DRAG_SLOP = 6
-
-// How much of the window a drag has to cover to count as "the next one" rather
-// than falling back to the nearest.
-const FLICK = 0.2
-
-// Fraction of the remaining distance covered per frame. Lower is heavier.
-const EASING = 0.16
-
 const { lang } = useLang()
 const { t } = useI18n()
 
 const items = computed(() => testimonials.map((entry) => ({ ...entry, ...entry[lang.value] })))
 
 const pane = ref(null)
-const reel = ref(null)
 const index = ref(0)
 const open = ref(-1)
 const hidden = ref([])
 
-const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-
-/*
-  The animation state is deliberately plain and not reactive: it is written onto
-  the reel, not rendered. A reactive offset would re-render the block on every
-  frame of a drag.
-*/
-let offsets = []
 let heights = []
-let maxOffset = 0
-let offset = 0
-let target = 0
-let frame = null
-let startY = 0
-let startOffset = 0
-let travelled = 0
-let lastExcess = 0
-let pointerId = null
-let observer = null
 
-function paint() {
-  if (reel.value) reel.value.style.transform = `translateY(${-offset}px)`
-}
-
-function settle() {
-  if (reduced.matches) {
-    offset = target
-    paint()
-    return
+/*
+  Which quote is showing is read from the scroll position, so the dots and the
+  counter follow a wheel or a swipe without anything having to drive them.
+*/
+function syncIndex() {
+  const el = pane.value
+  if (!el) return
+  const entries = Array.from(el.children)
+  let best = 0
+  for (let i = 1; i < entries.length; i += 1) {
+    if (entries[i].offsetTop <= el.scrollTop + 4) best = i
   }
-
-  if (frame) return
-  frame = requestAnimationFrame(function tick() {
-    offset += (target - offset) * EASING
-    if (Math.abs(target - offset) < 0.5) {
-      offset = target
-      frame = null
-    } else {
-      frame = requestAnimationFrame(tick)
-    }
-    paint()
-  })
+  index.value = best
+  hidden.value = entries.map((_, i) => i !== best)
 }
 
 /*
-  Measured, not assumed. The entries are different lengths, so where each one
-  sits is its own offset and the window's height is its own height; a uniform
-  step would be wrong the moment one quote is longer than another.
+  The window is the tallest entry, and the entries are padded to the tallest of
+  the ones that are NOT open: an open quote is taller than its clamped self, and
+  feeding that back in raised the floor of every entry, which is why collapsing
+  used to leave the block at the expanded size.
 */
 function measure() {
-  const rail = reel.value
-  if (!rail) return
+  const el = pane.value
+  if (!el) return
+  const entries = Array.from(el.children)
+  heights = entries.map((entry) => entry.getBoundingClientRect().height)
 
-  const entries = Array.from(rail.children)
-  const top = rail.getBoundingClientRect().top
-  offsets = entries.map((el) => el.getBoundingClientRect().top - top)
-  heights = entries.map((el) => el.getBoundingClientRect().height)
-  maxOffset = offsets.length ? offsets[offsets.length - 1] : 0
-
-  index.value = Math.min(Math.max(index.value, 0), entries.length - 1)
-  apply(true)
-}
-
-function apply(snap) {
-  const view = pane.value
-  const rail = reel.value
-  if (!view || !rail || !offsets.length) return
-
-  target = offsets[index.value]
-  if (snap) offset = target
-
-  /*
-    Two heights, not one, and that is the whole fix for the window that only
-    ever grew.
-
-    The floor is what the entries are padded to, so a short quote fills the
-    window and the next one cannot show through the gap. It is read from the
-    entries that are NOT open: an open quote is taller than its clamped self,
-    and feeding that back into the floor raised the floor of every entry, which
-    is why collapsing used to leave the block at the expanded size. The window
-    itself is still the tallest entry, so it grows while a quote is open and
-    comes back down when it closes.
-  */
   const rest = heights.filter((_, i) => i !== open.value)
   const floor = rest.length ? Math.max(...rest) : Math.max(...heights)
-  view.style.setProperty('--pane-h', `${floor}px`)
-  view.style.height = `${Math.max(...heights)}px`
-
-  hidden.value = offsets.map((_, i) => i !== index.value)
-
-  paint()
+  el.style.setProperty('--pane-h', `${floor}px`)
+  el.style.height = `${Math.max(...heights)}px`
+  syncIndex()
 }
 
-/*
-  One open quote at a time, and it belongs here because the window's height is
-  derived from the entries: the pager has to know which one is the tall one.
-*/
+function onScroll() {
+  syncIndex()
+}
+
+function goTo(wanted) {
+  const el = pane.value
+  if (!el) return
+  const entries = Array.from(el.children)
+  const next = Math.min(Math.max(wanted, 0), entries.length - 1)
+  if (open.value !== -1 && open.value !== next) open.value = -1
+  el.scrollTo({ top: entries[next].offsetTop, behavior: 'smooth' })
+}
+
 function toggle(i) {
   open.value = open.value === i ? -1 : i
-}
-
-/*
-  Going to a quote closes whatever was open first, and that is not tidiness. An
-  open entry is taller than its clamped self, so it holds the window at the
-  expanded size; a short quote shown in that window would leave the gap that
-  lets the next one show through.
-
-  nextTick before the second measurement, because the offsets come from the DOM
-  and it is Vue that puts the clamp back — measured in the same tick they are
-  still the expanded ones and the pager lands on the wrong entry.
-*/
-async function goTo(next) {
-  const wanted = Math.min(Math.max(next, 0), offsets.length - 1)
-
-  /*
-    Only when the index actually moves. A tap on the pane arrives here too (the
-    pointerup before the click), and closing on it would collapse the quote the
-    click is about to toggle — the "read less" would reopen it.
-  */
-  if (wanted !== index.value && open.value !== -1) {
-    open.value = -1
-    await nextTick()
-    measure()
-  }
-
-  index.value = wanted
-  apply(false)
-  settle()
-}
-
-/*
-  Dragging. One set of handlers for every pointer type: a mouse has no vertical
-  gesture of its own, and the pager is not a scroll container, so a phone has no
-  swipe either. The pane claims both axes, which is the cost of a vertical pager:
-  the page is scrolled by starting the touch anywhere else.
-*/
-function onPointerDown(event) {
-  if (!reel.value || !pane.value) return
-  travelled = 0
-  lastExcess = 0
-  startY = event.clientY
-  startOffset = offset
-  target = offset
-  pointerId = event.pointerId
-  if (frame) {
-    cancelAnimationFrame(frame)
-    frame = null
-  }
-  /*
-    Deliberately NOT capturing here. Capturing on pointerdown makes the pane the
-    target of the pointerup, and the click that follows is then dispatched at
-    the common ancestor of the two — the pane — so the "read more" under the
-    finger never sees it. Capture is taken in the move, once the gesture has
-    proved it is a drag and not a click.
-  */
-}
-
-function onPointerMove(event) {
-  if (pointerId === null || pointerId !== event.pointerId) return
-  const delta = event.clientY - startY
-  travelled = Math.max(travelled, Math.abs(delta))
-
-  if (!pane.value?.hasPointerCapture(event.pointerId)) {
-    if (travelled <= DRAG_SLOP) return
-    pane.value?.setPointerCapture(event.pointerId)
-  }
-
-  const desired = startOffset - delta
-  const clamped = Math.min(Math.max(desired, 0), maxOffset)
-
-  /*
-    Past either end the drag is not swallowed: the excess becomes a page scroll.
-    The pane claims the touch (touch-action: none) so it can follow the finger,
-    which means the browser will not scroll the page on its own — so a drag that
-    runs out of quotes has to hand the rest of the gesture to window.scrollBy,
-    or the page stops dead at the last testimonial.
-  */
-  const excess = desired - clamped
-  if (excess !== 0) window.scrollBy(0, excess - lastExcess)
-  lastExcess = excess
-
-  offset = clamped
-  paint()
-}
-
-function onPointerUp(event) {
-  if (pointerId === null || pointerId !== event.pointerId) return
-  pointerId = null
-  if (pane.value?.hasPointerCapture(event.pointerId)) {
-    pane.value.releasePointerCapture(event.pointerId)
-  }
-
-  /*
-    Settle on a quote. A drag that covered enough of the window takes the next
-    one in the direction it was going; anything shorter falls back to the nearest
-    one, which is found by comparing offsets — NOT by dividing the offset by a
-    height, which is what this did and what sent a short drag to the wrong quote
-    as soon as the first entry was longer than the others.
-  */
-  const moved = offset - startOffset
-  const height = Math.max(...heights) || 1
-  let next = 0
-  for (let i = 1; i < offsets.length; i += 1) {
-    if (Math.abs(offsets[i] - offset) < Math.abs(offsets[next] - offset)) next = i
-  }
-  if (Math.abs(moved) > height * FLICK) next = index.value + Math.sign(moved)
-
-  /*
-    Through goTo, so a drag while a quote is open closes it first — and so a
-    drag that lands back where it started still settles, which is why this is
-    not an early return.
-  */
-  goTo(next)
-}
-
-// A drag that ends over the "read more" must not press it.
-function onClickCapture(event) {
-  if (travelled <= DRAG_SLOP) return
-  travelled = 0
-  event.stopPropagation()
-  event.preventDefault()
+  nextTick(measure)
 }
 
 onMounted(() => {
   measure()
-  /*
-    The reel changes size when a quote is expanded and when the fonts land, and
-    the window's height is derived from the tallest entry — so it is the reel
-    that is watched, not the window, which would be a loop.
-  */
-  observer = new ResizeObserver(measure)
-  if (reel.value) observer.observe(reel.value)
+  // And again once the fonts have landed: a reflow changes what fits.
+  document.fonts?.ready.then(measure)
   window.addEventListener('resize', measure, { passive: true })
 })
 
-onUnmounted(() => {
-  observer?.disconnect()
-  window.removeEventListener('resize', measure)
-  if (frame) cancelAnimationFrame(frame)
-})
+onUnmounted(() => window.removeEventListener('resize', measure))
 </script>
 
 <template>
@@ -309,28 +115,18 @@ onUnmounted(() => {
         </div>
 
         <div class="body">
-          <div
-            ref="pane"
-            class="pane"
-            @pointerdown="onPointerDown"
-            @pointermove="onPointerMove"
-            @pointerup="onPointerUp"
-            @pointercancel="onPointerUp"
-            @click.capture="onClickCapture"
-          >
-            <div ref="reel" class="reel">
-              <TestimonialCard
-                v-for="(item, i) in items"
-                :key="i"
-                :quote="item.quote"
-                :name="item.name"
-                :role="item.role"
-                :avatar="item.avatar"
-                :open="open === i"
-                :inert="hidden[i] || undefined"
-                @toggle="toggle(i)"
-              />
-            </div>
+          <div ref="pane" class="pane" @scroll.passive="onScroll">
+            <TestimonialCard
+              v-for="(item, i) in items"
+              :key="i"
+              :quote="item.quote"
+              :name="item.name"
+              :role="item.role"
+              :avatar="item.avatar"
+              :open="open === i"
+              :inert="hidden[i] || undefined"
+              @toggle="toggle(i)"
+            />
           </div>
 
           <div class="dots" role="group" :aria-label="t('section.test')">
@@ -354,11 +150,8 @@ onUnmounted(() => {
 <style scoped>
 /*
   The block sits between the Stack and Contact, so it carries the page gutter and
-  the 1180px cap every section uses: it is not inside one any more. The top
-  margin is on top of the Stack's own bottom padding — the block is not a section
-  and still needs its own air to read as separate from the grid above it. The
-  bottom margin is what keeps the card off Contact's separator: without it the
-  hairline landed right under the box, which is the one thing it must not do.
+  the 1180px cap every section uses. The top margin is on top of the Stack's own
+  bottom padding, and the bottom margin keeps the card off Contact's separator.
 */
 .testimonials {
   max-width: 1180px;
@@ -366,12 +159,6 @@ onUnmounted(() => {
   padding: 0 var(--gutter-r) 0 var(--gutter-l);
 }
 
-/*
-  The box is the whole block. The controls live inside it, in its bottom right
-  corner: beside it they were a pair of buttons hanging off the edge of the box
-  with nothing to belong to, and on a desktop the box is wide enough to hold
-  them. On a phone they go back to being clipped, see below.
-*/
 .pager {
   display: flex;
   align-items: center;
@@ -389,13 +176,8 @@ onUnmounted(() => {
 
 /*
   A quote mark in the accent, large and faint, in the window's top right. It
-  belongs to the box and not to an entry, so it stays put while the quotes slide
-  through it — the one thing on the page that does not move.
-
-  --acc and not --acc-text: this is a fill, not text. At this opacity the
-  legible variant would read as a grey smudge on the dark theme instead of as
-  the palette's colour. aria-hidden in the template, because it is punctuation
-  and it says nothing.
+  belongs to the box and not to an entry, so it stays put while the quotes move
+  through it. --acc and not --acc-text: this is a fill, not text.
 */
 .mark {
   position: absolute;
@@ -414,12 +196,9 @@ onUnmounted(() => {
 }
 
 /*
-  The block's own header, inside the box: the mono label and the position. It is
-  a filled band, the marquee's and the contact band's own treatment —
-  `background: var(--acc)` with `--on-acc` on top — rather than a rule and two
-  grey strings. It is the box's top edge, so the block opens with the accent
-  instead of with a line, and it is the only place in the block that is filled.
-  The box's radius clips its two top corners.
+  The block's own header, inside the box: the mono label and the position, as a
+  filled band — the marquee's and the contact band's own treatment. It is the
+  box's top edge, so the block opens with the accent instead of with a line.
 */
 .head {
   display: flex;
@@ -431,9 +210,6 @@ onUnmounted(() => {
   color: var(--on-acc);
 }
 
-/* On the fill there is one text colour, --on-acc, and the hierarchy comes from
-   opacity instead of from a second token: the label names the block, the
-   counter is a number and sits back. */
 .label {
   margin: 0;
   font-family: var(--font-mono);
@@ -443,7 +219,6 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
-/* Mono and 11px, so it reads as a counter and not as a heading. */
 .position {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -451,28 +226,27 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-/*
-  The window. Clipped and masked top and bottom: the mask is what turns the
-  arrival and departure of a quote into a fade, and it is invisible at rest
-  because the entries carry their own vertical padding and the text never sits on
-  the edge. touch-action:none is what lets a vertical drag work on a phone — the
-  cost is that the page is scrolled by starting the touch anywhere else.
-*/
-/*
-  The window and the dots side by side, so the dots centre on the window and not
-  on the whole box — which includes the header band, and made them sit high.
-*/
+/* The window and the dots side by side, so the dots centre on the window and
+   not on the whole box — which includes the header band. */
 .body {
   display: flex;
   align-items: center;
 }
 
+/*
+  The window. A native scroll container with vertical snap: the wheel and the
+  finger move it and it settles on a quote by itself. The mask turns the arrival
+  and departure into a fade, and it is invisible at rest because the entries
+  carry their own vertical padding. overflow-y: auto and touch-action: auto are
+  the whole point — at either end the gesture chains to the page.
+*/
 .pane {
+  position: relative;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  touch-action: none;
-  cursor: grab;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
   padding: 0 clamp(18px, 2.6vw, 26px);
   -webkit-mask-image: linear-gradient(
     to bottom,
@@ -491,16 +265,19 @@ onUnmounted(() => {
   transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.reel {
-  will-change: transform;
+.pane::-webkit-scrollbar {
+  display: none;
+}
+
+.pane :deep(.entry) {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 /*
   The position indicator: a vertical column of dots on the right of the box. The
-  one you are on is a longer pill rather than a differently coloured dot — the
-  shape says where you are, not the colour. Each dot is a 28px button with an 8px
-  mark drawn inside it, so the target is comfortable on a phone while the mark
-  stays small.
+  one you are on is a longer pill in the accent. Each dot is a 20px button with
+  an 8px mark drawn inside it, so it stays tappable on a phone.
 */
 .dots {
   flex: 0 0 auto;
@@ -539,8 +316,6 @@ onUnmounted(() => {
   background: var(--fg-2);
 }
 
-/* The one you are on is a longer pill AND the accent colour — the shape is the
-   main cue, the colour confirms it. */
 .dot.active::before {
   top: 2px;
   bottom: 2px;
@@ -551,8 +326,7 @@ onUnmounted(() => {
   /*
     The mark drops and moves right on a phone, and grows. In a window this
     narrow it lands behind the quote instead of behind the name, which is where
-    a watermark belongs: it reads as something under the text rather than as a
-    second attribution.
+    a watermark belongs.
   */
   .mark {
     top: 52px;
@@ -562,7 +336,11 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pane,
+  .pane {
+    transition: none;
+    scroll-behavior: auto;
+  }
+
   .dot::before {
     transition: none;
   }
