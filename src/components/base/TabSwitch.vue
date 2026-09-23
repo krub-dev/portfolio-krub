@@ -95,7 +95,6 @@ function onClickCapture(event) {
   display: flex;
   gap: clamp(18px, 3vw, 34px);
   min-width: 0;
-  border-bottom: 1px solid var(--line);
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;

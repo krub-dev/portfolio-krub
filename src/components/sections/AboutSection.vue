@@ -206,12 +206,6 @@ function onTouchEnd(event) {
   flex-direction: column;
 }
 
-/* The tab row already draws a rule under itself, so the timeline's first row
-   would double it. */
-.timeline :deep(li:first-child .row) {
-  border-top: 0;
-}
-
 /* The content slides the way the tab did. out-in so the two panels do not sit
    on top of each other while they cross. */
 .tab-slide-left-enter-active,
