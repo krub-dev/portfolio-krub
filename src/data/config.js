@@ -4,13 +4,8 @@
 */
 export const config = {
   /*
-    Testimonials.
-
-    ON since 2026-09-17, and it should not ship like this: the quotes in
-    testimonials.js are still the bracketed placeholders, written so they could
-    never be mistaken for real ones. They are on so the section can be seen and
-    the real quotes dropped in one at a time. Turn it off again, or replace the
-    quotes, before this reaches main.
+    Testimonials. ON, with one real quote so far; more are added to
+    testimonials.js as they come and the pager grows with the list.
   */
   showTestimonials: true,
 

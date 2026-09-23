@@ -5,7 +5,7 @@ Live at **[krub.dev](https://krub.dev)**.
 My personal portfolio. One page plus a 404, bilingual (English / Spanish), dark and light themes
 with five accent palettes, built with Vue 3 and Vite.
 
-Kiko Rubio — fullstack developer in Barcelona, moving toward backend.
+Kiko Rubio — fullstack developer in Murcia, leaning toward backend.
 
 ## Stack
 
@@ -38,12 +38,14 @@ The CV is not built from this repository. Its plain-text sources and generator l
 `cv/` folder outside it, run with `node build-cv.mjs`; that script turns each file into LaTeX and
 compiles it with [tectonic](https://tectonic-typesetting.github.io), a single binary rather than a
 full TeX distribution. Put it on your `PATH`; on Windows the script also looks in
-`%LOCALAPPDATA%\Programs\tectonic`. It writes four PDFs — light and dark, one per language — into
-its own `out/` folder; copy them into this repository's `public/uploads/` to publish a change.
+`%LOCALAPPDATA%\Programs\tectonic`. It builds three documents — the full CV in light and dark, a
+one-page CV and a base cover letter, both light — into its own `out/` folder; copy the four `cv-*`
+PDFs into this repository's `public/uploads/` to publish a change. The same folder holds
+`build-og.mjs`, which renders the Open Graph banner.
 
 ## Tests
 
-Forty-one unit tests and thirty end-to-end flows, the latter run across two viewports.
+Forty-one unit tests and around forty end-to-end flows, the latter run across two viewports.
 
 Vitest covers the pure functions — how a timeline period is formatted, how the carousel index
 wraps, how a URL is tidied — the contact validation and its endpoint, and the composables that

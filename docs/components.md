@@ -126,7 +126,10 @@ under reduced motion.
 border).
 
 ### TabSwitch
-`options` (array of `{ value, label }`), `modelValue`. Emits `update:modelValue`.
+`options` (array of `{ value, label }`), `modelValue`, `panelId` (the id of the region the tabs
+switch, for the ARIA wiring). Emits `update:modelValue`. A real tablist: roving `tabindex`,
+`aria-controls` on each tab, and the arrows (with wrap) plus Home/End move the selection and the
+focus. See decision 73.
 
 ### AvailabilityBadge
 `label` (string), `color` (defaults to `#39D98A`). Wraps the fixed core and the pulsing ring.
@@ -173,15 +176,16 @@ resolves its own Role / Year / Stack labels through i18n).
 ### TestimonialCard
 `quote`, `name`, `role`, `avatar`, `open`. One entry as the pager's content: the attribution first, then
 the quote, clamped to four lines with a read more when there is more of it. No box of its own — the
-pager's window is the box. Whether it is open belongs to the pager, which is the one that sizes the
-window: the card emits `toggle` and reads the state back as a prop. See decisions.md 56 and 64.
+pager's pane is the box. Whether it is open belongs to the pager, which is the one that sizes the pane:
+the card emits `toggle` and reads the state back as a prop. See decisions.md 56 and 72.
 
 ### Testimonials
-The block at the end of the Projects rail: a filled accent header carrying the label and a `n / total`,
-and a vertical pager, one quote at a time. The window is as tall as the tallest entry and every entry is
-padded to it, so a short quote cannot show the next one through the gap; the entries that are not showing
-are `inert`. The arrows sit in the box's bottom right corner on a pointer device and are clipped to the accessibility tree
-on a phone, where the swipe is the gesture. Gated by `config` in ProjectsSection. See decisions.md 64.
+The block between the Stack and Contact: a filled accent header carrying the label and a `n / total`,
+and a vertical pager, one quote at a time. **One entry is in the DOM at all** — the current one — and
+changing swaps it, so the block never grows with the number of quotes; the pane's height is animated to
+the card on show. Navigation is the vertical dot column and a click on the card (which wraps); the pager
+is not a scroll container, so the wheel and a swipe belong to the page. `aria-live="polite"` on the pane
+so a screen reader hears the new quote. Gated by `config` in ProjectsSection. See decisions.md 72 and 74.
 
 ---
 
@@ -208,16 +212,16 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 No `id`: it is a band, not a destination.
 
 ### AboutSection
-`id="me"`. Three paragraphs, the experience/education tabs with their timeline, the CV button behind
-`config.showCv`, and the photo.
+`id="me"`. Three paragraphs, the experience / education / certifications tabs with their timeline,
+the CV button behind `config.showCv`, and the photo.
 
 ### ProjectsSection
 `id="projects"`. A horizontal rail of `ProjectCard`: a clipped viewport holding a track moved by
-`transform`, three cards and a sliver on a desktop and one on a phone, with two arrow buttons that
-step one card and disable at the ends. It drags with any pointer type, and swallows the click when the
-drag passed 6px so a drag does not open a card. Cards fully out of the rail are `inert`, so Tab cannot
-walk into one nobody can see. Emits `open` with the project that was clicked — the modal itself lives
-in `HomeView`, so the section does not own it.
+`transform`, three cards and a sliver on a desktop and one on a phone, with a row of dots under it —
+one per parking spot, recomputed per width, each a 24px button with an 8px mark inside. It drags with
+any pointer type, and swallows the click when the drag passed 6px so a drag does not open a card. Cards
+fully out of the rail are `inert`, so Tab cannot walk into one nobody can see. Emits `open` with the
+project that was clicked — the modal itself lives in `HomeView`, so the section does not own it.
 
 ### StackSection
 `id="stack"`. The four groups from `src/data/stack.js` in a two-column grid: `StackGroup` →
@@ -247,9 +251,9 @@ copy, because the animation depends on where the word splits, so they are not in
 
 ### LogoStage
 The reserved slot for the 3D scene, and the only thing on the page that tilts in 3D. It owns the
-mask, the inner grid, the rotating glow and the parallax that follows the pointer; the `.mark`
-element inside it is where a Three.js scene would go. The box and the magnetic pull sit on the
-frame around the stage, because the glow has to paint behind it. `HeroSection` is what decides not
+mask, the inner grid and the parallax that follows the pointer; the `.mark` element inside it is
+where a Three.js scene would go. The box and the magnetic pull sit on the frame around the stage.
+The rotating glow that used to live here is gone (decision 71). `HeroSection` is what decides not
 to mount it below 900px.
 
 ---
