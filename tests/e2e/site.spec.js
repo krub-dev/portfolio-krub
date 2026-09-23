@@ -439,6 +439,34 @@ test('the testimonials page one at a time', async ({ page }) => {
   await expect(dots.nth(0)).toHaveClass(/active/)
 })
 
+test('clicking the card goes to the next quote and wraps', async ({ page }) => {
+  await openSite(page, { reduced: true, width: 420, height: 900 })
+
+  const count = page.locator('.testimonials .position')
+  const pane = page.locator('.testimonials .pane')
+
+  await expect(count).toHaveText('1 / 3')
+  await pane.click({ position: { x: 30, y: 50 } })
+  await expect(count).toHaveText('2 / 3')
+  await pane.click({ position: { x: 30, y: 50 } })
+  await expect(count).toHaveText('3 / 3')
+
+  // The last one wraps to the first.
+  await pane.click({ position: { x: 30, y: 50 } })
+  await expect(count).toHaveText('1 / 3')
+})
+
+test('the read more button does not page the quote', async ({ page }) => {
+  await openSite(page, { reduced: true, width: 420, height: 900 })
+
+  const count = page.locator('.testimonials .position')
+  const more = page.locator('.testimonials .entry .more')
+
+  await expect(count).toHaveText('1 / 3')
+  await more.click()
+  await expect(count).toHaveText('1 / 3')
+})
+
 test('the testimonial dots are visible and tappable on every viewport', async ({ page }) => {
   await openSite(page, { reduced: true })
 

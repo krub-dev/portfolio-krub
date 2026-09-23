@@ -8,8 +8,9 @@
   keep a fixed height, and no entry sliding past the one on show. Each quote is
   its own block and is created when it is needed.
 
-  Navigation is the dots and a vertical swipe on the card. The page scrolls
-  normally over the block: the pager never claims the gesture.
+  Navigation is the dots and a click on the card, which always goes forward and
+  wraps from the last quote to the first. The page scrolls normally over the
+  block: the pager never claims the gesture.
 
   config.showTestimonials is checked by HomeView, not here: the page decides
   whether the block exists at all.
@@ -37,6 +38,18 @@ function goTo(wanted) {
   if (next === index.value) return
   direction.value = next > index.value ? 'next' : 'prev'
   index.value = next
+  open.value = false
+}
+
+/*
+  A click on the card is always forward, and the last quote wraps to the first.
+  The direction is set here and not derived, so the wrap still slides as "next"
+  instead of snapping back the other way.
+*/
+function advance() {
+  if (items.value.length < 2) return
+  direction.value = 'next'
+  index.value = (index.value + 1) % items.value.length
   open.value = false
 }
 
@@ -79,6 +92,26 @@ onMounted(() => {
 
 onUnmounted(() => observer?.disconnect())
 
+/*
+  A click anywhere on the card advances. Two things are not that click: the
+  "read more" button (or any link), and a drag that selects the quote — so the
+  pointer's travel is measured between down and up. The dots stay the control,
+  and this adds nothing to the tab order.
+*/
+const press = { x: 0, y: 0 }
+
+function onPressDown(event) {
+  press.x = event.clientX
+  press.y = event.clientY
+}
+
+function onCardClick(event) {
+  if (event.target.closest('button, a')) return
+  const travelled = Math.hypot(event.clientX - press.x, event.clientY - press.y)
+  if (travelled > 8 || window.getSelection()?.toString()) return
+  advance()
+}
+
 </script>
 
 <template>
@@ -93,7 +126,12 @@ onUnmounted(() => observer?.disconnect())
         </div>
 
         <div class="body">
-          <div ref="pane" class="pane">
+          <div
+            ref="pane"
+            class="pane"
+            @pointerdown="onPressDown"
+            @click="onCardClick"
+          >
             <Transition :name="`quote-${direction}`" mode="out-in" @after-enter="watchCard">
               <TestimonialCard
                 :key="index"
