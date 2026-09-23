@@ -58,11 +58,16 @@ the Vercel DNS change, and making the repository public.
   with Sharp (WebP and AVIF at three widths, hash-skipping what has not changed), the contact form
   stack, and the pieces built for the business: the events calendar, the gallery and the link
   manager.
-- [ ] **A base cover letter.** Generated like the CV, from a plain-text source through the same
-  external tool, so it can be iterated and tailored per application. **(owner)**
-- [ ] **A compact one-page CV.** Not urgent: a shorter variant for applications that ask for one
-  page, produced by the same generator.
-- [ ] **A new photo for /me.** Replace the current one. **(owner)**
+- [ ] **A base cover letter.** Drafted 2026-09-23: `cover-es.txt` / `cover-en.txt` in the external
+  cv tool, built by `node build-cv.mjs` to `cover-{es,en}.pdf` (one page, light, verified). It is a
+  base to tailor per application — the date, the role and the addressee are placeholders. Iterating
+  on the wording.
+- [ ] **A compact one-page CV.** Drafted 2026-09-23: `cv-1p-es.txt` / `cv-1p-en.txt` in the cv tool,
+  built to `cv-1p-{es,en}.pdf` (one page, light, verified). The generator now builds three documents
+  from six sources. Iterating on what to cut.
+- [x] **A new photo for /me.** Done: the current one is the 42 portrait, in colour — the grayscale
+  filter was dropped with it (decision 70). `photoPath` in `src/data/socials.js` points at
+  `public/assets/img/krub-pfp.jpeg` (540×540 JPEG, ~110 KB).
 - [ ] **Real screenshots for the projects.** CreandoMientras, Showroom, sideForge (backend only, so
   its logo will do) and krub.dev, dropped into the `image` and `slides` fields the model already
   has. **(owner)**
@@ -231,9 +236,9 @@ the Vercel DNS change, and making the repository public.
   ever written down as pending: the footer no longer sits in the layout from the first frame
   below 900px, and it shares `usePastHero` with the lemon, so the two arrive together at the end
   of the hero wrapper.
-- [ ] **The certifications tab on a phone.** The three-tab switch or the long certification names
-  read badly on a small screen. Decide between a scrollable list, a horizontal swipe, or something
-  else, after seeing exactly what breaks.
+- [x] **The certifications tab on a phone.** Done: the pills were the problem, not the row. As
+  folder labels on a hairline track the three tabs fit a phone at 12px with no tracking (decision
+  73), and the long certification names wrap in the single-column timeline below 900px.
 
 All three were real when the roadmap's "Later" list was written and are closed now; the group is
 kept as the record rather than deleted.
