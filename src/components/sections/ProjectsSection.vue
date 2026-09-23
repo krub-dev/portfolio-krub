@@ -458,7 +458,9 @@ onUnmounted(() => {
   --fade-l: 0px;
   --fade-r: 0px;
   overflow: hidden;
-  padding: 12px var(--rail-room);
+  /* More air top and bottom: the magnetic pull moves a card, and a card at the
+     bottom edge was having its border clipped. */
+  padding: 20px var(--rail-room);
   margin: 0 calc(-1 * var(--rail-room));
   -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
   mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);

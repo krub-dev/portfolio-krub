@@ -46,6 +46,7 @@ function goTo(wanted) {
   changed it in a single frame — the text slid but the box jumped.
 */
 const pane = ref(null)
+let observer = null
 
 function fit() {
   const el = pane.value
@@ -54,17 +55,29 @@ function fit() {
   el.style.height = `${card.getBoundingClientRect().height}px`
 }
 
-watch([index, open], () => nextTick(fit))
+/*
+  The height is measured when the new card is IN, not on nextTick: with
+  mode="out-in" the old card is still leaving at that point and the new one is not
+  mounted yet. And the observer watches the card itself, because its height also
+  changes after it lands — the fonts swap, the clamp resolves — which a single
+  measurement missed and left the box too short.
+*/
+function watchCard() {
+  observer?.disconnect()
+  const card = pane.value?.firstElementChild
+  if (card) observer?.observe(card)
+  fit()
+}
+
+watch(open, () => nextTick(fit))
 
 onMounted(() => {
-  fit()
-  // And again once the fonts have landed: a reflow changes the height.
+  observer = new ResizeObserver(fit)
+  watchCard()
   document.fonts?.ready.then(fit)
 })
 
-onUnmounted(() => {
-  pane.value?.style.removeProperty('height')
-})
+onUnmounted(() => observer?.disconnect())
 
 /*
   A sideways swipe on the card pages it, the same gesture the /me tabs use. It is
@@ -102,7 +115,7 @@ function onTouchEnd(event) {
 
         <div class="body">
           <div ref="pane" class="pane" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
-            <Transition :name="`quote-${direction}`" mode="out-in">
+            <Transition :name="`quote-${direction}`" mode="out-in" @after-enter="watchCard">
               <TestimonialCard
                 :key="index"
                 :quote="current.quote"
