@@ -13,68 +13,22 @@
   on in the accent with a short accent rule under it. No pills — a row of capsule
   buttons is the default shape, and it competes with the content.
 
-  On a phone the three labels do not fit, so the row slides sideways instead of
-  wrapping — the same gesture as the projects rail. It is a native scroll
-  container with snap (touch and trackpad do the work) plus a small
-  drag-to-scroll so a mouse can move it too, and a click guard so a drag does not
-  pick a tab it ends over.
+  The row does not scroll. It used to be a scroll container, and with
+  `overflow-x: auto` the cross axis computes to `auto` too, so on a phone the
+  labels could be dragged up and down as well as sideways. Instead they are sized
+  to fit a phone's width, and the content is what slides — by tap or by a
+  sideways swipe on it.
 */
-import { ref } from 'vue'
-
 defineProps({
   options: { type: Array, required: true }, // [{ value, label }]
   modelValue: { type: String, required: true },
 })
 
 defineEmits(['update:modelValue'])
-
-const el = ref(null)
-let down = false
-let startX = 0
-let startScroll = 0
-let moved = 0
-
-function onDown(event) {
-  // Mouse only. On touch the native scroll already moves the row, and driving
-  // scrollLeft as well made the two fight — the row slid vertically.
-  if (event.pointerType !== 'mouse') return
-  down = true
-  moved = 0
-  startX = event.clientX
-  startScroll = el.value?.scrollLeft ?? 0
-}
-
-function onMove(event) {
-  if (!down || !el.value) return
-  const delta = event.clientX - startX
-  moved = Math.max(moved, Math.abs(delta))
-  if (moved > 6) el.value.scrollLeft = startScroll - delta
-}
-
-function onUp() {
-  down = false
-}
-
-// A drag that ends over a tab must not pick it.
-function onClickCapture(event) {
-  if (moved <= 6) return
-  moved = 0
-  event.stopPropagation()
-  event.preventDefault()
-}
 </script>
 
 <template>
-  <div
-    ref="el"
-    class="tabs"
-    role="tablist"
-    @pointerdown="onDown"
-    @pointermove="onMove"
-    @pointerup="onUp"
-    @pointercancel="onUp"
-    @click.capture="onClickCapture"
-  >
+  <div class="tabs" role="tablist">
     <button
       v-for="option in options"
       :key="option.value"
@@ -93,28 +47,14 @@ function onClickCapture(event) {
 <style scoped>
 .tabs {
   display: flex;
-  gap: clamp(18px, 3vw, 34px);
+  gap: clamp(14px, 3vw, 34px);
   min-width: 0;
   border-bottom: 1px solid var(--line);
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
-  cursor: grab;
-}
-
-.tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.tabs:active {
-  cursor: grabbing;
 }
 
 .tab {
   position: relative;
   flex: 0 0 auto;
-  scroll-snap-align: start;
   padding: 0 0 12px;
   border: 0;
   background: none;
@@ -145,5 +85,20 @@ function onClickCapture(event) {
   height: 3px;
   border-radius: 3px;
   background: var(--acc);
+}
+
+/*
+  Sized to fit a phone. Three labels at 13px with tracking are a few pixels wider
+  than the gutter, which is what made the row overflow in the first place.
+*/
+@media (max-width: 900px) {
+  .tabs {
+    gap: 14px;
+  }
+
+  .tab {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
 }
 </style>

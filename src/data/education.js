@@ -9,11 +9,11 @@ export const education = [
     to: null,
     current: true,
     en: {
-      title: 'Higher Vocational Diploma (DAW) · IES Francisco de Goya',
+      title: 'Higher Vocational Diploma in Web Application Development (DAW) · IES Francisco de Goya',
       body: 'Official Higher Technician qualification, EQF level 5, distance learning from Murcia. First year under way, compatible with a job, and open to a company internship through the school.',
     },
     es: {
-      title: 'Grado Superior de FP (DAW) · IES Francisco de Goya',
+      title: 'Grado Superior de FP en Desarrollo de Aplicaciones Web (DAW) · IES Francisco de Goya',
       body: 'Título oficial de Técnico Superior, nivel 5 del EQF, a distancia desde Murcia. Primer curso en marcha, compatible con trabajar y abierto a prácticas mediante convenio con el centro.',
     },
   },

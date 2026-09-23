@@ -477,7 +477,7 @@ test('the testimonial dots are visible and tappable on every viewport', async ({
   expect(box.width).toBeGreaterThanOrEqual(18)
 })
 
-test('collapsing a quote brings the window back down', async ({ page }) => {
+test('opening a quote scrolls inside the window, it does not grow it', async ({ page }) => {
   /*
     A phone-width viewport on both projects: on a wide one the real quote fits
     inside the four-line clamp and there is no "read more" to press.
@@ -486,21 +486,21 @@ test('collapsing a quote brings the window back down', async ({ page }) => {
 
   const pane = page.locator('.testimonials .pane')
   const height = () => pane.evaluate((el) => el.clientHeight)
+  const scrollHeight = () => pane.evaluate((el) => el.scrollHeight)
 
-  const clamped = await height()
+  const fixed = await height()
   const more = page.locator('.testimonials .entry:not([inert]) .more')
 
   await expect(more).toBeVisible()
   await more.click()
-  await expect.poll(height).toBeGreaterThan(clamped)
 
   /*
-    And back. The window and the floor the entries are padded to were the same
-    variable, so opening a quote raised the floor of every entry and nothing
-    could shrink again: the block stayed at the expanded size for good.
+    The window keeps its size and the open quote is taller than it, so it scrolls
+    inside. Growing the window was what made scrolling away jump: closing the
+    open quote shrank the layout under the scroll and the next one slid past.
   */
-  await more.click()
-  await expect.poll(height).toBe(clamped)
+  expect(await height()).toBe(fixed)
+  await expect.poll(scrollHeight).toBeGreaterThan(fixed)
 })
 
 test('the project rail drags with a finger too', async ({ page, isMobile }) => {

@@ -57,10 +57,10 @@ function syncIndex() {
 }
 
 /*
-  The window is the tallest entry, and the entries are padded to the tallest of
-  the ones that are NOT open: an open quote is taller than its clamped self, and
-  feeding that back in raised the floor of every entry, which is why collapsing
-  used to leave the block at the expanded size.
+  The window is the tallest CLOSED entry, and it stays that size. Opening a quote
+  does not grow it: the open entry is taller than the window and scrolls inside
+  it. Letting the window grow was what made scrolling away jump — closing the
+  open quote shrank the layout under the scroll and the next one slid past.
 */
 function measure() {
   const el = pane.value
@@ -71,20 +71,12 @@ function measure() {
   const rest = heights.filter((_, i) => i !== open.value)
   const floor = rest.length ? Math.max(...rest) : Math.max(...heights)
   el.style.setProperty('--pane-h', `${floor}px`)
-  el.style.height = `${Math.max(...heights)}px`
+  el.style.height = `${floor}px`
   syncIndex()
 }
 
 function onScroll() {
   syncIndex()
-  /*
-    Scrolling away from an open quote closes it. Left open, it stays the tallest
-    entry, so the window stays tall and the next quote shows through the gap.
-  */
-  if (open.value !== -1 && open.value !== index.value) {
-    open.value = -1
-    nextTick(measure)
-  }
 }
 
 function goTo(wanted) {
@@ -253,7 +245,9 @@ onUnmounted(() => window.removeEventListener('resize', measure))
   flex: 1;
   min-width: 0;
   overflow-y: auto;
-  scroll-snap-type: y mandatory;
+  /* proximity, not mandatory: an open quote is taller than the window and has to
+     be scrollable inside it. */
+  scroll-snap-type: y proximity;
   scrollbar-width: none;
   padding: 0 clamp(18px, 2.6vw, 26px);
   -webkit-mask-image: linear-gradient(
