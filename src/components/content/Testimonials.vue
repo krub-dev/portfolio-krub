@@ -14,7 +14,7 @@
   config.showTestimonials is checked by HomeView, not here: the page decides
   whether the block exists at all.
 */
-import { computed, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import TestimonialCard from './TestimonialCard.vue'
@@ -41,10 +41,35 @@ function goTo(wanted) {
 }
 
 /*
-  A vertical swipe on the card pages it. It only takes the gesture once it is
-  clearly vertical (longer than it is wide), so a horizontal one is left alone,
-  and it never cancels the scroll — there is nothing to cancel, the pager is not
-  a scroll container.
+  The box is as tall as the quote on show, and it eases from one height to the
+  next. Left to itself the pane's height is its content, so swapping the card
+  changed it in a single frame — the text slid but the box jumped.
+*/
+const pane = ref(null)
+
+function fit() {
+  const el = pane.value
+  const card = el?.firstElementChild
+  if (!el || !card) return
+  el.style.height = `${card.getBoundingClientRect().height}px`
+}
+
+watch([index, open], () => nextTick(fit))
+
+onMounted(() => {
+  fit()
+  // And again once the fonts have landed: a reflow changes the height.
+  document.fonts?.ready.then(fit)
+})
+
+onUnmounted(() => {
+  pane.value?.style.removeProperty('height')
+})
+
+/*
+  A sideways swipe on the card pages it, the same gesture the /me tabs use. It is
+  horizontal on purpose: a vertical one is a scroll, and reading a scroll as a
+  swipe made the page jump between quotes while you were just moving down.
 */
 let touchX = 0
 let touchY = 0
@@ -59,8 +84,8 @@ function onTouchEnd(event) {
   const point = event.changedTouches[0]
   const dx = point.clientX - touchX
   const dy = point.clientY - touchY
-  if (Math.abs(dy) < 48 || Math.abs(dy) < Math.abs(dx)) return
-  goTo(index.value + (dy < 0 ? 1 : -1))
+  if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return
+  goTo(index.value + (dx < 0 ? 1 : -1))
 }
 </script>
 
@@ -76,7 +101,7 @@ function onTouchEnd(event) {
         </div>
 
         <div class="body">
-          <div class="pane" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
+          <div ref="pane" class="pane" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
             <Transition :name="`quote-${direction}`" mode="out-in">
               <TestimonialCard
                 :key="index"
@@ -192,40 +217,47 @@ function onTouchEnd(event) {
   align-items: center;
 }
 
+/*
+  The window is as tall as the quote on show and eases between heights. overflow
+  clips the sideways swap; the height transition is what stops the box jumping
+  when a longer or shorter quote comes in.
+*/
 .pane {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
   padding: 0 clamp(18px, 2.6vw, 26px);
+  transition: height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* The one quote at a time, swapped vertically: the way it moves says whether you
+/* The one quote at a time, swapped sideways: the way it moves says whether you
    went forward or back. out-in so the two never sit on top of each other. */
 .quote-next-enter-active,
 .quote-next-leave-active,
 .quote-prev-enter-active,
 .quote-prev-leave-active {
   transition:
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.28s ease;
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
 }
 
 .quote-next-enter-from {
-  transform: translateY(26px);
+  transform: translateX(40px);
   opacity: 0;
 }
 
 .quote-next-leave-to {
-  transform: translateY(-26px);
+  transform: translateX(-40px);
   opacity: 0;
 }
 
 .quote-prev-enter-from {
-  transform: translateY(-26px);
+  transform: translateX(-40px);
   opacity: 0;
 }
 
 .quote-prev-leave-to {
-  transform: translateY(26px);
+  transform: translateX(40px);
   opacity: 0;
 }
 
@@ -291,6 +323,7 @@ function onTouchEnd(event) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .pane,
   .quote-next-enter-active,
   .quote-next-leave-active,
   .quote-prev-enter-active,
