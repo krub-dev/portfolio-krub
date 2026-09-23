@@ -58,13 +58,12 @@ the Vercel DNS change, and making the repository public.
   with Sharp (WebP and AVIF at three widths, hash-skipping what has not changed), the contact form
   stack, and the pieces built for the business: the events calendar, the gallery and the link
   manager.
-- [ ] **A base cover letter.** Drafted 2026-09-23: `cover-es.txt` / `cover-en.txt` in the external
-  cv tool, built by `node build-cv.mjs` to `cover-{es,en}.pdf` (one page, light, verified). It is a
-  base to tailor per application — the date, the role and the addressee are placeholders. Iterating
-  on the wording.
-- [ ] **A compact one-page CV.** Drafted 2026-09-23: `cv-1p-es.txt` / `cv-1p-en.txt` in the cv tool,
+- [x] **A base cover letter.** Done 2026-09-23: `cover-es.txt` / `cover-en.txt` in the external cv
+  tool, built by `node build-cv.mjs` to `cover-{es,en}.pdf` (one page, light, verified). A base to
+  tailor per application — the date, the role and the addressee are placeholders.
+- [x] **A compact one-page CV.** Done 2026-09-23: `cv-1p-es.txt` / `cv-1p-en.txt` in the cv tool,
   built to `cv-1p-{es,en}.pdf` (one page, light, verified). The generator now builds three documents
-  from six sources. Iterating on what to cut.
+  from six sources; the wording is iterated on demand.
 - [x] **A new photo for /me.** Done: the current one is the 42 portrait, in colour — the grayscale
   filter was dropped with it (decision 70). `photoPath` in `src/data/socials.js` points at
   `public/assets/img/krub-pfp.jpeg` (540×540 JPEG, ~110 KB).
