@@ -1,24 +1,15 @@
 <script setup>
 /*
-  The square stage in the hero, with the logo tilting in 3D as the mouse moves
-  and a glow turning around its edge.
+  The square stage in the hero: the reserved slot for the 3D scene, and it
+  carries no explanatory text on purpose.
 
-  The stage is empty apart from the logo on purpose: it is the reserved slot
-  for a future 3D scene, and it carries no explanatory text.
+  The stage is a still box. The pointer only turns the logo inside it, and that
+  happens in the scene, on the mesh — not here with a CSS transform. It reads as
+  a solid object being looked at rather than as a card being pulled around, and
+  it keeps the frame's border and grid from drifting off the section's gutter.
 
-  The tilt maps the cursor's distance from the stage centre onto rotation:
-  -1 to 1 across each axis, times 14deg horizontally and 10deg vertically. The
-  vertical one is inverted because rotateX tips the top toward you as the value
-  grows, and the logo should lean toward the cursor, not away from it.
-
-  perspective() has to come first in the transform list — it establishes the
-  projection that the rotations are then read through. Written after them it
-  applies to nothing.
-
-  Only the logo tilts. The stage itself gets the magnetic pull instead, via
-  data-magnetic, so the two effects do not fight over the same transform — and
-  the pull is on the frame rather than on the stage, so the glow travels with
-  it instead of being left behind.
+  `tilt` is the cursor's position over the stage, normalised to -1..1 and
+  clamped, so the turn stops growing once the pointer leaves the box.
 */
 import { defineAsyncComponent, ref } from 'vue'
 
@@ -30,24 +21,20 @@ import { usePointer } from '../../composables/usePointer'
 */
 const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 
-const MAX_Y = 14 // degrees, left/right
-const MAX_X = 10 // degrees, up/down
-
 const stage = ref(null)
-const mark = ref(null)
+const tilt = ref({ x: 0, y: 0 })
 
 usePointer((pointer) => {
-  if (!stage.value || !mark.value) return
+  const el = stage.value
+  if (!el) return
 
-  const rect = stage.value.getBoundingClientRect()
+  const rect = el.getBoundingClientRect()
   if (rect.bottom < 0 || rect.top > window.innerHeight) return // offscreen, skip the work
 
-  // -1 at the left/top edge, 0 at the centre, 1 at the right/bottom edge.
-  // Clamped so the tilt stops growing once the cursor leaves the stage.
-  const nx = clamp((pointer.x - (rect.left + rect.width / 2)) / (rect.width / 2))
-  const ny = clamp((pointer.y - (rect.top + rect.height / 2)) / (rect.height / 2))
-
-  mark.value.style.transform = `perspective(700px) rotateY(${(nx * MAX_Y).toFixed(2)}deg) rotateX(${(-ny * MAX_X).toFixed(2)}deg)`
+  tilt.value = {
+    x: clamp((pointer.x - (rect.left + rect.width / 2)) / (rect.width / 2)),
+    y: clamp((pointer.y - (rect.top + rect.height / 2)) / (rect.height / 2)),
+  }
 })
 
 function clamp(value) {
@@ -56,12 +43,12 @@ function clamp(value) {
 </script>
 
 <template>
-  <div class="frame" data-magnetic>
+  <div class="frame">
     <div ref="stage" class="stage">
       <div class="grid" aria-hidden="true" />
-      <div ref="mark" class="scene" aria-hidden="true">
+      <div class="scene" aria-hidden="true">
         <Suspense>
-          <LogoScene />
+          <LogoScene :tilt="tilt" />
         </Suspense>
       </div>
       <slot />
@@ -71,10 +58,9 @@ function clamp(value) {
 
 <style scoped>
 /*
-  The frame holds the magnetic pull, so the pull moves the whole stage rather
-  than the logo inside it. The turning glow that used to live here (a conic
-  gradient on two pseudo-elements) is gone: it read as decoration rather than as
-  light, and it competed with the logo it was meant to frame.
+  The frame is the stage's box. It used to carry the magnetic pull; it does not
+  any more — only the logo moves. The turning glow that lived here (a conic
+  gradient on two pseudo-elements) is gone too.
 */
 .frame {
   position: relative;
@@ -119,20 +105,9 @@ function clamp(value) {
   background-size: 40px 40px;
 }
 
-/*
-  The scene fills the stage. It replaces the old masked `.mark` image: the logo
-  is the extruded 3D mesh now. The tilt that follows the pointer still lands
-  here, on the wrapper, so the whole logo leans as one piece.
-*/
+/* The scene fills the stage. The logo inside it is the extruded 3D mesh. */
 .scene {
   position: absolute;
   inset: 0;
-  transition: transform 0.12s linear;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scene {
-    transition: none;
-  }
 }
 </style>
