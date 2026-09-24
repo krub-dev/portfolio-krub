@@ -6,27 +6,28 @@
   parsed by Three's SVGLoader and extruded — which is the whole reason a vector
   copy exists: an ExtrudeGeometry needs outlines, and a raster PNG has none.
 
+  **The box is a window, not a card.** A large plane sits behind the mark with a
+  soft radial gradient, so the stage reads as a small space with depth rather
+  than as a flat panel — and, more concretely, so the crystal has something
+  behind it to refract. Transmission without a backdrop is a grey mass; this is
+  what makes the glass look like glass. The plane is one quad and one texture.
+
   It is deliberately cheap for what it is:
 
   - Lazy. TresJS and Three are a chunk of their own; LogoStage mounts the scene
     with defineAsyncComponent, so the initial bundle does not carry it.
-  - **The loop only runs while the stage is mostly on screen.** The observer
-    waits for 60% of the box, not a sliver, so the reflections cost nothing
-    during the scroll — which is exactly where they were hurting.
-  - Framed at 24fps and capped at 1.5x DPR. A logo does not need 60 frames a
-    second.
+  - **The loop only runs while the stage is mostly on screen** (60%), so the
+    reflections cost nothing during the scroll.
+  - Framed at 24fps and capped at 1.5x DPR.
   - Never on a phone: the stage is not mounted below 900px (decision 37).
 
   The wheel zooms the camera, not the mesh, so the perspective stays honest. It
   is clamped, and it only takes the gesture while it can still move — at either
   end the page keeps its scroll.
-
-  The material row is a temporary chooser, here to compare finishes before one is
-  picked; it is not meant to ship.
 */
 import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import { TresCanvas } from '@tresjs/core'
-import { ExtrudeGeometry } from 'three'
+import { CanvasTexture, ExtrudeGeometry, SRGBColorSpace } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
@@ -49,6 +50,7 @@ const MATERIALS = [
 
 const root = ref(null)
 const geometry = shallowRef(null)
+const backdrop = ref(null)
 const onScreen = ref(false)
 const material = ref('crystal')
 const zoom = ref(1)
@@ -82,6 +84,37 @@ function onWheel(event) {
   zoom.value = clamped
 }
 
+/*
+  The backdrop: a soft radial gradient drawn once into a canvas. It is what the
+  crystal refracts and what gives the box its depth. A texture rather than a
+  shader, because it never changes.
+*/
+function buildBackdrop() {
+  const size = 512
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')
+
+  const gradient = ctx.createRadialGradient(
+    size * 0.5,
+    size * 0.42,
+    size * 0.04,
+    size * 0.5,
+    size * 0.5,
+    size * 0.62,
+  )
+  gradient.addColorStop(0, '#3a3a40')
+  gradient.addColorStop(0.55, '#1c1c20')
+  gradient.addColorStop(1, '#0c0c0d')
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, 0, size, size)
+
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  backdrop.value = texture
+}
+
 async function build() {
   const svg = await fetch('/assets/img/krub-logo.svg').then((r) => r.text())
   const paths = new SVGLoader().parse(svg).paths
@@ -99,24 +132,22 @@ async function build() {
   })
 
   /*
-    Smooth the wall without rounding the edges.
-
-    ExtrudeGeometry does not share vertices between the segments of a curve, so
-    every facet of the wall carries its own normal and the polished metal shows
-    each polygon. `mergeVertices` alone does nothing here — it compares the whole
-    vertex, normals included, and they all differ. Dropping the normals first
-    lets it weld by position, and the recomputed normals average across the
-    curve.
+    Smooth the wall without rounding the edges. ExtrudeGeometry does not share
+    vertices between the segments of a curve, so every facet of the wall carries
+    its own normal and the polished metal shows each polygon. `mergeVertices`
+    alone does nothing here — it compares the whole vertex, normals included, and
+    they all differ. Dropping the normals first lets it weld by position, and the
+    recomputed normals average across the curve.
   */
   built.deleteAttribute('normal')
   built = mergeVertices(built, 1e-3)
   built.computeVertexNormals()
   built.center()
   geometry.value = built
-  // The scene has something to draw; the 2D fallback can go.
   emit('ready')
 }
 
+buildBackdrop()
 build()
 </script>
 
@@ -125,6 +156,14 @@ build()
     <TresCanvas :fps-limit="24" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1.6" />
+
+      <!-- The window: a gradient plane behind the mark, the thing the crystal
+           refracts and what gives the box its depth. -->
+      <TresMesh v-if="backdrop" :position="[0, 0, -180]">
+        <TresPlaneGeometry :args="[1400, 1400]" />
+        <TresMeshBasicMaterial :map="backdrop" :tone-mapped="false" />
+      </TresMesh>
+
       <LogoModel
         v-if="geometry"
         :geometry="geometry"

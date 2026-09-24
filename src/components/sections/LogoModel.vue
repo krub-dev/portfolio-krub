@@ -6,27 +6,17 @@
   `useTresContext` and the environment all need the renderer the canvas
   provides, and calling them in the component that renders the canvas throws.
 
-  Four things worth knowing:
+  The two finishes are three's own, none invented:
 
-  - **The environment is generated, not downloaded.** RoomEnvironment is a
-    little studio built in memory and run through PMREMGenerator (which turns a
-    scene into a pre-filtered map the material can reflect). It is what makes
-    the polished metal read as metal rather than as flat yellow, and it ships no
-    multi-megabyte .hdr.
-  - **The colour is a token.** `--acc-solid` is read from the page and re-read
-    when the theme or the accent changes. A material cannot read CSS, so this is
-    the one place the value is copied across.
-  - **The mesh is built once and never rebuilt.** The finish changes by swapping
-    `mesh.material`, not by rebuilding the group — rebuilding it threw away the
-    object the canvas had already mounted, which is why the first crystal switch
-    did nothing.
-  - **`running` is the optimisation.** Off-screen or under reduced motion the
-    renderer's loop is stopped, not left on a still frame.
+  - **Metal** — `MeshStandardMaterial`, full metalness, a tight roughness. The
+    environment does the reflecting.
+  - **Crystal** — `MeshPhysicalMaterial` with `transmission`. This is the one
+    that needs a backdrop: transmission refracts whatever is *behind* the
+    object, so with an empty scene it comes out as a flat grey mass. LogoScene
+    puts a gradient plane behind it for exactly that reason.
 
-  The movement is one value, eased every frame: hover tilts it toward the cursor,
-  drag spins it while the button is down, and on release the spin settles back to
-  the front — the magnetic snap. Hover is suspended during a drag so the two
-  never fight.
+  The mesh is built once and never rebuilt; the finish swaps `mesh.material`, so
+  the object the canvas mounted is left alone.
 
   When the real glTF arrives, the mesh is taken from the loaded scene instead of
   built from `props.geometry`. Lights, environment, colour, movement and pause
@@ -35,6 +25,7 @@
 import { onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
 import {
+  Color,
   Group,
   Mesh,
   MeshPhysicalMaterial,
@@ -49,7 +40,7 @@ const props = defineProps({
   tilt: { type: Object, default: () => ({ x: 0, y: 0 }) },
   spin: { type: Number, default: 0 },
   dragging: { type: Boolean, default: false },
-  material: { type: String, default: 'metal' },
+  material: { type: String, default: 'crystal' },
 })
 
 // How far the hover turns it, in radians. Small and readable, not a globe.
@@ -58,41 +49,39 @@ const TILT_X = 0.32
 const SWAY = 0.12
 
 const accent = ref('#ffc800')
+const WHITE = new Color('#ffffff')
 let smoothSpin = 0
 
 function makeMaterial(id) {
   if (id === 'crystal') {
     return new MeshPhysicalMaterial({
       metalness: 0,
-      roughness: 0.04,
+      roughness: 0.03,
       transmission: 1,
-      thickness: 14,
-      ior: 1.5,
-      envMapIntensity: 1.4,
+      thickness: 9,
+      ior: 1.52,
+      // The env map is what gives glass its edge highlights; the transmission
+      // gives it what is behind.
+      envMapIntensity: 1.6,
+      clearcoat: 1,
+      clearcoatRoughness: 0.04,
     })
   }
-  // Polished metal: full metalness and a tight roughness, the environment doing
-  // the reflecting. `metalness: 1` tints the reflection rather than a diffuse,
-  // which is what gives it the gold.
   return new MeshStandardMaterial({ metalness: 1, roughness: 0.15 })
 }
 
 const material = ref(makeMaterial(props.material))
 
-// Built once. The mesh is what the finish swaps on.
 const mesh = shallowRef(null)
 const group = new Group()
-const build = () => {
-  const built = new Mesh(props.geometry, material.value)
-  mesh.value = built
-  group.add(built)
-  group.scale.set(1.95)
-  // SVGLoader lays the shapes out in SVG space (y down), so they come out
-  // mirrored in three's y-up world. This one flip puts the mark back the way it
-  // reads in the favicon.
-  group.scale.y = -1.95
-}
-build()
+const built = new Mesh(props.geometry, material.value)
+mesh.value = built
+group.add(built)
+group.scale.set(1.95)
+// SVGLoader lays the shapes out in SVG space (y down), so they come out mirrored
+// in three's y-up world. This one flip puts the mark back the way it reads in
+// the favicon.
+group.scale.y = -1.95
 
 const { renderer, scene } = useTresContext()
 const { onBeforeRender } = useLoop()
@@ -108,7 +97,7 @@ watch(
     material.value.dispose()
     material.value = makeMaterial(id)
     // The swap. The group the canvas mounted is left untouched.
-    if (mesh.value) mesh.value.material = material.value
+    built.material = material.value
   },
 )
 
@@ -132,15 +121,14 @@ readAccent()
 
 onBeforeRender(({ elapsed, delta }) => {
   if (props.material === 'crystal') {
-    // A near-white crystal that takes a hint of the accent, not a solid fill.
-    material.value.color.set(accent.value).lerp({ r: 1, g: 1, b: 1 }, 0.72)
+    // Near-clear, with the faintest accent so it is not a colourless void.
+    material.value.color.set(accent.value).lerp(WHITE, 0.86)
   } else {
     material.value.color.set(accent.value)
   }
 
   // The drag angle, then the magnetic return: held by the pointer while
-  // dragging, easing back to zero the moment it is let go. The return is slower
-  // than the hover so the settle is visible.
+  // dragging, easing back to zero the moment it is let go.
   const spinTarget = props.dragging ? props.spin : 0
   const spinEase = Math.min(1, delta * (props.dragging ? 14 : 2.6))
   smoothSpin += (spinTarget - smoothSpin) * spinEase
