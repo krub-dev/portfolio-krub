@@ -138,7 +138,6 @@ function clamp(value) {
   width: 100%;
   height: 100%;
   border: 1px solid var(--line);
-  border-radius: 24px;
   background: radial-gradient(80% 80% at 50% 40%, var(--surface) 0%, var(--ink) 100%);
   overflow: hidden;
   display: flex;
@@ -171,14 +170,13 @@ function clamp(value) {
 }
 
 /*
-  The scene fills the stage and sits over the fallback. The radius and
-  `overflow: hidden` are what clip the canvas — a square WebGL canvas left to
-  itself covers the stage's rounded corners and the border reads as broken.
+  The scene fills the stage and sits over the fallback. `overflow: hidden` clips
+  the canvas to the stage's box, so a square WebGL canvas cannot paint over the
+  border.
 */
 .scene {
   position: absolute;
   inset: 0;
-  border-radius: 24px;
   overflow: hidden;
 }
 </style>

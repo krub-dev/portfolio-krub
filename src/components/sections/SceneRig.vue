@@ -10,16 +10,17 @@
   and close on a far wall that is only a fraction of it, so the grid on them
   converges and the box reads as a recess with real perspective. The camera sits
   just outside the near face, which is left out of the geometry, so it looks
-  straight in. Ten triangles, one unlit material, one grid texture, and a
-  `LineSegments` on the box's edges to close the corners.
+  straight in. Ten triangles, one unlit material and one grid texture, sized so a
+  whole number of cells lands on every edge — the grid itself draws the box's
+  edges, so it needs no separate outline.
 
   **The camera peeks.** It follows the pointer with a lerp and always looks back
   at the mark, so the mark stays centred while the room shifts around it: the
   parallax comes from the perspective, not from moving the object. The outer
   frame is CSS and never moves.
 
-  The texture and the edge colour are read from the theme tokens and rebuilt
-  when `data-theme` or `data-accent` changes.
+  The texture is read from the theme tokens and rebuilt when `data-theme` or
+  `data-accent` changes.
 */
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
@@ -27,7 +28,6 @@ import {
   BufferGeometry,
   CanvasTexture,
   DoubleSide,
-  EdgesGeometry,
   Float32BufferAttribute,
   RepeatWrapping,
   SRGBColorSpace,
@@ -48,10 +48,9 @@ const ROOM_HALF = 80
 const ROOM_TAPER = 1
 const ROOM_DEPTH = 160
 const ROOM_CENTER_Z = 5
-// World units per grid cell, so the grid is the same size on every face.
-const CELL = 12
-// Cells drawn per texture tile; the walls' UVs divide by CELL * CELLS so a cell
-// lands exactly one `CELL` wide.
+// World units per grid cell. ROOM_HALF * 2 is a whole number of cells (eight),
+// so the grid lines land on the box's edges and meet cleanly between faces.
+const CELL = 20
 const CELLS = 8
 const SPAN = CELL * CELLS
 // How far the camera leans, in world units.
@@ -60,8 +59,6 @@ const PEEK_Y = 11
 
 const room = ref(null)
 const roomGeo = ref(null)
-const edgeGeo = ref(null)
-const edgeColor = ref('rgba(255,255,255,.045)')
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const { camera } = useTresContext()
@@ -127,10 +124,6 @@ function buildRoomGeometry() {
   geo.computeBoundingSphere()
   roomGeo.value?.dispose()
   roomGeo.value = geo
-
-  // The box's edges: without them the walls read as one flat grid.
-  edgeGeo.value?.dispose()
-  edgeGeo.value = new EdgesGeometry(geo)
 }
 
 /*
@@ -171,14 +164,8 @@ function buildRoom() {
   room.value = texture
 }
 
-function readLines() {
-  const css = getComputedStyle(document.documentElement)
-  edgeColor.value = css.getPropertyValue('--grid').trim() || 'rgba(255,255,255,.045)'
-}
-
 function repaint() {
   buildRoom()
-  readLines()
 }
 
 onMounted(() => {
@@ -193,7 +180,6 @@ onUnmounted(() => {
   observer?.disconnect()
   room.value?.dispose()
   roomGeo.value?.dispose()
-  edgeGeo.value?.dispose()
 })
 
 buildRoomGeometry()
@@ -222,10 +208,4 @@ onBeforeRender(({ delta }) => {
   <TresMesh v-if="roomGeo" :geometry="roomGeo" :position="[0, 0, ROOM_CENTER_Z]">
     <TresMeshBasicMaterial :map="room" :side="DoubleSide" :tone-mapped="false" />
   </TresMesh>
-
-  <!-- The box's edges, closing the corners. Fainter than the face grid on
-       purpose: the grid is the texture, these just say where the walls meet. -->
-  <TresLineSegments v-if="edgeGeo" :geometry="edgeGeo" :position="[0, 0, ROOM_CENTER_Z]">
-    <TresLineBasicMaterial :color="edgeColor" :transparent="true" :tone-mapped="false" />
-  </TresLineSegments>
 </template>

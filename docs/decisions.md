@@ -2055,25 +2055,27 @@ repeat either of the two mistakes that sent it out the first time.
   as a flat grid.
 - **The far wall sits close to the frame.** A deep box read as a corridor; the far wall was pulled
   in (`ROOM_DEPTH` 280 → 160) so it lands near the stage's edge — a shallow recess, not a tunnel.
-- **The box's edges are drawn** (`LineSegments`), fainter than the face grid (`--grid` against
-  `--line`): without them the walls are one flat grid and the box disappears.
+- **The grid draws the box's edges.** No separate outline: the cell is chosen so a whole number
+  of them (eight) lands across each face, so the lines meet exactly on the box's edges and carry
+  from one face to the next. An earlier pass added a `LineSegments` outline for the same job, but
+  a 1px WebGL line antialiases badly and the grid does it better.
 - **The walls render double-sided.** With `BackSide` the far wall was culled and the box stood open
   at both ends — the page showed through. The opening has no face, so there is nothing to cull.
 - **The grid is world-uniform.** The walls are built by hand, with their UVs taken from the world
   position — a `BoxGeometry` maps each face to 0..1, which would stretch the grid on the deeper
-  walls — so a cell is the same size on every face. It is drawn at `--line` and a 12-unit cell: it
-  is the walls' own texture, not a faint wash. The CSS grid the slot used to carry is gone — with
-  the box drawing a grid on every face, a second one behind it had no sense.
+  walls — so a cell is the same size on every face. It is drawn at `--line` and a 20-unit cell: it
+  is the walls' own texture, not a faint wash, and it is sized to sit close to the page's own 72px
+  grid where the box meets the frame. The CSS grid the slot used to carry is gone — with the box
+  drawing a grid on every face, a second one behind it had no sense.
 - **The opening is sized to survive the camera.** It stays wider than the view at every zoom with
   the full lean, so the page never shows past the box's edges.
 - **The camera peeks.** `SceneRig` leans the camera with the pointer — the same `tilt` the mark
   uses — and always looks back at the mark, so the mark stays centred and the room parallaxes
   around it. The lean is a lerp in the scene's own loop, not a new rAF. The outer frame is CSS and
   does not move.
-- **The window.** The canvas fills the stage and is clipped to its rounded frame (`border-radius`
-  plus `overflow: hidden` on the scene). A square canvas left to itself covers the stage's rounded
-  corners and the border reads as broken. The stage keeps its single `--line` border as the frame;
-  the inset mat and the inner rim an earlier attempt added are gone — a single square reads better.
+- **The window is a square.** The stage dropped its 24px radius: the opening is square, like the
+  box behind it. The canvas fills it and `overflow: hidden` clips it to the frame; the stage keeps
+  its single `--line` border, and the inset mat and the inner rim an earlier attempt added are gone.
 - **No fog and no glow.** The fog was fading the very grid that gives the walls their perspective,
   and the glow never earned its place — a strong one reflected on the metal, and the owner did not
   want it. Both removed, `LogoModel`'s `material.fog = false` with them.
@@ -2083,7 +2085,8 @@ repeat either of the two mistakes that sent it out the first time.
 `SceneRig` is the new child of the canvas that owns the camera and the room; `LogoModel` keeps the
 mark. The values are first-pass and meant to be tuned: `ROOM_HALF` 80 (wide enough to stay past the
 view at every zoom and lean), `ROOM_DEPTH` 160 with the opening 120 in front of the camera, a
-12-unit cell, and `PEEK` 16/11 world units.
+20-unit cell (eight across each face, so the lines land on the edges), and `PEEK` 16/11 world
+units.
 
 > An earlier version of this entry had a fog and an accent glow on the far wall. Both were removed
 > in review; this is the state that shipped.

@@ -268,11 +268,10 @@ builds the mark's geometry — the favicon SVG path extruded, welded and re-norm
 
 ### SceneRig
 The rig around the mark: the camera and the room. An open box — four walls converging on a far wall
-kept close to the frame, built by hand so the grid is world-uniform, and with the box's edges drawn
-as a `LineSegments` — carries the grid; the camera sits outside the opening and leans with the
-pointer's `tilt`, always looking back at the mark, so the room parallaxes while the mark stays
-centred. A child of the canvas, because `useLoop` and `useTresContext` need the renderer. See
-decision 78.
+kept close to the frame, built by hand so the grid is world-uniform and sized so a cell lands on
+each edge — carries the grid; the camera sits outside the opening and leans with the pointer's
+`tilt`, always looking back at the mark, so the room parallaxes while the mark stays centred. A
+child of the canvas, because `useLoop` and `useTresContext` need the renderer. See decision 78.
 
 ### LogoModel
 The mesh and everything about how it looks and moves: the polished-metal `MeshStandardMaterial`,
