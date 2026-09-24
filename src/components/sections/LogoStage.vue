@@ -20,9 +20,15 @@
   the pull is on the frame rather than on the stage, so the glow travels with
   it instead of being left behind.
 */
-import { ref } from 'vue'
+import { defineAsyncComponent, ref } from 'vue'
 
 import { usePointer } from '../../composables/usePointer'
+
+/*
+  The scene is lazy: TresJS and Three are a chunk of their own, and the stage is
+  not mounted below 900px, so a phone never downloads them. See LogoScene.vue.
+*/
+const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 
 const MAX_Y = 14 // degrees, left/right
 const MAX_X = 10 // degrees, up/down
@@ -53,7 +59,11 @@ function clamp(value) {
   <div class="frame" data-magnetic>
     <div ref="stage" class="stage">
       <div class="grid" aria-hidden="true" />
-      <div ref="mark" class="mark" aria-hidden="true" />
+      <div ref="mark" class="scene" aria-hidden="true">
+        <Suspense>
+          <LogoScene />
+        </Suspense>
+      </div>
       <slot />
     </div>
   </div>
@@ -109,19 +119,19 @@ function clamp(value) {
   background-size: 40px 40px;
 }
 
-.mark {
-  width: 58%;
-  aspect-ratio: 1.682;
-  background: var(--mark);
-  -webkit-mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
-  mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
-  /* Short and linear: the position is already updated every frame, so an
-     easing curve here would only add lag. */
+/*
+  The scene fills the stage. It replaces the old masked `.mark` image: the logo
+  is the extruded 3D mesh now. The tilt that follows the pointer still lands
+  here, on the wrapper, so the whole logo leans as one piece.
+*/
+.scene {
+  position: absolute;
+  inset: 0;
   transition: transform 0.12s linear;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mark {
+  .scene {
     transition: none;
   }
 }
