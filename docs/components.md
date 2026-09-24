@@ -267,10 +267,11 @@ builds the mark's geometry — the favicon SVG path extruded, welded and re-norm
 `ready` when it is up. The camera, the room and the fog are `SceneRig`'s.
 
 ### SceneRig
-The rig around the mark: the camera, the fog, the room and the glow. A `BoxGeometry` with `side:
-BackSide` — the camera sits inside it — carries a grid texture and is faded by a `Fog` read from
-`--ink`; a soft additive light tinted from `--acc-solid` sits on the far wall; the camera leans
-with the pointer's `tilt` and always looks back at the mark, so the room parallaxes while the mark
+The rig around the mark: the camera, the fog, the room and the glow. An open box — four walls
+converging on a far wall, built by hand so the grid is world-uniform and with the box's edges drawn
+as a `LineSegments` — carries the grid and is faded by a `Fog` read from `--ink`; a soft additive
+light tinted from `--acc-solid` sits on the far wall; the camera sits outside the opening and leans
+with the pointer's `tilt`, always looking back at the mark, so the room parallaxes while the mark
 stays centred. A child of the canvas, because `useLoop` and `useTresContext` need the renderer. See
 decision 78.
 

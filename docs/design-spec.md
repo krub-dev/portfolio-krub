@@ -263,12 +263,12 @@ whole stage is magnetic, and only the logo inside it tilts. Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
   mark that tilts toward the cursor, spins with a drag and springs back to the front, and zooms
-  with the wheel. Behind it, a single `BackSide` box is a room seen from the inside — its grid in
-  real perspective, its far wall faded into the background by a fog and lit by a soft accent glow —
-  and the camera leans with the pointer so the room parallaxes while the mark stays centred. The
-  canvas fills the stage and is clipped to its rounded frame, so the stage reads as a window onto
-  the room. It is lazy, pauses off-screen and never mounts below 900px (decision 37). See decision
-  78.
+  with the wheel. Behind it, an open box — its four walls converging on a far wall, the grid painted
+  on each face and the box's edges drawn — fades into the background through a fog and is lit by a
+  soft accent glow; the camera leans with the pointer so the room parallaxes while the mark stays
+  centred. The canvas fills the stage and is clipped to its rounded frame, so the stage reads as a
+  window onto the room. It is lazy, pauses off-screen and never mounts below 900px (decision 37).
+  See decision 78.
 - **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
   first and fades out once the scene reports ready (decision 77), so a browser without WebGL still
   shows the logo.

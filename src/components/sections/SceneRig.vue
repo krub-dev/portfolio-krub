@@ -6,31 +6,41 @@
   `useTresContext` need the renderer the canvas provides, and calling them in the
   component that renders the canvas throws.
 
-  **The room is a box seen from the inside.** One `BoxGeometry` with
-  `side: BackSide`: the near face is culled, so the camera sits inside an open
-  room. One mesh, one unlit material and one small grid texture — the depth is
-  real perspective, not painted on. Twelve triangles.
+  **The room is a tapering box, open at the front.** Its four walls run away from
+  the frame and close on a smaller far wall, so the grid on them converges and
+  the box reads as a recess with real perspective. The camera sits just outside
+  the near face, which is left out of the geometry, so it looks straight in. Ten
+  triangles, one unlit material and one grid texture.
 
   **The camera peeks.** It follows the pointer with a lerp and always looks back
   at the mark, so the mark stays centred while the room shifts around it: the
   parallax comes from the perspective, not from moving the object. The outer
   frame is CSS and never moves.
 
-  **The fog does the rest.** It fades the room toward the site's own background
-  (`--ink`), so the box has no visible far edge. The mark opts out
+  **The fog does the rest.** It fades the room's far wall toward the site's own
+  background (`--ink`), so the box has no hard far edge. The mark opts out
   (`material.fog = false`, in LogoModel) and stays crisp in the foreground.
 
-  **A glow on the far wall** — a soft accent light, additive, tinted from
-  `--acc-solid` — is what makes the room read as a place with its own light
-  rather than a flat grid. It is one more quad and one small mask.
+  **A faint glow on the far wall** — a soft accent light, additive, tinted from
+  `--acc-solid` — so the room reads as a place with its own light. Kept weak: a
+  stronger one reflected on the metal.
 
-  The textures, the fog and the glow are read from the theme tokens and rebuilt
-  when `data-theme` or `data-accent` changes, so the room is light in the light
-  theme and the light follows the accent.
+  The texture, the fog and the glow are read from the theme tokens and rebuilt
+  when `data-theme` or `data-accent` changes.
 */
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
-import { AdditiveBlending, BackSide, CanvasTexture, Fog, SRGBColorSpace } from 'three'
+import {
+  AdditiveBlending,
+  BackSide,
+  BufferGeometry,
+  CanvasTexture,
+  EdgesGeometry,
+  Fog,
+  Float32BufferAttribute,
+  RepeatWrapping,
+  SRGBColorSpace,
+} from 'three'
 
 const props = defineProps({
   // Pointer position over the stage, normalised to -1..1, from LogoStage.
@@ -39,22 +49,32 @@ const props = defineProps({
   camZ: { type: Number, required: true },
 })
 
-// A room the camera sits inside, wide enough that its far wall stays out of
-// reach. The camera never travels near it.
-const ROOM = 620
-// How far the camera leans, in world units. Small: the depth is the
-// perspective, not the travel.
+// The room. The opening sits in front of the camera and stays wider than the
+// view at the closest zoom with the full lean, so the page never shows past its
+// edges; the walls run back to a far wall that is only a fraction of the frame,
+// which is what gives the box its depth.
+const ROOM_HALF = 80
+const ROOM_TAPER = 1
+const ROOM_DEPTH = 280
+const ROOM_CENTER_Z = -55
+// The fog starts behind the mark and has thinned the far wall by nearly half.
+const FOG_NEAR = 250
+const FOG_FAR = 600
+// World units per grid cell, so the grid is the same size on every face.
+const CELL = 12
+// Cells drawn per texture tile; the walls' UVs divide by CELL * CELLS so a cell
+// lands exactly one `CELL` wide.
+const CELLS = 8
+const SPAN = CELL * CELLS
+const GLOW = 200
+// How far the camera leans, in world units.
 const PEEK_X = 16
 const PEEK_Y = 11
-// The fog starts behind the mark and ends just short of the far wall.
-const FOG_NEAR = 300
-const FOG_FAR = 640
-const CELLS = 12
-// A soft accent light on the far wall, so the room reads as a place with its
-// own light rather than a flat grid.
-const GLOW = 380
 
 const room = ref(null)
+const roomGeo = ref(null)
+const edgeGeo = ref(null)
+const edgeColor = ref('rgba(255,255,255,.11)')
 const glow = ref(null)
 const glowColor = ref('#ffc800')
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -73,11 +93,65 @@ function makeCanvas(size) {
 }
 
 /*
-  The room's grid, painted from the theme's tokens. A flat fill, not the stage's
-  radial gradient: a gradient per face would show its own circle on each wall.
-  It uses the page's own `--grid` and is sized so a cell lands near the page's
-  72px at the far wall — the closest the box can get to continuing the grid
-  outside it.
+  The walls, built by hand so the grid is world-uniform: a BoxGeometry maps each
+  face to 0..1, which stretches the grid on the deeper walls, so the UVs are
+  taken straight from the world position here instead.
+*/
+function buildRoomGeometry() {
+  const near = ROOM_HALF
+  const far = ROOM_HALF * ROOM_TAPER
+  const zn = ROOM_DEPTH / 2
+  const zf = -ROOM_DEPTH / 2
+
+  const NBL = [-near, -near, zn]
+  const NBR = [near, -near, zn]
+  const NTR = [near, near, zn]
+  const NTL = [-near, near, zn]
+  const FBL = [-far, -far, zf]
+  const FBR = [far, -far, zf]
+  const FTR = [far, far, zf]
+  const FTL = [-far, far, zf]
+
+  const positions = []
+  const uvs = []
+  const indices = []
+
+  const addQuad = (corners, project) => {
+    const base = positions.length / 3
+    for (const corner of corners) {
+      positions.push(corner[0], corner[1], corner[2])
+      uvs.push(project(corner)[0], project(corner)[1])
+    }
+    indices.push(base, base + 1, base + 2, base, base + 2, base + 3)
+  }
+
+  const xz = (c) => [c[0] / SPAN, c[2] / SPAN]
+  const zy = (c) => [c[2] / SPAN, c[1] / SPAN]
+  const xy = (c) => [c[0] / SPAN, c[1] / SPAN]
+
+  addQuad([NBL, NBR, FBR, FBL], xz) // floor
+  addQuad([NBR, NTR, FTR, FBR], zy) // right wall
+  addQuad([NTR, NTL, FTL, FTR], xz) // ceiling
+  addQuad([NTL, NBL, FBL, FTL], zy) // left wall
+  addQuad([FBL, FBR, FTR, FTL], xy) // far wall
+
+  const geo = new BufferGeometry()
+  geo.setAttribute('position', new Float32BufferAttribute(positions, 3))
+  geo.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
+  geo.setIndex(indices)
+  geo.computeBoundingSphere()
+  roomGeo.value?.dispose()
+  roomGeo.value = geo
+
+  // The box's edges: without them the walls read as one flat grid.
+  edgeGeo.value?.dispose()
+  edgeGeo.value = new EdgesGeometry(geo)
+}
+
+/*
+  The room's grid, painted from the theme's tokens — the page's own `--grid`, so
+  the lines inside match the ones outside as far as the perspective allows. The
+  texture tiles, so a cell is `CELL` world units on every face.
 */
 function buildRoom() {
   const css = getComputedStyle(document.documentElement)
@@ -94,7 +168,7 @@ function buildRoom() {
   ctx.strokeStyle = grid
   ctx.lineWidth = 1
   ctx.beginPath()
-  for (let i = 0; i <= CELLS; i++) {
+  for (let i = 0; i < CELLS; i++) {
     const p = Math.round(i * step) + 0.5
     ctx.moveTo(p, 0)
     ctx.lineTo(p, size)
@@ -106,6 +180,8 @@ function buildRoom() {
   const texture = new CanvasTexture(canvas)
   texture.colorSpace = SRGBColorSpace
   texture.anisotropy = 4
+  texture.wrapS = RepeatWrapping
+  texture.wrapT = RepeatWrapping
   room.value?.dispose()
   room.value = texture
 }
@@ -129,15 +205,8 @@ function buildGlow() {
   const size = 256
   const canvas = makeCanvas(size)
   const ctx = canvas.getContext('2d')
-  const gradient = ctx.createRadialGradient(
-    size / 2,
-    size / 2,
-    0,
-    size / 2,
-    size / 2,
-    size / 2,
-  )
-  gradient.addColorStop(0, 'rgba(255,255,255,0.28)')
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
+  gradient.addColorStop(0, 'rgba(255,255,255,0.3)')
   gradient.addColorStop(0.4, 'rgba(255,255,255,0.07)')
   gradient.addColorStop(1, 'rgba(255,255,255,0)')
   ctx.fillStyle = gradient
@@ -152,6 +221,7 @@ function buildGlow() {
 function readAccent() {
   const css = getComputedStyle(document.documentElement)
   glowColor.value = css.getPropertyValue('--acc-solid').trim() || '#ffc800'
+  edgeColor.value = css.getPropertyValue('--line').trim() || 'rgba(255,255,255,.11)'
 }
 
 function repaint() {
@@ -171,9 +241,12 @@ onMounted(() => {
 onUnmounted(() => {
   observer?.disconnect()
   room.value?.dispose()
+  roomGeo.value?.dispose()
+  edgeGeo.value?.dispose()
   glow.value?.dispose()
 })
 
+buildRoomGeometry()
 buildGlow()
 repaint()
 
@@ -196,8 +269,18 @@ onBeforeRender(({ delta }) => {
 </script>
 
 <template>
-  <!-- The accent light on the far wall. Additive, so it only adds to the dark. -->
-  <TresMesh v-if="glow" :position="[0, 0, -ROOM / 2 + 6]">
+  <!-- The room: a box narrowing away from the frame, open toward the camera. -->
+  <TresMesh v-if="roomGeo" :geometry="roomGeo" :position="[0, 0, ROOM_CENTER_Z]">
+    <TresMeshBasicMaterial :map="room" :side="BackSide" :tone-mapped="false" />
+  </TresMesh>
+
+  <!-- The box's edges, so the room reads as a box and not as a flat grid. -->
+  <TresLineSegments v-if="edgeGeo" :geometry="edgeGeo" :position="[0, 0, ROOM_CENTER_Z]">
+    <TresLineBasicMaterial :color="edgeColor" :transparent="true" :tone-mapped="false" />
+  </TresLineSegments>
+
+  <!-- The accent light on the far wall. Additive, so it only adds. -->
+  <TresMesh v-if="glow" :position="[0, 0, ROOM_CENTER_Z - ROOM_DEPTH / 2 + 8]">
     <TresPlaneGeometry :args="[GLOW, GLOW]" />
     <TresMeshBasicMaterial
       :map="glow"
@@ -208,11 +291,5 @@ onBeforeRender(({ delta }) => {
       :tone-mapped="false"
       :fog="false"
     />
-  </TresMesh>
-
-  <!-- One box, seen from the inside: its far faces are the room. -->
-  <TresMesh v-if="room">
-    <TresBoxGeometry :args="[ROOM, ROOM, ROOM]" />
-    <TresMeshBasicMaterial :map="room" :side="BackSide" :tone-mapped="false" />
   </TresMesh>
 </template>
