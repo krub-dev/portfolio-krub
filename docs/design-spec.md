@@ -257,18 +257,16 @@ Left column: top mono label, a three-line headline with the key word in `--acc`,
 `--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and text yellow).
 
 Right column, the **square stage**: `aspect-ratio:1/1`, `max-height:min(58vh,520px)`,
-`max-width:520px`, border `--line`, radius 24, a `radial-gradient` from `--surface` to `--ink`,
-and a **40px** inner grid — not the page's 72px, which reads as noise inside a 520px box. The
-whole stage is magnetic, and only the logo inside it tilts. Inside:
+`max-width:520px`, border `--line`, radius 24, a `radial-gradient` from `--surface` to `--ink`.
+The whole stage is magnetic, and only the logo inside it turns. Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
   mark that tilts toward the cursor, spins with a drag and springs back to the front, and zooms
-  with the wheel. Behind it, an open box — its four walls converging on a far wall, the grid painted
-  on each face and the box's edges drawn — fades into the background through a fog and is lit by a
-  soft accent glow; the camera leans with the pointer so the room parallaxes while the mark stays
-  centred. The canvas fills the stage and is clipped to its rounded frame, so the stage reads as a
-  window onto the room. It is lazy, pauses off-screen and never mounts below 900px (decision 37).
-  See decision 78.
+  with the wheel. Behind it, an open box — its four walls converging on a far wall kept close to
+  the frame, the grid painted on every face and the box's edges drawn — and the camera leans with
+  the pointer so the room parallaxes while the mark stays centred. The canvas fills the stage and
+  is clipped to its rounded frame, so the stage reads as a window onto the room. It is lazy, pauses
+  off-screen and never mounts below 900px (decision 37). See decision 78.
 - **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
   first and fades out once the scene reports ready (decision 77), so a browser without WebGL still
   shows the logo.

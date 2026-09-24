@@ -94,8 +94,6 @@ function clamp(value) {
       @pointerup="onUp"
       @pointercancel="onUp"
     >
-      <div class="grid" aria-hidden="true" />
-
       <!-- The fallback, under the scene. It fades out once the scene is ready. -->
       <div class="mark" :class="{ gone: ready }" aria-hidden="true" />
 
@@ -151,16 +149,6 @@ function clamp(value) {
 
 .stage:active {
   cursor: grabbing;
-}
-
-/* 40px inside the stage, not the 72px of the page background: the page grid at
-   full size reads as noise inside a 520px box. */
-.grid {
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 40px 40px;
 }
 
 /* The 2D logo, masked and painted with the accent token. The fallback, and the

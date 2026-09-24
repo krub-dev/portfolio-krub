@@ -39,8 +39,6 @@ const accent = ref('#ffc800')
 let smoothSpin = 0
 
 const material = new MeshStandardMaterial({ metalness: 1, roughness: 0.15 })
-// The mark is the foreground: the room's fog must not tint it.
-material.fog = false
 
 const group = new Group()
 group.add(new Mesh(props.geometry, material))

@@ -2053,37 +2053,40 @@ repeat either of the two mistakes that sent it out the first time.
   that is only a fraction of the frame. Ten triangles and one unlit material. A first pass had the
   camera *inside* a large box — it filled the view, but no wall was ever visible, so the room read
   as a flat grid.
-- **The box's edges are drawn.** A `LineSegments` on the box, in `--line`. Without it the walls
-  read as one flat grid and the box disappears; this is the piece that makes it a room.
+- **The far wall sits close to the frame.** A deep box read as a corridor; the far wall was pulled
+  in (`ROOM_DEPTH` 280 → 160) so it lands near the stage's edge — a shallow recess, not a tunnel.
+- **The box's edges are drawn** (`LineSegments`), fainter than the face grid (`--grid` against
+  `--line`): without them the walls are one flat grid and the box disappears.
+- **The walls render double-sided.** With `BackSide` the far wall was culled and the box stood open
+  at both ends — the page showed through. The opening has no face, so there is nothing to cull.
 - **The grid is world-uniform.** The walls are built by hand, with their UVs taken from the world
   position — a `BoxGeometry` maps each face to 0..1, which would stretch the grid on the deeper
-  walls — so a cell is the same size on every face. It uses the page's own `--grid` and a 12-unit
-  cell, so the lines inside match the ones outside as far as the perspective allows. The CSS grid
-  stays as the fallback layer under the canvas (what shows before the scene is ready, and when
-  there is no WebGL); the room covers it once it loads.
+  walls — so a cell is the same size on every face. It is drawn at `--line` and a 12-unit cell: it
+  is the walls' own texture, not a faint wash. The CSS grid the slot used to carry is gone — with
+  the box drawing a grid on every face, a second one behind it had no sense.
 - **The opening is sized to survive the camera.** It stays wider than the view at every zoom with
   the full lean, so the page never shows past the box's edges.
 - **The camera peeks.** `SceneRig` leans the camera with the pointer — the same `tilt` the mark
   uses — and always looks back at the mark, so the mark stays centred and the room parallaxes
   around it. The lean is a lerp in the scene's own loop, not a new rAF. The outer frame is CSS and
   does not move.
-- **Fog.** A `Fog` on the scene, coloured from `--ink` and rebuilt on `data-theme`, fades the room's
-  far wall so the box has no hard far edge. The mark opts out (`material.fog = false`) and stays
-  crisp in the foreground.
 - **The window.** The canvas fills the stage and is clipped to its rounded frame (`border-radius`
   plus `overflow: hidden` on the scene). A square canvas left to itself covers the stage's rounded
   corners and the border reads as broken. The stage keeps its single `--line` border as the frame;
   the inset mat and the inner rim an earlier attempt added are gone — a single square reads better.
-- **A glow on the far wall.** A soft additive light tinted from `--acc-solid` — one quad and one
-  white mask — so the room reads as a place with its own light. Kept faint: a stronger one
-  reflected on the metal and read as a lens flare. It follows the accent.
+- **No fog and no glow.** The fog was fading the very grid that gives the walls their perspective,
+  and the glow never earned its place — a strong one reflected on the metal, and the owner did not
+  want it. Both removed, `LogoModel`'s `material.fog = false` with them.
 - **The mark's tilt is softer** (0.5 → 0.34 rad on y, 0.32 → 0.22 on x): the camera leans too now,
   and the two must not add up to a lurch.
 
-`SceneRig` is the new child of the canvas that owns the camera, the fog, the room and the glow;
-`LogoModel` keeps the mark. The values are first-pass and meant to be tuned: `ROOM_HALF` 80,
-`ROOM_DEPTH` 280 with the opening 120 in front of the camera, a 12-unit cell, `PEEK` 16/11 world
-units, `FOG_NEAR`/`FOG_FAR` 250/600, and a 200-unit glow.
+`SceneRig` is the new child of the canvas that owns the camera and the room; `LogoModel` keeps the
+mark. The values are first-pass and meant to be tuned: `ROOM_HALF` 80 (wide enough to stay past the
+view at every zoom and lean), `ROOM_DEPTH` 160 with the opening 120 in front of the camera, a
+12-unit cell, and `PEEK` 16/11 world units.
+
+> An earlier version of this entry had a fog and an accent glow on the far wall. Both were removed
+> in review; this is the state that shipped.
 
 **One cost, recorded:** the scene now weighs enough that the e2e suite goes from two to four
 failures when Playwright runs its four workers in parallel — each worker holds a WebGL context and
