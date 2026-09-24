@@ -14,10 +14,12 @@
     suspended and the logo spins with the pointer. On release it snaps back to
     the front, eased in the scene's own loop.
 
-  **The 2D mark is the fallback.** It paints first and is only hidden once the
+  **The 2D mark is the fallback.** It paints first and is only faded out once the
   scene says it is ready, so a browser without WebGL, a failed fetch or a
   rejected shader all leave the visitor with the logo rather than with an empty
-  box. The scene reports readiness; this decides what to do with it.
+  box. The fade is what turns the hand-off from the flat mark to the scene into a
+  crossfade instead of a pop. The scene reports readiness; this decides what to do
+  with it.
 */
 import { defineAsyncComponent, ref } from 'vue'
 
@@ -62,9 +64,6 @@ usePointer((pointer) => {
 })
 
 function onDown(event) {
-  // The material chooser is a control, not part of the object: a press on it
-  // must not start a drag, or the capture swallows the button's own click.
-  if (event.target.closest('.materials')) return
   if (!stage.value) return
   dragging.value = true
   startX = event.clientX
@@ -97,8 +96,8 @@ function clamp(value) {
     >
       <div class="grid" aria-hidden="true" />
 
-      <!-- The fallback, under the scene. It goes when the scene is ready. -->
-      <div v-show="!ready" class="mark" aria-hidden="true" />
+      <!-- The fallback, under the scene. It fades out once the scene is ready. -->
+      <div class="mark" :class="{ gone: ready }" aria-hidden="true" />
 
       <div class="scene" aria-hidden="true">
         <Suspense>
@@ -171,6 +170,15 @@ function clamp(value) {
   background: var(--mark);
   -webkit-mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
   mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
+  /* It is decoration, never a hit target, and it must not sit over the scene
+     once faded. */
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* The crossfade: the flat mark gives way to the scene. */
+.mark.gone {
+  opacity: 0;
 }
 
 /* The scene fills the stage and sits over the fallback. */

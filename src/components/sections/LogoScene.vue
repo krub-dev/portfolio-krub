@@ -6,11 +6,14 @@
   parsed by Three's SVGLoader and extruded — which is the whole reason a vector
   copy exists: an ExtrudeGeometry needs outlines, and a raster PNG has none.
 
-  **The box is a window, not a card.** A large plane sits behind the mark with a
-  soft radial gradient, so the stage reads as a small space with depth rather
-  than as a flat panel — and, more concretely, so the crystal has something
-  behind it to refract. Transmission without a backdrop is a grey mass; this is
-  what makes the glass look like glass. The plane is one quad and one texture.
+  **The box is a window, not a card.** Two surfaces build a shallow room behind
+  the mark: a back wall carrying the stage's own gradient and grid, and a floor
+  whose grid runs away from the camera. The floor is what gives the box depth —
+  a flat wall alone is still a card.
+
+  The wall is painted from the theme's own tokens (`--surface`, `--ink`,
+  `--grid`), read once and rebuilt when `data-theme` changes, so the box is light
+  in the light theme instead of a dark hole in a light page.
 
   It is deliberately cheap for what it is:
 
@@ -43,27 +46,25 @@ const props = defineProps({
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
 const emit = defineEmits(['ready'])
 
-const MATERIALS = [
-  { id: 'metal', label: 'Metal' },
-  { id: 'crystal', label: 'Cristal' },
-]
-
 const root = ref(null)
 const geometry = shallowRef(null)
 const backdrop = ref(null)
+const floor = ref(null)
 const onScreen = ref(false)
-const material = ref('crystal')
 const zoom = ref(1)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const DEPTH = 12
 const CAM_Z = 205
+const WALL_Z = -280
+const FLOOR_Y = -84
 const ZOOM_MIN = 0.82
 const ZOOM_MAX = 1.22
 
 const camZ = computed(() => CAM_Z / zoom.value)
 
 let observer = null
+let themeObserver = null
 
 onMounted(() => {
   // 0.6, not "any pixel": the loop is what costs, so it waits until the box is
@@ -72,9 +73,23 @@ onMounted(() => {
     threshold: 0.6,
   })
   observer.observe(root.value)
+
+  // The wall and the floor are painted from the theme tokens, so they are
+  // rebuilt when the theme changes. The textures are disposed first: a rebuilt
+  // canvas texture is a new GPU upload, and the old one would leak.
+  themeObserver = new MutationObserver(repaint)
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  })
 })
 
-onUnmounted(() => observer?.disconnect())
+onUnmounted(() => {
+  observer?.disconnect()
+  themeObserver?.disconnect()
+  backdrop.value?.dispose()
+  floor.value?.dispose()
+})
 
 function onWheel(event) {
   const next = zoom.value * (event.deltaY > 0 ? 0.94 : 1.06)
@@ -84,35 +99,114 @@ function onWheel(event) {
   zoom.value = clamped
 }
 
+function makeCanvas(size) {
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = size
+  return canvas
+}
+
+function drawGrid(ctx, size, cells, style, width) {
+  const step = size / cells
+  ctx.strokeStyle = style
+  ctx.lineWidth = width
+  ctx.beginPath()
+  for (let i = 0; i <= cells; i++) {
+    const p = Math.round(i * step) + 0.5
+    ctx.moveTo(p, 0)
+    ctx.lineTo(p, size)
+    ctx.moveTo(0, p)
+    ctx.lineTo(size, p)
+  }
+  ctx.stroke()
+}
+
 /*
-  The backdrop: a soft radial gradient drawn once into a canvas. It is what the
-  crystal refracts and what gives the box its depth. A texture rather than a
-  shader, because it never changes.
+  The theme's colours, read from CSS so the box follows the light/dark switch the
+  same way the CSS stage does. The fallbacks are the dark tokens, in case this
+  runs before the stylesheet has resolved.
+*/
+function readTokens() {
+  const css = getComputedStyle(document.documentElement)
+  const read = (name, fallback) => css.getPropertyValue(name).trim() || fallback
+  return {
+    surface: read('--surface', '#141416'),
+    ink: read('--ink', '#0c0c0d'),
+    grid: read('--grid', 'rgba(255,255,255,.045)'),
+  }
+}
+
+/*
+  The back wall. The gradient is the stage's own (`--surface` to `--ink`); the
+  grid is sized so it lands at roughly the CSS stage's 40px cells — the plane
+  sits at WALL_Z, parallel to the camera, so its world grid projects to a screen
+  grid, and the two backgrounds line up.
 */
 function buildBackdrop() {
-  const size = 512
-  const canvas = document.createElement('canvas')
-  canvas.width = size
-  canvas.height = size
+  const { surface, ink, grid } = readTokens()
+  const size = 1024
+  const canvas = makeCanvas(size)
   const ctx = canvas.getContext('2d')
 
   const gradient = ctx.createRadialGradient(
     size * 0.5,
-    size * 0.42,
+    size * 0.44,
+    size * 0.03,
+    size * 0.5,
+    size * 0.5,
+    size * 0.72,
+  )
+  gradient.addColorStop(0, surface)
+  gradient.addColorStop(1, ink)
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, 0, size, size)
+
+  // 50 cells across a 1600-unit plane is ~32 units — about 42px on screen.
+  drawGrid(ctx, size, 50, grid, 1.4)
+
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  texture.anisotropy = 4
+  backdrop.value?.dispose()
+  backdrop.value = texture
+}
+
+/*
+  The floor: the same grid, coarser, faded to nothing at the edges so the plane
+  has no border. This is the depth cue — its lines converge as they recede.
+*/
+function buildFloor() {
+  const { grid } = readTokens()
+  const size = 1024
+  const canvas = makeCanvas(size)
+  const ctx = canvas.getContext('2d')
+
+  drawGrid(ctx, size, 16, grid, 1.4)
+
+  ctx.globalCompositeOperation = 'destination-in'
+  const fade = ctx.createRadialGradient(
+    size * 0.5,
+    size * 0.5,
     size * 0.04,
     size * 0.5,
     size * 0.5,
-    size * 0.62,
+    size * 0.5,
   )
-  gradient.addColorStop(0, '#3a3a40')
-  gradient.addColorStop(0.55, '#1c1c20')
-  gradient.addColorStop(1, '#0c0c0d')
-  ctx.fillStyle = gradient
+  fade.addColorStop(0, 'rgba(0,0,0,1)')
+  fade.addColorStop(0.6, 'rgba(0,0,0,0.55)')
+  fade.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = fade
   ctx.fillRect(0, 0, size, size)
 
   const texture = new CanvasTexture(canvas)
   texture.colorSpace = SRGBColorSpace
-  backdrop.value = texture
+  texture.anisotropy = 4
+  floor.value?.dispose()
+  floor.value = texture
+}
+
+function repaint() {
+  buildBackdrop()
+  buildFloor()
 }
 
 async function build() {
@@ -147,21 +241,33 @@ async function build() {
   emit('ready')
 }
 
-buildBackdrop()
+repaint()
 build()
 </script>
 
 <template>
   <div ref="root" class="scene" @wheel="onWheel">
     <TresCanvas :fps-limit="24" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
-      <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
+      <!-- A little above the mark and looking slightly down, so the floor is
+           seen as a floor instead of edge-on. -->
+      <TresPerspectiveCamera :position="[0, 22, camZ]" :rotation="[-0.1, 0, 0]" :fov="40" />
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1.6" />
 
-      <!-- The window: a gradient plane behind the mark, the thing the crystal
-           refracts and what gives the box its depth. -->
-      <TresMesh v-if="backdrop" :position="[0, 0, -180]">
-        <TresPlaneGeometry :args="[1400, 1400]" />
+      <!-- The back wall: the stage's gradient and grid. -->
+      <TresMesh v-if="backdrop" :position="[0, 0, WALL_Z]">
+        <TresPlaneGeometry :args="[1600, 1600]" />
         <TresMeshBasicMaterial :map="backdrop" :tone-mapped="false" />
+      </TresMesh>
+
+      <!-- The floor: the same grid, receding. The depth cue. -->
+      <TresMesh v-if="floor" :position="[0, FLOOR_Y, -40]" :rotation="[-Math.PI / 2, 0, 0]">
+        <TresPlaneGeometry :args="[1400, 1400]" />
+        <TresMeshBasicMaterial
+          :map="floor"
+          :transparent="true"
+          :depth-write="false"
+          :tone-mapped="false"
+        />
       </TresMesh>
 
       <LogoModel
@@ -170,22 +276,9 @@ build()
         :tilt="props.tilt"
         :spin="props.spin"
         :dragging="props.dragging"
-        :material="material"
         :running="onScreen && !reduced"
       />
     </TresCanvas>
-
-    <div class="materials">
-      <button
-        v-for="option in MATERIALS"
-        :key="option.id"
-        type="button"
-        :class="{ on: material === option.id }"
-        @click="material = option.id"
-      >
-        {{ option.label }}
-      </button>
-    </div>
   </div>
 </template>
 
@@ -193,41 +286,5 @@ build()
 .scene {
   position: absolute;
   inset: 0;
-}
-
-/*
-  The temporary material chooser, pinned to the bottom of the box. Small and
-  quiet: it is a comparison aid, not part of the design.
-*/
-.materials {
-  position: absolute;
-  /* Above the canvas, which is a sibling that paints over it otherwise. */
-  z-index: 2;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--ink) 70%, transparent);
-}
-
-.materials button {
-  padding: 4px 8px;
-  border: 0;
-  border-radius: 5px;
-  background: none;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg-3);
-  cursor: pointer;
-}
-
-.materials button.on {
-  background: var(--acc);
-  color: var(--on-acc);
 }
 </style>
