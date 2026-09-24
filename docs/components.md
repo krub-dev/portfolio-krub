@@ -270,11 +270,12 @@ builds the mark's geometry — the favicon SVG path extruded, welded and re-norm
 
 ### SceneRig
 The rig around the mark: the camera and the depth. A deep open box — four walls converging on a
-distant far wall, built by hand so the grid is world-uniform and sized so a cell lands on each edge
-— carries the grid and is faded by a `Fog` read from `--ink`, so the tunnel has no visible bottom;
-and the camera sits outside the opening and leans a little with the pointer's `tilt`, always looking
-back at the mark. A child of the canvas, because `useLoop` and `useTresContext` need the renderer.
-See decisions 78 and 80.
+distant far wall, built by hand so the grid is world-uniform, sized to the camera's frustum so its
+opening lands on the stage, and divided into the stage's seven cells — carries the grid and is
+faded by a `Fog` read from `--ink`; it scales with the wheel's zoom so the opening stays put. A
+neutral backlight clears the grid behind the mark, and the camera leans a little with the pointer's
+`tilt`, always looking back at the mark. A child of the canvas, because `useLoop` and
+`useTresContext` need the renderer. See decisions 78–82.
 
 ### LogoModel
 The mesh and everything about how it looks and moves: the polished-metal `MeshStandardMaterial`,

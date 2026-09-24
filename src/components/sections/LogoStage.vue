@@ -36,16 +36,6 @@ const MAX_SPIN = 1.1 // radians, about 63 degrees each way
 const GRID = 72
 const MAX_CELLS = 7
 
-/*
-  Temporary: the two frame finishes, switched to compare. A chooser, not part of
-  the page; it goes when one is picked.
-*/
-const FRAMES = [
-  { id: 'accent', label: 'Accent' },
-  { id: 'bevel', label: 'Bevel' },
-]
-const frameStyle = ref('accent')
-
 const frame = ref(null)
 const stage = ref(null)
 const tilt = ref({ x: 0, y: 0 })
@@ -148,9 +138,6 @@ usePointer((pointer) => {
 })
 
 function onDown(event) {
-  // The frame chooser is a control, not part of the object: a press on it must
-  // not start a drag, or the capture swallows the button's own click.
-  if (event.target.closest('.frames')) return
   if (!stage.value) return
   dragging.value = true
   startX = event.clientX
@@ -196,21 +183,9 @@ function clamp(value) {
       </div>
 
       <!-- The frame, over the canvas and under the slot. -->
-      <div class="rim" :class="frameStyle" aria-hidden="true" />
+      <div class="rim" aria-hidden="true" />
 
       <slot />
-
-      <div class="frames">
-        <button
-          v-for="option in FRAMES"
-          :key="option.id"
-          type="button"
-          :class="{ on: frameStyle === option.id }"
-          @click="frameStyle = option.id"
-        >
-          {{ option.label }}
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -241,11 +216,7 @@ function clamp(value) {
   height: 100%;
   border: 1px solid var(--line);
   background: radial-gradient(80% 80% at 50% 40%, var(--surface) 0%, var(--ink) 100%);
-  /*
-    Visible, not hidden: the canvas is clipped by `.scene` below, and the stage
-    has to let the availability badge break its top edge rather than cut it off.
-  */
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,69 +247,31 @@ function clamp(value) {
 }
 
 /*
-  The frame. Square, sitting on the page's grid like the box, and drawn over the
-  canvas so the box's own edges are covered: whatever the camera's lean does to
-  them, the eye reads the frame and not the seam. Opaque, so it hides rather than
-  merely outlines.
+  The frame. Square, on the page's grid like the box, and drawn over the canvas so
+  the box's own edges are covered: whatever the camera's lean does to them, the
+  eye reads the frame and not the seam.
+
+  It is metal, out of the theme's own greys — `--fg` mixed into `--ink` in bands —
+  so it is a brushed sheen in both themes rather than a colour of its own.
+  `border-image` is what lets a border carry the gradient. The 24px width has to
+  cover the box's lean (about eleven pixels) with room to spare.
 */
 .rim {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /*
-    16px, wider than the eye needs: the camera's lean shifts the box's opening by
-    about eleven pixels, and the band has to cover it.
-  */
-  border: 16px solid var(--ink);
+  border: 24px solid var(--ink);
+  border-image: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--fg) 22%, var(--ink)) 0%,
+      color-mix(in srgb, var(--fg) 6%, var(--ink)) 15%,
+      color-mix(in srgb, var(--fg) 18%, var(--ink)) 32%,
+      color-mix(in srgb, var(--fg) 5%, var(--ink)) 50%,
+      color-mix(in srgb, var(--fg) 16%, var(--ink)) 68%,
+      color-mix(in srgb, var(--fg) 7%, var(--ink)) 100%
+    )
+    1;
   box-shadow: inset 0 0 0 1px var(--line);
-}
-
-/* The hairline in the accent, so the frame follows the palette. */
-.rim.accent {
-  box-shadow: inset 0 0 0 1px var(--acc-text);
-}
-
-/* A lit top edge and a dark bottom one: a physical bevel on the inner sill. */
-.rim.bevel {
-  box-shadow:
-    inset 1px 1px 0 color-mix(in srgb, var(--fg) 16%, transparent),
-    inset -1px -1px 0 color-mix(in srgb, var(--ink) 70%, transparent),
-    inset 0 0 0 1px var(--line);
-}
-
-/*
-  The temporary frame chooser, pinned to the bottom of the box. Small and quiet:
-  it is a comparison aid, not part of the design.
-*/
-.frames {
-  position: absolute;
-  z-index: 2;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--ink) 70%, transparent);
-}
-
-.frames button {
-  padding: 4px 8px;
-  border: 0;
-  border-radius: 5px;
-  background: none;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg-3);
-  cursor: pointer;
-}
-
-.frames button.on {
-  background: var(--acc);
-  color: var(--on-acc);
 }
 
 /* The scene fills the stage and sits over the fallback. `overflow: hidden` clips

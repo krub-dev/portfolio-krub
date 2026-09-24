@@ -2169,3 +2169,23 @@ the stage, and sends the tilt home when it leaves. The scene belongs to its fram
 - **Two frame finishes**, switched by a temporary chooser in `LogoStage`: the hairline in
   `--acc-text`, so the frame follows the palette, or a bevel (a lit top edge, a dark bottom one).
   The band went to 16px, wide enough to hide the lean.
+
+### 82. The grid phase, the zoom back, a neutral backlight and a metal frame
+
+**Date:** 2026-09-24 · **Status:** active
+
+- **The grid was half a cell out of phase.** Drawing the texture's lines on `i * step` put a line
+  through the middle of the opening and none on its edges, so the interior grid ran half a cell
+  behind the page's: it met at the corners and nowhere else. The lines are on the halves now
+  (`(i + 0.5) * step`), which is what makes the two grids coincide.
+- **The zoom comes back, compensated.** The camera moves as before, and the box scales and follows
+  it (`k` on the mesh, and the box's z with it) so its opening stays on the stage at any zoom. A
+  fixed box would take the grid off the page's the moment you scrolled; this keeps seven cells
+  across the opening throughout.
+- **The backlight is neutral.** It was tinted with the accent, which the owner did not want. It is
+  the page's own background now — dark in the dark theme, light in the light one — so it clears the
+  grid behind the mark instead of lighting it in a colour.
+- **The frame is metal.** The accent hairline and the bevel are gone, replaced by one band with a
+  brushed gradient of `--fg` mixed into `--ink` (`border-image`): a sheen in both themes, not a
+  colour. The band is 24px, which has room to cover the lean.
+- **The lean is bigger** (6/4, was 3/2), still spent inside the frame's band.

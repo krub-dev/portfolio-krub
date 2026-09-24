@@ -21,10 +21,10 @@
   - The room is one unlit box of ten triangles and one small grid texture.
   - Never on a phone: the stage is not mounted below 900px (decision 37).
 
-  The camera is fixed: the opening is cut to the stage, so any zoom would take
-  its grid off the page's.
+  The camera zooms; the room scales with it, which keeps its opening on the
+  stage and its grid on the page's, so the zoom moves the mark and nothing else.
 */
-import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import { TresCanvas } from '@tresjs/core'
 import { ExtrudeGeometry } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
@@ -46,14 +46,15 @@ const emit = defineEmits(['ready'])
 const root = ref(null)
 const geometry = shallowRef(null)
 const onScreen = ref(false)
+const zoom = ref(1)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const DEPTH = 12
-// A fixed camera. The room's opening is cut to land exactly on the stage, so a
-// zoom would move it off the page's grid; the depth is fixed and the mark is
-// what answers the pointer.
 const CAM_Z = 205
-const camZ = CAM_Z
+const ZOOM_MIN = 0.82
+const ZOOM_MAX = 1.22
+
+const camZ = computed(() => CAM_Z / zoom.value)
 
 let observer = null
 
@@ -67,6 +68,19 @@ onMounted(() => {
 })
 
 onUnmounted(() => observer?.disconnect())
+
+/*
+  The wheel zooms the camera. The room keeps its opening on the stage by scaling
+  with the distance (SceneRig), so the zoom moves the mark without taking the
+  grid off the page's.
+*/
+function onWheel(event) {
+  const next = zoom.value * (event.deltaY > 0 ? 0.94 : 1.06)
+  const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next))
+  if (clamped === zoom.value) return // at a limit, let the page have the scroll
+  event.preventDefault()
+  zoom.value = clamped
+}
 
 async function build() {
   const svg = await fetch('/assets/img/krub-logo.svg').then((r) => r.text())
@@ -104,7 +118,7 @@ build()
 </script>
 
 <template>
-  <div ref="root" class="scene">
+  <div ref="root" class="scene" @wheel="onWheel">
     <TresCanvas :fps-limit="24" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1.6" />

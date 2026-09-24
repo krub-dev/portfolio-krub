@@ -157,15 +157,15 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
   padding: 14px 26px;
 }
 
-/* Straddling the stage's top edge, so the label reads as a HUD tag breaking the
-   frame's line rather than one more thing over the tunnel's perspective. */
+/* A HUD chip, just inside the frame's top-left corner: on the page's channel so
+   it clears the tunnel's grid behind it rather than fighting the perspective. */
 .availability {
   position: absolute;
-  top: 0;
-  left: 20px;
-  transform: translateY(-50%);
-  padding: 4px 9px 4px 3px;
-  background: var(--ink);
+  top: 30px;
+  left: 30px;
+  padding: 5px 10px 5px 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--ink) 82%, transparent);
 }
 
 /*

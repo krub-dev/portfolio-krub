@@ -265,12 +265,14 @@ hairline inside it over the canvas. The whole stage is magnetic, and only the lo
 Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
-  mark that tilts toward the cursor, spins with a drag and springs back to the front, and zooms
-  with the wheel. Behind it, a deep open box — its four walls converging on a distant far wall, the
-  grid painted on every face — fades into the background through a fog, and the camera leans a
-  little with the pointer so the depth shifts while the mark stays centred. The canvas fills the
-  square stage, the frame covers its edges, and the stage reads as a window onto the room. It is
-  lazy, pauses off-screen and never mounts below 900px (decision 37). See decisions 78 and 80.
+  mark that tilts toward the cursor, spins with a drag and springs back to the front. Behind it a
+  deep open box recedes, its grid painted on every face and fading to the background through a fog,
+  and the camera leans a little with the pointer, so the depth shifts while the mark stays centred.
+  **The opening is cut to the stage** and divided into the stage's own seven cells, so its grid
+  lines fall on the page's at the frame; the box scales with the wheel's zoom to keep it so. A
+  neutral backlight — the theme's own background — clears the grid behind the mark, and a metal
+  `border-image` frame covers the box's edges. It is lazy, pauses off-screen and never mounts below
+  900px (decision 37). See decisions 78–82.
 - **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
   first and fades out once the scene reports ready (decision 77), so a browser without WebGL still
   shows the logo.

@@ -19,10 +19,9 @@
   The texture and the fog are read from the theme tokens and rebuilt when
   `data-theme` or `data-accent` changes.
 */
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
 import {
-  AdditiveBlending,
   BufferGeometry,
   CanvasTexture,
   DoubleSide,
@@ -44,30 +43,38 @@ const props = defineProps({
 // frustum's half-height is `d * tan(fov/2)`, so an opening that size projects to
 // the stage's edges and nothing more. Divide it into the same seven cells the
 // stage is (decision 79) and its grid lines fall on the page's at the frame.
+//
+// The geometry is built at the base distance and the whole box is scaled by the
+// zoom (see `k`), which keeps the opening on the stage at any zoom.
 const FOV = 40
+const BASE_CAM_Z = 205
 const OPENING_Z = 25
 const CELLS = 7
-const ROOM_HALF = (props.camZ - OPENING_Z) * Math.tan((FOV / 2) * (Math.PI / 180))
+const ROOM_HALF = (BASE_CAM_Z - OPENING_Z) * Math.tan((FOV / 2) * (Math.PI / 180))
 const CELL = (ROOM_HALF * 2) / CELLS
 const SPAN = CELL * CELLS
 const ROOM_DEPTH = 700
-const ROOM_CENTER_Z = OPENING_Z - ROOM_DEPTH / 2
+// The zoom: how much nearer the camera is than at rest, and where the box has to
+// sit so its opening still lands on OPENING_Z.
+const k = computed(() => (props.camZ - OPENING_Z) / (BASE_CAM_Z - OPENING_Z))
+const roomZ = computed(() => OPENING_Z - (k.value * ROOM_DEPTH) / 2)
 // Just behind the mark the fog starts, and it has blacked the far wall well
 // before the box ends, so the tunnel has no bottom to see.
 const FOG_NEAR = 240
 const FOG_FAR = 560
-// A touch of lean, spent before the frame's edge: the opening is the stage now,
-// so a big one would pull its edge out from under the frame.
-const PEEK_X = 3
-const PEEK_Y = 2
-// A faint light behind the mark, to rim it against the dark.
+// The lean, sized to the frame: the opening is the stage, so a bigger one would
+// pull its edge out from under the frame's band.
+const PEEK_X = 6
+const PEEK_Y = 4
+// A neutral halo behind the mark, in the theme's own background: dark in the
+// dark theme, light in the light one.
 const BACKLIGHT_Z = -60
-const BACKLIGHT = 150
+const BACKLIGHT = 170
 
 const room = ref(null)
 const roomGeo = ref(null)
 const backlight = ref(null)
-const backlightColor = ref('#ffc800')
+const backlightColor = ref('#0c0c0d')
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const { camera, scene } = useTresContext()
@@ -161,8 +168,14 @@ function buildRoom() {
   ctx.strokeStyle = grid
   ctx.lineWidth = 1
   ctx.beginPath()
+  /*
+    The lines sit on the halves of a cell, not on `i * step`: the stage's own
+    grid puts a line on every edge and none through its middle, because seven
+    whole cells leave the centre mid-cell. Drawing the texture half a cell over
+    is what makes the two grids meet instead of running a cell out of phase.
+  */
   for (let i = 0; i < CELLS; i++) {
-    const p = Math.round(i * step) + 0.5
+    const p = Math.round((i + 0.5) * step) + 0.5
     ctx.moveTo(p, 0)
     ctx.lineTo(p, size)
     ctx.moveTo(0, p)
@@ -189,16 +202,16 @@ function buildFog() {
 }
 
 /*
-  The backlight is a white radial mask; the tint comes from `--acc-solid`, so the
-  halo behind the mark follows the accent. A mask has to be white.
+  The halo is a white radial mask; its colour is the page's own background, set
+  on the material. A mask has to be white.
 */
 function buildBacklight() {
   const size = 256
   const canvas = makeCanvas(size)
   const ctx = canvas.getContext('2d')
   const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  gradient.addColorStop(0, 'rgba(255,255,255,0.22)')
-  gradient.addColorStop(0.45, 'rgba(255,255,255,0.06)')
+  gradient.addColorStop(0, 'rgba(255,255,255,0.85)')
+  gradient.addColorStop(0.5, 'rgba(255,255,255,0.3)')
   gradient.addColorStop(1, 'rgba(255,255,255,0)')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, size, size)
@@ -209,15 +222,17 @@ function buildBacklight() {
   backlight.value = texture
 }
 
-function readAccent() {
+function readBacklight() {
   const css = getComputedStyle(document.documentElement)
-  backlightColor.value = css.getPropertyValue('--acc-solid').trim() || '#ffc800'
+  // The halo is the page's own background: dark in the dark theme, light in the
+  // light one, so it separates the mark without a colour of its own.
+  backlightColor.value = css.getPropertyValue('--ink').trim() || '#0c0c0d'
 }
 
 function repaint() {
   buildRoom()
   buildFog()
-  readAccent()
+  readBacklight()
 }
 
 onMounted(() => {
@@ -258,19 +273,24 @@ onBeforeRender(({ delta }) => {
 </script>
 
 <template>
-  <!-- The room: a deep box open toward the camera, its walls converging. -->
-  <TresMesh v-if="roomGeo" :geometry="roomGeo" :position="[0, 0, ROOM_CENTER_Z]">
+  <!-- The room: a deep box open toward the camera. It scales and moves with the
+       zoom so its opening stays on the stage. -->
+  <TresMesh
+    v-if="roomGeo"
+    :geometry="roomGeo"
+    :position="[0, 0, roomZ]"
+    :scale="[k, k, k]"
+  >
     <TresMeshBasicMaterial :map="room" :side="DoubleSide" :tone-mapped="false" />
   </TresMesh>
 
-  <!-- The backlight, just behind the mark: a soft accent halo to rim it. -->
+  <!-- A neutral halo behind the mark, to clear the grid and rim it. -->
   <TresMesh v-if="backlight" :position="[0, 0, BACKLIGHT_Z]">
     <TresPlaneGeometry :args="[BACKLIGHT, BACKLIGHT]" />
     <TresMeshBasicMaterial
       :map="backlight"
       :color="backlightColor"
       :transparent="true"
-      :blending="AdditiveBlending"
       :depth-write="false"
       :tone-mapped="false"
       :fog="false"
