@@ -7,17 +7,19 @@
   a solid object being looked at rather than as a card being pulled around, and
   it keeps the frame's border and grid on the section's gutter.
 
-  Two gestures, and they share one value:
+  Two gestures, and they never run at once — that was the mistake the first time:
 
-  - **Hover** tilts it a little, toward the cursor. `tilt` is the pointer's
-    position over the stage, normalised to -1..1 and clamped.
-  - **Drag** spins it, and on release it snaps back to the front. `spin` is the
-    dragged angle; the magnetic return lives in the scene, where the render loop
-    already runs, so it costs no second loop here.
+  - **Hover** tilts it a little, toward the cursor.
+  - **Drag** takes over completely: while the button is down the hover is
+    suspended and the logo spins with the pointer. On release it snaps back to
+    the front, eased in the scene's own loop.
 
-  Both are clamped: past ~70 degrees the word stops being a word.
+  **The 2D mark is the fallback.** It paints first and is only hidden once the
+  scene says it is ready, so a browser without WebGL, a failed fetch or a
+  rejected shader all leave the visitor with the logo rather than with an empty
+  box. The scene reports readiness; this decides what to do with it.
 */
-import { defineAsyncComponent, onUnmounted, ref } from 'vue'
+import { defineAsyncComponent, ref } from 'vue'
 
 import { usePointer } from '../../composables/usePointer'
 
@@ -27,12 +29,13 @@ import { usePointer } from '../../composables/usePointer'
 */
 const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 
-const MAX_SPIN = 1.2 // radians, about 70 degrees each way
+const MAX_SPIN = 1.1 // radians, about 63 degrees each way
 
 const stage = ref(null)
 const tilt = ref({ x: 0, y: 0 })
 const spin = ref(0)
 const dragging = ref(false)
+const ready = ref(false)
 
 let startX = 0
 let startSpin = 0
@@ -45,8 +48,8 @@ usePointer((pointer) => {
 
   if (dragging.value) {
     // A full width of travel is a bit more than the clamp, so the limit is felt
-    // rather than hit at the edges of the box.
-    spin.value = clamp(startSpin + ((pointer.x - startX) / rect.width) * 3.2, -MAX_SPIN, MAX_SPIN)
+    // before the pointer reaches the edge of the box.
+    spin.value = clamp(startSpin + ((pointer.x - startX) / rect.width) * 3, -MAX_SPIN, MAX_SPIN)
     return
   }
 
@@ -59,6 +62,9 @@ usePointer((pointer) => {
 })
 
 function onDown(event) {
+  // The material chooser is a control, not part of the object: a press on it
+  // must not start a drag, or the capture swallows the button's own click.
+  if (event.target.closest('.materials')) return
   if (!stage.value) return
   dragging.value = true
   startX = event.clientX
@@ -78,8 +84,6 @@ function onUp(event) {
 function clamp(value) {
   return Math.max(-1, Math.min(1, value))
 }
-
-onUnmounted(() => (dragging.value = false))
 </script>
 
 <template>
@@ -92,9 +96,18 @@ onUnmounted(() => (dragging.value = false))
       @pointercancel="onUp"
     >
       <div class="grid" aria-hidden="true" />
+
+      <!-- The fallback, under the scene. It goes when the scene is ready. -->
+      <div v-show="!ready" class="mark" aria-hidden="true" />
+
       <div class="scene" aria-hidden="true">
         <Suspense>
-          <LogoScene :tilt="tilt" :spin="spin" :dragging="dragging" />
+          <LogoScene
+            :tilt="tilt"
+            :spin="spin"
+            :dragging="dragging"
+            @ready="ready = true"
+          />
         </Suspense>
       </div>
       <slot />
@@ -150,7 +163,17 @@ onUnmounted(() => (dragging.value = false))
   background-size: 40px 40px;
 }
 
-/* The scene fills the stage. The logo inside it is the extruded 3D mesh. */
+/* The 2D logo, masked and painted with the accent token. The fallback, and the
+   thing that paints first. */
+.mark {
+  width: 58%;
+  aspect-ratio: 1.682;
+  background: var(--mark);
+  -webkit-mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
+  mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
+}
+
+/* The scene fills the stage and sits over the fallback. */
 .scene {
   position: absolute;
   inset: 0;

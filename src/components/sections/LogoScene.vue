@@ -10,10 +10,11 @@
 
   - Lazy. TresJS and Three are a chunk of their own; LogoStage mounts the scene
     with defineAsyncComponent, so the initial bundle does not carry it.
-  - Framed at 20fps (`fps-limit`) and capped at 1.5x DPR. A logo does not need
-    60 frames a second, and the reflections make every frame cost more than a
-    flat colour would.
-  - Paused off-screen: an IntersectionObserver drives `running`.
+  - **The loop only runs while the stage is mostly on screen.** The observer
+    waits for 60% of the box, not a sliver, so the reflections cost nothing
+    during the scroll — which is exactly where they were hurting.
+  - Framed at 24fps and capped at 1.5x DPR. A logo does not need 60 frames a
+    second.
   - Never on a phone: the stage is not mounted below 900px (decision 37).
 
   The wheel zooms the camera, not the mesh, so the perspective stays honest. It
@@ -38,6 +39,9 @@ const props = defineProps({
   dragging: { type: Boolean, default: false },
 })
 
+// Tells LogoStage the scene is up, so it can drop its 2D fallback.
+const emit = defineEmits(['ready'])
+
 const MATERIALS = [
   { id: 'metal', label: 'Metal' },
   { id: 'crystal', label: 'Cristal' },
@@ -46,7 +50,7 @@ const MATERIALS = [
 const root = ref(null)
 const geometry = shallowRef(null)
 const onScreen = ref(false)
-const material = ref('metal')
+const material = ref('crystal')
 const zoom = ref(1)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -60,8 +64,10 @@ const camZ = computed(() => CAM_Z / zoom.value)
 let observer = null
 
 onMounted(() => {
+  // 0.6, not "any pixel": the loop is what costs, so it waits until the box is
+  // properly in view rather than waking up as it grazes the edge of the screen.
   observer = new IntersectionObserver(([entry]) => (onScreen.value = entry.isIntersecting), {
-    rootMargin: '100px',
+    threshold: 0.6,
   })
   observer.observe(root.value)
 })
@@ -97,17 +103,18 @@ async function build() {
 
     ExtrudeGeometry does not share vertices between the segments of a curve, so
     every facet of the wall carries its own normal and the polished metal shows
-    each polygon. `mergeVertices` alone does nothing here — it compares the
-    whole vertex, normals included, and they all differ. Dropping the normals
-    first lets it weld by position, and the recomputed normals average across
-    the curve. The bevel keeps its hard edge because its faces meet at a real
-    angle, not a shallow one, so the average does not wash it out.
+    each polygon. `mergeVertices` alone does nothing here — it compares the whole
+    vertex, normals included, and they all differ. Dropping the normals first
+    lets it weld by position, and the recomputed normals average across the
+    curve.
   */
   built.deleteAttribute('normal')
   built = mergeVertices(built, 1e-3)
   built.computeVertexNormals()
   built.center()
   geometry.value = built
+  // The scene has something to draw; the 2D fallback can go.
+  emit('ready')
 }
 
 build()
@@ -115,23 +122,8 @@ build()
 
 <template>
   <div ref="root" class="scene" @wheel="onWheel">
-    <TresCanvas :fps-limit="20" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
+    <TresCanvas :fps-limit="24" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
-
-      <!--
-        The "portal": a grid floor that recedes toward a vanishing point behind
-        the mark, so the box reads as a small room with depth rather than as a
-        flat card. It is one GridHelper — lines, no geometry, no texture — and
-        it parallaxes for free because it lives in the scene with the camera.
-      -->
-      <TresGridHelper
-        :args="[900, 30, '#ffc800', '#3a3a3c']"
-        :position="[0, -150, -260]"
-        :rotation="[-Math.PI / 2, 0, 0]"
-        :material-opacity="0.22"
-        :material-transparent="true"
-      />
-
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1.6" />
       <LogoModel
         v-if="geometry"

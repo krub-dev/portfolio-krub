@@ -16,21 +16,23 @@
   - **The colour is a token.** `--acc-solid` is read from the page and re-read
     when the theme or the accent changes. A material cannot read CSS, so this is
     the one place the value is copied across.
-  - **Two materials, both three's own.** Standard for the polished metal,
-    Physical with `transmission` for the crystal. Neither is a custom shader.
+  - **The mesh is built once and never rebuilt.** The finish changes by swapping
+    `mesh.material`, not by rebuilding the group — rebuilding it threw away the
+    object the canvas had already mounted, which is why the first crystal switch
+    did nothing.
   - **`running` is the optimisation.** Off-screen or under reduced motion the
     renderer's loop is stopped, not left on a still frame.
 
-  The movement is a single value, eased every frame: hover tilts it toward the
-  cursor, drag spins it, and on release the spin settles back to the front — the
-  magnetic snap. The return is slower than the tilt, so it reads as settling
-  rather than as snapping back.
+  The movement is one value, eased every frame: hover tilts it toward the cursor,
+  drag spins it while the button is down, and on release the spin settles back to
+  the front — the magnetic snap. Hover is suspended during a drag so the two
+  never fight.
 
   When the real glTF arrives, the mesh is taken from the loaded scene instead of
   built from `props.geometry`. Lights, environment, colour, movement and pause
   stay.
 */
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
 import {
   Group,
@@ -66,7 +68,6 @@ function makeMaterial(id) {
       transmission: 1,
       thickness: 14,
       ior: 1.5,
-      // A whisper of tint so the crystal takes the accent without going opaque.
       envMapIntensity: 1.4,
     })
   }
@@ -78,17 +79,20 @@ function makeMaterial(id) {
 
 const material = ref(makeMaterial(props.material))
 
-const group = computed(() => {
-  const mesh = new Mesh(props.geometry, material.value)
-  const wrapper = new Group()
-  wrapper.add(mesh)
-  wrapper.scale.set(1.95)
+// Built once. The mesh is what the finish swaps on.
+const mesh = shallowRef(null)
+const group = new Group()
+const build = () => {
+  const built = new Mesh(props.geometry, material.value)
+  mesh.value = built
+  group.add(built)
+  group.scale.set(1.95)
   // SVGLoader lays the shapes out in SVG space (y down), so they come out
   // mirrored in three's y-up world. This one flip puts the mark back the way it
   // reads in the favicon.
-  wrapper.scale.y = -1.95
-  return wrapper
-})
+  group.scale.y = -1.95
+}
+build()
 
 const { renderer, scene } = useTresContext()
 const { onBeforeRender } = useLoop()
@@ -103,7 +107,8 @@ watch(
   (id) => {
     material.value.dispose()
     material.value = makeMaterial(id)
-    group.value.children[0].material = material.value
+    // The swap. The group the canvas mounted is left untouched.
+    if (mesh.value) mesh.value.material = material.value
   },
 )
 
@@ -140,12 +145,12 @@ onBeforeRender(({ elapsed, delta }) => {
   const spinEase = Math.min(1, delta * (props.dragging ? 14 : 2.6))
   smoothSpin += (spinTarget - smoothSpin) * spinEase
 
-  const target = props.tilt
+  // During a drag the hover is off: the spin is the whole story.
+  const target = props.dragging ? { x: 0, y: 0 } : props.tilt
   const ease = Math.min(1, delta * 6)
-  group.value.rotation.y +=
-    (target.x * TILT_Y + Math.sin(elapsed * 0.45) * SWAY + smoothSpin - group.value.rotation.y) *
-    ease
-  group.value.rotation.x += (target.y * TILT_X - group.value.rotation.x) * ease
+  group.rotation.y +=
+    (target.x * TILT_Y + Math.sin(elapsed * 0.45) * SWAY + smoothSpin - group.rotation.y) * ease
+  group.rotation.x += (target.y * TILT_X - group.rotation.x) * ease
 })
 </script>
 
