@@ -110,9 +110,6 @@ function clamp(value) {
         </Suspense>
       </div>
 
-      <!-- The vignette, over the scene and under the slot. -->
-      <div class="vignette" aria-hidden="true" />
-
       <slot />
     </div>
   </div>
@@ -185,26 +182,17 @@ function clamp(value) {
   opacity: 0;
 }
 
-/* The scene fills the stage and sits over the fallback. */
+/*
+  The scene is a window: inset from the stage so the stage's own gradient reads
+  as the mat around it, and given its own frame and radius. The radius and the
+  `overflow: hidden` are also what clip the canvas — a square WebGL canvas left
+  to itself covers the stage's rounded corners and the border reads as broken.
+*/
 .scene {
   position: absolute;
-  inset: 0;
-}
-
-/*
-  The vignette: an inner shadow and a perimeter fade so the room sinks into the
-  frame instead of ending at a hard edge. Decoration, never a hit target, and it
-  comes before the slot so the badge still sits on top.
-*/
-.vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  box-shadow: inset 0 0 48px 6px color-mix(in srgb, var(--ink) 65%, transparent);
-  background: radial-gradient(
-    120% 120% at 50% 45%,
-    transparent 55%,
-    color-mix(in srgb, var(--ink) 55%, transparent) 100%
-  );
+  inset: 9px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
 }
 </style>

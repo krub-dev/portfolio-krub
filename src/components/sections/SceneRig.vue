@@ -20,12 +20,17 @@
   (`--ink`), so the box has no visible far edge. The mark opts out
   (`material.fog = false`, in LogoModel) and stays crisp in the foreground.
 
-  Both the texture and the fog colour are read from the theme tokens and rebuilt
-  when `data-theme` changes, so the room is light in the light theme.
+  **A glow on the far wall** — a soft accent light, additive, tinted from
+  `--acc-solid` — is what makes the room read as a place with its own light
+  rather than a flat grid. It is one more quad and one small mask.
+
+  The textures, the fog and the glow are read from the theme tokens and rebuilt
+  when `data-theme` or `data-accent` changes, so the room is light in the light
+  theme and the light follows the accent.
 */
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
-import { BackSide, CanvasTexture, Fog, SRGBColorSpace } from 'three'
+import { AdditiveBlending, BackSide, CanvasTexture, Fog, SRGBColorSpace } from 'three'
 
 const props = defineProps({
   // Pointer position over the stage, normalised to -1..1, from LogoStage.
@@ -45,8 +50,13 @@ const PEEK_Y = 11
 const FOG_NEAR = 300
 const FOG_FAR = 640
 const CELLS = 16
+// A soft accent light on the far wall, so the room reads as a place with its
+// own light rather than a flat grid.
+const GLOW = 380
 
 const room = ref(null)
+const glow = ref(null)
+const glowColor = ref('#ffc800')
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const { camera, scene } = useTresContext()
@@ -65,11 +75,13 @@ function makeCanvas(size) {
 /*
   The room's grid, painted from the theme's tokens. A flat fill, not the stage's
   radial gradient: a gradient per face would show its own circle on each wall.
+  The grid is `--line`, not the page's fainter `--grid`: inside the box it is the
+  thing that gives the walls their perspective, so it has to read.
 */
 function buildRoom() {
   const css = getComputedStyle(document.documentElement)
   const surface = css.getPropertyValue('--surface').trim() || '#141416'
-  const grid = css.getPropertyValue('--grid').trim() || 'rgba(255,255,255,.045)'
+  const grid = css.getPropertyValue('--line').trim() || 'rgba(255,255,255,.11)'
 
   const size = 512
   const canvas = makeCanvas(size)
@@ -107,24 +119,61 @@ function buildFog() {
   }
 }
 
+/*
+  The glow is a white radial mask, not a colour: the tint comes from the
+  material, which reads `--acc-solid` so the light in the room matches the mark.
+  A mask has to be white, the same way the fade masks above have to be black.
+*/
+function buildGlow() {
+  const size = 256
+  const canvas = makeCanvas(size)
+  const ctx = canvas.getContext('2d')
+  const gradient = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2,
+  )
+  gradient.addColorStop(0, 'rgba(255,255,255,0.6)')
+  gradient.addColorStop(0.4, 'rgba(255,255,255,0.16)')
+  gradient.addColorStop(1, 'rgba(255,255,255,0)')
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, 0, size, size)
+
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  glow.value?.dispose()
+  glow.value = texture
+}
+
+function readAccent() {
+  const css = getComputedStyle(document.documentElement)
+  glowColor.value = css.getPropertyValue('--acc-solid').trim() || '#ffc800'
+}
+
 function repaint() {
   buildRoom()
   buildFog()
+  readAccent()
 }
 
 onMounted(() => {
   observer = new MutationObserver(repaint)
   observer.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-theme'],
+    attributeFilter: ['data-theme', 'data-accent'],
   })
 })
 
 onUnmounted(() => {
   observer?.disconnect()
   room.value?.dispose()
+  glow.value?.dispose()
 })
 
+buildGlow()
 repaint()
 
 onBeforeRender(({ delta }) => {
@@ -146,6 +195,20 @@ onBeforeRender(({ delta }) => {
 </script>
 
 <template>
+  <!-- The accent light on the far wall. Additive, so it only adds to the dark. -->
+  <TresMesh v-if="glow" :position="[0, 0, -ROOM / 2 + 6]">
+    <TresPlaneGeometry :args="[GLOW, GLOW]" />
+    <TresMeshBasicMaterial
+      :map="glow"
+      :color="glowColor"
+      :transparent="true"
+      :blending="AdditiveBlending"
+      :depth-write="false"
+      :tone-mapped="false"
+      :fog="false"
+    />
+  </TresMesh>
+
   <!-- One box, seen from the inside: its far faces are the room. -->
   <TresMesh v-if="room">
     <TresBoxGeometry :args="[ROOM, ROOM, ROOM]" />

@@ -2053,8 +2053,10 @@ repeat either of the two mistakes that sent it out the first time.
   corners have no loose edges — which is what read wrong before. Twelve triangles, one unlit
   material, one 512² grid texture.
 - **The room carries the grid.** The stage's flat 40px CSS grid becomes the room's, with real
-  perspective. The CSS grid stays as the fallback layer under the canvas (it is what shows before
-  the scene is ready, and when there is no WebGL), but the room covers it once it loads.
+  perspective, drawn at `--line` rather than the page's fainter `--grid`: inside the box the grid
+  is what gives the walls their depth, so it has to read. The CSS grid stays as the fallback layer
+  under the canvas (it is what shows before the scene is ready, and when there is no WebGL), but
+  the room covers it once it loads.
 - **The camera peeks.** `SceneRig` leans the camera with the pointer — the same `tilt` the mark
   uses — and always looks back at the mark, so the mark stays centred and the room parallaxes
   around it. The lean is a lerp in the scene's own loop, not a new rAF. The outer frame is CSS and
@@ -2062,15 +2064,21 @@ repeat either of the two mistakes that sent it out the first time.
 - **Fog.** A `Fog` on the scene, coloured from `--ink` and rebuilt on `data-theme`, fades the room's
   far wall so the box has no visible edge. The mark opts out (`material.fog = false`) and stays
   crisp in the foreground.
-- **A CSS vignette.** An inset shadow and a perimeter gradient over the canvas, `pointer-events:
-  none`, sink the room into the frame.
+- **The window.** The canvas is inset 9px inside the stage and given its own `--line` frame and a
+  16px radius, so the stage's gradient reads as the mat around it and the box closes on the
+  corners. The radius and `overflow: hidden` are also what clip the canvas — a square canvas left
+  to itself covers the stage's rounded corners and the border reads as broken. The vignette that
+  used to darken the perimeter is gone: it was what made the corners look open.
+- **A glow on the far wall.** A soft additive light tinted from `--acc-solid` — one quad and one
+  white mask — so the room reads as a place with its own light rather than a flat grid. It follows
+  the accent.
 - **The mark's tilt is softer** (0.5 → 0.34 rad on y, 0.32 → 0.22 on x): the camera leans too now,
   and the two must not add up to a lurch.
 
-`SceneRig` is the new child of the canvas that owns the camera, the fog and the room; `LogoModel`
-keeps the mark. The values are first-pass and meant to be tuned: `ROOM` 620 (wide enough that the
-camera never leaves it at any zoom), `PEEK` 16/11 world units, `FOG_NEAR`/`FOG_FAR` 300/640, 16
-cells.
+`SceneRig` is the new child of the canvas that owns the camera, the fog, the room and the glow;
+`LogoModel` keeps the mark. The values are first-pass and meant to be tuned: `ROOM` 620 (wide
+enough that the camera never leaves it at any zoom), `PEEK` 16/11 world units,
+`FOG_NEAR`/`FOG_FAR` 300/640, 16 cells, and a 380-unit glow.
 
 **One cost, recorded:** the scene now weighs enough that the e2e suite goes from two to four
 failures when Playwright runs its four workers in parallel — each worker holds a WebGL context and

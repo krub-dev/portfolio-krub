@@ -254,11 +254,11 @@ copy, because the animation depends on where the word splits, so they are not in
 
 ### LogoStage
 The hero's square stage and the only thing on the page that turns in 3D. It owns the box, the
-inner grid, the 2D fallback mask, the CSS vignette over the canvas and the pointer gestures — a
-hover tilt and a drag spin that springs back — which it forwards to the scene as `tilt` / `spin` /
-`dragging`. The scene is lazy (`defineAsyncComponent`), so Three never reaches the initial bundle,
-and `HeroSection` is what decides not to mount it below 900px (decision 37). The rotating glow that
-used to live here is gone (decision 71).
+inner grid, the 2D fallback mask, the inset window frame over the canvas and the pointer gestures
+— a hover tilt and a drag spin that springs back — which it forwards to the scene as `tilt` /
+`spin` / `dragging`. The scene is lazy (`defineAsyncComponent`), so Three never reaches the initial
+bundle, and `HeroSection` is what decides not to mount it below 900px (decision 37). The rotating
+glow that used to live here is gone (decision 71).
 
 ### LogoScene
 The `<TresCanvas>`: the light, the wheel-zoom (clamped, and it only takes the gesture while it can
@@ -267,11 +267,12 @@ builds the mark's geometry — the favicon SVG path extruded, welded and re-norm
 `ready` when it is up. The camera, the room and the fog are `SceneRig`'s.
 
 ### SceneRig
-The rig around the mark: the camera, the fog and the room. A `BoxGeometry` with `side: BackSide` —
-the camera sits inside it — carries a grid texture and is faded by a `Fog` read from `--ink`; the
-camera leans with the pointer's `tilt` and always looks back at the mark, so the room parallaxes
-while the mark stays centred. A child of the canvas, because `useLoop` and `useTresContext` need the
-renderer. See decision 78.
+The rig around the mark: the camera, the fog, the room and the glow. A `BoxGeometry` with `side:
+BackSide` — the camera sits inside it — carries a grid texture and is faded by a `Fog` read from
+`--ink`; a soft additive light tinted from `--acc-solid` sits on the far wall; the camera leans
+with the pointer's `tilt` and always looks back at the mark, so the room parallaxes while the mark
+stays centred. A child of the canvas, because `useLoop` and `useTresContext` need the renderer. See
+decision 78.
 
 ### LogoModel
 The mesh and everything about how it looks and moves: the polished-metal `MeshStandardMaterial`
