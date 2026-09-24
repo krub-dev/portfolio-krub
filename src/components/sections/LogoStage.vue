@@ -156,6 +156,10 @@ function onDown(event) {
 
 function onUp(event) {
   dragging.value = false
+  // Clear the drag angles. They are what the next press measures its start from,
+  // so leaving the last one in place made the mark jump back to it on a click.
+  spin.value = 0
+  spinY.value = 0
   if (stage.value?.hasPointerCapture(event.pointerId)) {
     stage.value.releasePointerCapture(event.pointerId)
   }
@@ -273,7 +277,7 @@ function clamp(value) {
     raised lip itself — light on two edges, dark on the other two — over the
     theme's own metal grey, so the frame is a single piece.
   */
-  border: 24px ridge color-mix(in srgb, var(--fg) 30%, var(--ink));
+  border: 24px ridge color-mix(in srgb, var(--fg) 40%, var(--ink));
   box-shadow: inset 0 0 0 1px var(--line);
 }
 
@@ -293,15 +297,15 @@ function clamp(value) {
   border: 24px solid transparent;
   border-image: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--fg) 22%, var(--ink)) 0%,
-      color-mix(in srgb, var(--fg) 6%, var(--ink)) 15%,
-      color-mix(in srgb, var(--fg) 18%, var(--ink)) 32%,
-      color-mix(in srgb, var(--fg) 5%, var(--ink)) 50%,
-      color-mix(in srgb, var(--fg) 16%, var(--ink)) 68%,
-      color-mix(in srgb, var(--fg) 7%, var(--ink)) 100%
+      color-mix(in srgb, var(--fg) 30%, var(--ink)) 0%,
+      color-mix(in srgb, var(--fg) 3%, var(--ink)) 15%,
+      color-mix(in srgb, var(--fg) 26%, var(--ink)) 33%,
+      color-mix(in srgb, var(--fg) 2%, var(--ink)) 50%,
+      color-mix(in srgb, var(--fg) 24%, var(--ink)) 68%,
+      color-mix(in srgb, var(--fg) 4%, var(--ink)) 100%
     )
     1;
-  opacity: 0.78;
+  opacity: 0.85;
 }
 
 /* The scene fills the stage and sits over the fallback. `overflow: hidden` clips

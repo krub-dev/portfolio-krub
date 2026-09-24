@@ -2224,3 +2224,18 @@ the stage, and sends the tilt home when it leaves. The scene belongs to its fram
   *border* box — pulled out by the border's own width and clipped back to it — carrying the exact
   stops the frame had before, at an opacity low enough (0.78) that the ridge's lit and shaded edges
   still read under it.
+
+### 85. The click jump, a softer light, and more frame contrast
+
+**Date:** 2026-09-24 · **Status:** active
+
+- **A click no longer throws the mark.** `spin` and `spinY` kept the last drag angle when the
+  pointer came up, and the next press measured its start from them — so a plain click snapped the
+  mark back to wherever it had last been orbited. They are cleared on release, which is what makes
+  the mark rest between gestures.
+- **The light is softer.** The hot spots were the generated environment's emissive panels — Three's
+  `RoomEnvironment` through a PMREM, not an HDRI file — plus the directional light. The directional
+  came down to 1 and the metal's roughness up to 0.25, which spreads the highlights instead of
+  pointing them at one angle.
+- **The frame carries more contrast**: a lighter ridge grey and a wider spread in the brushed
+  gradient, at 0.85 opacity.
