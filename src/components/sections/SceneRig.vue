@@ -49,7 +49,7 @@ const PEEK_Y = 11
 // The fog starts behind the mark and ends just short of the far wall.
 const FOG_NEAR = 300
 const FOG_FAR = 640
-const CELLS = 16
+const CELLS = 12
 // A soft accent light on the far wall, so the room reads as a place with its
 // own light rather than a flat grid.
 const GLOW = 380
@@ -75,13 +75,14 @@ function makeCanvas(size) {
 /*
   The room's grid, painted from the theme's tokens. A flat fill, not the stage's
   radial gradient: a gradient per face would show its own circle on each wall.
-  The grid is `--line`, not the page's fainter `--grid`: inside the box it is the
-  thing that gives the walls their perspective, so it has to read.
+  It uses the page's own `--grid` and is sized so a cell lands near the page's
+  72px at the far wall — the closest the box can get to continuing the grid
+  outside it.
 */
 function buildRoom() {
   const css = getComputedStyle(document.documentElement)
   const surface = css.getPropertyValue('--surface').trim() || '#141416'
-  const grid = css.getPropertyValue('--line').trim() || 'rgba(255,255,255,.11)'
+  const grid = css.getPropertyValue('--grid').trim() || 'rgba(255,255,255,.045)'
 
   const size = 512
   const canvas = makeCanvas(size)
@@ -136,8 +137,8 @@ function buildGlow() {
     size / 2,
     size / 2,
   )
-  gradient.addColorStop(0, 'rgba(255,255,255,0.6)')
-  gradient.addColorStop(0.4, 'rgba(255,255,255,0.16)')
+  gradient.addColorStop(0, 'rgba(255,255,255,0.28)')
+  gradient.addColorStop(0.4, 'rgba(255,255,255,0.07)')
   gradient.addColorStop(1, 'rgba(255,255,255,0)')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, size, size)

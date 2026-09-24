@@ -18,7 +18,7 @@
 export const copy = {
   hero: {
     en: {
-      badge: 'Available for work',
+      badge: 'Available',
       line1: 'I build things',
       line2: 'that hold up',
       line3pre: 'on the ',
@@ -27,7 +27,7 @@ export const copy = {
       body: 'Full Stack Developer in Murcia, open to Barcelona and remote, leaning into backend: Java 17 with Spring Boot, Node and Express, and relational databases. Vue on the front when needed. I used to do 3D, and it still shows in how I look at things.',
     },
     es: {
-      badge: 'Disponible para trabajar',
+      badge: 'Disponible',
       line1: 'Desarrollo cosas',
       line2: 'que aguantan',
       line3pre: 'el ',

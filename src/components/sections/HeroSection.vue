@@ -161,8 +161,8 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
    the gestures live next to the markup they drive. */
 .availability {
   position: absolute;
-  top: 14px;
-  left: 22px;
+  top: 18px;
+  left: 24px;
 }
 
 /*

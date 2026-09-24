@@ -183,16 +183,14 @@ function clamp(value) {
 }
 
 /*
-  The scene is a window: inset from the stage so the stage's own gradient reads
-  as the mat around it, and given its own frame and radius. The radius and the
-  `overflow: hidden` are also what clip the canvas — a square WebGL canvas left
-  to itself covers the stage's rounded corners and the border reads as broken.
+  The scene fills the stage and sits over the fallback. The radius and
+  `overflow: hidden` are what clip the canvas — a square WebGL canvas left to
+  itself covers the stage's rounded corners and the border reads as broken.
 */
 .scene {
   position: absolute;
-  inset: 9px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
+  inset: 0;
+  border-radius: 24px;
   overflow: hidden;
 }
 </style>

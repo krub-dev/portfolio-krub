@@ -266,19 +266,20 @@ whole stage is magnetic, and only the logo inside it tilts. Inside:
   with the wheel. Behind it, a single `BackSide` box is a room seen from the inside — its grid in
   real perspective, its far wall faded into the background by a fog and lit by a soft accent glow —
   and the camera leans with the pointer so the room parallaxes while the mark stays centred. The
-  canvas is inset and framed inside the stage, so the stage reads as a window onto the room. It is
-  lazy, pauses off-screen and never mounts below 900px (decision 37). See decision 78.
+  canvas fills the stage and is clipped to its rounded frame, so the stage reads as a window onto
+  the room. It is lazy, pauses off-screen and never mounts below 900px (decision 37). See decision
+  78.
 - **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
   first and fades out once the scene reports ready (decision 77), so a browser without WebGL still
   shows the logo.
-- **Availability indicator**, top left (`top:14px; left:22px`): a mono row of 10px uppercase,
+- **Availability indicator**, top left (`top:18px; left:24px`): a mono row of 10px uppercase,
   `letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two
   layers inside a 5×5px container:
   - core: a solid `#39D98A` circle filling the container, **not animated**;
   - ring: `inset:-5px`, `border:1px solid #39D98A`, `border-radius:50%`, animation
     `dotHalo 2.6s cubic-bezier(.15,.6,.3,1) infinite` — born small, appears, grows and fades
     out completely before restarting.
-  - Text: "Available for work" / "Disponible para trabajar".
+  - Text: "Available" / "Disponible".
 
 The stage carries **no label and no explanatory text**.
 
