@@ -261,9 +261,14 @@ Right column, the **square stage**: `aspect-ratio:1/1`, `max-height:min(58vh,520
 and a **40px** inner grid — not the page's 72px, which reads as noise inside a 520px box. The
 whole stage is magnetic, and only the logo inside it tilts. Inside:
 
-- The logo at 58% of the width, as a mask over `var(--mark)`, with **3D parallax**: it
-  follows the mouse with `perspective(700px) rotateY(±14deg) rotateX(∓10deg)`, proportional
-  to the cursor's distance from the centre of the stage.
+- **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
+  mark that tilts toward the cursor, spins with a drag and springs back to the front, and zooms
+  with the wheel. It is lazy, pauses off-screen and never mounts below 900px (decision 37). The
+  scene is only the mark — the canvas is transparent, so the stage's own gradient and grid show
+  through (decision 76).
+- **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
+  first and fades out once the scene reports ready (decision 77), so a browser without WebGL still
+  shows the logo.
 - **Availability indicator**, top left (`top:14px; left:22px`): a mono row of 10px uppercase,
   `letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two
   layers inside a 5×5px container:
@@ -273,8 +278,7 @@ whole stage is magnetic, and only the logo inside it tilts. Inside:
     out completely before restarting.
   - Text: "Available for work" / "Disponible para trabajar".
 
-The stage is a reserved slot for a future 3D scene: it carries **no label and no explanatory
-text**.
+The stage carries **no label and no explanatory text**.
 
 ### 3.3 Marquee
 
@@ -892,8 +896,8 @@ These are deliberate. They are not rough edges to be tidied up later:
 - The yellow `#FFC800` is identical in both themes **as a fill**; what changes is whatever is
   painted with `--mark` or `--acc-text`.
 - The giant section number **overlaps** the title on purpose.
-- The square hero stage is empty on purpose: it is the slot for a future 3D scene. No
-  explanatory text goes inside it.
+- The square hero stage holds the 3D logo and carries **no explanatory text** inside it. The scene
+  is only the mark; the box around it is CSS.
 - There are no filler cards in projects and no user hints ("click to open", "optional
   section", photo captions). They were removed deliberately.
 - The lemon enters in a straight line from the right, with no tilt, and its body is flat

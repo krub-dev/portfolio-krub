@@ -48,7 +48,7 @@ App
 ├─ main (HomeView)
 │   ├─ HeroSection
 │   │   ├─ BrandName     (the animated KIKO / RUBIO reveal)
-│   │   ├─ LogoStage     (3D logo parallax; slot holds the badge — desktop only)
+│   │   ├─ LogoStage     (the 3D logo; slot holds the badge — desktop only)
 │   │   │   └─ AvailabilityBadge
 │   │   └─ BaseButton ×2
 │   ├─ MarqueeBar
@@ -250,11 +250,25 @@ The KIKO / RUBIO reveal at the top of the hero. A pure CSS animation — the let
 copy, because the animation depends on where the word splits, so they are not in `src/data/`.
 
 ### LogoStage
-The reserved slot for the 3D scene, and the only thing on the page that tilts in 3D. It owns the
-mask, the inner grid and the parallax that follows the pointer; the `.mark` element inside it is
-where a Three.js scene would go. The box and the magnetic pull sit on the frame around the stage.
-The rotating glow that used to live here is gone (decision 71). `HeroSection` is what decides not
-to mount it below 900px.
+The hero's square stage and the only thing on the page that turns in 3D. It owns the box, the
+inner grid, the 2D fallback mask and the pointer gestures — a hover tilt and a drag spin that
+springs back — which it forwards to the scene as `tilt` / `spin` / `dragging`. The scene is lazy
+(`defineAsyncComponent`), so Three never reaches the initial bundle, and `HeroSection` is what
+decides not to mount it below 900px (decision 37). The rotating glow that used to live here is
+gone (decision 71).
+
+### LogoScene
+The `<TresCanvas>`: the straight-on camera, the light, the wheel-zoom (clamped, and it only takes
+the gesture while it can still move), the off-screen pause (an IntersectionObserver at 60%) and
+the fps and DPR caps. It builds the geometry — the favicon SVG path extruded, welded and
+re-normalled — and emits `ready` when it is up. It holds no backdrop: the canvas is transparent
+over the CSS stage (decision 76).
+
+### LogoModel
+The mesh and everything about how it looks and moves: the polished-metal `MeshStandardMaterial`,
+the generated `RoomEnvironment` (a PMREM), the accent colour read from `--acc-solid`, and the
+hover sway, drag spin and magnetic return. It is a child of the canvas on purpose — `useLoop` and
+`useTresContext` need the renderer the canvas provides. Built once and never rebuilt.
 
 ---
 
@@ -351,7 +365,8 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useBodyScrollLock(active)` | locks scrolling while the modal is open |
 
 One single `requestAnimationFrame` drives everything that follows the mouse (cursor, lemon
-pupils, logo parallax, magnetic hover). No per-component loops.
+pupils, the logo's tilt, magnetic hover). No per-component loops. The 3D logo is the one
+exception: Three's renderer owns its own loop, paused while off-screen.
 
 ---
 
