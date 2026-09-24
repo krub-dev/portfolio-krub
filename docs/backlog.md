@@ -39,10 +39,10 @@ the refreshed site content with the certifications tab. None of it is published 
 
 `WEB3FORMS_KEY` is set in Vercel, so the contact form works in production.
 
-**The substantial work still open:** the 3D logo (the largest; needs the Blender export first),
-the OG banner and structured-data refresh, the LinkedIn update, the GitHub profile README, the
-prose reread, project screenshots, the compact CV and a base cover letter, Bing Webmaster Tools,
-the Vercel DNS change, and making the repository public.
+**The substantial work still open:** the real glTF model for the 3D logo (the extruded SVG mark
+ships, but the Blender export and its loading percentage do not), the structured-data refresh, the
+LinkedIn update, the GitHub profile README, the prose reread, Bing Webmaster Tools, the Vercel DNS
+change, and making the repository public.
 
 ---
 
@@ -148,14 +148,13 @@ the Vercel DNS change, and making the repository public.
   bloom. It follows the accent and the theme through `--glow-dim`, and reduced motion stops the turn
   and leaves the ring. It cost the stage a wrapper, because the glow has to paint behind it. See
   decision 52.
-- [ ] **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
-  carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the
-  inner grid, so a Three.js scene replaces the `.mark` element and nothing else has to move.
-  Built with **TresJS** (github.com/Tresjs/tres), the Vue wrapper around Three.js, rather than
-  Three.js directly. Needs the model out of Blender first, exported as glTF/GLB. Read the mobile note below
-  before starting. When it lands, its download is the only one on this site worth reporting: a real
-  percentage from `THREE.LoadingManager` inside the stage, and a delayed shimmer while it arrives —
-  see the skeleton note below and decision 54.
+- [x] **The 3D logo.** Built on 2026-09-24: the hero mark is a WebGL scene now — the favicon SVG
+  path extruded into a polished-metal object that tilts, spins and zooms, with the 2D mask kept as
+  the fallback. TresJS (github.com/Tresjs/tres), lazy and never mounted below 900px. The crystal
+  finish and the in-scene backdrop were both built and then removed. See decisions 75–77. **What
+  is still open is the real model:** the mark is a procedural extrusion of the SVG, not the Blender
+  export (glTF/GLB), and because there is no download to report there is no `THREE.LoadingManager`
+  percentage or arrival shimmer yet — see the skeleton note below and decision 54.
 - [x] **Rethink the stack section.** Done on 2026-09-17: four blocks in two columns, tiles from 44px
   to 60px and labels from 11px to 13px (48px tiles on mobile, where 60px was eating the screen), the
   grid monochrome at rest — each logo drawn twice, a held-back grey copy under a colour one — and the
@@ -229,8 +228,8 @@ the Vercel DNS change, and making the repository public.
   is an iPhone 5 and decision 37 accepted it rather than compromise. Reopen this only if the
   mobile hero is redesigned as a whole, because the functional symptom is gone.
 - [x] **Decide whether the 3D scene runs on a phone.** Answered by decision 37: `LogoStage` does
-  not mount below 900px, so the parallax never subscribes and a WebGL scene would cost nothing
-  because it would not be there. The scene itself is still the 3D logo task above.
+  not mount below 900px, so the WebGL scene is never created and costs nothing. The scene is built
+  now (decisions 75–77).
 - [x] **The footer slides in on a phone too.** Fixed in `9df04e8` (decision 37), before this was
   ever written down as pending: the footer no longer sits in the layout from the first frame
   below 900px, and it shares `usePastHero` with the lemon, so the two arrive together at the end
@@ -241,6 +240,18 @@ the Vercel DNS change, and making the repository public.
 
 All three were real when the roadmap's "Later" list was written and are closed now; the group is
 kept as the record rather than deleted.
+
+## Testing
+
+- [ ] **The e2e suite goes flaky while the hero is on screen.** One to two tests fail on `desktop`
+  in a full run — earlier four to eight — all of them timing tests that scroll or measure with the
+  hero visible: the nav link following the scroll, and the modal's Escape-and-focus-return. The
+  cause is not the tests' logic but the clock: mounting the WebGL scene forces a `ReadPixels` (the
+  PMREM environment, the `GPU stall` warning) and the browser is briefly slow enough that the
+  default `expect` timeouts expire. Removing the crystal finish (decision 75) cut the failures
+  down, so the direction is right. The fix is to make those flows wait on a condition rather than
+  on the clock — assert the state, not a fixed pause — and, if that is not enough, to stop the
+  scene's loop from running during the suite.
 
 ## Ideas (future)
 

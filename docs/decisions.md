@@ -1981,3 +1981,62 @@ on each pager.
   new light background (measured: `--fg` 16–17:1, `--fg-2` 6.3–7.7:1, `--fg-3` 4.52–5.29:1,
   `--acc-text` 4.56–12.6:1). Lighthouse is 100 on accessibility and best practices in both themes;
   the only audit still red is `bf-cache`, which Chrome reports as "not actionable".
+
+### 75. The hero stage is a real 3D logo, and it is metal only
+
+**Date:** 2026-09-24 · **Status:** active
+
+The stage stopped being a slot. `LogoStage` still owns the box, the inner grid and the pointer
+gestures, but the mark inside it is a WebGL scene now: the same vector path as the favicon
+(`public/assets/img/krub-logo.svg`), parsed by Three's `SVGLoader` and extruded, so the logo has
+real depth instead of the flat mask. TresJS renders it, lazy through `defineAsyncComponent`, and
+never below 900px (decision 37).
+
+Four calls shaped it:
+
+- **Metal, and only metal.** A crystal finish (`MeshPhysicalMaterial` with `transmission`) was
+  built and then removed. Transmission refracts what is *behind* the object, and the mark is a
+  flat extrusion: at normal incidence its Fresnel is about 5%, so it read as a dark mass, and the
+  only way to make glass legible was a detailed backdrop — which is the whole of decision 76. It
+  also forces a per-frame `ReadPixels` (`GPU stall`), the cost that was making the e2e suite
+  flaky. The polished `MeshStandardMaterial` is the finish that earned its place.
+- **The walls are welded and re-normalled.** `ExtrudeGeometry` does not share vertices between the
+  segments of a curve, so every facet carries its own normal and the polished metal showed each
+  polygon. Dropping the normals, `mergeVertices` by position and `computeVertexNormals` averages
+  them across the curve without rounding the edges.
+- **The drag is a magnetic snap.** Hover tilts it a little; a drag takes over completely and spins
+  it with the pointer; on release it eases back to the front, in the scene's own loop.
+- **The loop is paused off-screen** (IntersectionObserver at 60%), framed at 24fps and capped at
+  1.5x DPR. The wheel zooms the camera, clamped, and only while it can still move — at either end
+  the page keeps its scroll.
+
+The 2D mask is not gone: it is the fallback (decision 77).
+
+### 76. The 3D scene is only the mark; the box stays CSS
+
+**Date:** 2026-09-24 · **Status:** active
+
+The first attempt at depth built a second copy of the stage *inside* the scene: a back wall
+carrying the gradient and the grid, and a receding floor whose lines converged toward a vanishing
+point, with the camera lifted and tilted so the floor read as a floor. It was painted from the CSS
+tokens (`--surface`, `--ink`, `--grid`) and rebuilt on `data-theme`, so it was light in the light
+theme.
+
+It was removed. Two reasons. It duplicated what the stage already paints, so the box had two
+grids to keep in step. And the canvas is not clipped to the stage's radius — it is the stage's
+`overflow:hidden` that rounds the corners — so the wall and the floor spilled past the radius and
+the box's corners read wrong. The canvas is transparent now, the CSS stage shows through, and the
+scene is only the mark. The straight-on camera (`[0, 0, camZ]`, `fov 40`) came back with it.
+
+### 77. The 2D mark is the fallback, and it fades
+
+**Date:** 2026-09-24 · **Status:** active
+
+The PNG mask over `var(--mark)` paints first and is what a browser without WebGL, a failed fetch
+or a rejected shader falls back to. The scene reports readiness with a `ready` emit, and the mark
+is not removed: it fades (`opacity`, 0.4s) so the hand-off from the flat mark to the scene is a
+crossfade instead of a pop.
+
+One trap, learned the hard way: `ready` is emitted by the scene's geometry build, not by the model
+that draws it, so a `LogoModel` that throws still leaves the mark fading onto an empty stage. The
+fade only makes sense while the scene is actually there — the two have to stay in step.

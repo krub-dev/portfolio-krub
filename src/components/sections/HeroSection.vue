@@ -3,9 +3,9 @@
   The hero: name, headline, paragraph, two CTAs on the left; the square stage
   with the logo on the right.
 
-  The stage on the right is LogoStage: it owns the logo, the inner grid and the
-  3D parallax. The availability badge is passed into its slot, because it sits
-  inside the stage but has nothing to do with the tilt.
+  The stage on the right is LogoStage: it owns the 3D logo, the inner grid and
+  the pointer gestures. The availability badge is passed into its slot, because
+  it sits inside the stage but has nothing to do with the tilt.
 
   On a phone there is no stage at all — see the note above the media query in
   the styles — so the badge moves into the text column instead.
@@ -158,7 +158,7 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 }
 
 /* The stage, its grid and the logo all moved to LogoStage.vue in step 8, so
-   the parallax lives next to the markup it drives. */
+   the gestures live next to the markup they drive. */
 .availability {
   position: absolute;
   top: 14px;
@@ -177,16 +177,15 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
   The stage is what does not fit, so on a phone it is not rendered at all.
   Every way of keeping it was worse than losing it: shrunk to fit it became a
   ~130px square holding a logo that is already in the navbar directly above it,
-  with the availability badge wrapping onto two lines inside it. An empty box
-  reserved for a 3D scene earns its space on a desktop, where it is half the
+  with the availability badge wrapping onto two lines inside it. A box that
+  holds the 3D logo earns its space on a desktop, where it is half the
   composition. On a phone it was taking the marquee's place to show a smaller
   copy of the logo.
 
   Two things follow. The badge moves into the text column, since it was living
-  inside the stage — that is the v-if in the script. And the parallax never
-  subscribes on a phone, because LogoStage does not mount, which also answers
-  the question of what a WebGL scene would cost on a mid-range device: nothing,
-  it will not be there.
+  inside the stage — that is the v-if in the script. And the WebGL scene never
+  mounts on a phone, because LogoStage does not mount, so it costs nothing on a
+  mid-range device: it is not there.
 */
 @media (max-width: 900px) {
   .hero {

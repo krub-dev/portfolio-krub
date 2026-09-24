@@ -103,7 +103,8 @@ src/
   belong to a specific element rather than to the theme — the availability dot's green and
   Limonacho's palette — and the design spec names each one.
 - **One `requestAnimationFrame`** for everything that follows the mouse: the custom cursor, the
-  magnetic hover, the logo parallax and the lemon's pupils all subscribe to a single loop.
+  magnetic hover and the lemon's pupils all subscribe to a single loop. The 3D logo is the one
+  exception — Three's renderer owns its own loop, paused while off-screen.
 - **Content and interface are separate.** Sentences I wrote live in `src/data/`, with both
   languages side by side in one file. Strings the interface needs live in `src/locales/`.
 
