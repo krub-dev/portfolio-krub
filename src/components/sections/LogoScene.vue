@@ -6,9 +6,10 @@
   parsed by Three's SVGLoader and extruded — which is the whole reason a vector
   copy exists: an ExtrudeGeometry needs outlines, and a raster PNG has none.
 
-  The scene is the mark and the rig around it (SceneRig): a room box seen from
-  the inside, a fog and a camera that leans with the pointer. The room replaces
-  the stage's flat grid; the stage keeps its border, its radius and its gradient.
+  The scene is the mark and the rig around it (SceneRig): a deep box open at the
+  front, its grid fading into the page's background, and a camera that leans a
+  little with the pointer. The box's opening is cut to land exactly on the stage,
+  so its grid lines fall on the page's own grid at the frame.
 
   It is deliberately cheap for what it is:
 
@@ -17,14 +18,13 @@
   - **The loop only runs while the stage is mostly on screen** (60%), so the
     reflections cost nothing during the scroll.
   - Framed at 24fps and capped at 1.5x DPR.
-  - The room is one unlit 12-triangle box and one small grid texture.
+  - The room is one unlit box of ten triangles and one small grid texture.
   - Never on a phone: the stage is not mounted below 900px (decision 37).
 
-  The wheel zooms the camera, not the mesh, so the perspective stays honest. It
-  is clamped, and it only takes the gesture while it can still move — at either
-  end the page keeps its scroll.
+  The camera is fixed: the opening is cut to the stage, so any zoom would take
+  its grid off the page's.
 */
-import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import { TresCanvas } from '@tresjs/core'
 import { ExtrudeGeometry } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
@@ -46,26 +46,14 @@ const emit = defineEmits(['ready'])
 const root = ref(null)
 const geometry = shallowRef(null)
 const onScreen = ref(false)
-const zoom = ref(1)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/*
-  The three ways to dress the depth, switched to compare. Temporary: this is a
-  chooser, not part of the page, and goes when one is picked.
-*/
-const MODES = [
-  { id: 'grid', label: 'Grid' },
-  { id: 'rings', label: 'Rings' },
-  { id: 'both', label: 'Both' },
-]
-const mode = ref('grid')
-
 const DEPTH = 12
+// A fixed camera. The room's opening is cut to land exactly on the stage, so a
+// zoom would move it off the page's grid; the depth is fixed and the mark is
+// what answers the pointer.
 const CAM_Z = 205
-const ZOOM_MIN = 0.82
-const ZOOM_MAX = 1.22
-
-const camZ = computed(() => CAM_Z / zoom.value)
+const camZ = CAM_Z
 
 let observer = null
 
@@ -79,14 +67,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => observer?.disconnect())
-
-function onWheel(event) {
-  const next = zoom.value * (event.deltaY > 0 ? 0.94 : 1.06)
-  const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next))
-  if (clamped === zoom.value) return // at a limit, let the page have the scroll
-  event.preventDefault()
-  zoom.value = clamped
-}
 
 async function build() {
   const svg = await fetch('/assets/img/krub-logo.svg').then((r) => r.text())
@@ -124,12 +104,12 @@ build()
 </script>
 
 <template>
-  <div ref="root" class="scene" @wheel="onWheel">
+  <div ref="root" class="scene">
     <TresCanvas :fps-limit="24" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1.6" />
 
-      <SceneRig :tilt="props.tilt" :cam-z="camZ" :mode="mode" />
+      <SceneRig :tilt="props.tilt" :cam-z="camZ" />
 
       <LogoModel
         v-if="geometry"
@@ -140,18 +120,6 @@ build()
         :running="onScreen && !reduced"
       />
     </TresCanvas>
-
-    <div class="modes">
-      <button
-        v-for="option in MODES"
-        :key="option.id"
-        type="button"
-        :class="{ on: mode === option.id }"
-        @click="mode = option.id"
-      >
-        {{ option.label }}
-      </button>
-    </div>
   </div>
 </template>
 
@@ -159,40 +127,5 @@ build()
 .scene {
   position: absolute;
   inset: 0;
-}
-
-/*
-  The temporary depth chooser, pinned to the bottom of the box. Small and quiet:
-  it is a comparison aid, not part of the design.
-*/
-.modes {
-  position: absolute;
-  z-index: 2;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--ink) 70%, transparent);
-}
-
-.modes button {
-  padding: 4px 8px;
-  border: 0;
-  border-radius: 5px;
-  background: none;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg-3);
-  cursor: pointer;
-}
-
-.modes button.on {
-  background: var(--acc);
-  color: var(--on-acc);
 }
 </style>

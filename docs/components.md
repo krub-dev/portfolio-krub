@@ -266,17 +266,15 @@ used to live here is gone (decision 71).
 The `<TresCanvas>`: the light, the wheel-zoom (clamped, and it only takes the gesture while it can
 still move), the off-screen pause (an IntersectionObserver at 60%) and the fps and DPR caps. It
 builds the mark's geometry — the favicon SVG path extruded, welded and re-normalled — and emits
-`ready` when it is up. The camera and the depth are `SceneRig`'s. It also carries the **temporary**
-Grid / Rings / Both chooser while the depth treatment is picked (decision 80).
+`ready` when it is up. The camera and the depth are `SceneRig`'s.
 
 ### SceneRig
 The rig around the mark: the camera and the depth. A deep open box — four walls converging on a
 distant far wall, built by hand so the grid is world-uniform and sized so a cell lands on each edge
-— carries the grid and is faded by a `Fog` read from `--ink`; an optional `InstancedMesh` of square
-frames (a `shallowRef`, so Vue leaves its matrices alone) recedes down the same axis, tinted from a
-hint of the accent to `--ink`; and the camera sits outside the opening and leans a little with the
-pointer's `tilt`, always looking back at the mark. `mode` picks the grid tunnel, the rings or both
-(decision 80). A child of the canvas, because `useLoop` and `useTresContext` need the renderer.
+— carries the grid and is faded by a `Fog` read from `--ink`, so the tunnel has no visible bottom;
+and the camera sits outside the opening and leans a little with the pointer's `tilt`, always looking
+back at the mark. A child of the canvas, because `useLoop` and `useTresContext` need the renderer.
+See decisions 78 and 80.
 
 ### LogoModel
 The mesh and everything about how it looks and moves: the polished-metal `MeshStandardMaterial`,

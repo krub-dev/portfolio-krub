@@ -157,12 +157,15 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
   padding: 14px 26px;
 }
 
-/* The stage, its grid and the logo all moved to LogoStage.vue in step 8, so
-   the gestures live next to the markup they drive. */
+/* Straddling the stage's top edge, so the label reads as a HUD tag breaking the
+   frame's line rather than one more thing over the tunnel's perspective. */
 .availability {
   position: absolute;
-  top: 18px;
-  left: 24px;
+  top: 0;
+  left: 20px;
+  transform: translateY(-50%);
+  padding: 4px 9px 4px 3px;
+  background: var(--ink);
 }
 
 /*

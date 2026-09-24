@@ -2138,6 +2138,34 @@ Two ideas from the owner, off a reference the model drew.
   `instanceColor`, not alpha; and the `InstancedMesh` must be a `shallowRef`, or Vue's reactive
   proxy trips the renderer over its read-only matrices.
 
-Three ways to dress the depth are built — the grid tunnel, the rings, both — and a **temporary
-chooser** in `LogoScene` (Grid / Rings / Both) switches between them so they can be compared. It is
-a comparison aid with hardcoded labels, not part of the page, and comes out when one is picked.
+Three ways to dress the depth were built — the grid tunnel, the rings, both — behind a temporary
+Grid / Rings / Both chooser in `LogoScene`. The owner picked the **grid tunnel**: the rings and the
+combination read badly, and both the chooser and the rings were removed. The deep grid box and its
+fog are what ship.
+
+The hover is scoped to the frame, too. `LogoStage` already knew the stage's box, but it tilted the
+mark from the pointer's position on the whole page; it now reads the pointer only while it is over
+the stage, and sends the tilt home when it leaves. The scene belongs to its frame, not to the page.
+
+### 81. The opening is cut to the stage, a backlight, and the badge moves
+
+**Date:** 2026-09-24 · **Status:** active
+
+- **The box's opening is now the stage.** Its half-size is `d * tan(fov/2)` at its distance, so an
+  opening that size projects to the stage's edges and nothing more; divided into the same seven
+  cells the stage is (decision 79), its grid lines fall on the page's at the frame. The interior
+  still converges — that is what perspective is, and the one thing that will not square — but the
+  first lines and the corners land, which is what the owner asked for.
+- **The camera zoom is gone.** With the opening cut to the stage, a zoom moves it off the grid: the
+  two cannot both hold. The camera is fixed and the depth is static; the mark is what answers the
+  pointer.
+- **A backlight.** A soft additive halo tinted from `--acc-solid`, just behind the mark, to rim the
+  typography against the dark.
+- **The fog closes in** (240/560, was 300/900): the far end is black by the time the tunnel ends, so
+  the logo stands out with more volume.
+- **The badge** straddles the stage's top edge, `--ink` behind it, so it breaks the frame's line and
+  reads as a HUD tag instead of one more thing over the tunnel. That is why the stage no longer
+  clips its own overflow — the canvas is clipped by the canvas wrapper instead.
+- **Two frame finishes**, switched by a temporary chooser in `LogoStage`: the hairline in
+  `--acc-text`, so the frame follows the palette, or a bevel (a lit top edge, a dark bottom one).
+  The band went to 16px, wide enough to hide the lean.
