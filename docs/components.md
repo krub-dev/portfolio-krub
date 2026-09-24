@@ -255,10 +255,11 @@ copy, because the animation depends on where the word splits, so they are not in
 ### LogoStage
 The hero's square stage and the only thing on the page that turns in 3D. It owns the box, the 2D
 fallback mask, the frame that clips the canvas and the pointer gestures — a hover tilt and a drag
-spin that springs back — which it forwards to the scene as `tilt` / `spin` / `dragging`. The scene
-is lazy (`defineAsyncComponent`), so Three never reaches the initial bundle, and `HeroSection` is
-what decides not to mount it below 900px (decision 37). The rotating glow that used to live here is
-gone (decision 71).
+spin that springs back — which it forwards to the scene as `tilt` / `spin` / `dragging`. It also
+snaps its own box to the page's 72px grid (a square of whole cells, measured on mount and resize;
+decision 79). The scene is lazy (`defineAsyncComponent`), so Three never reaches the initial
+bundle, and `HeroSection` is what decides not to mount it below 900px (decision 37). The rotating
+glow that used to live here is gone (decision 71).
 
 ### LogoScene
 The `<TresCanvas>`: the light, the wheel-zoom (clamped, and it only takes the gesture while it can

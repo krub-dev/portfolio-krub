@@ -256,9 +256,11 @@ Left column: top mono label, a three-line headline with the key word in `--acc`,
 `padding:11px 24px`, 18px, weight 600, hover to `--acc-2`) and secondary "/projects" (border
 `--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and text yellow).
 
-Right column, the **square stage**: `aspect-ratio:1/1`, `max-height:min(58vh,520px)`,
-`max-width:520px`, border `--line`, a `radial-gradient` from `--surface` to `--ink`. The whole
-stage is magnetic, and only the logo inside it turns. Inside:
+Right column, the **square stage**: a square of whole 72px cells of the page's background grid —
+six by six (432×432) at the usual viewport, its four edges on the grid lines and nudged to the next
+cell right of its natural position. It is measured and snapped by `LogoStage`, since it depends on
+the viewport (decision 79). Border `--line`, a `radial-gradient` from `--surface` to `--ink`. The
+whole stage is magnetic, and only the logo inside it turns. Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
   mark that tilts toward the cursor, spins with a drag and springs back to the front, and zooms

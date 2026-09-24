@@ -21,7 +21,7 @@
   crossfade instead of a pop. The scene reports readiness; this decides what to do
   with it.
 */
-import { defineAsyncComponent, ref } from 'vue'
+import { defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
 
 import { usePointer } from '../../composables/usePointer'
 
@@ -32,7 +32,10 @@ import { usePointer } from '../../composables/usePointer'
 const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 
 const MAX_SPIN = 1.1 // radians, about 63 degrees each way
+// The page's background grid. The box is sized and placed on whole cells of it.
+const GRID = 72
 
+const frame = ref(null)
 const stage = ref(null)
 const tilt = ref({ x: 0, y: 0 })
 const spin = ref(0)
@@ -41,6 +44,54 @@ const ready = ref(false)
 
 let startX = 0
 let startSpin = 0
+let snapFrame = 0
+
+/*
+  Snap the box to the page's grid: a square of whole 72px cells, its left edge on
+  the next line to the right and its top on the nearest one, so a box that is
+  otherwise centred in its column lands on the background it sits on. Done in JS
+  because it depends on the viewport and the column width; `width`, `height` and
+  `transform` are the only things it sets.
+*/
+function snapToGrid() {
+  const el = frame.value
+  if (!el) return
+
+  // Clear our own overrides first, so the natural layout can be measured.
+  el.style.width = ''
+  el.style.height = ''
+  el.style.transform = ''
+
+  const natural = el.getBoundingClientRect().width
+  const limit = Math.min(natural, 520, window.innerHeight * 0.58)
+  const cells = Math.max(1, Math.floor(limit / GRID))
+  const size = cells * GRID
+  el.style.width = `${size}px`
+  el.style.height = `${size}px`
+
+  const rect = el.getBoundingClientRect()
+  const left = rect.left + window.scrollX
+  const top = rect.top + window.scrollY
+  const targetLeft = Math.ceil(left / GRID) * GRID
+  const targetTop = Math.round(top / GRID) * GRID
+  el.style.transform = `translate(${targetLeft - left}px, ${targetTop - top}px)`
+}
+
+function scheduleSnap() {
+  cancelAnimationFrame(snapFrame)
+  snapFrame = requestAnimationFrame(snapToGrid)
+}
+
+onMounted(() => {
+  scheduleSnap()
+  window.addEventListener('resize', scheduleSnap)
+  document.fonts?.ready.then(scheduleSnap)
+})
+
+onUnmounted(() => {
+  cancelAnimationFrame(snapFrame)
+  window.removeEventListener('resize', scheduleSnap)
+})
 
 usePointer((pointer) => {
   const el = stage.value
@@ -86,7 +137,7 @@ function clamp(value) {
 </script>
 
 <template>
-  <div class="frame">
+  <div ref="frame" class="frame">
     <div
       ref="stage"
       class="stage"

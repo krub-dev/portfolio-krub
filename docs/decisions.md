@@ -2095,3 +2095,21 @@ units.
 failures when Playwright runs its four workers in parallel — each worker holds a WebGL context and
 the GPU stalls. With `--workers=1` the whole suite is green. That is the testing item in the
 backlog, not a product problem.
+
+### 79. The stage snaps to the page's grid
+
+**Date:** 2026-09-24 · **Status:** active
+
+The box sat centred in its column, which put it on no line of the page's 72px background grid: at
+1280×800 its left edge fell 6px past a line and it was 490×464, not a whole number of cells. Moving
+it "one cell right" would have carried the same 6px along.
+
+It is now a **square of whole cells** — six by six at the usual viewport, 432×432 — with all four
+edges on grid lines, moved to the next cell to the right of where it landed naturally. The smaller
+box also gives the text column more air, which the owner asked for.
+
+This is measured, not computed: the column width, the viewport height and the centring all move, so
+`LogoStage` reads the box's natural size, rounds it down to whole 72px cells, sets it, and
+translates it onto the grid — on mount, on resize, and once the fonts land. It is the only element
+on the page placed by script; everything else is still layout. `width`, `height` and `transform`
+are the only properties it touches.
