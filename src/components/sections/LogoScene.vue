@@ -49,6 +49,17 @@ const onScreen = ref(false)
 const zoom = ref(1)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+/*
+  The three ways to dress the depth, switched to compare. Temporary: this is a
+  chooser, not part of the page, and goes when one is picked.
+*/
+const MODES = [
+  { id: 'grid', label: 'Grid' },
+  { id: 'rings', label: 'Rings' },
+  { id: 'both', label: 'Both' },
+]
+const mode = ref('grid')
+
 const DEPTH = 12
 const CAM_Z = 205
 const ZOOM_MIN = 0.82
@@ -118,7 +129,7 @@ build()
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1.6" />
 
-      <SceneRig :tilt="props.tilt" :cam-z="camZ" />
+      <SceneRig :tilt="props.tilt" :cam-z="camZ" :mode="mode" />
 
       <LogoModel
         v-if="geometry"
@@ -129,6 +140,18 @@ build()
         :running="onScreen && !reduced"
       />
     </TresCanvas>
+
+    <div class="modes">
+      <button
+        v-for="option in MODES"
+        :key="option.id"
+        type="button"
+        :class="{ on: mode === option.id }"
+        @click="mode = option.id"
+      >
+        {{ option.label }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -136,5 +159,40 @@ build()
 .scene {
   position: absolute;
   inset: 0;
+}
+
+/*
+  The temporary depth chooser, pinned to the bottom of the box. Small and quiet:
+  it is a comparison aid, not part of the design.
+*/
+.modes {
+  position: absolute;
+  z-index: 2;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+.modes button {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  cursor: pointer;
+}
+
+.modes button.on {
+  background: var(--acc);
+  color: var(--on-acc);
 }
 </style>

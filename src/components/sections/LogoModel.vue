@@ -39,6 +39,8 @@ const accent = ref('#ffc800')
 let smoothSpin = 0
 
 const material = new MeshStandardMaterial({ metalness: 1, roughness: 0.15 })
+// The mark is the foreground: the tunnel's fog must not wash it out.
+material.fog = false
 
 const group = new Group()
 group.add(new Mesh(props.geometry, material))

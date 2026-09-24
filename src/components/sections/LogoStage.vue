@@ -34,6 +34,7 @@ const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 const MAX_SPIN = 1.1 // radians, about 63 degrees each way
 // The page's background grid. The box is sized and placed on whole cells of it.
 const GRID = 72
+const MAX_CELLS = 7
 
 const frame = ref(null)
 const stage = ref(null)
@@ -60,19 +61,28 @@ function snapToGrid() {
   // Clear our own overrides first, so the natural layout can be measured.
   el.style.width = ''
   el.style.height = ''
+  el.style.maxWidth = ''
+  el.style.maxHeight = ''
   el.style.transform = ''
 
   const natural = el.getBoundingClientRect().width
-  const limit = Math.min(natural, 520, window.innerHeight * 0.58)
-  const cells = Math.max(1, Math.floor(limit / GRID))
+  const byWidth = Math.round(natural / GRID)
+  const byHeight = Math.floor((window.innerHeight - 200) / GRID)
+  const cells = Math.max(1, Math.min(MAX_CELLS, byWidth, byHeight))
   const size = cells * GRID
   el.style.width = `${size}px`
   el.style.height = `${size}px`
+  // The stylesheet caps the box; the snap owns its size now.
+  el.style.maxWidth = 'none'
+  el.style.maxHeight = 'none'
 
   const rect = el.getBoundingClientRect()
   const left = rect.left + window.scrollX
   const top = rect.top + window.scrollY
-  const targetLeft = Math.ceil(left / GRID) * GRID
+  // The next line to the right, unless that would run the box off the screen —
+  // then the line before, so a bigger box still fits.
+  let targetLeft = Math.ceil(left / GRID) * GRID
+  if (targetLeft + size > window.innerWidth - 8) targetLeft -= GRID
   const targetTop = Math.round(top / GRID) * GRID
   el.style.transform = `translate(${targetLeft - left}px, ${targetTop - top}px)`
 }
@@ -115,6 +125,9 @@ usePointer((pointer) => {
 })
 
 function onDown(event) {
+  // The depth chooser is a control, not part of the object: a press on it must
+  // not start a drag, or the capture swallows the button's own click.
+  if (event.target.closest('.modes')) return
   if (!stage.value) return
   dragging.value = true
   startX = event.clientX
@@ -158,6 +171,9 @@ function clamp(value) {
           />
         </Suspense>
       </div>
+
+      <!-- The frame, over the canvas and under the slot. -->
+      <div class="rim" aria-hidden="true" />
 
       <slot />
     </div>
@@ -221,10 +237,22 @@ function clamp(value) {
 }
 
 /*
-  The scene fills the stage and sits over the fallback. `overflow: hidden` clips
-  the canvas to the stage's box, so a square WebGL canvas cannot paint over the
-  border.
+  The frame. Square, sitting on the page's grid like the box, and drawn over the
+  canvas so the box's own edges are covered: whatever the camera's lean does to
+  them, the eye reads the frame and not the seam. Opaque, so it hides rather than
+  merely outlines.
 */
+.rim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 9px solid var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* The scene fills the stage and sits over the fallback. `overflow: hidden` clips
+   the canvas to the stage's box, so a square WebGL canvas cannot paint over the
+   border. */
 .scene {
   position: absolute;
   inset: 0;

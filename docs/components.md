@@ -255,24 +255,28 @@ copy, because the animation depends on where the word splits, so they are not in
 ### LogoStage
 The hero's square stage and the only thing on the page that turns in 3D. It owns the box, the 2D
 fallback mask, the frame that clips the canvas and the pointer gestures — a hover tilt and a drag
-spin that springs back — which it forwards to the scene as `tilt` / `spin` / `dragging`. It also
-snaps its own box to the page's 72px grid (a square of whole cells, measured on mount and resize;
-decision 79). The scene is lazy (`defineAsyncComponent`), so Three never reaches the initial
-bundle, and `HeroSection` is what decides not to mount it below 900px (decision 37). The rotating
-glow that used to live here is gone (decision 71).
+spin that springs back — which it forwards to the scene as `tilt` / `spin` / `dragging`. It snaps
+its own box to the page's 72px grid (a square of whole cells, measured on mount and resize;
+decision 79) and draws the opaque frame over the canvas so the box's edges are covered (decision
+80). The scene is lazy (`defineAsyncComponent`), so Three never reaches the initial bundle, and
+`HeroSection` is what decides not to mount it below 900px (decision 37). The rotating glow that
+used to live here is gone (decision 71).
 
 ### LogoScene
 The `<TresCanvas>`: the light, the wheel-zoom (clamped, and it only takes the gesture while it can
 still move), the off-screen pause (an IntersectionObserver at 60%) and the fps and DPR caps. It
 builds the mark's geometry — the favicon SVG path extruded, welded and re-normalled — and emits
-`ready` when it is up. The camera and the room are `SceneRig`'s.
+`ready` when it is up. The camera and the depth are `SceneRig`'s. It also carries the **temporary**
+Grid / Rings / Both chooser while the depth treatment is picked (decision 80).
 
 ### SceneRig
-The rig around the mark: the camera and the room. An open box — four walls converging on a far wall
-kept close to the frame, built by hand so the grid is world-uniform and sized so a cell lands on
-each edge — carries the grid; the camera sits outside the opening and leans with the pointer's
-`tilt`, always looking back at the mark, so the room parallaxes while the mark stays centred. A
-child of the canvas, because `useLoop` and `useTresContext` need the renderer. See decision 78.
+The rig around the mark: the camera and the depth. A deep open box — four walls converging on a
+distant far wall, built by hand so the grid is world-uniform and sized so a cell lands on each edge
+— carries the grid and is faded by a `Fog` read from `--ink`; an optional `InstancedMesh` of square
+frames (a `shallowRef`, so Vue leaves its matrices alone) recedes down the same axis, tinted from a
+hint of the accent to `--ink`; and the camera sits outside the opening and leans a little with the
+pointer's `tilt`, always looking back at the mark. `mode` picks the grid tunnel, the rings or both
+(decision 80). A child of the canvas, because `useLoop` and `useTresContext` need the renderer.
 
 ### LogoModel
 The mesh and everything about how it looks and moves: the polished-metal `MeshStandardMaterial`,

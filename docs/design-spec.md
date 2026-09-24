@@ -257,18 +257,20 @@ Left column: top mono label, a three-line headline with the key word in `--acc`,
 `--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and text yellow).
 
 Right column, the **square stage**: a square of whole 72px cells of the page's background grid —
-six by six (432×432) at the usual viewport, its four edges on the grid lines and nudged to the next
-cell right of its natural position. It is measured and snapped by `LogoStage`, since it depends on
-the viewport (decision 79). Border `--line`, a `radial-gradient` from `--surface` to `--ink`. The
-whole stage is magnetic, and only the logo inside it turns. Inside:
+seven by seven (504×504) at the usual viewport, its four edges on the grid lines and nudged to the
+next cell right of its natural position (or kept a cell back when that would run off the screen).
+It is measured and snapped by `LogoStage`, since it depends on the viewport (decision 79). Border
+`--line`, a `radial-gradient` from `--surface` to `--ink`, and a square `--ink` frame with a
+hairline inside it over the canvas. The whole stage is magnetic, and only the logo inside it turns.
+Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
   mark that tilts toward the cursor, spins with a drag and springs back to the front, and zooms
-  with the wheel. Behind it, an open box — its four walls converging on a far wall kept close to
-  the frame, with the grid painted on every face and sized so a cell lands on the box's edges — and
-  the camera leans with the pointer so the room parallaxes while the mark stays centred. The canvas
-  fills the square stage and is clipped to it, so the stage reads as a window onto the room. It is
-  lazy, pauses off-screen and never mounts below 900px (decision 37). See decision 78.
+  with the wheel. Behind it, a deep open box — its four walls converging on a distant far wall, the
+  grid painted on every face — fades into the background through a fog, and the camera leans a
+  little with the pointer so the depth shifts while the mark stays centred. The canvas fills the
+  square stage, the frame covers its edges, and the stage reads as a window onto the room. It is
+  lazy, pauses off-screen and never mounts below 900px (decision 37). See decisions 78 and 80.
 - **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
   first and fades out once the scene reports ready (decision 77), so a browser without WebGL still
   shows the logo.

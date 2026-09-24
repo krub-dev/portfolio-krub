@@ -2104,12 +2104,40 @@ The box sat centred in its column, which put it on no line of the page's 72px ba
 1280×800 its left edge fell 6px past a line and it was 490×464, not a whole number of cells. Moving
 it "one cell right" would have carried the same 6px along.
 
-It is now a **square of whole cells** — six by six at the usual viewport, 432×432 — with all four
-edges on grid lines, moved to the next cell to the right of where it landed naturally. The smaller
-box also gives the text column more air, which the owner asked for.
+It is now a **square of whole cells** — seven by seven, 504×504 — with all four edges on grid
+lines, moved to the next cell to the right of where it landed naturally, or one back when that
+would run it off the screen (as at 1280, where 7×7 only fits starting at 720).
 
 This is measured, not computed: the column width, the viewport height and the centring all move, so
-`LogoStage` reads the box's natural size, rounds it down to whole 72px cells, sets it, and
-translates it onto the grid — on mount, on resize, and once the fonts land. It is the only element
-on the page placed by script; everything else is still layout. `width`, `height` and `transform`
-are the only properties it touches.
+`LogoStage` reads the box's natural size, rounds it to whole 72px cells, sets it, and translates it
+onto the grid — on mount, on resize, and once the fonts land. It is the only element on the page
+placed by script; everything else is still layout. `width`, `height`, `max-width`, `max-height` and
+`transform` are the only properties it touches; the maxes because the stylesheet's own cap would
+otherwise clip the box below a whole number of cells.
+
+### 80. A CSS frame, a touch of peek, and three depth treatments
+
+**Date:** 2026-09-24 · **Status:** active
+
+Two ideas from the owner, off a reference the model drew.
+
+- **A frame over the canvas.** A square, `--ink` band nine pixels wide with a `--line` hairline
+  inside it, drawn over the WebGL canvas and under the slot. It is what lets the camera lean again:
+  the box's own edges sit under the frame, so the lean never shows the page past them. The stage was
+  already snapped to the page grid (decision 79), so the frame is on it too.
+- **The peek comes back**, smaller (10/7 world units, was 16/11). It had been dropped while the grid
+  had to stay perfectly aligned; with the frame covering the seam, a small lean is safe.
+- **The tunnel runs deep, and fades.** The room went from 160 to 700 units, so the grid converges
+  into the distance, and a `Fog` tuned to `--ink` (300/900) swallows the far end — no bottom to see.
+  That is the fog decision 75 removed, back where it belongs: in a long tunnel it fades only the far
+  part, not the whole grid. The mark opts out again (`material.fog = false`).
+- **The rings**, from the model's "infinite tunnel": one square frame — a `Shape` with a square hole
+  — in an `InstancedMesh`, the same size each time and only further back, so perspective shrinks
+  them, tinted from a hint of the accent at the front to `--ink` at the back. One draw call, a few
+  hundred triangles. Two notes for the record: Three has no per-instance opacity, so the fade is
+  `instanceColor`, not alpha; and the `InstancedMesh` must be a `shallowRef`, or Vue's reactive
+  proxy trips the renderer over its read-only matrices.
+
+Three ways to dress the depth are built — the grid tunnel, the rings, both — and a **temporary
+chooser** in `LogoScene` (Grid / Rings / Both) switches between them so they can be compared. It is
+a comparison aid with hardcoded labels, not part of the page, and comes out when one is picked.
