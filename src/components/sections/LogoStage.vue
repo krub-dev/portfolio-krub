@@ -95,6 +95,8 @@ function clamp(value) {
   justify-content: center;
 }
 
+
+
 /* 40px inside the stage, not the 72px of the page background: the page grid at
    full size reads as noise inside a 520px box. */
 .grid {
