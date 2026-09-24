@@ -280,8 +280,9 @@ function clamp(value) {
 /*
   The brushed sheen over the ridge. This one has to reach the *border* box — a
   pseudo at `inset: 0` sits inside the border and reads as a second band — so it
-  is pulled out by the border's own width and clipped back to it. The gradient is
-  translucent on purpose, so the ridge's lit and shaded edges still show through.
+  is pulled out by the border's own width and clipped back to it. It carries the
+  same gradient the frame had before the ridge; the opacity is what keeps the
+  ridge's lit and shaded edges showing underneath instead of burying them.
 */
 .rim::after {
   content: '';
@@ -292,14 +293,15 @@ function clamp(value) {
   border: 24px solid transparent;
   border-image: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--fg) 42%, transparent) 0%,
-      color-mix(in srgb, var(--fg) 12%, transparent) 16%,
-      color-mix(in srgb, var(--fg) 34%, transparent) 33%,
-      color-mix(in srgb, var(--fg) 8%, transparent) 50%,
-      color-mix(in srgb, var(--fg) 30%, transparent) 68%,
-      color-mix(in srgb, var(--fg) 14%, transparent) 100%
+      color-mix(in srgb, var(--fg) 22%, var(--ink)) 0%,
+      color-mix(in srgb, var(--fg) 6%, var(--ink)) 15%,
+      color-mix(in srgb, var(--fg) 18%, var(--ink)) 32%,
+      color-mix(in srgb, var(--fg) 5%, var(--ink)) 50%,
+      color-mix(in srgb, var(--fg) 16%, var(--ink)) 68%,
+      color-mix(in srgb, var(--fg) 7%, var(--ink)) 100%
     )
     1;
+  opacity: 0.78;
 }
 
 /* The scene fills the stage and sits over the fallback. `overflow: hidden` clips
