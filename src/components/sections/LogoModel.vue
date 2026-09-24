@@ -33,7 +33,7 @@ const props = defineProps({
 // and softer than it was, because the camera leans too now (SceneRig) and the
 // two must not add up to a lurch.
 const TILT_Y = 0.34
-const TILT_X = 0.22
+const TILT_X = 0.18
 // The idle: a slow breath on both axes, a touch wider and quicker than it was
 // so the mark never looks parked.
 const SWAY = 0.2

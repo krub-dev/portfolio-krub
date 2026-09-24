@@ -31,7 +31,8 @@ import { usePointer } from '../../composables/usePointer'
 */
 const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 
-const MAX_SPIN = 1.1 // radians, about 63 degrees each way
+const MAX_SPIN = 1.1 // radians, about 63 degrees each way, horizontally
+const MAX_SPIN_Y = 0.45 // and much less vertically: tipping it up and down reads heavier
 // The page's background grid. The box is sized and placed on whole cells of it.
 const GRID = 72
 const MAX_CELLS = 7
@@ -116,7 +117,7 @@ usePointer((pointer) => {
     // Both axes, both clamped the same way, so the mark can be thrown up and
     // down as well as left and right.
     spin.value = clamp(startSpin + ((pointer.x - startX) / rect.width) * 3, -MAX_SPIN, MAX_SPIN)
-    spinY.value = clamp(startSpinY + ((pointer.y - startY) / rect.height) * 3, -MAX_SPIN, MAX_SPIN)
+    spinY.value = clamp(startSpinY + ((pointer.y - startY) / rect.height) * 3, -MAX_SPIN_Y, MAX_SPIN_Y)
     return
   }
 
@@ -223,12 +224,7 @@ function clamp(value) {
   height: 100%;
   border: 1px solid var(--line);
   background: radial-gradient(80% 80% at 50% 40%, var(--surface) 0%, var(--ink) 100%);
-  /*
-    Visible, not hidden: the canvas is clipped by `.scene` below, and the stage
-    has to let the availability badge sit outside its bottom-right corner rather
-    than cut it off.
-  */
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -284,6 +280,19 @@ function clamp(value) {
     )
     1;
   box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/*
+  A ridge over the metal. The browser's own `border-style: ridge` draws a raised
+  bevel from a single colour, so a translucent one laid over the band reads as a
+  lip without burying the brushed gradient underneath.
+*/
+.rim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 24px ridge color-mix(in srgb, var(--fg) 22%, transparent);
 }
 
 /* The scene fills the stage and sits over the fallback. `overflow: hidden` clips

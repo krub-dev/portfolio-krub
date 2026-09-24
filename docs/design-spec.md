@@ -251,10 +251,18 @@ column and needs the room.
 Two-column grid `1.1fr .9fr`, `gap: clamp(32px,5vw,64px)`, vertically centred,
 `max-width:1180px`. One column on mobile.
 
-Left column: top mono label, a three-line headline with the key word in `--acc`, a paragraph
-(`--fg-2`, 46ch) and two buttons — primary "Let's talk ↗" (background `--acc`, radius 999,
-`padding:11px 24px`, 18px, weight 600, hover to `--acc-2`) and secondary "/projects" (border
-`--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and text yellow).
+Left column: the name, the availability indicator (below), a three-line headline with the key word
+in `--acc`, a paragraph (`--fg-2`, 46ch) and two buttons — primary "Let's talk ↗" (background
+`--acc`, radius 999, `padding:11px 24px`, 18px, weight 600, hover to `--acc-2`) and secondary
+"/projects" (border `--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and
+text yellow).
+
+**The availability indicator** opens the column, over the headline: a mono row of 10px uppercase,
+`letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two layers inside
+a 5×5px container: a core, a solid `#39D98A` circle filling it and **not animated**; and a ring,
+`inset:-5px`, `border:1px solid #39D98A`, `border-radius:50%`, animated
+`dotHalo 2.6s cubic-bezier(.15,.6,.3,1) infinite` — born small, appears, grows and fades out
+completely before restarting. Text: "Available" / "Disponible".
 
 Right column, the **square stage**: a square of whole 72px cells of the page's background grid —
 seven by seven (504×504) at the usual viewport, its four edges on the grid lines and nudged to the
@@ -276,14 +284,6 @@ Inside:
 - **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
   first and fades out once the scene reports ready (decision 77), so a browser without WebGL still
   shows the logo.
-- **Availability indicator**, top left (`top:18px; left:24px`): a mono row of 10px uppercase,
-  `letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two
-  layers inside a 5×5px container:
-  - core: a solid `#39D98A` circle filling the container, **not animated**;
-  - ring: `inset:-5px`, `border:1px solid #39D98A`, `border-radius:50%`, animation
-    `dotHalo 2.6s cubic-bezier(.15,.6,.3,1) infinite` — born small, appears, grows and fades
-    out completely before restarting.
-  - Text: "Available" / "Disponible".
 
 The stage carries **no label and no explanatory text**.
 

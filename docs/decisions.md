@@ -2204,3 +2204,18 @@ the stage, and sends the tilt home when it leaves. The scene belongs to its fram
 - **The backlight is anchored to the mark.** It was a fixed plane in world space, so as the camera
   leaned the halo slid off the mark; it is placed each frame on the camera's axis, behind the mark,
   which is what "it should only move with the model" means.
+
+### 84. The badge lands in the text column, the vertical is capped, and the frame gets a ridge
+
+**Date:** 2026-09-24 · **Status:** active
+
+- **The availability badge opens the text column now**, right over the headline. It had been tried
+  inside the frame, straddling its top edge, and under its bottom-right corner, and none of them
+  read: it either fought the tunnel's perspective or looked like an orphan tag. In the column it is
+  page furniture, which is what it is, and the stage keeps its slot to itself. The design spec moved
+  the indicator's description out of the stage for the same reason.
+- **The vertical is capped harder**: the drag's vertical range is 0.45 rad against the 1.1 the
+  horizontal keeps, and the hover's vertical tilt is 0.18. Tipping a logo up and down reads heavier
+  than turning it side to side.
+- **The frame gets a ridge**: the browser's own `border-style: ridge`, translucent, laid over the
+  brushed `border-image`, so the band reads as a raised lip without burying the metal.
