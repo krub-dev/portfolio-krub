@@ -89,7 +89,7 @@ code in [`docs/decisions.md`](docs/decisions.md).
 - The yellow `#FFC800` is the same in both themes; what changes is what is painted with `--mark`.
 - The giant section number overlaps the title on purpose.
 - The square hero stage holds the 3D logo and carries no explanatory text inside it. The scene is
-  only the mark; the box around it is CSS.
+  the mark and the room behind it; the frame around it is CSS.
 - No filler project cards, no user hints ("click to open", "optional section", photo captions).
 - The lemon enters in a straight line from the right, no tilt, flat yellow body, no gradient.
 - The project card arrow is `↗`, not `→`.

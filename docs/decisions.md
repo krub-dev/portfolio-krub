@@ -2040,3 +2040,39 @@ crossfade instead of a pop.
 One trap, learned the hard way: `ready` is emitted by the scene's geometry build, not by the model
 that draws it, so a `LogoModel` that throws still leaves the mark fading onto an empty stage. The
 fade only makes sense while the scene is actually there — the two have to stay in step.
+
+### 78. The room comes back, as one box and a rig
+
+**Date:** 2026-09-24 · **Status:** active
+
+Decision 76 took the backdrop out. This brings a backdrop back, deliberately, done so it does not
+repeat either of the two mistakes that sent it out the first time.
+
+- **One box, not two planes.** A single `BoxGeometry` with `side: BackSide` and the camera inside:
+  the near face is culled and we look into a room. Wall and floor are one joined mesh now, so the
+  corners have no loose edges — which is what read wrong before. Twelve triangles, one unlit
+  material, one 512² grid texture.
+- **The room carries the grid.** The stage's flat 40px CSS grid becomes the room's, with real
+  perspective. The CSS grid stays as the fallback layer under the canvas (it is what shows before
+  the scene is ready, and when there is no WebGL), but the room covers it once it loads.
+- **The camera peeks.** `SceneRig` leans the camera with the pointer — the same `tilt` the mark
+  uses — and always looks back at the mark, so the mark stays centred and the room parallaxes
+  around it. The lean is a lerp in the scene's own loop, not a new rAF. The outer frame is CSS and
+  does not move.
+- **Fog.** A `Fog` on the scene, coloured from `--ink` and rebuilt on `data-theme`, fades the room's
+  far wall so the box has no visible edge. The mark opts out (`material.fog = false`) and stays
+  crisp in the foreground.
+- **A CSS vignette.** An inset shadow and a perimeter gradient over the canvas, `pointer-events:
+  none`, sink the room into the frame.
+- **The mark's tilt is softer** (0.5 → 0.34 rad on y, 0.32 → 0.22 on x): the camera leans too now,
+  and the two must not add up to a lurch.
+
+`SceneRig` is the new child of the canvas that owns the camera, the fog and the room; `LogoModel`
+keeps the mark. The values are first-pass and meant to be tuned: `ROOM` 620 (wide enough that the
+camera never leaves it at any zoom), `PEEK` 16/11 world units, `FOG_NEAR`/`FOG_FAR` 300/640, 16
+cells.
+
+**One cost, recorded:** the scene now weighs enough that the e2e suite goes from two to four
+failures when Playwright runs its four workers in parallel — each worker holds a WebGL context and
+the GPU stalls. With `--workers=1` the whole suite is green. That is the testing item in the
+backlog, not a product problem.

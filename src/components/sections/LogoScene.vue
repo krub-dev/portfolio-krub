@@ -6,10 +6,9 @@
   parsed by Three's SVGLoader and extruded — which is the whole reason a vector
   copy exists: an ExtrudeGeometry needs outlines, and a raster PNG has none.
 
-  The scene is only the mark. The stage's own gradient and grid show through the
-  transparent canvas behind it, so the box is painted once, by CSS, and the 3D
-  sits on top of it rather than rebuilding a second copy of the same backdrop in
-  WebGL.
+  The scene is the mark and the rig around it (SceneRig): a room box seen from
+  the inside, a fog and a camera that leans with the pointer. The room replaces
+  the stage's flat grid; the stage keeps its border, its radius and its gradient.
 
   It is deliberately cheap for what it is:
 
@@ -18,6 +17,7 @@
   - **The loop only runs while the stage is mostly on screen** (60%), so the
     reflections cost nothing during the scroll.
   - Framed at 24fps and capped at 1.5x DPR.
+  - The room is one unlit 12-triangle box and one small grid texture.
   - Never on a phone: the stage is not mounted below 900px (decision 37).
 
   The wheel zooms the camera, not the mesh, so the perspective stays honest. It
@@ -31,6 +31,7 @@ import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 import LogoModel from './LogoModel.vue'
+import SceneRig from './SceneRig.vue'
 
 const props = defineProps({
   // Pointer position over the stage, normalised to -1..1, from LogoStage.
@@ -116,6 +117,8 @@ build()
     <TresCanvas :fps-limit="24" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1.6" />
+
+      <SceneRig :tilt="props.tilt" :cam-z="camZ" />
 
       <LogoModel
         v-if="geometry"

@@ -263,9 +263,10 @@ whole stage is magnetic, and only the logo inside it tilts. Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
   mark that tilts toward the cursor, spins with a drag and springs back to the front, and zooms
-  with the wheel. It is lazy, pauses off-screen and never mounts below 900px (decision 37). The
-  scene is only the mark — the canvas is transparent, so the stage's own gradient and grid show
-  through (decision 76).
+  with the wheel. Behind it, a single `BackSide` box is a room seen from the inside — its grid in
+  real perspective, its far wall faded into the background by a fog — and the camera leans with the
+  pointer so the room parallaxes while the mark stays centred. A CSS vignette sinks it into the
+  frame. It is lazy, pauses off-screen and never mounts below 900px (decision 37). See decision 78.
 - **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
   first and fades out once the scene reports ready (decision 77), so a browser without WebGL still
   shows the logo.
@@ -897,7 +898,7 @@ These are deliberate. They are not rough edges to be tidied up later:
   painted with `--mark` or `--acc-text`.
 - The giant section number **overlaps** the title on purpose.
 - The square hero stage holds the 3D logo and carries **no explanatory text** inside it. The scene
-  is only the mark; the box around it is CSS.
+  is the mark and the room behind it; the frame around it is CSS.
 - There are no filler cards in projects and no user hints ("click to open", "optional
   section", photo captions). They were removed deliberately.
 - The lemon enters in a straight line from the right, with no tilt, and its body is flat

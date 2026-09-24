@@ -48,7 +48,10 @@ App
 ├─ main (HomeView)
 │   ├─ HeroSection
 │   │   ├─ BrandName     (the animated KIKO / RUBIO reveal)
-│   │   ├─ LogoStage     (the 3D logo; slot holds the badge — desktop only)
+│   │   ├─ LogoStage     (the stage; slot holds the badge — desktop only)
+│   │   │   ├─ LogoScene  (WebGL, lazy)
+│   │   │   │   ├─ SceneRig  (camera, fog, room)
+│   │   │   │   └─ LogoModel (the mark)
 │   │   │   └─ AvailabilityBadge
 │   │   └─ BaseButton ×2
 │   ├─ MarqueeBar
@@ -251,24 +254,31 @@ copy, because the animation depends on where the word splits, so they are not in
 
 ### LogoStage
 The hero's square stage and the only thing on the page that turns in 3D. It owns the box, the
-inner grid, the 2D fallback mask and the pointer gestures — a hover tilt and a drag spin that
-springs back — which it forwards to the scene as `tilt` / `spin` / `dragging`. The scene is lazy
-(`defineAsyncComponent`), so Three never reaches the initial bundle, and `HeroSection` is what
-decides not to mount it below 900px (decision 37). The rotating glow that used to live here is
-gone (decision 71).
+inner grid, the 2D fallback mask, the CSS vignette over the canvas and the pointer gestures — a
+hover tilt and a drag spin that springs back — which it forwards to the scene as `tilt` / `spin` /
+`dragging`. The scene is lazy (`defineAsyncComponent`), so Three never reaches the initial bundle,
+and `HeroSection` is what decides not to mount it below 900px (decision 37). The rotating glow that
+used to live here is gone (decision 71).
 
 ### LogoScene
-The `<TresCanvas>`: the straight-on camera, the light, the wheel-zoom (clamped, and it only takes
-the gesture while it can still move), the off-screen pause (an IntersectionObserver at 60%) and
-the fps and DPR caps. It builds the geometry — the favicon SVG path extruded, welded and
-re-normalled — and emits `ready` when it is up. It holds no backdrop: the canvas is transparent
-over the CSS stage (decision 76).
+The `<TresCanvas>`: the light, the wheel-zoom (clamped, and it only takes the gesture while it can
+still move), the off-screen pause (an IntersectionObserver at 60%) and the fps and DPR caps. It
+builds the mark's geometry — the favicon SVG path extruded, welded and re-normalled — and emits
+`ready` when it is up. The camera, the room and the fog are `SceneRig`'s.
+
+### SceneRig
+The rig around the mark: the camera, the fog and the room. A `BoxGeometry` with `side: BackSide` —
+the camera sits inside it — carries a grid texture and is faded by a `Fog` read from `--ink`; the
+camera leans with the pointer's `tilt` and always looks back at the mark, so the room parallaxes
+while the mark stays centred. A child of the canvas, because `useLoop` and `useTresContext` need the
+renderer. See decision 78.
 
 ### LogoModel
-The mesh and everything about how it looks and moves: the polished-metal `MeshStandardMaterial`,
-the generated `RoomEnvironment` (a PMREM), the accent colour read from `--acc-solid`, and the
-hover sway, drag spin and magnetic return. It is a child of the canvas on purpose — `useLoop` and
-`useTresContext` need the renderer the canvas provides. Built once and never rebuilt.
+The mesh and everything about how it looks and moves: the polished-metal `MeshStandardMaterial`
+(opt out of the fog, so the mark stays crisp), the generated `RoomEnvironment` (a PMREM), the accent
+colour read from `--acc-solid`, and the hover sway, drag spin and magnetic return. It is a child of
+the canvas on purpose — `useLoop` and `useTresContext` need the renderer the canvas provides. Built
+once and never rebuilt.
 
 ---
 

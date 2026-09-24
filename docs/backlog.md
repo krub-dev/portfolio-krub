@@ -243,15 +243,16 @@ kept as the record rather than deleted.
 
 ## Testing
 
-- [ ] **The e2e suite goes flaky while the hero is on screen.** One to two tests fail on `desktop`
-  in a full run — earlier four to eight — all of them timing tests that scroll or measure with the
-  hero visible: the nav link following the scroll, and the modal's Escape-and-focus-return. The
-  cause is not the tests' logic but the clock: mounting the WebGL scene forces a `ReadPixels` (the
-  PMREM environment, the `GPU stall` warning) and the browser is briefly slow enough that the
-  default `expect` timeouts expire. Removing the crystal finish (decision 75) cut the failures
-  down, so the direction is right. The fix is to make those flows wait on a condition rather than
-  on the clock — assert the state, not a fixed pause — and, if that is not enough, to stop the
-  scene's loop from running during the suite.
+- [ ] **The e2e suite goes flaky while the hero is on screen.** In a full parallel run several
+  `desktop` tests fail — the count moves with the machine's load (one to four, and the room in
+  decision 78 took it from two to four). They are timing tests that scroll or measure with the hero
+  visible: the nav link following the scroll, the modal's Escape-and-focus-return, and the reload
+  flows. The real cause is not the tests' logic but the GPU: `fullyParallel` runs four workers, each
+  holding a WebGL context, and they stall each other (`ReadPixels`, the PMREM environment). The
+  proof is `--workers=1`: the whole suite is green, and the four that failed in parallel pass
+  alone. So the fix is to stop the desktop project from holding four WebGL contexts at once — fewer
+  workers for it, or gating the scene off under `navigator.webdriver` — and, second, to make those
+  flows wait on a condition rather than on the clock.
 
 ## Ideas (future)
 
