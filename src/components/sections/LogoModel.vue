@@ -25,6 +25,7 @@ const props = defineProps({
   running: { type: Boolean, default: true },
   tilt: { type: Object, default: () => ({ x: 0, y: 0 }) },
   spin: { type: Number, default: 0 },
+  spinY: { type: Number, default: 0 },
   dragging: { type: Boolean, default: false },
 })
 
@@ -33,10 +34,15 @@ const props = defineProps({
 // two must not add up to a lurch.
 const TILT_Y = 0.34
 const TILT_X = 0.22
-const SWAY = 0.12
+// The idle: a slow breath on both axes, a touch wider and quicker than it was
+// so the mark never looks parked.
+const SWAY = 0.2
+const SWAY_X = 0.1
+const BREATH = 0.7
 
 const accent = ref('#ffc800')
 let smoothSpin = 0
+let smoothSpinY = 0
 
 const material = new MeshStandardMaterial({ metalness: 1, roughness: 0.15 })
 // The mark is the foreground: the tunnel's fog must not wash it out.
@@ -81,17 +87,23 @@ onBeforeRender(({ elapsed, delta }) => {
   material.color.set(accent.value)
 
   // The drag angle, then the magnetic return: held by the pointer while
-  // dragging, easing back to zero the moment it is let go.
-  const spinTarget = props.dragging ? props.spin : 0
+  // dragging, easing back to zero the moment it is let go. On both axes.
   const spinEase = Math.min(1, delta * (props.dragging ? 14 : 2.6))
-  smoothSpin += (spinTarget - smoothSpin) * spinEase
+  smoothSpin += ((props.dragging ? props.spin : 0) - smoothSpin) * spinEase
+  smoothSpinY += ((props.dragging ? props.spinY : 0) - smoothSpinY) * spinEase
 
-  // During a drag the hover is off: the spin is the whole story.
+  // During a drag the hover is off: the spin is the whole story, and the idle
+  // breathes underneath it whichever way that is.
   const target = props.dragging ? { x: 0, y: 0 } : props.tilt
   const ease = Math.min(1, delta * 6)
   group.rotation.y +=
-    (target.x * TILT_Y + Math.sin(elapsed * 0.45) * SWAY + smoothSpin - group.rotation.y) * ease
-  group.rotation.x += (target.y * TILT_X - group.rotation.x) * ease
+    (target.x * TILT_Y + Math.sin(elapsed * BREATH) * SWAY + smoothSpin - group.rotation.y) * ease
+  group.rotation.x +=
+    (target.y * TILT_X +
+      Math.sin(elapsed * BREATH * 0.8) * SWAY_X +
+      smoothSpinY -
+      group.rotation.x) *
+    ease
 })
 </script>
 

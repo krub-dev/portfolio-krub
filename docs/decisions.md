@@ -2189,3 +2189,18 @@ the stage, and sends the tilt home when it leaves. The scene belongs to its fram
   brushed gradient of `--fg` mixed into `--ink` (`border-image`): a sheen in both themes, not a
   colour. The band is 24px, which has room to cover the lean.
 - **The lean is bigger** (6/4, was 3/2), still spent inside the frame's band.
+
+### 83. The idle breathes more, the drag is two-axis, and the badge leaves the frame
+
+**Date:** 2026-09-24 · **Status:** active
+
+- **The idle moves more and faster**, on both axes: a wider, quicker sway than the single slow one
+  it had, plus a smaller one on x, so the mark never looks parked.
+- **The drag is constrained on both axes**, not just horizontally. A vertical drag turns it up and
+  down, clamped the same way, and on release both ease home and hand back to the idle.
+- **The badge is a HUD note outside the frame now**, under its bottom-right corner and with no chip
+  behind it: outside reads as page furniture rather than something inside the tunnel. The stage lets
+  it out — the canvas is clipped by the scene wrapper instead — so its overflow is visible again.
+- **The backlight is anchored to the mark.** It was a fixed plane in world space, so as the camera
+  leaned the halo slid off the mark; it is placed each frame on the camera's axis, behind the mark,
+  which is what "it should only move with the model" means.

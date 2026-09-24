@@ -37,6 +37,7 @@ const props = defineProps({
   // Pointer position over the stage, normalised to -1..1, from LogoStage.
   tilt: { type: Object, default: () => ({ x: 0, y: 0 }) },
   spin: { type: Number, default: 0 },
+  spinY: { type: Number, default: 0 },
   dragging: { type: Boolean, default: false },
 })
 
@@ -130,6 +131,7 @@ build()
         :geometry="geometry"
         :tilt="props.tilt"
         :spin="props.spin"
+        :spin-y="props.spinY"
         :dragging="props.dragging"
         :running="onScreen && !reduced"
       />

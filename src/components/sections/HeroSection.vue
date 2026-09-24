@@ -157,15 +157,12 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
   padding: 14px 26px;
 }
 
-/* A HUD chip, just inside the frame's top-left corner: on the page's channel so
-   it clears the tunnel's grid behind it rather than fighting the perspective. */
+/* Outside the frame, under its bottom-right corner: a HUD note on the page, not
+   a chip over the tunnel. */
 .availability {
   position: absolute;
-  top: 30px;
-  left: 30px;
-  padding: 5px 10px 5px 6px;
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--ink) 82%, transparent);
+  right: 0;
+  bottom: -28px;
 }
 
 /*

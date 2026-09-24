@@ -40,11 +40,14 @@ const frame = ref(null)
 const stage = ref(null)
 const tilt = ref({ x: 0, y: 0 })
 const spin = ref(0)
+const spinY = ref(0)
 const dragging = ref(false)
 const ready = ref(false)
 
 let startX = 0
+let startY = 0
 let startSpin = 0
+let startSpinY = 0
 let snapFrame = 0
 
 /*
@@ -110,9 +113,10 @@ usePointer((pointer) => {
   const rect = el.getBoundingClientRect()
 
   if (dragging.value) {
-    // A full width of travel is a bit more than the clamp, so the limit is felt
-    // before the pointer reaches the edge of the box.
+    // Both axes, both clamped the same way, so the mark can be thrown up and
+    // down as well as left and right.
     spin.value = clamp(startSpin + ((pointer.x - startX) / rect.width) * 3, -MAX_SPIN, MAX_SPIN)
+    spinY.value = clamp(startSpinY + ((pointer.y - startY) / rect.height) * 3, -MAX_SPIN, MAX_SPIN)
     return
   }
 
@@ -141,7 +145,9 @@ function onDown(event) {
   if (!stage.value) return
   dragging.value = true
   startX = event.clientX
+  startY = event.clientY
   startSpin = spin.value
+  startSpinY = spinY.value
   // Capture so the drag survives leaving the box; the logo keeps up with the
   // pointer instead of stopping at the edge.
   stage.value.setPointerCapture(event.pointerId)
@@ -176,6 +182,7 @@ function clamp(value) {
           <LogoScene
             :tilt="tilt"
             :spin="spin"
+            :spin-y="spinY"
             :dragging="dragging"
             @ready="ready = true"
           />
@@ -216,7 +223,12 @@ function clamp(value) {
   height: 100%;
   border: 1px solid var(--line);
   background: radial-gradient(80% 80% at 50% 40%, var(--surface) 0%, var(--ink) 100%);
-  overflow: hidden;
+  /*
+    Visible, not hidden: the canvas is clipped by `.scene` below, and the stage
+    has to let the availability badge sit outside its bottom-right corner rather
+    than cut it off.
+  */
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;

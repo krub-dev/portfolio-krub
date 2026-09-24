@@ -74,6 +74,7 @@ const BACKLIGHT = 170
 const room = ref(null)
 const roomGeo = ref(null)
 const backlight = ref(null)
+const backlightMesh = ref(null)
 const backlightColor = ref('#0c0c0d')
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -269,6 +270,12 @@ onBeforeRender(({ delta }) => {
   // Always looking back at the mark, so it stays centred while the room moves.
   cam.position.set(smoothX, -smoothY, props.camZ)
   cam.lookAt(0, 0, 0)
+
+  // The halo sits on the camera's own axis, behind the mark: the point on the
+  // line through the camera and the mark at the halo's depth. Without this it
+  // stays in world space and slides off the mark as the camera leans.
+  const axis = BACKLIGHT_Z / props.camZ
+  backlightMesh.value?.position.set(smoothX * axis, -smoothY * axis, BACKLIGHT_Z)
 })
 </script>
 
@@ -284,8 +291,10 @@ onBeforeRender(({ delta }) => {
     <TresMeshBasicMaterial :map="room" :side="DoubleSide" :tone-mapped="false" />
   </TresMesh>
 
-  <!-- A neutral halo behind the mark, to clear the grid and rim it. -->
-  <TresMesh v-if="backlight" :position="[0, 0, BACKLIGHT_Z]">
+  <!-- A neutral halo behind the mark, to clear the grid and rim it. It is placed
+       each frame on the camera's own axis (below), so it stays behind the mark
+       however the camera leans instead of sliding off it. -->
+  <TresMesh ref="backlightMesh" v-if="backlight" :position="[0, 0, BACKLIGHT_Z]">
     <TresPlaneGeometry :args="[BACKLIGHT, BACKLIGHT]" />
     <TresMeshBasicMaterial
       :map="backlight"

@@ -209,6 +209,12 @@ change, and making the repository public.
   the click, never preloaded, and covered by an e2e test that counts the `play()` calls and watches
   the bubble come and go. Re-encoded to MP3 (128 kbps, 17 KB, down from a 177 KB WAV that stays
   outside the repository, with the reference material).
+- [ ] **The room's grid does not coincide with the page's inside the frame.** Its transverse lines
+  are spaced uniformly in world space, so on screen they land about 20px apart near the frame while
+  the page's grid is 72px: only the lines *at* the frame coincide (decision 82), which is why one
+  shows just inside it. A uniform perspective grid cannot do better. The fix is to space the
+  transverse lines in perspective — map the depth axis to the screen projection in the UVs, or draw
+  the grid as lines at the computed positions — so the whole interior lands on the page's grid.
 
 ## Mobile and responsive
 
