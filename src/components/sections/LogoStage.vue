@@ -1,17 +1,23 @@
 <script setup>
 /*
-  The square stage in the hero: the reserved slot for the 3D scene, and it
-  carries no explanatory text on purpose.
+  The square stage in the hero: the slot for the 3D scene.
 
   The stage is a still box. The pointer only turns the logo inside it, and that
-  happens in the scene, on the mesh — not here with a CSS transform. It reads as
+  happens on the mesh, in the scene — not here with a CSS transform. It reads as
   a solid object being looked at rather than as a card being pulled around, and
-  it keeps the frame's border and grid from drifting off the section's gutter.
+  it keeps the frame's border and grid on the section's gutter.
 
-  `tilt` is the cursor's position over the stage, normalised to -1..1 and
-  clamped, so the turn stops growing once the pointer leaves the box.
+  Two gestures, and they share one value:
+
+  - **Hover** tilts it a little, toward the cursor. `tilt` is the pointer's
+    position over the stage, normalised to -1..1 and clamped.
+  - **Drag** spins it, and on release it snaps back to the front. `spin` is the
+    dragged angle; the magnetic return lives in the scene, where the render loop
+    already runs, so it costs no second loop here.
+
+  Both are clamped: past ~70 degrees the word stops being a word.
 */
-import { defineAsyncComponent, ref } from 'vue'
+import { defineAsyncComponent, onUnmounted, ref } from 'vue'
 
 import { usePointer } from '../../composables/usePointer'
 
@@ -21,14 +27,29 @@ import { usePointer } from '../../composables/usePointer'
 */
 const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 
+const MAX_SPIN = 1.2 // radians, about 70 degrees each way
+
 const stage = ref(null)
 const tilt = ref({ x: 0, y: 0 })
+const spin = ref(0)
+const dragging = ref(false)
+
+let startX = 0
+let startSpin = 0
 
 usePointer((pointer) => {
   const el = stage.value
   if (!el) return
 
   const rect = el.getBoundingClientRect()
+
+  if (dragging.value) {
+    // A full width of travel is a bit more than the clamp, so the limit is felt
+    // rather than hit at the edges of the box.
+    spin.value = clamp(startSpin + ((pointer.x - startX) / rect.width) * 3.2, -MAX_SPIN, MAX_SPIN)
+    return
+  }
+
   if (rect.bottom < 0 || rect.top > window.innerHeight) return // offscreen, skip the work
 
   tilt.value = {
@@ -37,18 +58,43 @@ usePointer((pointer) => {
   }
 })
 
+function onDown(event) {
+  if (!stage.value) return
+  dragging.value = true
+  startX = event.clientX
+  startSpin = spin.value
+  // Capture so the drag survives leaving the box; the logo keeps up with the
+  // pointer instead of stopping at the edge.
+  stage.value.setPointerCapture(event.pointerId)
+}
+
+function onUp(event) {
+  dragging.value = false
+  if (stage.value?.hasPointerCapture(event.pointerId)) {
+    stage.value.releasePointerCapture(event.pointerId)
+  }
+}
+
 function clamp(value) {
   return Math.max(-1, Math.min(1, value))
 }
+
+onUnmounted(() => (dragging.value = false))
 </script>
 
 <template>
   <div class="frame">
-    <div ref="stage" class="stage">
+    <div
+      ref="stage"
+      class="stage"
+      @pointerdown="onDown"
+      @pointerup="onUp"
+      @pointercancel="onUp"
+    >
       <div class="grid" aria-hidden="true" />
       <div class="scene" aria-hidden="true">
         <Suspense>
-          <LogoScene :tilt="tilt" />
+          <LogoScene :tilt="tilt" :spin="spin" :dragging="dragging" />
         </Suspense>
       </div>
       <slot />
@@ -57,11 +103,8 @@ function clamp(value) {
 </template>
 
 <style scoped>
-/*
-  The frame is the stage's box. It used to carry the magnetic pull; it does not
-  any more — only the logo moves. The turning glow that lived here (a conic
-  gradient on two pseudo-elements) is gone too.
-*/
+/* The frame is the stage's box. It used to carry the magnetic pull; it does not
+   any more — only the logo moves. */
 .frame {
   position: relative;
   aspect-ratio: 1 / 1;
@@ -73,15 +116,12 @@ function clamp(value) {
 
 .stage {
   position: relative;
-  /* Above the glow, which is behind it by design. */
   z-index: 1;
   /*
-    border-box, which the project does not set globally on purpose (the spec's
-    measurements were taken content-box). Here it is not a preference: with
-    content-box the 1px border is added to 100% of the frame, so the stage came
-    out 2px wider and taller than the box it was supposed to fill, pushed out of
-    centre, and its overflow covered the glow on the right and bottom edges —
-    which is exactly what it looked like.
+    border-box, which the project does not set globally on purpose. Here it is
+    not a preference: with content-box the 1px border is added to 100% of the
+    frame, so the stage came out 2px wider and taller than the box it was
+    supposed to fill.
   */
   box-sizing: border-box;
   width: 100%;
@@ -93,9 +133,12 @@ function clamp(value) {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: grab;
 }
 
-
+.stage:active {
+  cursor: grabbing;
+}
 
 /* 40px inside the stage, not the 72px of the page background: the page grid at
    full size reads as noise inside a 520px box. */

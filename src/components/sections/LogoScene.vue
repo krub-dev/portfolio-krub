@@ -10,15 +10,17 @@
 
   - Lazy. TresJS and Three are a chunk of their own; LogoStage mounts the scene
     with defineAsyncComponent, so the initial bundle does not carry it.
-  - Framed at 30fps (`fps-limit`) and capped at 2x DPR.
+  - Framed at 20fps (`fps-limit`) and capped at 1.5x DPR. A logo does not need
+    60 frames a second, and the reflections make every frame cost more than a
+    flat colour would.
   - Paused off-screen: an IntersectionObserver drives `running`.
   - Never on a phone: the stage is not mounted below 900px (decision 37).
 
   The wheel zooms the camera, not the mesh, so the perspective stays honest. It
   is clamped, and it only takes the gesture while it can still move — at either
-  end the page keeps its scroll, the same rule the testimonials pager learned.
+  end the page keeps its scroll.
 
-  The material row is a temporary chooser, here to compare the four before one is
+  The material row is a temporary chooser, here to compare finishes before one is
   picked; it is not meant to ship.
 */
 import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
@@ -32,11 +34,14 @@ import LogoModel from './LogoModel.vue'
 const props = defineProps({
   // Pointer position over the stage, normalised to -1..1, from LogoStage.
   tilt: { type: Object, default: () => ({ x: 0, y: 0 }) },
+  spin: { type: Number, default: 0 },
+  dragging: { type: Boolean, default: false },
 })
 
-// Only the polished metal for now. The row stays so more finishes can be added
-// to it, and it is temporary either way — it is a chooser, not part of the page.
-const MATERIALS = [{ id: 'metal', label: 'Metal' }]
+const MATERIALS = [
+  { id: 'metal', label: 'Metal' },
+  { id: 'crystal', label: 'Cristal' },
+]
 
 const root = ref(null)
 const geometry = shallowRef(null)
@@ -45,8 +50,6 @@ const material = ref('metal')
 const zoom = ref(1)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-// A third of the depth the first pass had, and closer to the camera so the mark
-// fills more of the box.
 const DEPTH = 12
 const CAM_Z = 205
 const ZOOM_MIN = 0.82
@@ -68,8 +71,7 @@ onUnmounted(() => observer?.disconnect())
 function onWheel(event) {
   const next = zoom.value * (event.deltaY > 0 ? 0.94 : 1.06)
   const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next))
-  // At a limit, let the page have the scroll back.
-  if (clamped === zoom.value) return
+  if (clamped === zoom.value) return // at a limit, let the page have the scroll
   event.preventDefault()
   zoom.value = clamped
 }
@@ -87,16 +89,22 @@ async function build() {
     bevelThickness: 0.8,
     bevelSize: 0.6,
     bevelSegments: 2,
-    curveSegments: 12,
+    curveSegments: 24,
   })
+
   /*
-    Weld the vertices and recompute the normals. ExtrudeGeometry does not share
-    vertices between the segments of a curve, so each facet of the wall gets its
-    own normal and the polished metal shows every polygon. Merging first lets
-    the normals average across the curve, which is what smooths the wall without
-    touching the flat front and back.
+    Smooth the wall without rounding the edges.
+
+    ExtrudeGeometry does not share vertices between the segments of a curve, so
+    every facet of the wall carries its own normal and the polished metal shows
+    each polygon. `mergeVertices` alone does nothing here — it compares the
+    whole vertex, normals included, and they all differ. Dropping the normals
+    first lets it weld by position, and the recomputed normals average across
+    the curve. The bevel keeps its hard edge because its faces meet at a real
+    angle, not a shallow one, so the average does not wash it out.
   */
-  built = mergeVertices(built, 1e-4)
+  built.deleteAttribute('normal')
+  built = mergeVertices(built, 1e-3)
   built.computeVertexNormals()
   built.center()
   geometry.value = built
@@ -107,13 +115,30 @@ build()
 
 <template>
   <div ref="root" class="scene" @wheel="onWheel">
-    <TresCanvas :fps-limit="30" :dpr="[1, 2]" clear-color="#00000000" alpha>
+    <TresCanvas :fps-limit="20" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
+
+      <!--
+        The "portal": a grid floor that recedes toward a vanishing point behind
+        the mark, so the box reads as a small room with depth rather than as a
+        flat card. It is one GridHelper — lines, no geometry, no texture — and
+        it parallaxes for free because it lives in the scene with the camera.
+      -->
+      <TresGridHelper
+        :args="[900, 30, '#ffc800', '#3a3a3c']"
+        :position="[0, -150, -260]"
+        :rotation="[-Math.PI / 2, 0, 0]"
+        :material-opacity="0.22"
+        :material-transparent="true"
+      />
+
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1.6" />
       <LogoModel
         v-if="geometry"
         :geometry="geometry"
         :tilt="props.tilt"
+        :spin="props.spin"
+        :dragging="props.dragging"
         :material="material"
         :running="onScreen && !reduced"
       />
