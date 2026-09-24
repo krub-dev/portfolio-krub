@@ -268,31 +268,38 @@ function clamp(value) {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  border: 24px solid var(--ink);
-  border-image: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--fg) 22%, var(--ink)) 0%,
-      color-mix(in srgb, var(--fg) 6%, var(--ink)) 15%,
-      color-mix(in srgb, var(--fg) 18%, var(--ink)) 32%,
-      color-mix(in srgb, var(--fg) 5%, var(--ink)) 50%,
-      color-mix(in srgb, var(--fg) 16%, var(--ink)) 68%,
-      color-mix(in srgb, var(--fg) 7%, var(--ink)) 100%
-    )
-    1;
+  /*
+    One ridged band, no second one behind it. `border-style: ridge` draws the
+    raised lip itself — light on two edges, dark on the other two — over the
+    theme's own metal grey, so the frame is a single piece.
+  */
+  border: 24px ridge color-mix(in srgb, var(--fg) 30%, var(--ink));
   box-shadow: inset 0 0 0 1px var(--line);
 }
 
 /*
-  A ridge over the metal. The browser's own `border-style: ridge` draws a raised
-  bevel from a single colour, so a translucent one laid over the band reads as a
-  lip without burying the brushed gradient underneath.
+  The brushed sheen over the ridge. This one has to reach the *border* box — a
+  pseudo at `inset: 0` sits inside the border and reads as a second band — so it
+  is pulled out by the border's own width and clipped back to it. The gradient is
+  translucent on purpose, so the ridge's lit and shaded edges still show through.
 */
 .rim::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -24px;
+  box-sizing: border-box;
   pointer-events: none;
-  border: 24px ridge color-mix(in srgb, var(--fg) 22%, transparent);
+  border: 24px solid transparent;
+  border-image: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--fg) 42%, transparent) 0%,
+      color-mix(in srgb, var(--fg) 12%, transparent) 16%,
+      color-mix(in srgb, var(--fg) 34%, transparent) 33%,
+      color-mix(in srgb, var(--fg) 8%, transparent) 50%,
+      color-mix(in srgb, var(--fg) 30%, transparent) 68%,
+      color-mix(in srgb, var(--fg) 14%, transparent) 100%
+    )
+    1;
 }
 
 /* The scene fills the stage and sits over the fallback. `overflow: hidden` clips

@@ -2217,5 +2217,9 @@ the stage, and sends the tilt home when it leaves. The scene belongs to its fram
 - **The vertical is capped harder**: the drag's vertical range is 0.45 rad against the 1.1 the
   horizontal keeps, and the hover's vertical tilt is 0.18. Tipping a logo up and down reads heavier
   than turning it side to side.
-- **The frame gets a ridge**: the browser's own `border-style: ridge`, translucent, laid over the
-  brushed `border-image`, so the band reads as a raised lip without burying the metal.
+- **The frame is one ridged band with a brushed sheen.** A translucent ridge laid over the brushed
+  `border-image` first put the ridge *inside* the metal: an absolutely positioned pseudo is placed
+  against the padding box, which on a bordered element is inside the border. So the ridge is the
+  band now, and the brushed gradient is a second layer that reaches the *border* box instead —
+  pulled out by the border's own width and clipped back to it — with transparent stops, so the
+  ridge's lit and shaded edges still show through. One piece that reads as a metal frame.
