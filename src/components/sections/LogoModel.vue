@@ -38,7 +38,6 @@ let smoothSpin = 0
 
 const material = new MeshStandardMaterial({ metalness: 1, roughness: 0.15 })
 
-const mesh = shallowRef(null)
 const group = new Group()
 group.add(new Mesh(props.geometry, material))
 group.scale.set(1.95)
