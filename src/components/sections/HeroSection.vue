@@ -3,9 +3,9 @@
   The hero: name, headline, paragraph, two CTAs on the left; the square stage
   with the logo on the right.
 
-  The stage on the right is LogoStage: it owns the 3D logo and the pointer
-  gestures. The availability badge opens the text column, over the headline, so
-  it reads as page furniture rather than as something inside the tunnel.
+  The stage on the right is LogoStage: it owns the 3D logo, the frame and the
+  pointer gestures. The availability badge sits outside the frame's top-left
+  corner, passed into its slot so it can hang off the stage.
 
   On a phone there is no stage at all — see the note above the media query in
   the styles.
@@ -55,8 +55,6 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
       <div class="left">
         <BrandName />
 
-        <AvailabilityBadge class="availability-inline" :label="hero.badge" />
-
         <h1 class="headline">
           {{ hero.line1 }}<br />
           {{ hero.line2 }}<br />
@@ -78,7 +76,9 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 
       </div>
 
-      <LogoStage v-if="!narrow" />
+      <LogoStage v-if="!narrow">
+        <AvailabilityBadge class="availability" :label="hero.badge" />
+      </LogoStage>
     </div>
   </section>
 </template>
@@ -149,6 +149,14 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
    instance — see the note in BaseButton.vue. */
 .secondary {
   padding: 14px 26px;
+}
+
+/* Outside the frame, above its top-left corner: page furniture, not part of the
+   window. */
+.availability {
+  position: absolute;
+  top: -28px;
+  left: 0;
 }
 
 /*

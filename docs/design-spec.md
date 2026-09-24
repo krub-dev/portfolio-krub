@@ -251,16 +251,16 @@ column and needs the room.
 Two-column grid `1.1fr .9fr`, `gap: clamp(32px,5vw,64px)`, vertically centred,
 `max-width:1180px`. One column on mobile.
 
-Left column: the name, the availability indicator (below), a three-line headline with the key word
+Left column: the name, a three-line headline with the key word
 in `--acc`, a paragraph (`--fg-2`, 46ch) and two buttons — primary "Let's talk ↗" (background
 `--acc`, radius 999, `padding:11px 24px`, 18px, weight 600, hover to `--acc-2`) and secondary
 "/projects" (border `--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and
 text yellow).
 
-**The availability indicator** opens the column, over the headline: a mono row of 10px uppercase,
-`letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two layers inside
-a 5×5px container: a core, a solid `#39D98A` circle filling it and **not animated**; and a ring,
-`inset:-5px`, `border:1px solid #39D98A`, `border-radius:50%`, animated
+**The availability indicator** hangs outside the frame's top-left corner: a mono row
+of 10px uppercase, `letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is
+two layers inside a 5×5px container: a core, a solid `#39D98A` circle filling it and **not
+animated**; and a ring, `inset:-5px`, `border:1px solid #39D98A`, `border-radius:50%`, animated
 `dotHalo 2.6s cubic-bezier(.15,.6,.3,1) infinite` — born small, appears, grows and fades out
 completely before restarting. Text: "Available" / "Disponible".
 
@@ -268,9 +268,8 @@ Right column, the **square stage**: a square of whole 72px cells of the page's b
 seven by seven (504×504) at the usual viewport, its four edges on the grid lines and nudged to the
 next cell right of its natural position (or kept a cell back when that would run off the screen).
 It is measured and snapped by `LogoStage`, since it depends on the viewport (decision 79). Border
-`--line`, a `radial-gradient` from `--surface` to `--ink`, and a square `--ink` frame with a
-hairline inside it over the canvas. The whole stage is magnetic, and only the logo inside it turns.
-Inside:
+`--line`, a `radial-gradient` from `--surface` to `--ink`, and a slim brushed-metal frame over the
+canvas (decision 81). The whole stage is magnetic, and only the logo inside it turns. Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
   mark that tilts toward the cursor, spins with a drag and springs back to the front. Behind it a
@@ -278,8 +277,8 @@ Inside:
   and the camera leans a little with the pointer, so the depth shifts while the mark stays centred.
   **The opening is cut to the stage** and divided into the stage's own seven cells, so its grid
   lines fall on the page's at the frame; the box scales with the wheel's zoom to keep it so. A
-  neutral backlight — the theme's own background — clears the grid behind the mark, and a metal
-  `border-image` frame covers the box's edges. It is lazy, pauses off-screen and never mounts below
+  neutral backlight — the theme's own background — clears the grid behind the mark, and a soft
+  entrance glow rings the opening in the accent. It is lazy, pauses off-screen and never mounts below
   900px (decision 37). See decisions 78–82.
 - **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
   first and fades out once the scene reports ready (decision 77), so a browser without WebGL still

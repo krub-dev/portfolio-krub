@@ -19,15 +19,18 @@
   The texture and the fog are read from the theme tokens and rebuilt when
   `data-theme` or `data-accent` changes.
 */
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
 import {
+  AdditiveBlending,
   BufferGeometry,
   CanvasTexture,
   DoubleSide,
   Float32BufferAttribute,
   Fog,
+  Mesh,
   MeshBasicMaterial,
+  PlaneGeometry,
   RepeatWrapping,
   SRGBColorSpace,
 } from 'three'
@@ -64,8 +67,12 @@ const FOG_NEAR = 240
 const FOG_FAR = 560
 // The lean, sized to the frame: the opening is the stage, so a bigger one would
 // pull its edge out from under the frame's band.
-const PEEK_X = 6
-const PEEK_Y = 4
+// The lean, sized to the slim frame: the band is 12px, and a bigger one would
+// pull the box's edge out from under it.
+const PEEK_X = 3
+const PEEK_Y = 2
+// The entrance glow: a ring of light at the opening, just inside the frame.
+const RING_INSET = 0.94
 // A neutral halo behind the mark, in the theme's own background: dark in the
 // dark theme, light in the light one.
 const BACKLIGHT_Z = -60
@@ -76,6 +83,7 @@ const roomGeo = ref(null)
 const backlight = ref(null)
 const backlightMesh = ref(null)
 const backlightColor = ref('#0c0c0d')
+const ring = shallowRef(null)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const { camera, scene } = useTresContext()
@@ -98,6 +106,7 @@ function tokens() {
     surface: read('--surface', '#141416'),
     ink: read('--ink', '#0c0c0d'),
     grid: read('--line', 'rgba(255,255,255,.11)'),
+    accent: read('--acc-solid', '#ffc800'),
   }
 }
 
@@ -230,10 +239,64 @@ function readBacklight() {
   backlightColor.value = css.getPropertyValue('--ink').trim() || '#0c0c0d'
 }
 
+/*
+  The entrance glow: a soft ring of light at the opening, in the accent. It is a
+  blurred square, not a stroked outline — a hard line reads as wire, and the point
+  is the sense of light coming in from the frame — so it is drawn in a few passes
+  with a growing blur for a bright core and a wide halo.
+*/
+function buildRing() {
+  const size = 512
+  const canvas = makeCanvas(size)
+  const ctx = canvas.getContext('2d')
+  const inset = size * 0.06
+  const box = size - inset * 2
+  ctx.strokeStyle = tokens().accent
+  ctx.shadowColor = tokens().accent
+  for (const [width, blur, alpha] of [
+    [size * 0.005, size * 0.02, 1],
+    [size * 0.009, size * 0.06, 0.5],
+    [size * 0.013, size * 0.13, 0.26],
+  ]) {
+    ctx.globalAlpha = alpha
+    ctx.lineWidth = width
+    ctx.shadowBlur = blur
+    ctx.strokeRect(inset, inset, box, box)
+  }
+  ctx.globalAlpha = 1
+
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  disposeRing()
+  const span = ROOM_HALF * 2 * RING_INSET
+  const mesh = new Mesh(
+    new PlaneGeometry(span, span),
+    new MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      blending: AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+      fog: false,
+    }),
+  )
+  mesh.position.z = OPENING_Z
+  ring.value = mesh
+}
+
+function disposeRing() {
+  if (!ring.value) return
+  ring.value.material.map?.dispose()
+  ring.value.geometry.dispose()
+  ring.value.material.dispose()
+  ring.value = null
+}
+
 function repaint() {
   buildRoom()
   buildFog()
   readBacklight()
+  buildRing()
 }
 
 onMounted(() => {
@@ -249,6 +312,7 @@ onUnmounted(() => {
   room.value?.dispose()
   roomGeo.value?.dispose()
   backlight.value?.dispose()
+  disposeRing()
 })
 
 buildRoomGeometry()
@@ -276,6 +340,9 @@ onBeforeRender(({ delta }) => {
   // stays in world space and slides off the mark as the camera leans.
   const axis = BACKLIGHT_Z / props.camZ
   backlightMesh.value?.position.set(smoothX * axis, -smoothY * axis, BACKLIGHT_Z)
+
+  // The ring sits on the opening, and the opening scales with the zoom.
+  ring.value?.scale.setScalar(k.value)
 })
 </script>
 
@@ -305,4 +372,6 @@ onBeforeRender(({ delta }) => {
       :fog="false"
     />
   </TresMesh>
+  <!-- The entrance glow at the opening. -->
+  <primitive v-if="ring" :object="ring" />
 </template>

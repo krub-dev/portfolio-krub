@@ -2115,127 +2115,46 @@ placed by script; everything else is still layout. `width`, `height`, `max-width
 `transform` are the only properties it touches; the maxes because the stylesheet's own cap would
 otherwise clip the box below a whole number of cells.
 
-### 80. A CSS frame, a touch of peek, and three depth treatments
+### 80. The opening is cut to the stage, and the grid meets the page's
 
 **Date:** 2026-09-24 · **Status:** active
 
-Two ideas from the owner, off a reference the model drew.
+- **The opening is cut to the stage** — its half-size is `d * tan(fov/2)` at its distance — and
+  divided into the stage's own **seven cells** (decision 79), so its grid lines land on the page's at
+  the frame. The lines are drawn on the **half cell** (`(i + 0.5) * step`): a line on every edge and
+  none through the middle, which is what makes the two grids meet instead of running a cell out of
+  phase. The interior still converges — a uniform perspective grid cannot match a flat one anywhere
+  but the frame — and that is the backlog item.
+- **The wheel zooms, and the box scales with it** so its opening stays on the stage at any zoom; a
+  fixed box would take the grid off the page's the moment you scrolled. The camera also leans a
+  little with the pointer (6/4) and reads the pointer only while it is over the stage.
+- **The fog falls off to `--ink`** so the tunnel has no bottom to see, and the **backlight** is the
+  theme's own background — dark in the dark theme, light in the light one — placed each frame on the
+  camera's axis behind the mark, so it clears the grid there rather than lighting it in a colour.
+- **An entrance glow.** A soft ring of light at the opening, in the accent: a blurred square drawn in
+  a few passes and added over the scene, so the frame reads as an opening that light comes through
+  rather than as a hard outline.
 
-- **A frame over the canvas.** A square, `--ink` band nine pixels wide with a `--line` hairline
-  inside it, drawn over the WebGL canvas and under the slot. It is what lets the camera lean again:
-  the box's own edges sit under the frame, so the lean never shows the page past them. The stage was
-  already snapped to the page grid (decision 79), so the frame is on it too.
-- **The peek comes back**, smaller (10/7 world units, was 16/11). It had been dropped while the grid
-  had to stay perfectly aligned; with the frame covering the seam, a small lean is safe.
-- **The tunnel runs deep, and fades.** The room went from 160 to 700 units, so the grid converges
-  into the distance, and a `Fog` tuned to `--ink` (300/900) swallows the far end — no bottom to see.
-  That is the fog decision 75 removed, back where it belongs: in a long tunnel it fades only the far
-  part, not the whole grid. The mark opts out again (`material.fog = false`).
-- **The rings**, from the model's "infinite tunnel": one square frame — a `Shape` with a square hole
-  — in an `InstancedMesh`, the same size each time and only further back, so perspective shrinks
-  them, tinted from a hint of the accent at the front to `--ink` at the back. One draw call, a few
-  hundred triangles. Two notes for the record: Three has no per-instance opacity, so the fade is
-  `instanceColor`, not alpha; and the `InstancedMesh` must be a `shallowRef`, or Vue's reactive
-  proxy trips the renderer over its read-only matrices.
-
-Three ways to dress the depth were built — the grid tunnel, the rings, both — behind a temporary
-Grid / Rings / Both chooser in `LogoScene`. The owner picked the **grid tunnel**: the rings and the
-combination read badly, and both the chooser and the rings were removed. The deep grid box and its
-fog are what ship.
-
-The hover is scoped to the frame, too. `LogoStage` already knew the stage's box, but it tilted the
-mark from the pointer's position on the whole page; it now reads the pointer only while it is over
-the stage, and sends the tilt home when it leaves. The scene belongs to its frame, not to the page.
-
-### 81. The opening is cut to the stage, a backlight, and the badge moves
+### 81. The frame is a slim brushed-metal band, and the badge hangs outside it
 
 **Date:** 2026-09-24 · **Status:** active
 
-- **The box's opening is now the stage.** Its half-size is `d * tan(fov/2)` at its distance, so an
-  opening that size projects to the stage's edges and nothing more; divided into the same seven
-  cells the stage is (decision 79), its grid lines fall on the page's at the frame. The interior
-  still converges — that is what perspective is, and the one thing that will not square — but the
-  first lines and the corners land, which is what the owner asked for.
-- **The camera zoom is gone.** With the opening cut to the stage, a zoom moves it off the grid: the
-  two cannot both hold. The camera is fixed and the depth is static; the mark is what answers the
-  pointer.
-- **A backlight.** A soft additive halo tinted from `--acc-solid`, just behind the mark, to rim the
-  typography against the dark.
-- **The fog closes in** (240/560, was 300/900): the far end is black by the time the tunnel ends, so
-  the logo stands out with more volume.
-- **The badge** straddles the stage's top edge, `--ink` behind it, so it breaks the frame's line and
-  reads as a HUD tag instead of one more thing over the tunnel. That is why the stage no longer
-  clips its own overflow — the canvas is clipped by the canvas wrapper instead.
-- **Two frame finishes**, switched by a temporary chooser in `LogoStage`: the hairline in
-  `--acc-text`, so the frame follows the palette, or a bevel (a lit top edge, a dark bottom one).
-  The band went to 16px, wide enough to hide the lean.
+- **The frame is a slim brushed-metal band** — 12px, opaque, over the canvas — drawn in the theme's
+  own greys (`--fg` mixed into `--ink`) rather than a colour, with a hairline on its inner edge. The
+  ridge and the wider bands were tried and dropped: it reads better thin. Being opaque, it also masks
+  the box's edges and whatever the camera's small lean would show past them.
+- **The badge hangs outside the frame's top-left corner.** It was tried inside the frame, in the text
+  column and under the bottom-right corner; outside the top-left is where the owner wanted it.
 
-### 82. The grid phase, the zoom back, a neutral backlight and a metal frame
+### 82. The mark's motion and light
 
 **Date:** 2026-09-24 · **Status:** active
 
-- **The grid was half a cell out of phase.** Drawing the texture's lines on `i * step` put a line
-  through the middle of the opening and none on its edges, so the interior grid ran half a cell
-  behind the page's: it met at the corners and nowhere else. The lines are on the halves now
-  (`(i + 0.5) * step`), which is what makes the two grids coincide.
-- **The zoom comes back, compensated.** The camera moves as before, and the box scales and follows
-  it (`k` on the mesh, and the box's z with it) so its opening stays on the stage at any zoom. A
-  fixed box would take the grid off the page's the moment you scrolled; this keeps seven cells
-  across the opening throughout.
-- **The backlight is neutral.** It was tinted with the accent, which the owner did not want. It is
-  the page's own background now — dark in the dark theme, light in the light one — so it clears the
-  grid behind the mark instead of lighting it in a colour.
-- **The frame is metal.** The accent hairline and the bevel are gone, replaced by one band with a
-  brushed gradient of `--fg` mixed into `--ink` (`border-image`): a sheen in both themes, not a
-  colour. The band is 24px, which has room to cover the lean.
-- **The lean is bigger** (6/4, was 3/2), still spent inside the frame's band.
-
-### 83. The idle breathes more, the drag is two-axis, and the badge leaves the frame
-
-**Date:** 2026-09-24 · **Status:** active
-
-- **The idle moves more and faster**, on both axes: a wider, quicker sway than the single slow one
-  it had, plus a smaller one on x, so the mark never looks parked.
-- **The drag is constrained on both axes**, not just horizontally. A vertical drag turns it up and
-  down, clamped the same way, and on release both ease home and hand back to the idle.
-- **The badge is a HUD note outside the frame now**, under its bottom-right corner and with no chip
-  behind it: outside reads as page furniture rather than something inside the tunnel. The stage lets
-  it out — the canvas is clipped by the scene wrapper instead — so its overflow is visible again.
-- **The backlight is anchored to the mark.** It was a fixed plane in world space, so as the camera
-  leaned the halo slid off the mark; it is placed each frame on the camera's axis, behind the mark,
-  which is what "it should only move with the model" means.
-
-### 84. The badge lands in the text column, the vertical is capped, and the frame gets a ridge
-
-**Date:** 2026-09-24 · **Status:** active
-
-- **The availability badge opens the text column now**, right over the headline. It had been tried
-  inside the frame, straddling its top edge, and under its bottom-right corner, and none of them
-  read: it either fought the tunnel's perspective or looked like an orphan tag. In the column it is
-  page furniture, which is what it is, and the stage keeps its slot to itself. The design spec moved
-  the indicator's description out of the stage for the same reason.
-- **The vertical is capped harder**: the drag's vertical range is 0.45 rad against the 1.1 the
-  horizontal keeps, and the hover's vertical tilt is 0.18. Tipping a logo up and down reads heavier
-  than turning it side to side.
-- **The frame is one ridged band with the brushed sheen back on it.** A first attempt laid a
-  translucent ridge over the brushed `border-image` and put the ridge *inside* the metal: an
-  absolutely positioned pseudo is placed against the padding box, which on a bordered element is
-  inside the border. So the ridge is the band, and the gradient is a second layer that reaches the
-  *border* box — pulled out by the border's own width and clipped back to it — carrying the exact
-  stops the frame had before, at an opacity low enough (0.78) that the ridge's lit and shaded edges
-  still read under it.
-
-### 85. The click jump, a softer light, and more frame contrast
-
-**Date:** 2026-09-24 · **Status:** active
-
-- **A click no longer throws the mark.** `spin` and `spinY` kept the last drag angle when the
-  pointer came up, and the next press measured its start from them — so a plain click snapped the
-  mark back to wherever it had last been orbited. They are cleared on release, which is what makes
-  the mark rest between gestures.
-- **The light is softer.** The hot spots were the generated environment's emissive panels — Three's
-  `RoomEnvironment` through a PMREM, not an HDRI file — plus the directional light. The directional
-  came down to 1 and the metal's roughness up to 0.25, which spreads the highlights instead of
-  pointing them at one angle.
-- **The frame carries more contrast**: a lighter ridge grey and a wider spread in the brushed
-  gradient, at 0.85 opacity.
+- **The idle breathes on both axes** — a wider, quicker sway than the single slow one it had — so the
+  mark never looks parked.
+- **The drag is constrained on both axes**, the vertical capped harder (0.45 rad against the
+  horizontal's 1.1), and **cleared on release**: leaving the angles in place is what made a plain
+  click snap the mark back to wherever it had last been orbited.
+- **The light is a generated environment, not an HDRI**: Three's `RoomEnvironment` through a PMREM,
+  plus one directional light at intensity 1. The metal's roughness is 0.25, which spreads the
+  environment's hot spots instead of pointing them at one angle.

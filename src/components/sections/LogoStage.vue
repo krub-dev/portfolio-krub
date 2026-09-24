@@ -143,6 +143,9 @@ usePointer((pointer) => {
 })
 
 function onDown(event) {
+  // The frame chooser is a control, not part of the object: a press on it must
+  // not start a drag, or the capture swallows the button's own click.
+  if (event.target.closest('.frames')) return
   if (!stage.value) return
   dragging.value = true
   startX = event.clientX
@@ -194,7 +197,7 @@ function clamp(value) {
         </Suspense>
       </div>
 
-      <!-- The frame, over the canvas and under the slot. -->
+      <!-- The frame: a slim brushed-metal band over the canvas. -->
       <div class="rim" aria-hidden="true" />
 
       <slot />
@@ -228,7 +231,11 @@ function clamp(value) {
   height: 100%;
   border: 1px solid var(--line);
   background: radial-gradient(80% 80% at 50% 40%, var(--surface) 0%, var(--ink) 100%);
-  overflow: hidden;
+  /*
+    Visible, not hidden: the canvas is clipped by `.scene` below, and the stage
+    has to let the availability badge sit outside its top-left corner.
+  */
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -259,42 +266,17 @@ function clamp(value) {
 }
 
 /*
-  The frame. Square, on the page's grid like the box, and drawn over the canvas so
-  the box's own edges are covered: whatever the camera's lean does to them, the
-  eye reads the frame and not the seam.
-
-  It is metal, out of the theme's own greys — `--fg` mixed into `--ink` in bands —
-  so it is a brushed sheen in both themes rather than a colour of its own.
-  `border-image` is what lets a border carry the gradient. The 24px width has to
-  cover the box's lean (about eleven pixels) with room to spare.
+  The frame: a slim brushed-metal band over the canvas. Opaque, so it masks the
+  box's edges — whatever the camera's small lean does to them — and drawn in the
+  theme's own greys (`--fg` mixed into `--ink`), a sheen in both themes rather
+  than a colour. `border-image` is what lets a border carry the gradient, and the
+  hairline sits on its inner edge.
 */
 .rim {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /*
-    One ridged band, no second one behind it. `border-style: ridge` draws the
-    raised lip itself — light on two edges, dark on the other two — over the
-    theme's own metal grey, so the frame is a single piece.
-  */
-  border: 24px ridge color-mix(in srgb, var(--fg) 40%, var(--ink));
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-
-/*
-  The brushed sheen over the ridge. This one has to reach the *border* box — a
-  pseudo at `inset: 0` sits inside the border and reads as a second band — so it
-  is pulled out by the border's own width and clipped back to it. It carries the
-  same gradient the frame had before the ridge; the opacity is what keeps the
-  ridge's lit and shaded edges showing underneath instead of burying them.
-*/
-.rim::after {
-  content: '';
-  position: absolute;
-  inset: -24px;
-  box-sizing: border-box;
-  pointer-events: none;
-  border: 24px solid transparent;
+  border: 12px solid transparent;
   border-image: linear-gradient(
       135deg,
       color-mix(in srgb, var(--fg) 30%, var(--ink)) 0%,
@@ -305,7 +287,7 @@ function clamp(value) {
       color-mix(in srgb, var(--fg) 4%, var(--ink)) 100%
     )
     1;
-  opacity: 0.85;
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
 /* The scene fills the stage and sits over the fallback. `overflow: hidden` clips
