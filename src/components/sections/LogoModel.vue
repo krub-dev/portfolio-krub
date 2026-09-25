@@ -59,8 +59,7 @@ let smoothSpinY = 0
   supplies the hue.
 
   Asset: `matcaps/128/3B3C3F_DAD9D5_929290_ABACA8-128px.png` from
-  github.com/nidorx/matcaps. That library is collected from various sources and
-  its README asks for credit to the original author — see the decisions log.
+  github.com/nidorx/matcaps.
 */
 const matcap = new TextureLoader().load('/assets/img/matcap-metal.png')
 matcap.colorSpace = SRGBColorSpace

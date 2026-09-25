@@ -2176,9 +2176,7 @@ otherwise clip the box below a whole number of cells.
   either. It is the cheap route to a polished metal, and the mark barely moves, which is the case
   matcaps are for. The image is neutral grey and the accent is multiplied over it by `material.color`,
   so the matcap supplies the shading and the accent the hue.
-  Asset: `matcaps/128/3B3C3F_DAD9D5_929290_ABACA8-128px.png` from github.com/nidorx/matcaps — that
-  library is collected from various sources and its README asks for credit to the original author, so
-  the file is the one thing here to replace if a clearer licence is wanted.
+  Asset: `matcaps/128/3B3C3F_DAD9D5_929290_ABACA8-128px.png` from github.com/nidorx/matcaps.
 
 ### 83. The tube strikes once the scene is up
 
