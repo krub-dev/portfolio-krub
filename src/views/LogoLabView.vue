@@ -21,14 +21,38 @@ import { computed, ref } from 'vue'
 import LogoStage from '../components/sections/LogoStage.vue'
 
 const VARIANTS = [
-  { id: 'plain', label: 'Plain', entrance: 'none', effects: 'none' },
-  { id: 'fade', label: 'Fade', entrance: 'fade', effects: 'none' },
-  { id: 'bloom', label: 'Fade + bloom', entrance: 'fade', effects: 'bloom' },
-  { id: 'grain', label: 'Fade + bloom + grain', entrance: 'fade', effects: 'grain' },
+  {
+    id: 'plain',
+    label: 'Plain',
+    note: 'no composer, no fade — the behaviour before any of this',
+    entrance: 'none',
+    effects: 'none',
+  },
+  {
+    id: 'fade',
+    label: 'Fade',
+    note: 'the scene eases up out of the dark. What the hero ships',
+    entrance: 'fade',
+    effects: 'none',
+  },
+  {
+    id: 'bloom',
+    label: 'Fade + bloom',
+    note: 'fade, plus a soft bloom on the glints — one extra pass every frame',
+    entrance: 'fade',
+    effects: 'bloom',
+  },
+  {
+    id: 'grain',
+    label: 'Fade + bloom + grain',
+    note: 'the same, with premultiplied film grain — the heaviest of the four',
+    entrance: 'fade',
+    effects: 'grain',
+  },
 ]
 
-// The hero's default. See the lede below.
-const pick = ref('bloom')
+// The hero's own choice: the fade, without a composer.
+const pick = ref('fade')
 const variant = computed(() => VARIANTS.find((item) => item.id === pick.value))
 
 // Bumping the key remounts the stage, so the entrance plays again.
@@ -45,24 +69,25 @@ const round = ref(0)
       <button class="replay" type="button" @click="round++">Replay entrance</button>
     </header>
 
-    <div class="bar">
-      <button
-        v-for="item in VARIANTS"
-        :key="item.id"
-        class="tab"
-        type="button"
-        :class="{ on: pick === item.id }"
-        @click="pick = item.id"
-      >
-        {{ item.label }}
-      </button>
-    </div>
+    <ul class="options">
+      <li v-for="item in VARIANTS" :key="item.id">
+        <button
+          class="option"
+          type="button"
+          :class="{ on: pick === item.id }"
+          @click="pick = item.id"
+        >
+          <span class="option-label">{{ item.label }}</span>
+          <span class="option-note">{{ item.note }}</span>
+        </button>
+      </li>
+    </ul>
 
     <p class="lede">
-      The hero ships <strong>{{ VARIANTS[2].label }}</strong
-      >. The composer costs one full-screen pass per effect per frame;
-      <strong>{{ VARIANTS[0].label }}</strong> and <strong>{{ VARIANTS[1].label }}</strong> have
-      none, and the grain is the one on trial.
+      The composer costs one full-screen pass per effect per frame, so
+      <strong>{{ VARIANTS[0].label }}</strong> and <strong>{{ VARIANTS[1].label }}</strong> are
+      free. Switching remounts the stage, so the entrance plays again; <em>Replay</em> does it again
+      on the same option.
     </p>
 
     <div class="stage-wrap">
@@ -124,31 +149,52 @@ const round = ref(0)
   border-color: var(--acc);
 }
 
-.bar {
+.options {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 560px;
 }
 
-.tab {
-  font: 500 12px var(--font-mono);
-  color: var(--fg-2);
-  background: transparent;
+.option {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: left;
+  padding: 12px 16px;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 8px 16px;
+  border-radius: 12px;
+  background: transparent;
   cursor: pointer;
-  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  transition: border-color 0.16s ease, background 0.16s ease;
 }
 
-.tab:hover {
+.option:hover {
+  border-color: var(--fg-3);
+}
+
+.option.on {
+  border-color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 10%, transparent);
+}
+
+.option-label {
+  font: 600 14px var(--font-sans);
   color: var(--fg);
 }
 
-.tab.on {
-  color: var(--on-acc);
-  background: var(--acc);
-  border-color: var(--acc);
+.option.on .option-label {
+  color: var(--acc-text);
+}
+
+.option-note {
+  font: 400 12px var(--font-sans);
+  color: var(--fg-3);
 }
 
 .lede {

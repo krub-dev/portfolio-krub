@@ -33,12 +33,12 @@ const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 
 const props = defineProps({
   /*
-    Forwarded to the scene: how the render is finished. See LogoScene. Bloom by
-    default — `grain` is in /logo-lab to compare, but the only knob the wrapper
-    gives it is `premultiply`, and on the metal it reads as a sandy finish rather
-    than as film.
+    Forwarded to the scene: how the render is finished. See LogoScene. Off in the
+    hero — the bloom read as too heavy at any strength worth noticing, so the hero
+    ships the plain render and the fade, and `/logo-lab` keeps the bloom and the
+    grain to judge side by side.
   */
-  effects: { type: String, default: 'bloom' },
+  effects: { type: String, default: 'none' },
   /*
     How the scene arrives: `fade` comes up out of the dark, `none` switches on.
     The scene builds asynchronously, so without this it pops the moment it is
@@ -85,7 +85,7 @@ const failed = ref(!webglSupported())
 const BEAT_MS = 500
 // Must agree with the .scene transition in the stylesheet — the glow is held
 // back until the fade is done, so a mismatch strikes over a half-arrived mark.
-const FADE_MS = 600
+const FADE_MS = 900
 const armed = ref(false)
 let armFrameA = 0
 let armFrameB = 0
@@ -290,10 +290,12 @@ function clamp(value) {
             @ready="ready = true"
           />
         </Suspense>
-      </div>
 
-      <!-- The frame's shadow, on the tunnel. -->
-      <div class="vignette" aria-hidden="true" />
+        <!-- The frame's shadow, on the tunnel. Inside the scene so it arrives
+             with it: as a sibling it painted a shadow into the empty slot while
+             the scene was still building. -->
+        <div class="vignette" aria-hidden="true" />
+      </div>
 
       <!-- The frame: a slim brushed-metal band over the canvas. -->
       <div class="rim" aria-hidden="true" />
@@ -502,17 +504,24 @@ function clamp(value) {
 
 /*
   The entrance. The scene builds asynchronously, so without this it pops the
-  instant it reports ready; this brings it up out of the dark instead. The
-  duration has to agree with FADE_MS in the script, which is what holds the glow
-  back until it is done. Marked decorative, so reduced motion drops the fade and
+  instant it reports ready. Opacity alone was not enough: the room's walls are the
+  same `--surface` as the stage behind them, so the fade had almost nothing to
+  fade from. The small scale is what makes it read — the opening eases back into
+  the frame — and it goes the right way, from larger to rest, so the box's edges
+  stay out of sight behind the frame the whole time.
+
+  The duration has to agree with FADE_MS in the script, which is what holds the
+  glow back until it is done. Marked decorative, so reduced motion drops it and
   the scene simply appears.
 */
 .scene.fade {
   opacity: 0;
-  transition: opacity 0.6s ease;
+  transform: scale(1.03);
+  transition: opacity 0.9s ease, transform 0.9s ease;
 }
 
 .scene.fade.shown {
   opacity: 1;
+  transform: scale(1);
 }
 </style>

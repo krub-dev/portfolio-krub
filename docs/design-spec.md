@@ -273,8 +273,9 @@ The whole stage is magnetic, and only the logo inside it turns. Inside:
   **The opening is cut to the stage** and divided into the stage's own seven cells, so its grid
   lines fall on the page's at the frame; the box scales with the wheel's zoom to keep it so. A
   neutral backlight — the theme's own background — clears the grid behind the mark. It is lazy,
-  pauses off-screen and never mounts below 900px (decision 37). The scene fades up out of the dark,
-  and the render is finished with a subtle bloom (decision 85). See decisions 78–85.
+  pauses off-screen and never mounts below 900px (decision 37). It eases up into the frame on
+  arrival, and its render is plain: the bloom and the grain live in the dev-only `/logo-lab`
+  (decision 85). See decisions 78–85.
 - **The 2D mark is the failure state.** The PNG mask over `var(--mark)` at 58% of the width is
   painted only if WebGL is missing or the scene never reports ready (decisions 77, 85), so a working
   load shows the 3D alone rather than a flash of the flat logo.

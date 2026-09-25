@@ -176,9 +176,9 @@ requestAnimationFrame(() => requestAnimationFrame(build))
             what is already on screen, so the black of the tunnel stays clean.
           -->
           <BloomPmndrs
-            :intensity="0.45"
-            :luminance-threshold="0.85"
-            :luminance-smoothing="0.28"
+            :intensity="0.25"
+            :luminance-threshold="0.9"
+            :luminance-smoothing="0.3"
             :radius="0.5"
             mipmap-blur
           />

@@ -2185,9 +2185,10 @@ otherwise clip the box below a whole number of cells.
 - **A soft dark vignette sits inside the frame**, fading the room's grid out before it reaches the
   metal. The grid ran right up to the band and stopped dead against it, which read as a picture pasted
   into the frame rather than a cavity behind it.
-- **It is its own layer, not a shadow on the glow.** The glow is dark until the scene is up (83), and
-  this has to stand regardless — and it is in CSS, on the compositor, rather than a post-processing
-  pass.
+- **It is its own layer, inside the scene.** Not a shadow on the glow — the glow is dark until the
+  scene is up (83), and this is part of the tunnel, not part of the light — and being inside the
+  scene wrapper is what makes it arrive with the scene instead of painting a shadow into the empty
+  slot while the scene is still building. It is CSS, on the compositor, not a post-processing pass.
 - **It fades to `--ink`**, the same value the scene's fog fades to, so the effect continues the fog
   rather than laying a second, unrelated darkness over it. In the light theme it fades the grid into
   the light background, which is what "dark" means there.
@@ -2196,17 +2197,20 @@ otherwise clip the box below a whole number of cells.
 
 **Date:** 2026-09-25 · **Status:** active
 
-- **The scene fades up out of the dark** rather than switching on. It builds asynchronously, so
-  without a fade it pops the instant it reports ready. The fade is CSS on the canvas wrapper, marked
-  decorative so reduced motion drops it, and the glow is held back until it has finished.
-- **The scene goes through a composer** (`@tresjs/post-processing`, wrapping pmndrs effects) for a
-  subtle bloom: the threshold sits just under the mark's top faces, so only the near-white glints
-  glow. Lower and the body of the mark blooms too, and it loses its metal. The composer costs one
-  full-screen pass per effect per frame, so it is opt-in — the `effects` prop — and `/logo-lab`
-  compares plain, bloom, and bloom with grain side by side.
-- **The grain is kept, but off in the hero.** The wrapper exposes only `premultiply` and the blend
-  function, and on the polished metal the grain reads as a sandy finish rather than as film, so the
-  hero ships bloom alone and the lab keeps the third option to judge.
+- **The scene eases up into the frame** rather than switching on. It builds asynchronously, so
+  without this it pops the instant it reports ready. Opacity alone was not enough: the room's walls
+  are the same `--surface` as the stage behind them, so the fade had almost nothing to fade from. It
+  comes with a small scale — from 1.03 down to rest, so the box's edges stay behind the frame while it
+  settles — and the glow is held back until it is done. Reduced motion drops the whole thing.
+- **The composer is a lab option, not the hero's.** `@tresjs/post-processing` and the pmndrs effects
+  do give the scene a bloom, but at any strength worth noticing it read as too heavy on the polished
+  metal, so the hero ships the plain render and `/logo-lab` keeps plain, fade, fade with bloom and
+  fade with bloom and grain to judge. And the lab is one stage behind a list, not three side by side:
+  every stage is its own WebGL context, its own generated environment and its own composer, so three
+  at once is three times the cost of the very thing being compared.
+- **The grain has no strength knob.** The wrapper exposes only `premultiply` and the blend function,
+  and on the polished metal it reads as a sandy finish rather than as film, which is the other reason
+  the hero ships without it.
 - **The 2D mark is the failure state now, not the loading state.** It painted first and faded out on
   ready, which flashed the flat logo on every load. It is shown only if WebGL is missing, or if the
   scene has not reported in eight seconds; a working load never renders it at all.
