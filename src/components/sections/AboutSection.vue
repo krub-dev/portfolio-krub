@@ -159,9 +159,9 @@ function onTouchEnd(event) {
       </div>
 
       <div class="photo-wrap" data-pfp-wrap>
+        <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
         <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
           <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
-          <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
         </div>
       </div>
     </div>
@@ -305,17 +305,10 @@ function onTouchEnd(event) {
   border: 1px solid var(--line);
 }
 
-/*
-  Over the photo, no chip: just the dot and the label, inside the top-left
-  corner. The shadow is what keeps them legible against whatever the picture has
-  there — the busy artwork in this one.
-*/
+/* Above the photo, out of the picture and nudged in off the corner. */
 .availability {
-  position: absolute;
-  z-index: 1;
-  top: 14px;
-  left: 16px;
-  filter: drop-shadow(0 1px 2px var(--ink));
+  align-self: flex-end;
+  transform: translate(-8px, 6px);
 }
 
 @media (max-width: 900px) {
