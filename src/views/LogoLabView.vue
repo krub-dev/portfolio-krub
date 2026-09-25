@@ -40,6 +40,10 @@ const variant = computed(() => VARIANTS.find((item) => item.id === pick.value))
 
 // Bumping the key remounts the stage, so the entrance plays again.
 const round = ref(0)
+
+// Live switches, so the stage is not remounted while they are flipped.
+const showLogo = ref(true)
+const showRing = ref(true)
 </script>
 
 <template>
@@ -49,7 +53,17 @@ const round = ref(0)
         <p class="eyebrow">dev only</p>
         <h1 class="title">logo-lab</h1>
       </div>
-      <button class="replay" type="button" @click="round++">Replay entrance</button>
+      <div class="controls">
+        <label class="toggle">
+          <input v-model="showLogo" type="checkbox" />
+          Mark
+        </label>
+        <label class="toggle">
+          <input v-model="showRing" type="checkbox" />
+          Ring
+        </label>
+        <button class="replay" type="button" @click="round++">Replay entrance</button>
+      </div>
     </header>
 
     <div class="options">
@@ -71,6 +85,8 @@ const round = ref(0)
       <LogoStage
         :key="`${variant.id}-${round}`"
         :entrance="variant.entrance"
+        :logo="showLogo"
+        :ring="showRing"
         :snap="false"
       />
     </div>
@@ -107,6 +123,30 @@ const round = ref(0)
   margin: 0;
   font: 700 clamp(28px, 4vw, 44px) var(--font-mono);
   letter-spacing: -0.04em;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 500 12px var(--font-mono);
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.toggle input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--acc);
+  cursor: pointer;
 }
 
 .replay {

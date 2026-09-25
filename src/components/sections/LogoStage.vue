@@ -38,6 +38,9 @@ const props = defineProps({
     ready.
   */
   entrance: { type: String, default: 'fade' },
+  // The lab switches these off to show what is behind what. On in the site.
+  logo: { type: Boolean, default: true },
+  ring: { type: Boolean, default: true },
   // The lab puts stages side by side and does not want them walking themselves
   // onto the page's grid.
   snap: { type: Boolean, default: true },
@@ -279,6 +282,7 @@ function clamp(value) {
             :spin-y="spinY"
             :dragging="dragging"
             :reset="resetToken"
+            :logo="props.logo"
             @ready="ready = true"
           />
         </Suspense>
@@ -292,6 +296,7 @@ function clamp(value) {
       <!-- The frame: a slim brushed-metal band over the canvas. -->
       <div class="rim" aria-hidden="true" />
       <div
+        v-if="props.ring"
         class="glow"
         :class="{ on: armed }"
         data-motion="decorative"

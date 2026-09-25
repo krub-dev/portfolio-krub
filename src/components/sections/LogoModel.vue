@@ -27,6 +27,10 @@ const props = defineProps({
   spin: { type: Number, default: 0 },
   spinY: { type: Number, default: 0 },
   dragging: { type: Boolean, default: false },
+  // The lab takes the mark out of the scene to show what is behind it. Hidden by
+  // `v-if` on the primitive rather than by unmounting, so the material and the
+  // generated environment survive the toggle.
+  logo: { type: Boolean, default: true },
 })
 
 // How far the hover turns it, in radians. Wider than it was: the room's lean is
@@ -110,5 +114,5 @@ onBeforeRender(({ elapsed, delta }) => {
 </script>
 
 <template>
-  <primitive :object="group" />
+  <primitive v-if="props.logo" :object="group" />
 </template>

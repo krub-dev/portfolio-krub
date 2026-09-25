@@ -41,6 +41,8 @@ const props = defineProps({
   dragging: { type: Boolean, default: false },
   // Bumped by a double press in LogoStage: bring the zoom home.
   reset: { type: Number, default: 0 },
+  // The lab hides the mark to show what is behind it. On in the site.
+  logo: { type: Boolean, default: true },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -157,6 +159,7 @@ requestAnimationFrame(() => requestAnimationFrame(build))
         :spin-y="props.spinY"
         :dragging="props.dragging"
         :running="onScreen && !reduced"
+        :logo="props.logo"
       />
     </TresCanvas>
   </div>
