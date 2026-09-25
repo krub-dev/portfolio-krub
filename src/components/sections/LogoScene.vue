@@ -43,6 +43,8 @@ const props = defineProps({
   reset: { type: Number, default: 0 },
   // The lab hides the mark to show what is behind it. On in the site.
   logo: { type: Boolean, default: true },
+  // Same, for the halo the rig puts behind the mark.
+  halo: { type: Boolean, default: true },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -149,7 +151,7 @@ requestAnimationFrame(() => requestAnimationFrame(build))
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1" />
 
-      <SceneRig :tilt="props.tilt" :cam-z="camZ" />
+      <SceneRig :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" />
 
       <LogoModel
         v-if="geometry"

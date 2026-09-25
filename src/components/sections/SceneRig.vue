@@ -37,6 +37,8 @@ const props = defineProps({
   tilt: { type: Object, default: () => ({ x: 0, y: 0 }) },
   // Base distance, from the wheel zoom in LogoScene.
   camZ: { type: Number, required: true },
+  // The lab switches the halo off to see the tunnel without it.
+  halo: { type: Boolean, default: true },
 })
 
 // The box's opening is cut to land exactly on the stage: at its distance the
@@ -317,7 +319,7 @@ onBeforeRender(({ delta }) => {
        by them. -->
   <TresMesh
     ref="backlightMesh"
-    v-if="backlight"
+    v-if="props.halo && backlight"
     :position="[0, 0, BACKLIGHT_Z]"
     :scale="[k, k, 1]"
   >

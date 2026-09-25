@@ -222,6 +222,13 @@ change, and making the repository public.
   the bundle. `LogoModel` already builds from `props.geometry` with a note to take the mesh from a
   loaded scene. Watch the scale and the orientation (the SVG's y-down flip disappears) and keep our
   own material, light and environment.
+- [ ] **The tunnel's far end is a black void, and it reads as bad lighting.** The fog fades to `--ink`
+  on purpose so the tunnel has no bottom to see (decision 80), but in the dark theme that lands as a
+  dark blob in the middle of the grid; the halo adds a defined ring around it, where the fog has not
+  arrived yet. Measured: switching the halo off brightens the mid-distance walls but leaves the middle
+  untouched, because `--ink` over an already `--ink` far end is nothing. The levers are the fog —
+  start it further out, make it a haze rather than the page's background, or put a light at the end so
+  the cavity looks lit rather than empty.
 
 ## Mobile and responsive
 

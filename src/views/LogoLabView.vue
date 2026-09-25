@@ -44,6 +44,7 @@ const round = ref(0)
 // Live switches, so the stage is not remounted while they are flipped.
 const showLogo = ref(true)
 const showRing = ref(true)
+const showHalo = ref(true)
 </script>
 
 <template>
@@ -61,6 +62,10 @@ const showRing = ref(true)
         <label class="toggle">
           <input v-model="showRing" type="checkbox" />
           Ring
+        </label>
+        <label class="toggle">
+          <input v-model="showHalo" type="checkbox" />
+          Halo
         </label>
         <button class="replay" type="button" @click="round++">Replay entrance</button>
       </div>
@@ -87,6 +92,7 @@ const showRing = ref(true)
         :entrance="variant.entrance"
         :logo="showLogo"
         :ring="showRing"
+        :halo="showHalo"
         :snap="false"
       />
     </div>

@@ -41,6 +41,7 @@ const props = defineProps({
   // The lab switches these off to show what is behind what. On in the site.
   logo: { type: Boolean, default: true },
   ring: { type: Boolean, default: true },
+  halo: { type: Boolean, default: true },
   // The lab puts stages side by side and does not want them walking themselves
   // onto the page's grid.
   snap: { type: Boolean, default: true },
@@ -283,6 +284,7 @@ function clamp(value) {
             :dragging="dragging"
             :reset="resetToken"
             :logo="props.logo"
+            :halo="props.halo"
             @ready="ready = true"
           />
         </Suspense>
