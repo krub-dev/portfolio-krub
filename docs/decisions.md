@@ -29,8 +29,9 @@ new number to its range when a decision is appended.
 - **A UI pass — 70.** The testimonial dots, the grid cell off, scrollable tabs and the CTAs.
 - **Polish and accessibility — 71–74.** The cooler light grey and the glow gone, the one-quote
   vertical pager, the `/me` tabs as a real tablist, and the 24px dots with the live region.
-- **The hero's 3D stage — 75–83.** The mark as a real WebGL object, the room and its rig, the snap to
-  the page's grid, the frame and the glow, the mark's motion and light, and the tube's ignition.
+- **The hero's 3D stage — 75–85.** The mark as a real WebGL object, the room and its rig, the snap to
+  the page's grid, the frame and the glow, the mark's motion and light, the tube's ignition, the
+  shadow the frame casts into the tunnel, and how the render is finished.
 
 ---
 
@@ -2176,3 +2177,37 @@ otherwise clip the box below a whole number of cells.
 - **The frame's inner hairline is gone** — the one 81 put there. The glow's own hard edge is the line
   at that boundary, and a faint `--line` rule on top of it read as two, one of them pulsing, since it
   sits inside the glow that breathes.
+
+### 84. The frame casts a shadow into the tunnel
+
+**Date:** 2026-09-25 · **Status:** active
+
+- **A soft dark vignette sits inside the frame**, fading the room's grid out before it reaches the
+  metal. The grid ran right up to the band and stopped dead against it, which read as a picture pasted
+  into the frame rather than a cavity behind it.
+- **It is its own layer, not a shadow on the glow.** The glow is dark until the scene is up (83), and
+  this has to stand regardless — and it is in CSS, on the compositor, rather than a post-processing
+  pass.
+- **It fades to `--ink`**, the same value the scene's fog fades to, so the effect continues the fog
+  rather than laying a second, unrelated darkness over it. In the light theme it fades the grid into
+  the light background, which is what "dark" means there.
+
+### 85. The render is finished with bloom, and the flat mark is the failure state
+
+**Date:** 2026-09-25 · **Status:** active
+
+- **The scene goes through a composer** (`@tresjs/post-processing`, wrapping pmndrs effects) for a
+  subtle bloom: the threshold sits just under the mark's top faces, so only the near-white glints
+  glow. Lower and the body of the mark blooms too, and it loses its metal. The composer costs one
+  full-screen pass per effect per frame, so it is opt-in — the `effects` prop — and `/logo-lab`
+  compares plain, bloom, and bloom with grain side by side.
+- **The grain is kept, but off in the hero.** The wrapper exposes only `premultiply` and the blend
+  function, and on the polished metal the grain reads as a sandy finish rather than as film, so the
+  hero ships bloom alone and the lab keeps the third option to judge.
+- **The 2D mark is the failure state now, not the loading state.** It painted first and faded out on
+  ready, which flashed the flat logo on every load. It is shown only if WebGL is missing, or if the
+  scene has not reported in eight seconds; a working load never renders it at all.
+- **The extrusion is deferred past the first paints.** Parsing the SVG and extruding it blocks the
+  main thread for around half a second. The fetch starts immediately and only the parse, extrude and
+  weld wait two frames, so the frame is up first. When the mark arrives as a glTF this goes: a glTF
+  is a fetch and a parse of precomputed buffers, which does not block.

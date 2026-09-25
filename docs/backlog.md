@@ -215,6 +215,17 @@ change, and making the repository public.
   shows just inside it. A uniform perspective grid cannot do better. The fix is to space the
   transverse lines in perspective — map the depth axis to the screen projection in the UVs, or draw
   the grid as lines at the computed positions — so the whole interior lands on the page's grid.
+- [ ] **The mark as a glTF.** The mesh is built in the browser from the SVG and that blocks the main
+  thread for around half a second (deferred past the first paints, decision 85). A GLB exported from a
+  modelling app is a fetch and a parse of precomputed buffers instead: nothing to parse, extrude or
+  weld, a better mesh if it is modelled, and it takes the SVG loader and the buffer utilities out of
+  the bundle. `LogoModel` already builds from `props.geometry` with a note to take the mesh from a
+  loaded scene. Watch the scale and the orientation (the SVG's y-down flip disappears) and keep our
+  own material, light and environment.
+- [ ] **The grain has no strength knob.** `@tresjs/post-processing`'s Noise exposes only `premultiply`
+  and the blend function, so it cannot be dialled below what it is; on the polished metal it reads as a
+  sandy finish rather than as film, which is why the hero ships bloom alone (decision 85). A
+  hand-written pass with an opacity, or a CSS grain layer over the stage, if it is wanted back.
 
 ## Mobile and responsive
 

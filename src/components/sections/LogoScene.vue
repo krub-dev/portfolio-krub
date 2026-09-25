@@ -26,6 +26,7 @@
 */
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { TresCanvas } from '@tresjs/core'
+import { BloomPmndrs, EffectComposerPmndrs, NoisePmndrs } from '@tresjs/post-processing'
 import { ExtrudeGeometry } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
@@ -41,6 +42,12 @@ const props = defineProps({
   dragging: { type: Boolean, default: false },
   // Bumped by a double press in LogoStage: bring the zoom home.
   reset: { type: Number, default: 0 },
+  /*
+    How the render is finished: `none`, `bloom`, or `grain` (bloom and a soft
+    film grain). The composer is a full-screen pass per effect per frame, so this
+    is opt-in and the playground compares the three.
+  */
+  effects: { type: String, default: 'none' },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -93,8 +100,12 @@ function onWheel(event) {
   zoom.value = clamped
 }
 
+// Away immediately, so the wait for it overlaps the work below rather than
+// holding it up.
+const svgText = fetch('/assets/img/krub-logo.svg').then((response) => response.text())
+
 async function build() {
-  const svg = await fetch('/assets/img/krub-logo.svg').then((r) => r.text())
+  const svg = await svgText
   const paths = new SVGLoader().parse(svg).paths
   const shapes = paths.flatMap((path) => SVGLoader.createShapes(path))
 
@@ -125,7 +136,16 @@ async function build() {
   emit('ready')
 }
 
-build()
+/*
+  Two frames before the heavy half: parsing the SVG and extruding it blocks the
+  main thread — around half a second, measured — and the frame has no business
+  waiting on that. The fetch is already away and the room is built by SceneRig, so
+  what this defers is only the parse, the extrude and the weld.
+
+  When the mark arrives as a glTF this goes: loading one is a fetch and a parse of
+  precomputed buffers, which does not block.
+*/
+requestAnimationFrame(() => requestAnimationFrame(build))
 </script>
 
 <template>
@@ -145,6 +165,26 @@ build()
         :dragging="props.dragging"
         :running="onScreen && !reduced"
       />
+
+      <Suspense v-if="props.effects !== 'none'">
+        <EffectComposerPmndrs>
+          <!--
+            The threshold sits just under the mark's top faces on purpose. The
+            body of the mark is a solid yellow around .77 luminance, so anything
+            lower blooms the whole thing and it loses its metal; this way only the
+            near-white faces glint. `premultiply` on the grain multiplies it by
+            what is already on screen, so the black of the tunnel stays clean.
+          -->
+          <BloomPmndrs
+            :intensity="0.45"
+            :luminance-threshold="0.85"
+            :luminance-smoothing="0.28"
+            :radius="0.5"
+            mipmap-blur
+          />
+          <NoisePmndrs v-if="props.effects === 'grain'" premultiply />
+        </EffectComposerPmndrs>
+      </Suspense>
     </TresCanvas>
   </div>
 </template>

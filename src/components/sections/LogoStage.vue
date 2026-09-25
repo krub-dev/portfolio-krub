@@ -31,6 +31,19 @@ import { usePointer } from '../../composables/usePointer'
 */
 const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 
+const props = defineProps({
+  /*
+    Forwarded to the scene: how the render is finished. See LogoScene. Bloom by
+    default — `grain` is in /logo-lab to compare, but the only knob the wrapper
+    gives it is `premultiply`, and on the metal it reads as a sandy finish rather
+    than as film.
+  */
+  effects: { type: String, default: 'bloom' },
+  // The lab puts stages side by side and does not want them walking themselves
+  // onto the page's grid.
+  snap: { type: Boolean, default: true },
+})
+
 const MAX_SPIN = 1.1 // radians, about 63 degrees each way, horizontally
 const MAX_SPIN_Y = 0.45 // and much less vertically: tipping it up and down reads heavier
 // The page's background grid. The box is sized and placed on whole cells of it.
@@ -47,30 +60,46 @@ const ready = ref(false)
 // Bumped on a double press: LogoScene watches it to bring the zoom home.
 const resetToken = ref(0)
 /*
+  The 2D mark is the failure state now, not the loading state. It used to paint
+  first and fade out, which meant a flash of the flat logo on every load; now it
+  is shown only if WebGL never comes up, so a load with a working scene never
+  renders it at all.
+*/
+const failed = ref(!webglSupported())
+/*
   The glow stays dark until this is set, and it is set only once the scene has
   reported ready — the 3D and the room's grid on screen — and the flat fallback
-  mark has faded out. Striking the tube before that ignites the wrong picture: an
-  empty box, or the 2D logo.
+  has had its beat. Striking the tube before that ignites an empty box.
 
   Two frames before the timer, because the geometry build blocks the main thread
-  for a moment right after `ready`: the fallback's crossfade only starts once the
-  thread frees and the class change paints. Measuring from `ready` itself put the
-  strike up to half a second early — on top of the fade, over the flat mark.
+  for a moment right after `ready`: the frame has to be up and painted before the
+  count starts. `failed` arms it too, so a browser without WebGL still ends up
+  with a lit frame around the 2D mark.
 */
-const FADE_MS = 400
+const BEAT_MS = 500
 const armed = ref(false)
 let armFrameA = 0
 let armFrameB = 0
 let armTimer = 0
+let failTimer = 0
 
-watch(ready, (isReady) => {
-  if (!isReady) return
+watch([ready, failed], ([isReady, isFailed]) => {
+  if (!isReady && !isFailed) return
   armFrameA = requestAnimationFrame(() => {
     armFrameB = requestAnimationFrame(() => {
-      armTimer = window.setTimeout(() => (armed.value = true), FADE_MS + 100)
+      armTimer = window.setTimeout(() => (armed.value = true), BEAT_MS)
     })
   })
 })
+
+function webglSupported() {
+  try {
+    const canvas = document.createElement('canvas')
+    return Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
 
 let startX = 0
 let startY = 0
@@ -88,7 +117,7 @@ let snapFrame = 0
 */
 function snapToGrid() {
   const el = frame.value
-  if (!el) return
+  if (!el || !props.snap) return
 
   // Clear our own overrides first, so the natural layout can be measured.
   el.style.width = ''
@@ -128,6 +157,14 @@ onMounted(() => {
   scheduleSnap()
   window.addEventListener('resize', scheduleSnap)
   document.fonts?.ready.then(scheduleSnap)
+  /*
+    Slow is not broken. The scene loads a chunk and then builds; if it has not
+    reported by now something is wrong with it rather than slow, and the flat mark
+    is better than an empty frame.
+  */
+  failTimer = window.setTimeout(() => {
+    if (!ready.value) failed.value = true
+  }, 8000)
 })
 
 onUnmounted(() => {
@@ -135,6 +172,7 @@ onUnmounted(() => {
   cancelAnimationFrame(armFrameA)
   cancelAnimationFrame(armFrameB)
   clearTimeout(armTimer)
+  clearTimeout(failTimer)
   window.removeEventListener('resize', scheduleSnap)
 })
 
@@ -221,10 +259,10 @@ function clamp(value) {
       @pointerup="onUp"
       @pointercancel="onUp"
     >
-      <!-- The fallback, under the scene. It fades out once the scene is ready. -->
-      <div class="mark" :class="{ gone: ready }" aria-hidden="true" />
+      <!-- The fallback. It paints only if the scene never came up. -->
+      <div v-if="failed" class="mark" aria-hidden="true" />
 
-      <div class="scene" aria-hidden="true">
+      <div v-if="!failed" class="scene" aria-hidden="true">
         <Suspense>
           <LogoScene
             :tilt="tilt"
@@ -232,10 +270,14 @@ function clamp(value) {
             :spin-y="spinY"
             :dragging="dragging"
             :reset="resetToken"
+            :effects="props.effects"
             @ready="ready = true"
           />
         </Suspense>
       </div>
+
+      <!-- The frame's shadow, on the tunnel. -->
+      <div class="vignette" aria-hidden="true" />
 
       <!-- The frame: a slim brushed-metal band over the canvas. -->
       <div class="rim" aria-hidden="true" />
@@ -288,23 +330,30 @@ function clamp(value) {
   cursor: grabbing;
 }
 
-/* The 2D logo, masked and painted with the accent token. The fallback, and the
-   thing that paints first. */
+/* The 2D logo, masked and painted with the accent token. Only ever seen when the
+   scene could not start at all. */
 .mark {
   width: 58%;
   aspect-ratio: 1.682;
   background: var(--mark);
   -webkit-mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
   mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
-  /* It is decoration, never a hit target, and it must not sit over the scene
-     once faded. */
   pointer-events: none;
-  transition: opacity 0.4s ease;
 }
 
-/* The crossfade: the flat mark gives way to the scene. */
-.mark.gone {
-  opacity: 0;
+/*
+  The frame's shadow, cast into the tunnel. The room's grid runs to the metal and
+  stops dead against it; this fades it out first, so the opening reads as a cavity
+  behind the frame rather than a picture pasted into it. Its own layer, not a
+  shadow on the glow, because it stands whether the glow is lit or not — and
+  `--ink` is what the scene's own fog already fades to, so it continues that. It
+  takes no pointer events, so the stage keeps the drag.
+*/
+.vignette {
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+  box-shadow: inset 0 0 90px 20px color-mix(in srgb, var(--ink) 72%, transparent);
 }
 
 /*

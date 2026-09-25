@@ -262,7 +262,8 @@ seven by seven (504×504) at the usual viewport, its four edges on the grid line
 next cell right of its natural position (or kept a cell back when that would run off the screen).
 It is measured and snapped by `LogoStage`, since it depends on the viewport (decision 79). Border
 `--line`, a `radial-gradient` from `--surface` to `--ink`, a slim brushed-metal frame over the canvas
-and, inside it, a CSS entrance glow — hard on the frame's inner edge, fading inward (decision 81).
+and, inside it, a soft dark vignette that fades the grid into the metal and a CSS entrance glow — hard
+on the frame's inner edge, fading inward (decisions 81, 84).
 The whole stage is magnetic, and only the logo inside it turns. Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
@@ -272,10 +273,11 @@ The whole stage is magnetic, and only the logo inside it turns. Inside:
   **The opening is cut to the stage** and divided into the stage's own seven cells, so its grid
   lines fall on the page's at the frame; the box scales with the wheel's zoom to keep it so. A
   neutral backlight — the theme's own background — clears the grid behind the mark. It is lazy,
-  pauses off-screen and never mounts below 900px (decision 37). See decisions 78–82.
-- **The 2D mark is the fallback.** The PNG mask over `var(--mark)` at 58% of the width paints
-  first and fades out once the scene reports ready (decision 77), so a browser without WebGL still
-  shows the logo.
+  pauses off-screen and never mounts below 900px (decision 37). The render is finished with a subtle
+  bloom (decision 85). See decisions 78–85.
+- **The 2D mark is the failure state.** The PNG mask over `var(--mark)` at 58% of the width is
+  painted only if WebGL is missing or the scene never reports ready (decisions 77, 85), so a working
+  load shows the 3D alone rather than a flash of the flat logo.
 
 The stage carries **no label and no explanatory text**.
 
