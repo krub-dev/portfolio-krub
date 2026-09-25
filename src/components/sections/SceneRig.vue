@@ -214,12 +214,19 @@ function buildFog() {
 /*
   The halo is a white radial mask; its colour is the page's own background, set
   on the material. A mask has to be white.
+
+  The mask reaches zero at the tunnel's own half-width, not at the plane's edge.
+  The plane is wider than the tunnel on purpose, so a mask that faded out at its
+  edge had that outer band hidden by the walls and the halo ended on a hard cut
+  at the wall instead of fading. Ending it where the walls are is what makes it
+  fade out exactly as the tunnel closes.
 */
 function buildBacklight() {
   const size = 256
   const canvas = makeCanvas(size)
   const ctx = canvas.getContext('2d')
-  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
+  const reach = (ROOM_HALF / (BACKLIGHT / 2)) * (size / 2)
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, reach)
   gradient.addColorStop(0, 'rgba(255,255,255,0.85)')
   gradient.addColorStop(0.5, 'rgba(255,255,255,0.3)')
   gradient.addColorStop(1, 'rgba(255,255,255,0)')
@@ -302,8 +309,15 @@ onBeforeRender(({ delta }) => {
 
   <!-- A neutral halo behind the mark, to clear the grid and rim it. It is placed
        each frame on the camera's own axis (below), so it stays behind the mark
-       however the camera leans instead of sliding off it. -->
-  <TresMesh ref="backlightMesh" v-if="backlight" :position="[0, 0, BACKLIGHT_Z]">
+       however the camera leans instead of sliding off it, and it scales with the
+       zoom so its mask keeps ending at the tunnel's walls rather than being cut
+       by them. -->
+  <TresMesh
+    ref="backlightMesh"
+    v-if="backlight"
+    :position="[0, 0, BACKLIGHT_Z]"
+    :scale="[k, k, 1]"
+  >
     <TresPlaneGeometry :args="[BACKLIGHT, BACKLIGHT]" />
     <TresMeshBasicMaterial
       :map="backlight"

@@ -69,26 +69,20 @@ const round = ref(0)
       <button class="replay" type="button" @click="round++">Replay entrance</button>
     </header>
 
-    <ul class="options">
-      <li v-for="item in VARIANTS" :key="item.id">
-        <button
-          class="option"
-          type="button"
-          :class="{ on: pick === item.id }"
-          @click="pick = item.id"
-        >
-          <span class="option-label">{{ item.label }}</span>
-          <span class="option-note">{{ item.note }}</span>
-        </button>
-      </li>
-    </ul>
+    <div class="options">
+      <button
+        v-for="item in VARIANTS"
+        :key="item.id"
+        class="option"
+        type="button"
+        :class="{ on: pick === item.id }"
+        @click="pick = item.id"
+      >
+        {{ item.label }}
+      </button>
+    </div>
 
-    <p class="lede">
-      The composer costs one full-screen pass per effect per frame, so
-      <strong>{{ VARIANTS[0].label }}</strong> and <strong>{{ VARIANTS[1].label }}</strong> are
-      free. Switching remounts the stage, so the entrance plays again; <em>Replay</em> does it again
-      on the same option.
-    </p>
+    <p class="option-note">{{ variant.note }}</p>
 
     <div class="stage-wrap">
       <LogoStage
@@ -150,58 +144,41 @@ const round = ref(0)
 }
 
 .options {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
   max-width: 560px;
 }
 
 .option {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  text-align: left;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 999px;
   background: transparent;
+  color: var(--fg-2);
+  font: 500 13px var(--font-mono);
   cursor: pointer;
-  transition: border-color 0.16s ease, background 0.16s ease;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
 }
 
 .option:hover {
-  border-color: var(--fg-3);
-}
-
-.option.on {
-  border-color: var(--acc);
-  background: color-mix(in srgb, var(--acc) 10%, transparent);
-}
-
-.option-label {
-  font: 600 14px var(--font-sans);
   color: var(--fg);
 }
 
-.option.on .option-label {
-  color: var(--acc-text);
+.option.on {
+  color: var(--on-acc);
+  background: var(--acc);
+  border-color: var(--acc);
 }
 
+/* It holds a line whether the note wraps or not, so the stage below never jumps
+   when the option changes. */
 .option-note {
-  font: 400 12px var(--font-sans);
-  color: var(--fg-3);
-}
-
-.lede {
   margin: 0;
-  font: 400 14px var(--font-sans);
+  min-height: 22px;
+  font: 400 13px var(--font-sans);
   line-height: 1.6;
-  color: var(--fg-2);
+  color: var(--fg-3);
 }
 
 .stage-wrap {

@@ -2133,7 +2133,10 @@ otherwise clip the box below a whole number of cells.
   little with the pointer (6/4) and reads the pointer only while it is over the stage.
 - **The fog falls off to `--ink`** so the tunnel has no bottom to see, and the **backlight** is the
   theme's own background — dark in the dark theme, light in the light one — placed each frame on the
-  camera's axis behind the mark, so it clears the grid there rather than lighting it in a colour.
+  camera's axis behind the mark, so it clears the grid there rather than lighting it in a colour. Its
+  mask ends at the tunnel's half-width rather than at the plane's edge, and it scales with the zoom to
+  keep it so: fading out past the walls meant the outer band was hidden and the halo ended on a hard
+  cut where the tunnel closed.
 
 ### 81. The frame is a slim brushed-metal band, and the badge hangs outside it
 
