@@ -2136,7 +2136,9 @@ otherwise clip the box below a whole number of cells.
   camera's axis behind the mark, so it clears the grid there rather than lighting it in a colour. Its
   mask ends at the tunnel's half-width rather than at the plane's edge, and it scales with the zoom to
   keep it so: fading out past the walls meant the outer band was hidden and the halo ended on a hard
-  cut where the tunnel closed.
+  cut where the tunnel closed. It also sits close behind the mark for the same reason — further back it
+  projected to little more than the mark's own width, and its falloff, with nothing to spread it over,
+  read as an edge rather than as a shadow.
 
 ### 81. The frame is a slim brushed-metal band, and the badge hangs outside it
 
@@ -2187,7 +2189,9 @@ otherwise clip the box below a whole number of cells.
 
 - **A soft dark vignette sits inside the frame**, fading the room's grid out before it reaches the
   metal. The grid ran right up to the band and stopped dead against it, which read as a picture pasted
-  into the frame rather than a cavity behind it.
+  into the frame rather than a cavity behind it. Its blur is long and its alpha low on purpose: with a
+  tight one the shadow's own shape showed through as a line running parallel to the frame, and its
+  corners — where an inset shadow takes two edges' worth — read darker than its sides.
 - **It is its own layer, inside the scene.** Not a shadow on the glow — the glow is dark until the
   scene is up (83), and this is part of the tunnel, not part of the light — and being inside the
   scene wrapper is what makes it arrive with the scene instead of painting a shadow into the empty

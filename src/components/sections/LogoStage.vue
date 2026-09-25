@@ -369,7 +369,14 @@ function clamp(value) {
   position: absolute;
   inset: 12px;
   pointer-events: none;
-  box-shadow: inset 0 0 90px 20px color-mix(in srgb, var(--ink) 72%, transparent);
+  /*
+    A long, soft blur, because a short one drew its own shape: the corners of a
+    rectangular inset shadow take two edges' worth of darkening, and with a tight
+    blur the boundary between dark and light read as a line running parallel to
+    the frame. Wide and low is what makes it read as a shadow rather than as an
+    outline.
+  */
+  box-shadow: inset 0 0 220px 24px color-mix(in srgb, var(--ink) 66%, transparent);
 }
 
 /*

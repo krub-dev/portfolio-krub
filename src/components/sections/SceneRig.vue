@@ -69,8 +69,10 @@ const FOG_FAR = 560
 const PEEK_X = 3
 const PEEK_Y = 2
 // A neutral halo behind the mark, in the theme's own background: dark in the
-// dark theme, light in the light one.
-const BACKLIGHT_Z = -60
+// dark theme, light in the light one. Nearer than it was, so it projects large
+// and fades over more screen: at -60 it was only just wider than the mark and its
+// falloff read as an edge.
+const BACKLIGHT_Z = -20
 const BACKLIGHT = 170
 
 const room = ref(null)
@@ -227,8 +229,9 @@ function buildBacklight() {
   const ctx = canvas.getContext('2d')
   const reach = (ROOM_HALF / (BACKLIGHT / 2)) * (size / 2)
   const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, reach)
-  gradient.addColorStop(0, 'rgba(255,255,255,0.85)')
-  gradient.addColorStop(0.5, 'rgba(255,255,255,0.3)')
+  gradient.addColorStop(0, 'rgba(255,255,255,0.72)')
+  gradient.addColorStop(0.4, 'rgba(255,255,255,0.42)')
+  gradient.addColorStop(0.75, 'rgba(255,255,255,0.16)')
   gradient.addColorStop(1, 'rgba(255,255,255,0)')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, size, size)
