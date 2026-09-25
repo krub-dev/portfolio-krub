@@ -39,6 +39,12 @@ const props = defineProps({
     than as film.
   */
   effects: { type: String, default: 'bloom' },
+  /*
+    How the scene arrives: `fade` comes up out of the dark, `none` switches on.
+    The scene builds asynchronously, so without this it pops the moment it is
+    ready.
+  */
+  entrance: { type: String, default: 'fade' },
   // The lab puts stages side by side and does not want them walking themselves
   // onto the page's grid.
   snap: { type: Boolean, default: true },
@@ -77,6 +83,9 @@ const failed = ref(!webglSupported())
   with a lit frame around the 2D mark.
 */
 const BEAT_MS = 500
+// Must agree with the .scene transition in the stylesheet — the glow is held
+// back until the fade is done, so a mismatch strikes over a half-arrived mark.
+const FADE_MS = 600
 const armed = ref(false)
 let armFrameA = 0
 let armFrameB = 0
@@ -85,9 +94,10 @@ let failTimer = 0
 
 watch([ready, failed], ([isReady, isFailed]) => {
   if (!isReady && !isFailed) return
+  const beat = props.entrance === 'fade' ? FADE_MS + BEAT_MS : BEAT_MS
   armFrameA = requestAnimationFrame(() => {
     armFrameB = requestAnimationFrame(() => {
-      armTimer = window.setTimeout(() => (armed.value = true), BEAT_MS)
+      armTimer = window.setTimeout(() => (armed.value = true), beat)
     })
   })
 })
@@ -262,7 +272,13 @@ function clamp(value) {
       <!-- The fallback. It paints only if the scene never came up. -->
       <div v-if="failed" class="mark" aria-hidden="true" />
 
-      <div v-if="!failed" class="scene" aria-hidden="true">
+      <div
+        v-if="!failed"
+        class="scene"
+        :class="{ fade: props.entrance === 'fade', shown: ready }"
+        data-motion="decorative"
+        aria-hidden="true"
+      >
         <Suspense>
           <LogoScene
             :tilt="tilt"
@@ -482,5 +498,21 @@ function clamp(value) {
   position: absolute;
   inset: 0;
   overflow: hidden;
+}
+
+/*
+  The entrance. The scene builds asynchronously, so without this it pops the
+  instant it reports ready; this brings it up out of the dark instead. The
+  duration has to agree with FADE_MS in the script, which is what holds the glow
+  back until it is done. Marked decorative, so reduced motion drops the fade and
+  the scene simply appears.
+*/
+.scene.fade {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.scene.fade.shown {
+  opacity: 1;
 }
 </style>

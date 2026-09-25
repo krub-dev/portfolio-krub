@@ -2196,6 +2196,9 @@ otherwise clip the box below a whole number of cells.
 
 **Date:** 2026-09-25 · **Status:** active
 
+- **The scene fades up out of the dark** rather than switching on. It builds asynchronously, so
+  without a fade it pops the instant it reports ready. The fade is CSS on the canvas wrapper, marked
+  decorative so reduced motion drops it, and the glow is held back until it has finished.
 - **The scene goes through a composer** (`@tresjs/post-processing`, wrapping pmndrs effects) for a
   subtle bloom: the threshold sits just under the mark's top faces, so only the near-white glints
   glow. Lower and the body of the mark blooms too, and it loses its metal. The composer costs one
