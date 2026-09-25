@@ -2200,20 +2200,20 @@ otherwise clip the box below a whole number of cells.
 
 **Date:** 2026-09-25 · **Status:** active
 
+- **The empty stage is flat `--ink`.** The `--surface`-to-`--ink` radial that used to sit behind the
+  canvas read as a shadow hanging in the slot while the scene built — most visible before the glow and
+  the mark were there — and it hid the entrance fade, because the room's walls are that same
+  `--surface`. Flat, the slot is simply dark and the room arrives visibly.
 - **The scene eases up into the frame** rather than switching on. It builds asynchronously, so
-  without this it pops the instant it reports ready. Opacity alone was not enough: the room's walls
-  are the same `--surface` as the stage behind them, so the fade had almost nothing to fade from. It
-  comes with a small scale — from 1.03 down to rest, so the box's edges stay behind the frame while it
-  settles — and the glow is held back until it is done. Reduced motion drops the whole thing.
-- **The composer is a lab option, not the hero's.** `@tresjs/post-processing` and the pmndrs effects
-  do give the scene a bloom, but at any strength worth noticing it read as too heavy on the polished
-  metal, so the hero ships the plain render and `/logo-lab` keeps plain, fade, fade with bloom and
-  fade with bloom and grain to judge. And the lab is one stage behind a list, not three side by side:
-  every stage is its own WebGL context, its own generated environment and its own composer, so three
-  at once is three times the cost of the very thing being compared.
-- **The grain has no strength knob.** The wrapper exposes only `premultiply` and the blend function,
-  and on the polished metal it reads as a sandy finish rather than as film, which is the other reason
-  the hero ships without it.
+  without this it pops the instant it reports ready. Opacity alone was not enough against the old
+  background, so it comes with a small scale too — from 1.03 down to rest, which keeps the box's edges
+  behind the frame as it settles. The glow is held back until it is done, and reduced motion drops the
+  whole thing.
+- **The composer was tried and dropped.** A bloom and a film grain were built on
+  `@tresjs/post-processing` and compared in `/logo-lab`; at any strength worth noticing the bloom read
+  as too heavy on the polished metal, and the grain — whose only knob is `premultiply` — as sand
+  rather than film. The dependency, the composer and the `effects` prop are gone. The entrance is the
+  whole of the arrival now, and the lab compares only that: switching on against easing in.
 - **The 2D mark is the failure state now, not the loading state.** It painted first and faded out on
   ready, which flashed the flat logo on every load. It is shown only if WebGL is missing, or if the
   scene has not reported in eight seconds; a working load never renders it at all.

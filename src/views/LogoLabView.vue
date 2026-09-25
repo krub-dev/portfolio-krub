@@ -2,15 +2,14 @@
 /*
   DEV SCAFFOLDING — not part of the site.
 
-  One hero stage, with a selector, to compare how it arrives and how the render is
-  finished: plain, the fade, the fade with bloom, and the fade with bloom and
-  grain.
+  One hero stage, with a selector, to compare how the scene arrives: switching on
+  the instant it is ready, or easing up out of the dark.
 
-  One stage rather than three side by side on purpose. Every stage is its own
-  WebGL context, with its own generated environment and its own composer, so three
-  at once is three times the cost — that is what made the screen feel heavy, not
-  the composer itself. Switching the selector remounts the stage, and `Replay`
-  does it again, which is what re-runs the entrance and the tube's ignition.
+  One stage rather than two side by side on purpose. Every stage is its own WebGL
+  context with its own generated environment, so two at once is twice the cost of
+  the very thing being compared. Switching the selector remounts the stage, and
+  `Replay` does it again, which is what re-runs the entrance and the tube's
+  ignition.
 
   Like PreviewView, this is exempt from the "no literal strings in a template"
   rule: the labels are the subject. It never ships — the route is dev-only and
@@ -24,34 +23,18 @@ const VARIANTS = [
   {
     id: 'plain',
     label: 'Plain',
-    note: 'no composer, no fade — the behaviour before any of this',
+    note: 'no fade — the scene switches on the moment it reports ready',
     entrance: 'none',
-    effects: 'none',
   },
   {
     id: 'fade',
     label: 'Fade',
-    note: 'the scene eases up out of the dark. What the hero ships',
+    note: 'the scene eases up out of the dark as the opening settles into the frame',
     entrance: 'fade',
-    effects: 'none',
-  },
-  {
-    id: 'bloom',
-    label: 'Fade + bloom',
-    note: 'fade, plus a soft bloom on the glints — one extra pass every frame',
-    entrance: 'fade',
-    effects: 'bloom',
-  },
-  {
-    id: 'grain',
-    label: 'Fade + bloom + grain',
-    note: 'the same, with premultiplied film grain — the heaviest of the four',
-    entrance: 'fade',
-    effects: 'grain',
   },
 ]
 
-// The hero's own choice: the fade, without a composer.
+// What the hero ships.
 const pick = ref('fade')
 const variant = computed(() => VARIANTS.find((item) => item.id === pick.value))
 
@@ -88,7 +71,6 @@ const round = ref(0)
       <LogoStage
         :key="`${variant.id}-${round}`"
         :entrance="variant.entrance"
-        :effects="variant.effects"
         :snap="false"
       />
     </div>

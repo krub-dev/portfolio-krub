@@ -222,10 +222,6 @@ change, and making the repository public.
   the bundle. `LogoModel` already builds from `props.geometry` with a note to take the mesh from a
   loaded scene. Watch the scale and the orientation (the SVG's y-down flip disappears) and keep our
   own material, light and environment.
-- [ ] **The grain has no strength knob.** `@tresjs/post-processing`'s Noise exposes only `premultiply`
-  and the blend function, so it cannot be dialled below what it is; on the polished metal it reads as a
-  sandy finish rather than as film, which is why the hero ships bloom alone (decision 85). A
-  hand-written pass with an opacity, or a CSS grain layer over the stage, if it is wanted back.
 
 ## Mobile and responsive
 

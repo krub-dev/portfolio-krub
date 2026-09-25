@@ -33,13 +33,6 @@ const LogoScene = defineAsyncComponent(() => import('./LogoScene.vue'))
 
 const props = defineProps({
   /*
-    Forwarded to the scene: how the render is finished. See LogoScene. Off in the
-    hero — the bloom read as too heavy at any strength worth noticing, so the hero
-    ships the plain render and the fade, and `/logo-lab` keeps the bloom and the
-    grain to judge side by side.
-  */
-  effects: { type: String, default: 'none' },
-  /*
     How the scene arrives: `fade` comes up out of the dark, `none` switches on.
     The scene builds asynchronously, so without this it pops the moment it is
     ready.
@@ -286,7 +279,6 @@ function clamp(value) {
             :spin-y="spinY"
             :dragging="dragging"
             :reset="resetToken"
-            :effects="props.effects"
             @ready="ready = true"
           />
         </Suspense>
@@ -336,7 +328,13 @@ function clamp(value) {
   width: 100%;
   height: 100%;
   border: 1px solid var(--line);
-  background: radial-gradient(80% 80% at 50% 40%, var(--surface) 0%, var(--ink) 100%);
+  /*
+    Flat, and the page's own background. It is only ever seen while the scene
+    builds or if it fails, and the `--surface`-to-`--ink` radial that used to be
+    here read as a shadow hanging in the empty slot — and it hid the entrance
+    fade, because the room's walls are that same `--surface`.
+  */
+  background: var(--ink);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -378,7 +376,10 @@ function clamp(value) {
   The frame: a slim brushed-metal band over the canvas. Opaque, so it masks the
   box's edges — whatever the camera's small lean does to them — and drawn in the
   theme's own greys (`--fg` mixed into `--ink`), a sheen in both themes rather
-  than a colour. `border-image` is what lets a border carry the gradient.
+  than a colour. `border-image` is what lets a border carry the gradient, and the
+  slice is the band's own width so the corners take a real piece of it: sliced at
+  one pixel the corners were each a single colour stretched over 12px, and the
+  brushed streaks stopped dead at the edges.
 
   No hairline on its inner edge: the glow's own hard edge is the line there, and
   a faint `--line` rule on top of it read as two — one of them pulsing, since the
@@ -398,7 +399,7 @@ function clamp(value) {
       color-mix(in srgb, var(--fg) 24%, var(--ink)) 68%,
       color-mix(in srgb, var(--fg) 4%, var(--ink)) 100%
     )
-    1;
+    12;
 }
 
 /*

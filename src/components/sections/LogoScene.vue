@@ -26,7 +26,6 @@
 */
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { TresCanvas } from '@tresjs/core'
-import { BloomPmndrs, EffectComposerPmndrs, NoisePmndrs } from '@tresjs/post-processing'
 import { ExtrudeGeometry } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
@@ -42,12 +41,6 @@ const props = defineProps({
   dragging: { type: Boolean, default: false },
   // Bumped by a double press in LogoStage: bring the zoom home.
   reset: { type: Number, default: 0 },
-  /*
-    How the render is finished: `none`, `bloom`, or `grain` (bloom and a soft
-    film grain). The composer is a full-screen pass per effect per frame, so this
-    is opt-in and the playground compares the three.
-  */
-  effects: { type: String, default: 'none' },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -165,26 +158,6 @@ requestAnimationFrame(() => requestAnimationFrame(build))
         :dragging="props.dragging"
         :running="onScreen && !reduced"
       />
-
-      <Suspense v-if="props.effects !== 'none'">
-        <EffectComposerPmndrs>
-          <!--
-            The threshold sits just under the mark's top faces on purpose. The
-            body of the mark is a solid yellow around .77 luminance, so anything
-            lower blooms the whole thing and it loses its metal; this way only the
-            near-white faces glint. `premultiply` on the grain multiplies it by
-            what is already on screen, so the black of the tunnel stays clean.
-          -->
-          <BloomPmndrs
-            :intensity="0.25"
-            :luminance-threshold="0.9"
-            :luminance-smoothing="0.3"
-            :radius="0.5"
-            mipmap-blur
-          />
-          <NoisePmndrs v-if="props.effects === 'grain'" premultiply />
-        </EffectComposerPmndrs>
-      </Suspense>
     </TresCanvas>
   </div>
 </template>
