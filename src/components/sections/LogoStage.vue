@@ -300,19 +300,24 @@ function clamp(value) {
 }
 
 /*
-  The entrance glow, in CSS: an inset shadow inside the frame, hard on its inner
+  The entrance glow, in CSS: an inset shadow inside the frame, soft on its inner
   edge and fading to nothing inward, so it reads as light coming through the
   opening. No WebGL for this, so it costs nothing. It breathes slowly — opacity
   only, which the compositor handles — and the reduced-motion rule switches it
   off with the rest of the decorative motion.
+
+  Two shadows, and the first is the one that decides how bright it looks: a tight
+  blur at full strength paints a hard ring on the frame's inner edge, which the
+  eye reads as glare rather than as light. It is kept low and spread out, so the
+  edge stops being a line and the halo underneath does the work.
 */
 .glow {
   position: absolute;
   inset: 12px;
   pointer-events: none;
   box-shadow:
-    inset 0 0 12px 1px color-mix(in srgb, var(--acc-solid) 100%, transparent),
-    inset 0 0 90px 20px color-mix(in srgb, var(--acc-solid) 82%, transparent);
+    inset 0 0 20px 0 color-mix(in srgb, var(--acc-solid) 38%, transparent),
+    inset 0 0 96px 20px color-mix(in srgb, var(--acc-solid) 62%, transparent);
   animation: glowBreathe 5.5s ease-in-out infinite;
 }
 
