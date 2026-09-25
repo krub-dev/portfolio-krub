@@ -29,6 +29,8 @@ new number to its range when a decision is appended.
 - **A UI pass — 70.** The testimonial dots, the grid cell off, scrollable tabs and the CTAs.
 - **Polish and accessibility — 71–74.** The cooler light grey and the glow gone, the one-quote
   vertical pager, the `/me` tabs as a real tablist, and the 24px dots with the live region.
+- **The hero's 3D stage — 75–83.** The mark as a real WebGL object, the room and its rig, the snap to
+  the page's grid, the frame and the glow, the mark's motion and light, and the tube's ignition.
 
 ---
 
@@ -2159,3 +2161,18 @@ otherwise clip the box below a whole number of cells.
 - **The light is a generated environment, not an HDRI**: Three's `RoomEnvironment` through a PMREM,
   plus one directional light at intensity 1. The metal's roughness is 0.25, which spreads the
   environment's hot spots instead of pointing them at one angle.
+
+### 83. The tube strikes once the scene is up
+
+**Date:** 2026-09-25 · **Status:** active
+
+- **The glow is dark until the scene has reported ready and the flat fallback has faded**, then it
+  strikes — a flick, a pause, two flicks, then it holds — and only then starts to breathe. Igniting
+  on load struck an empty box, or the 2D logo: the scene builds asynchronously, so the ignition has
+  to wait for it rather than for the document.
+- **The strike is held back by two frames**, not counted straight from `ready`: the geometry build
+  blocks the main thread for a moment just after, so the fallback's crossfade starts late, and a
+  delay measured from `ready` landed on top of the fade.
+- **The frame's inner hairline is gone** — the one 81 put there. The glow's own hard edge is the line
+  at that boundary, and a faint `--line` rule on top of it read as two, one of them pulsing, since it
+  sits inside the glow that breathes.

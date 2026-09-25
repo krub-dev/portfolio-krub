@@ -21,7 +21,7 @@
   crossfade instead of a pop. The scene reports readiness; this decides what to do
   with it.
 */
-import { defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
+import { defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 
 import { usePointer } from '../../composables/usePointer'
 
@@ -46,6 +46,31 @@ const dragging = ref(false)
 const ready = ref(false)
 // Bumped on a double press: LogoScene watches it to bring the zoom home.
 const resetToken = ref(0)
+/*
+  The glow stays dark until this is set, and it is set only once the scene has
+  reported ready — the 3D and the room's grid on screen — and the flat fallback
+  mark has faded out. Striking the tube before that ignites the wrong picture: an
+  empty box, or the 2D logo.
+
+  Two frames before the timer, because the geometry build blocks the main thread
+  for a moment right after `ready`: the fallback's crossfade only starts once the
+  thread frees and the class change paints. Measuring from `ready` itself put the
+  strike up to half a second early — on top of the fade, over the flat mark.
+*/
+const FADE_MS = 400
+const armed = ref(false)
+let armFrameA = 0
+let armFrameB = 0
+let armTimer = 0
+
+watch(ready, (isReady) => {
+  if (!isReady) return
+  armFrameA = requestAnimationFrame(() => {
+    armFrameB = requestAnimationFrame(() => {
+      armTimer = window.setTimeout(() => (armed.value = true), FADE_MS + 100)
+    })
+  })
+})
 
 let startX = 0
 let startY = 0
@@ -107,6 +132,9 @@ onMounted(() => {
 
 onUnmounted(() => {
   cancelAnimationFrame(snapFrame)
+  cancelAnimationFrame(armFrameA)
+  cancelAnimationFrame(armFrameB)
+  clearTimeout(armTimer)
   window.removeEventListener('resize', scheduleSnap)
 })
 
@@ -211,7 +239,12 @@ function clamp(value) {
 
       <!-- The frame: a slim brushed-metal band over the canvas. -->
       <div class="rim" aria-hidden="true" />
-      <div class="glow" data-motion="decorative" aria-hidden="true" />
+      <div
+        class="glow"
+        :class="{ on: armed }"
+        data-motion="decorative"
+        aria-hidden="true"
+      />
 
       <slot />
     </div>
@@ -278,8 +311,11 @@ function clamp(value) {
   The frame: a slim brushed-metal band over the canvas. Opaque, so it masks the
   box's edges — whatever the camera's small lean does to them — and drawn in the
   theme's own greys (`--fg` mixed into `--ink`), a sheen in both themes rather
-  than a colour. `border-image` is what lets a border carry the gradient, and the
-  hairline sits on its inner edge.
+  than a colour. `border-image` is what lets a border carry the gradient.
+
+  No hairline on its inner edge: the glow's own hard edge is the line there, and
+  a faint `--line` rule on top of it read as two — one of them pulsing, since the
+  glow breathes.
 */
 .rim {
   position: absolute;
@@ -296,7 +332,6 @@ function clamp(value) {
       color-mix(in srgb, var(--fg) 4%, var(--ink)) 100%
     )
     1;
-  box-shadow: inset 0 0 0 1px var(--line);
 }
 
 /*
@@ -315,53 +350,65 @@ function clamp(value) {
   position: absolute;
   inset: 12px;
   pointer-events: none;
+  /*
+    Dark until `on`. The strike is paused, which holds its first frame — and its
+    first frame is dark — and the base opacity is the belt for when the
+    reduced-motion rule has taken the animation away altogether.
+  */
+  opacity: 0;
   box-shadow:
     inset 0 0 12px 1px color-mix(in srgb, var(--acc-solid) 84%, transparent),
     inset 0 0 90px 20px color-mix(in srgb, var(--acc-solid) 24%, transparent);
   /*
-    Two runs: the tube striking, once, then the slow breath. Both are on
-    opacity, so the breath is held back by its delay — otherwise it would take
-    over from the first frame and the strike would never be seen.
+    Two runs, in order: the tube striking, once, then the slow breath. Both are on
+    opacity, so the breath waits the strike out with a delay of the strike's own
+    length — otherwise it would take over from the first frame and the strike
+    would never be seen. The delay is the one thing to keep in step with
+    `glowStrike`'s duration below.
   */
   animation:
-    glowStrike 1.6s steps(1, end) 1,
-    glowBreathe 5.5s ease-in-out 1.6s infinite;
+    glowStrike 2.1s steps(1, end) 1,
+    glowBreathe 5.5s ease-in-out 2.1s infinite;
+  animation-play-state: paused;
+}
+
+.glow.on {
+  opacity: 1;
+  animation-play-state: running;
 }
 
 /*
-  The tube coming on: a stutter, a second stutter, then it holds. Stepped, so
-  every change snaps instead of fading, which is what reads as neon rather than
-  as a dimmer. Runs on load; the reduced-motion rule turns it off with the rest.
+  The tube coming on: a flick, a pause, two more flicks, then it holds. Stepped,
+  so every change snaps instead of fading — that is what reads as neon rather
+  than as a dimmer. It opens dark, which is what covers the stretch before the
+  scene is up; the reduced-motion rule turns the whole thing off.
 */
 @keyframes glowStrike {
   0% {
     opacity: 0;
   }
-  5% {
+  8% {
     opacity: 1;
   }
-  9% {
-    opacity: 0.12;
+  14% {
+    opacity: 0;
   }
-  13% {
+  36% {
+    opacity: 0;
+  }
+  44% {
     opacity: 1;
   }
-  19% {
-    opacity: 0.22;
+  50% {
+    opacity: 0;
   }
-  25% {
+  58% {
     opacity: 1;
   }
-  33% {
-    opacity: 0.62;
+  64% {
+    opacity: 0;
   }
-  41% {
-    opacity: 1;
-  }
-  52% {
-    opacity: 0.78;
-  }
-  60% {
+  80% {
     opacity: 1;
   }
   100% {
