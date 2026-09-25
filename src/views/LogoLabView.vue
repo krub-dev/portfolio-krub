@@ -46,7 +46,6 @@ const FOG_MODES = [
   { id: 'off', label: 'Off' },
   { id: 'near', label: 'Near' },
   { id: 'far', label: 'Far' },
-  { id: 'haze', label: 'Haze' },
 ]
 
 const fogMode = ref('far')

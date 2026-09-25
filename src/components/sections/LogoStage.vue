@@ -84,7 +84,7 @@ const failed = ref(!webglSupported())
 const BEAT_MS = 500
 // Must agree with the .scene transition in the stylesheet — the glow is held
 // back until the fade is done, so a mismatch strikes over a half-arrived mark.
-const FADE_MS = 1200
+const FADE_MS = 1800
 const armed = ref(false)
 let armFrameA = 0
 let armFrameB = 0
@@ -290,11 +290,6 @@ function clamp(value) {
             @ready="ready = true"
           />
         </Suspense>
-
-        <!-- The frame's shadow, on the tunnel. Inside the scene so it arrives
-             with it: as a sibling it painted a shadow into the empty slot while
-             the scene was still building. -->
-        <div class="vignette" aria-hidden="true" />
       </div>
 
       <!-- The frame: a slim brushed-metal band over the canvas. -->
@@ -367,28 +362,6 @@ function clamp(value) {
 }
 
 /*
-  The frame's shadow, cast into the tunnel. The room's grid runs to the metal and
-  stops dead against it; this fades it out first, so the opening reads as a cavity
-  behind the frame rather than a picture pasted into it. Its own layer, not a
-  shadow on the glow, because it stands whether the glow is lit or not — and
-  `--ink` is what the scene's own fog already fades to, so it continues that. It
-  takes no pointer events, so the stage keeps the drag.
-*/
-.vignette {
-  position: absolute;
-  inset: 12px;
-  pointer-events: none;
-  /*
-    A long, soft blur, because a short one drew its own shape: the corners of a
-    rectangular inset shadow take two edges' worth of darkening, and with a tight
-    blur the boundary between dark and light read as a line running parallel to
-    the frame. Wide and low is what makes it read as a shadow rather than as an
-    outline.
-  */
-  box-shadow: inset 0 0 220px 24px color-mix(in srgb, var(--ink) 66%, transparent);
-}
-
-/*
   The frame: a slim brushed-metal band over the canvas. Opaque, so it masks the
   box's edges — whatever the camera's small lean does to them — and drawn in the
   theme's own greys (`--fg` mixed into `--ink`), a sheen in both themes rather
@@ -397,9 +370,11 @@ function clamp(value) {
   one pixel the corners were each a single colour stretched over 12px, and the
   brushed streaks stopped dead at the edges.
 
-  No hairline on its inner edge: the glow's own hard edge is the line there, and
-  a faint `--line` rule on top of it read as two — one of them pulsing, since the
-  glow breathes.
+  No hairline on its inner edge, and no vignette either: the glow's own hard edge
+  is the line there, and a dark rule or a soft inset shadow on top of it read as a
+  second edge running round the frame. The vignette lasted a while and measured at
+  only about 4/255, but it was the shape — a rounded rectangle, brighter at the
+  sides than at its corners — that kept reading as a shadow cast into the slot.
 */
 .rim {
   position: absolute;
@@ -538,7 +513,7 @@ function clamp(value) {
 .scene.fade {
   opacity: 0;
   transform: scale(1.03);
-  transition: opacity 1.2s ease, transform 1.2s ease;
+  transition: opacity 1.8s ease, transform 1.8s ease;
 }
 
 .scene.fade.shown {

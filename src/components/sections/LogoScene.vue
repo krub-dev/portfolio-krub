@@ -151,7 +151,6 @@ requestAnimationFrame(() => requestAnimationFrame(build))
   <div ref="root" class="scene" @wheel="onWheel">
     <TresCanvas :fps-limit="24" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
-      <TresDirectionalLight :position="[120, 160, 200]" :intensity="1" />
 
       <SceneRig :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" :fog="props.fog" />
 

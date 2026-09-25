@@ -262,13 +262,14 @@ seven by seven (504×504) at the usual viewport, its four edges on the grid line
 next cell right of its natural position (or kept a cell back when that would run off the screen).
 It is measured and snapped by `LogoStage`, since it depends on the viewport (decision 79). Border
 `--line`, a flat `--ink` fill — only seen while the scene builds or if it fails — a slim brushed-metal
-frame over the canvas, whose sheen carries round its corners, and inside it a soft dark vignette that
-fades the grid into the metal and a CSS entrance glow — hard on the frame's inner edge, fading inward
-(decisions 81, 84).
+frame over the canvas, whose sheen carries round its corners, and inside it a CSS entrance glow — hard
+on the frame's inner edge, fading inward (decision 81). A vignette that faded the grid into the metal
+was tried and dropped (decision 84).
 The whole stage is magnetic, and only the logo inside it turns. Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
-  mark that tilts toward the cursor, spins with a drag and springs back to the front. Behind it a
+  mark that tilts toward the cursor, spins with a drag and springs back to the front. The metal is a
+  matcap, so no light and no environment sit behind it (decision 82). Behind it a
   deep open box recedes, its grid painted on every face and fading to the background through a fog,
   and the camera leans a little with the pointer, so the depth shifts while the mark stays centred.
   **The opening is cut to the stage** and divided into the stage's own seven cells, so its grid

@@ -2139,14 +2139,12 @@ otherwise clip the box below a whole number of cells.
   cut where the tunnel closed. It also sits close behind the mark for the same reason — further back it
   projected to little more than the mark's own width, and its falloff, with nothing to spread it over,
   read as an edge rather than as a shadow.
-- **The fog has modes** (`off`, `near`, `far`, `haze`, the lab switches them). Measuring settled what
-  each one can do: fading to `--ink` can only ever darken the far end by the 8/255 that separates
-  `--ink` from `--surface` in the dark theme, so `near` and `far` differ by about 1.5/255 and the end
-  reads as a hole either way. **`haze` is the one that changes the character**: the same fog built from
-  `--fg` mixed into `--ink` sits *above* the background, so the far end reads as mist with light in it
-  rather than as a hole. The mix is done in hex by hand, because what the browser computes for
-  `color-mix` serialises as `color(srgb …)` and Three's `Color.set` does not parse that — it warns and
-  keeps the colour it had, which is how the first attempt at the haze silently did nothing.
+- **The fog has modes** (`off`, `near`, `far`, which the lab switches; a `haze` was built and
+  dropped). Measuring settled what each one can do: fading to `--ink` can only ever darken the far end
+  by the 8/255 that separates `--ink` from `--surface` in the dark theme, so `near` and `far` differ by
+  about 1.5/255 and the end reads as a hole either way. A `haze` that mixed `--fg` into `--ink`, so the
+  end rose above the background instead, did lift it — 12 to 33 on the same measurement — but read as a
+  square panel of mist at the end of the tunnel rather than as depth, so it is out.
 
 ### 81. The frame is a slim brushed-metal band, and the badge hangs outside it
 
@@ -2172,9 +2170,15 @@ otherwise clip the box below a whole number of cells.
 - **The drag is constrained on both axes**, the vertical capped harder (0.45 rad against the
   horizontal's 1.1), and **cleared on release**: leaving the angles in place is what made a plain
   click snap the mark back to wherever it had last been orbited.
-- **The light is a generated environment, not an HDRI**: Three's `RoomEnvironment` through a PMREM,
-  plus one directional light at intensity 1. The metal's roughness is 0.25, which spreads the
-  environment's hot spots instead of pointing them at one angle.
+- **The finish is a matcap** (`MeshMatcapMaterial` and one 128px texture), not a lit material. The
+  lighting and the reflections are baked into the image, so there is no environment, no PMREM, no BRDF
+  and no light in the scene at all: the directional light went with it, because the room was never lit
+  either. It is the cheap route to a polished metal, and the mark barely moves, which is the case
+  matcaps are for. The image is neutral grey and the accent is multiplied over it by `material.color`,
+  so the matcap supplies the shading and the accent the hue.
+  Asset: `matcaps/128/3B3C3F_DAD9D5_929290_ABACA8-128px.png` from github.com/nidorx/matcaps — that
+  library is collected from various sources and its README asks for credit to the original author, so
+  the file is the one thing here to replace if a clearer licence is wanted.
 
 ### 83. The tube strikes once the scene is up
 
@@ -2191,19 +2195,19 @@ otherwise clip the box below a whole number of cells.
   at that boundary, and a faint `--line` rule on top of it read as two, one of them pulsing, since it
   sits inside the glow that breathes.
 
-### 84. The frame casts a shadow into the tunnel
+### 84. The frame casts a shadow into the tunnel — tried, and dropped
 
-**Date:** 2026-09-25 · **Status:** active
+**Date:** 2026-09-25 · **Status:** reversed
 
-- **A soft dark vignette sits inside the frame**, fading the room's grid out before it reaches the
-  metal. The grid ran right up to the band and stopped dead against it, which read as a picture pasted
-  into the frame rather than a cavity behind it. Its blur is long and its alpha low on purpose: with a
-  tight one the shadow's own shape showed through as a line running parallel to the frame, and its
-  corners — where an inset shadow takes two edges' worth — read darker than its sides.
-- **It is its own layer, inside the scene.** Not a shadow on the glow — the glow is dark until the
-  scene is up (83), and this is part of the tunnel, not part of the light — and being inside the
-  scene wrapper is what makes it arrive with the scene instead of painting a shadow into the empty
-  slot while the scene is still building. It is CSS, on the compositor, not a post-processing pass.
+- **A soft dark vignette sat inside the frame**, fading the room's grid out before it reached the
+  metal. Built on request, and it never stopped reading as a shadow: an inset `box-shadow` darkens a
+  rounded rectangle, so its corners take two edges' worth and come out darker than its sides, and no
+  amount of blur hid the shape — 90px, then 220px, both still legible. Measured at only about 4/255,
+  it was nonetheless the thing the eye kept catching in the empty slot, before the glow lit or the mark
+  arrived.
+- **It is gone**, and the grid runs to the metal again. If the grid stopping dead against the frame
+  becomes a problem, the place for it is the 3D — the fog or the halo — not a rectangle over the
+  canvas.
 - **It fades to `--ink`**, the same value the scene's fog fades to, so the effect continues the fog
   rather than laying a second, unrelated darkness over it. In the light theme it fades the grid into
   the light background, which is what "dark" means there.

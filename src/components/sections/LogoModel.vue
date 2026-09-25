@@ -6,8 +6,8 @@
   `useTresContext` and the environment all need the renderer the canvas
   provides, and calling them in the component that renders the canvas throws.
 
-  The finish is three's own, not invented: a `MeshStandardMaterial` at full
-  metalness and a tight roughness, with the environment doing the reflecting.
+  The finish is a matcap: a `MeshMatcapMaterial` and one small texture, with no
+  lights and no environment behind it. See the note above the material.
 
   The mesh is built once and never rebuilt.
 
@@ -17,8 +17,7 @@
 */
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
-import { Group, Mesh, MeshStandardMaterial, PMREMGenerator } from 'three'
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import { Group, Mesh, MeshMatcapMaterial, SRGBColorSpace, TextureLoader } from 'three'
 
 const props = defineProps({
   geometry: { type: Object, required: true },
@@ -48,7 +47,25 @@ const accent = ref('#ffc800')
 let smoothSpin = 0
 let smoothSpinY = 0
 
-const material = new MeshStandardMaterial({ metalness: 1, roughness: 0.25 })
+/*
+  A matcap, not a lit material. `MeshMatcapMaterial` colours each pixel from a
+  texture read by the surface normal in view space — the lighting and the
+  reflections are baked into the image — so there is no environment, no PMREM, no
+  BRDF and no light reaching it at all. It is the cheap route to a polished metal,
+  and the mark barely moves, which is exactly the case matcaps are for.
+
+  The image is neutral grey on purpose: the mark's colour is the accent, applied
+  by `material.color` over it, so the matcap supplies the shading and the accent
+  supplies the hue.
+
+  Asset: `matcaps/128/3B3C3F_DAD9D5_929290_ABACA8-128px.png` from
+  github.com/nidorx/matcaps. That library is collected from various sources and
+  its README asks for credit to the original author — see the decisions log.
+*/
+const matcap = new TextureLoader().load('/assets/img/matcap-metal.png')
+matcap.colorSpace = SRGBColorSpace
+
+const material = new MeshMatcapMaterial({ matcap })
 // The mark is the foreground: the tunnel's fog must not wash it out.
 material.fog = false
 
@@ -60,14 +77,11 @@ group.scale.set(1.95)
 // the favicon.
 group.scale.y = -1.95
 
-const { renderer, scene } = useTresContext()
+const { renderer } = useTresContext()
 const { onBeforeRender } = useLoop()
 
-// The generated environment, once. Disposed with the component.
-const pmrem = new PMREMGenerator(renderer.instance)
-scene.value.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
-onBeforeUnmount(() => pmrem.dispose())
 onBeforeUnmount(() => material.dispose())
+onBeforeUnmount(() => matcap.dispose())
 
 watch(
   () => props.running,

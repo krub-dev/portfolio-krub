@@ -224,11 +224,10 @@ change, and making the repository public.
   own material, light and environment.
 - [ ] **The tunnel's far end reads as a black void.** Fading to `--ink` can only darken the end by the
   8/255 that separates it from `--surface` in the dark theme, so `near` and `far` differ by about
-  1.5/255 and the end lands as a hole rather than as depth (measured). The `haze` fog mode answers it —
-  the same fog built from `--fg` mixed into `--ink` sits above the background, and the end rises to a
-  grey mist (12 to 33 on the same measurement) — but its boundary is still a fairly square cut where
-  the walls have not fogged yet, and how strong the mix should be is unsettled. Tune `HAZE_MIX` and the
-  mode's reach, or find a shape that does not read as a lit panel at the end of the tunnel.
+  1.5/255 and the end lands as a hole rather than as depth (measured). A `haze` mode that mixed `--fg`
+  into `--ink`, so the end rose above the background, did lift it (12 to 33) but read as a square panel
+  of mist at the end of the tunnel, so it was dropped. Still open: a shape that does not read as a lit
+  panel — spacing the fog on the projection, or lighting the end some other way.
 
 ## Mobile and responsive
 
