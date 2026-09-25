@@ -95,7 +95,9 @@ onBeforeRender(({ elapsed, delta }) => {
   // During a drag the hover is off: the spin is the whole story, and the idle
   // breathes underneath it whichever way that is.
   const target = props.dragging ? { x: 0, y: 0 } : props.tilt
-  const ease = Math.min(1, delta * 6)
+  // Slower than the drag's return: leaving the stage used to snap, and the eye
+  // reads a hanging tilt as the mark settling rather than as a jump.
+  const ease = Math.min(1, delta * 3.5)
   group.rotation.y +=
     (target.x * TILT_Y + Math.sin(elapsed * BREATH) * SWAY + smoothSpin - group.rotation.y) * ease
   group.rotation.x +=

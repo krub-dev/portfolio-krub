@@ -39,11 +39,14 @@ export const copy = {
 
   about: {
     en: {
+      // What Limonacho says when the pointer lands on the photo.
+      greet: 'Kiko!',
       p1: 'I came from 3D and ended up programming: same thing, fewer twelve-hour renders.',
       p2: 'Six years modelling and texturing for games, apps and e-commerce taught me to ship on time and to sweat the details. I bring the same to the code: careful, tested, documented, and delivered when I said it would be.',
       p3: 'Looking for a team where I can grow into backend while still poking at odd things in C on weekends.',
     },
     es: {
+      greet: '¡Kiko!',
       p1: 'Vengo del 3D y acabé programando, que es lo mismo pero con menos renders de doce horas.',
       p2: 'Seis años modelando y texturizando para videojuegos, apps y e-commerce me enseñaron a entregar a tiempo y a mirar el detalle. Traigo eso mismo al código: cuidado, probado, documentado y entregado cuando dije que lo estaría.',
       p3: 'Busco equipo donde crecer hacia backend sin dejar de tocar cosas raras en C los fines de semana.',

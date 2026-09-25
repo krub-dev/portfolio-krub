@@ -17,12 +17,15 @@ import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
 import { useLang } from '../../composables/useLang'
 import { useTheme } from '../../composables/useTheme'
+import { useLemonVoice } from '../../composables/useLemonVoice'
 import { certifications, config, copy, cvPath, education, experience, photoPath } from '../../data'
 import { formatPeriod } from '../../utils/format'
 
 const { lang } = useLang()
 const { theme } = useTheme()
 const { t } = useI18n()
+// Limonacho greets you when the pointer lands on the photo.
+const { say, hush } = useLemonVoice()
 
 const tab = ref('exp')
 // The id that ties the tab row to the panel it switches, for the ARIA tablist.
@@ -156,8 +159,10 @@ function onTouchEnd(event) {
       </div>
 
       <div class="photo-wrap" data-pfp-wrap>
-        <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
-        <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
+        <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
+          <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
+          <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
+        </div>
       </div>
     </div>
   </section>
@@ -286,7 +291,13 @@ function onTouchEnd(event) {
   gap: 10px;
 }
 
+/* The photo, and the badge that sits on it. */
+.photo-box {
+  position: relative;
+}
+
 .photo {
+  display: block;
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
@@ -294,9 +305,20 @@ function onTouchEnd(event) {
   border: 1px solid var(--line);
 }
 
-/* Under the photo, and only as wide as its own text. */
+/*
+  The badge, in a chip in the photo's top-left corner. Its radius is the photo's,
+  so its corner sits exactly on the photo's own, and the blur keeps the label
+  readable over whatever the picture has there.
+*/
 .availability {
-  align-self: flex-start;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  padding: 7px 13px 7px 9px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ink) 74%, transparent);
+  backdrop-filter: blur(6px);
 }
 
 @media (max-width: 900px) {

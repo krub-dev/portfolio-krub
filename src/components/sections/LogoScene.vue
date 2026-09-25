@@ -24,7 +24,7 @@
   The camera zooms; the room scales with it, which keeps its opening on the
   stage and its grid on the page's, so the zoom moves the mark and nothing else.
 */
-import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { TresCanvas } from '@tresjs/core'
 import { ExtrudeGeometry } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
@@ -39,6 +39,8 @@ const props = defineProps({
   spin: { type: Number, default: 0 },
   spinY: { type: Number, default: 0 },
   dragging: { type: Boolean, default: false },
+  // Bumped by a double press in LogoStage: bring the zoom home.
+  reset: { type: Number, default: 0 },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -69,6 +71,14 @@ onMounted(() => {
 })
 
 onUnmounted(() => observer?.disconnect())
+
+// A double press in LogoStage (its `reset` token) brings the zoom back to rest.
+watch(
+  () => props.reset,
+  () => {
+    zoom.value = 1
+  },
+)
 
 /*
   The wheel zooms the camera. The room keeps its opening on the stage by scaling

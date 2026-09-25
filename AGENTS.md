@@ -51,7 +51,9 @@ the bundle. Production sets the variable in Vercel.
   its provider refuses a request once there are more than thirty — which cuts the work off mid-step
   and is expensive to recover from. Diagnose with text first (the console, `getBoundingClientRect`,
   computed styles); when a picture is genuinely needed, read one, once, and never re-read it.
-  Deleting the temporary files afterwards is tidiness, not what keeps the count down.
+  Deleting the temporary files afterwards is tidiness, not what keeps the count down. **Keep a
+  running count aloud and say when it passes about twenty**, so the owner can `/compact` before it
+  reaches thirty.
 
 ## Non-negotiable
 

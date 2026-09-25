@@ -44,11 +44,14 @@ const spin = ref(0)
 const spinY = ref(0)
 const dragging = ref(false)
 const ready = ref(false)
+// Bumped on a double press: LogoScene watches it to bring the zoom home.
+const resetToken = ref(0)
 
 let startX = 0
 let startY = 0
 let startSpin = 0
 let startSpinY = 0
+let lastDownAt = 0
 let snapFrame = 0
 
 /*
@@ -143,10 +146,18 @@ usePointer((pointer) => {
 })
 
 function onDown(event) {
-  // The frame chooser is a control, not part of the object: a press on it must
-  // not start a drag, or the capture swallows the button's own click.
-  if (event.target.closest('.frames')) return
   if (!stage.value) return
+  // A double press puts the view back: the mark straight and the zoom home. It
+  // is read here rather than with `dblclick` because the drag captures the
+  // pointer, which can keep the native event from landing.
+  const now = performance.now()
+  if (now - lastDownAt < 320) {
+    spin.value = 0
+    spinY.value = 0
+    resetToken.value += 1
+  }
+  lastDownAt = now
+
   dragging.value = true
   startX = event.clientX
   startY = event.clientY
@@ -192,6 +203,7 @@ function clamp(value) {
             :spin="spin"
             :spin-y="spinY"
             :dragging="dragging"
+            :reset="resetToken"
             @ready="ready = true"
           />
         </Suspense>
@@ -199,7 +211,7 @@ function clamp(value) {
 
       <!-- The frame: a slim brushed-metal band over the canvas. -->
       <div class="rim" aria-hidden="true" />
-      <div class="glow" aria-hidden="true" />
+      <div class="glow" data-motion="decorative" aria-hidden="true" />
 
       <slot />
     </div>
@@ -290,15 +302,28 @@ function clamp(value) {
 /*
   The entrance glow, in CSS: an inset shadow inside the frame, hard on its inner
   edge and fading to nothing inward, so it reads as light coming through the
-  opening. No WebGL for this, so it costs nothing.
+  opening. No WebGL for this, so it costs nothing. It breathes slowly — opacity
+  only, which the compositor handles — and the reduced-motion rule switches it
+  off with the rest of the decorative motion.
 */
 .glow {
   position: absolute;
   inset: 12px;
   pointer-events: none;
   box-shadow:
-    inset 0 0 10px 0 color-mix(in srgb, var(--acc-solid) 75%, transparent),
-    inset 0 0 70px 14px color-mix(in srgb, var(--acc-solid) 38%, transparent);
+    inset 0 0 10px 0 color-mix(in srgb, var(--acc-solid) 90%, transparent),
+    inset 0 0 70px 14px color-mix(in srgb, var(--acc-solid) 55%, transparent);
+  animation: glowBreathe 5.5s ease-in-out infinite;
+}
+
+@keyframes glowBreathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
 }
 
 /* The scene fills the stage and sits over the fallback. `overflow: hidden` clips
