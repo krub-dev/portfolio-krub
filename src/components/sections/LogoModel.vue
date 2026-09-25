@@ -29,11 +29,11 @@ const props = defineProps({
   dragging: { type: Boolean, default: false },
 })
 
-// How far the hover turns it, in radians. Small and readable, not a globe —
-// and softer than it was, because the camera leans too now (SceneRig) and the
-// two must not add up to a lurch.
-const TILT_Y = 0.34
-const TILT_X = 0.18
+// How far the hover turns it, in radians. Wider than it was: the room's lean is
+// capped by the frame's width (SceneRig), so this is the axis with room to give,
+// and the mark has to carry the gesture.
+const TILT_Y = 0.5
+const TILT_X = 0.27
 // The idle: a slow breath on both axes, a touch wider and quicker than it was
 // so the mark never looks parked.
 const SWAY = 0.2

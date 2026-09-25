@@ -318,7 +318,55 @@ function clamp(value) {
   box-shadow:
     inset 0 0 12px 1px color-mix(in srgb, var(--acc-solid) 84%, transparent),
     inset 0 0 90px 20px color-mix(in srgb, var(--acc-solid) 24%, transparent);
-  animation: glowBreathe 5.5s ease-in-out infinite;
+  /*
+    Two runs: the tube striking, once, then the slow breath. Both are on
+    opacity, so the breath is held back by its delay — otherwise it would take
+    over from the first frame and the strike would never be seen.
+  */
+  animation:
+    glowStrike 1.6s steps(1, end) 1,
+    glowBreathe 5.5s ease-in-out 1.6s infinite;
+}
+
+/*
+  The tube coming on: a stutter, a second stutter, then it holds. Stepped, so
+  every change snaps instead of fading, which is what reads as neon rather than
+  as a dimmer. Runs on load; the reduced-motion rule turns it off with the rest.
+*/
+@keyframes glowStrike {
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  9% {
+    opacity: 0.12;
+  }
+  13% {
+    opacity: 1;
+  }
+  19% {
+    opacity: 0.22;
+  }
+  25% {
+    opacity: 1;
+  }
+  33% {
+    opacity: 0.62;
+  }
+  41% {
+    opacity: 1;
+  }
+  52% {
+    opacity: 0.78;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes glowBreathe {

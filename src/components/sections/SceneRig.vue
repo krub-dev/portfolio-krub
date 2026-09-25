@@ -161,13 +161,19 @@ function buildRoomGeometry() {
 */
 function buildRoom() {
   const { surface, grid } = tokens()
-  const size = 512
+  /*
+    A whole number of cells across the tile, so it is exactly one repeat and
+    wraps without a seam. At 512 the tile was not a multiple of seven, and
+    rounding the half-cell line positions left the join a pixel wide of every
+    other gap — a faint line running the length of each wall.
+  */
+  const cellPx = 72
+  const size = cellPx * CELLS
   const canvas = makeCanvas(size)
   const ctx = canvas.getContext('2d')
   ctx.fillStyle = surface
   ctx.fillRect(0, 0, size, size)
 
-  const step = size / CELLS
   ctx.strokeStyle = grid
   ctx.lineWidth = 1
   ctx.beginPath()
@@ -175,10 +181,11 @@ function buildRoom() {
     The lines sit on the halves of a cell, not on `i * step`: the stage's own
     grid puts a line on every edge and none through its middle, because seven
     whole cells leave the centre mid-cell. Drawing the texture half a cell over
-    is what makes the two grids meet instead of running a cell out of phase.
+    is what makes the two grids meet instead of running a cell out of phase. The
+    half-pixel offset lands the one-pixel stroke on a whole texel.
   */
   for (let i = 0; i < CELLS; i++) {
-    const p = Math.round((i + 0.5) * step) + 0.5
+    const p = (i + 0.5) * cellPx + 0.5
     ctx.moveTo(p, 0)
     ctx.lineTo(p, size)
     ctx.moveTo(0, p)
