@@ -4,8 +4,7 @@
   with the logo on the right.
 
   The stage on the right is LogoStage: it owns the 3D logo, the frame and the
-  pointer gestures. The availability badge sits outside the frame's top-left
-  corner, passed into its slot so it can hang off the stage.
+  pointer gestures.
 
   On a phone there is no stage at all — see the note above the media query in
   the styles.
@@ -13,7 +12,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import AvailabilityBadge from '../base/AvailabilityBadge.vue'
 import BaseButton from '../base/BaseButton.vue'
 import { useLang } from '../../composables/useLang'
 import { copy } from '../../data'
@@ -76,9 +74,7 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 
       </div>
 
-      <LogoStage v-if="!narrow">
-        <AvailabilityBadge class="availability" :label="hero.badge" />
-      </LogoStage>
+      <LogoStage v-if="!narrow" />
     </div>
   </section>
 </template>
@@ -151,14 +147,6 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
   padding: 14px 26px;
 }
 
-/* Outside the frame, above its top-left corner: page furniture, not part of the
-   window. */
-.availability {
-  position: absolute;
-  top: -28px;
-  left: 0;
-}
-
 /*
   The phone layout.
 
@@ -170,16 +158,13 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 
   The stage is what does not fit, so on a phone it is not rendered at all.
   Every way of keeping it was worse than losing it: shrunk to fit it became a
-  ~130px square holding a logo that is already in the navbar directly above it,
-  with the availability badge wrapping onto two lines inside it. A box that
-  holds the 3D logo earns its space on a desktop, where it is half the
+  ~130px square holding a logo that is already in the navbar directly above it.
+  A box that holds the 3D logo earns its space on a desktop, where it is half the
   composition. On a phone it was taking the marquee's place to show a smaller
   copy of the logo.
 
-  Two things follow. The badge moves into the text column, since it was living
-  inside the stage — that is the v-if in the script. And the WebGL scene never
-  mounts on a phone, because LogoStage does not mount, so it costs nothing on a
-  mid-range device: it is not there.
+  And the WebGL scene never mounts on a phone, because LogoStage does not mount,
+  so it costs nothing on a mid-range device: it is not there.
 */
 @media (max-width: 900px) {
   .hero {

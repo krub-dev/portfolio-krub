@@ -2131,9 +2131,6 @@ otherwise clip the box below a whole number of cells.
 - **The fog falls off to `--ink`** so the tunnel has no bottom to see, and the **backlight** is the
   theme's own background — dark in the dark theme, light in the light one — placed each frame on the
   camera's axis behind the mark, so it clears the grid there rather than lighting it in a colour.
-- **An entrance glow.** A soft ring of light at the opening, in the accent: a blurred square drawn in
-  a few passes and added over the scene, so the frame reads as an opening that light comes through
-  rather than as a hard outline.
 
 ### 81. The frame is a slim brushed-metal band, and the badge hangs outside it
 
@@ -2143,8 +2140,12 @@ otherwise clip the box below a whole number of cells.
   own greys (`--fg` mixed into `--ink`) rather than a colour, with a hairline on its inner edge. The
   ridge and the wider bands were tried and dropped: it reads better thin. Being opaque, it also masks
   the box's edges and whatever the camera's small lean would show past them.
-- **The badge hangs outside the frame's top-left corner.** It was tried inside the frame, in the text
-  column and under the bottom-right corner; outside the top-left is where the owner wanted it.
+- **The entrance glow is CSS, not WebGL.** The ring was built in the scene twice — a hard annulus,
+  then a blurred mask — and both sat one rectangle inside the frame and cost a plane and a texture.
+  It is an `inset` shadow on a wrapper inside the frame now: hard on the frame's inner edge, fading
+  inward, for nothing.
+- **The badge lives under the photo in `/me`.** It was tried inside the frame, over the headline, and
+  outside the frame's top-left corner; under the photo is where it settled.
 
 ### 82. The mark's motion and light
 

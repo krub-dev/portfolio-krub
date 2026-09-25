@@ -199,6 +199,7 @@ function clamp(value) {
 
       <!-- The frame: a slim brushed-metal band over the canvas. -->
       <div class="rim" aria-hidden="true" />
+      <div class="glow" aria-hidden="true" />
 
       <slot />
     </div>
@@ -231,11 +232,7 @@ function clamp(value) {
   height: 100%;
   border: 1px solid var(--line);
   background: radial-gradient(80% 80% at 50% 40%, var(--surface) 0%, var(--ink) 100%);
-  /*
-    Visible, not hidden: the canvas is clipped by `.scene` below, and the stage
-    has to let the availability badge sit outside its top-left corner.
-  */
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -288,6 +285,20 @@ function clamp(value) {
     )
     1;
   box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/*
+  The entrance glow, in CSS: an inset shadow inside the frame, hard on its inner
+  edge and fading to nothing inward, so it reads as light coming through the
+  opening. No WebGL for this, so it costs nothing.
+*/
+.glow {
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 10px 0 color-mix(in srgb, var(--acc-solid) 75%, transparent),
+    inset 0 0 70px 14px color-mix(in srgb, var(--acc-solid) 38%, transparent);
 }
 
 /* The scene fills the stage and sits over the fallback. `overflow: hidden` clips

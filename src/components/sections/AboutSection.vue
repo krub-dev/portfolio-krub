@@ -11,6 +11,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../base/BaseButton.vue'
+import AvailabilityBadge from '../base/AvailabilityBadge.vue'
 import SectionHeading from '../base/SectionHeading.vue'
 import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
@@ -156,6 +157,7 @@ function onTouchEnd(event) {
 
       <div class="photo-wrap" data-pfp-wrap>
         <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
+        <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
       </div>
     </div>
   </section>
@@ -290,6 +292,11 @@ function onTouchEnd(event) {
   object-fit: cover;
   border-radius: 18px;
   border: 1px solid var(--line);
+}
+
+/* Under the photo, and only as wide as its own text. */
+.availability {
+  align-self: flex-start;
 }
 
 @media (max-width: 900px) {
