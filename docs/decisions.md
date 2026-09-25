@@ -2139,6 +2139,14 @@ otherwise clip the box below a whole number of cells.
   cut where the tunnel closed. It also sits close behind the mark for the same reason — further back it
   projected to little more than the mark's own width, and its falloff, with nothing to spread it over,
   read as an edge rather than as a shadow.
+- **The fog has modes** (`off`, `near`, `far`, `haze`, the lab switches them). Measuring settled what
+  each one can do: fading to `--ink` can only ever darken the far end by the 8/255 that separates
+  `--ink` from `--surface` in the dark theme, so `near` and `far` differ by about 1.5/255 and the end
+  reads as a hole either way. **`haze` is the one that changes the character**: the same fog built from
+  `--fg` mixed into `--ink` sits *above* the background, so the far end reads as mist with light in it
+  rather than as a hole. The mix is done in hex by hand, because what the browser computes for
+  `color-mix` serialises as `color(srgb …)` and Three's `Color.set` does not parse that — it warns and
+  keeps the colour it had, which is how the first attempt at the haze silently did nothing.
 
 ### 81. The frame is a slim brushed-metal band, and the badge hangs outside it
 
@@ -2209,10 +2217,11 @@ otherwise clip the box below a whole number of cells.
   the mark were there — and it hid the entrance fade, because the room's walls are that same
   `--surface`. Flat, the slot is simply dark and the room arrives visibly.
 - **The scene eases up into the frame** rather than switching on. It builds asynchronously, so
-  without this it pops the instant it reports ready. Opacity alone was not enough against the old
-  background, so it comes with a small scale too — from 1.03 down to rest, which keeps the box's edges
-  behind the frame as it settles. The glow is held back until it is done, and reduced motion drops the
-  whole thing.
+  without this it pops the instant it reports ready — a plain CSS transition on the wrapper's opacity
+  and a small scale, nothing in the scene. It is deliberately **not** marked `data-motion="decorative"`:
+  a crossfade is not the continuous movement that setting asks to be rid of, and marking it meant the
+  whole entrance vanished for anyone with reduced motion on, leaving the pop it exists to avoid. Only
+  the scale is dropped for them. The glow is held back until the fade is done.
 - **The composer was tried and dropped.** A bloom and a film grain were built on
   `@tresjs/post-processing` and compared in `/logo-lab`; at any strength worth noticing the bloom read
   as too heavy on the polished metal, and the grain — whose only knob is `premultiply` — as sand

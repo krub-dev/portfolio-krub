@@ -45,6 +45,8 @@ const props = defineProps({
   logo: { type: Boolean, default: true },
   // Same, for the halo the rig puts behind the mark.
   halo: { type: Boolean, default: true },
+  // How the tunnel fades out with depth.
+  fog: { type: String, default: 'far' },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -151,7 +153,7 @@ requestAnimationFrame(() => requestAnimationFrame(build))
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
       <TresDirectionalLight :position="[120, 160, 200]" :intensity="1" />
 
-      <SceneRig :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" />
+      <SceneRig :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" :fog="props.fog" />
 
       <LogoModel
         v-if="geometry"

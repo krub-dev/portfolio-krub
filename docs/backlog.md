@@ -222,13 +222,13 @@ change, and making the repository public.
   the bundle. `LogoModel` already builds from `props.geometry` with a note to take the mesh from a
   loaded scene. Watch the scale and the orientation (the SVG's y-down flip disappears) and keep our
   own material, light and environment.
-- [ ] **The tunnel's far end is a black void, and it reads as bad lighting.** The fog fades to `--ink`
-  on purpose so the tunnel has no bottom to see (decision 80), but in the dark theme that lands as a
-  dark blob in the middle of the grid; the halo adds a defined ring around it, where the fog has not
-  arrived yet. Measured: switching the halo off brightens the mid-distance walls but leaves the middle
-  untouched, because `--ink` over an already `--ink` far end is nothing. The levers are the fog —
-  start it further out, make it a haze rather than the page's background, or put a light at the end so
-  the cavity looks lit rather than empty.
+- [ ] **The tunnel's far end reads as a black void.** Fading to `--ink` can only darken the end by the
+  8/255 that separates it from `--surface` in the dark theme, so `near` and `far` differ by about
+  1.5/255 and the end lands as a hole rather than as depth (measured). The `haze` fog mode answers it —
+  the same fog built from `--fg` mixed into `--ink` sits above the background, and the end rises to a
+  grey mist (12 to 33 on the same measurement) — but its boundary is still a fairly square cut where
+  the walls have not fogged yet, and how strong the mix should be is unsettled. Tune `HAZE_MIX` and the
+  mode's reach, or find a shape that does not read as a lit panel at the end of the tunnel.
 
 ## Mobile and responsive
 

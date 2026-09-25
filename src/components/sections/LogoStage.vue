@@ -42,6 +42,8 @@ const props = defineProps({
   logo: { type: Boolean, default: true },
   ring: { type: Boolean, default: true },
   halo: { type: Boolean, default: true },
+  // How the tunnel fades out with depth. See SceneRig for the modes and why.
+  fog: { type: String, default: 'far' },
   // The lab puts stages side by side and does not want them walking themselves
   // onto the page's grid.
   snap: { type: Boolean, default: true },
@@ -82,7 +84,7 @@ const failed = ref(!webglSupported())
 const BEAT_MS = 500
 // Must agree with the .scene transition in the stylesheet — the glow is held
 // back until the fade is done, so a mismatch strikes over a half-arrived mark.
-const FADE_MS = 900
+const FADE_MS = 1200
 const armed = ref(false)
 let armFrameA = 0
 let armFrameB = 0
@@ -273,7 +275,6 @@ function clamp(value) {
         v-if="!failed"
         class="scene"
         :class="{ fade: props.entrance === 'fade', shown: ready }"
-        data-motion="decorative"
         aria-hidden="true"
       >
         <Suspense>
@@ -285,6 +286,7 @@ function clamp(value) {
             :reset="resetToken"
             :logo="props.logo"
             :halo="props.halo"
+            :fog="props.fog"
             @ready="ready = true"
           />
         </Suspense>
@@ -525,18 +527,28 @@ function clamp(value) {
   the frame — and it goes the right way, from larger to rest, so the box's edges
   stay out of sight behind the frame the whole time.
 
+  Not marked `data-motion="decorative"` on purpose: a crossfade is not the
+  continuous movement that setting asks to be rid of, and marking it meant the
+  whole entrance disappeared for anyone with it on, leaving the pop it exists to
+  avoid. Only the scale is dropped for reduced motion.
+
   The duration has to agree with FADE_MS in the script, which is what holds the
-  glow back until it is done. Marked decorative, so reduced motion drops it and
-  the scene simply appears.
+  glow back until it is done.
 */
 .scene.fade {
   opacity: 0;
   transform: scale(1.03);
-  transition: opacity 0.9s ease, transform 0.9s ease;
+  transition: opacity 1.2s ease, transform 1.2s ease;
 }
 
 .scene.fade.shown {
   opacity: 1;
   transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene.fade {
+    transform: none;
+  }
 }
 </style>

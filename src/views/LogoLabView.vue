@@ -41,6 +41,16 @@ const variant = computed(() => VARIANTS.find((item) => item.id === pick.value))
 // Bumping the key remounts the stage, so the entrance plays again.
 const round = ref(0)
 
+// How the tunnel fades out with depth. See SceneRig for what each one means.
+const FOG_MODES = [
+  { id: 'off', label: 'Off' },
+  { id: 'near', label: 'Near' },
+  { id: 'far', label: 'Far' },
+  { id: 'haze', label: 'Haze' },
+]
+
+const fogMode = ref('far')
+
 // Live switches, so the stage is not remounted while they are flipped.
 const showLogo = ref(true)
 const showRing = ref(true)
@@ -71,20 +81,39 @@ const showHalo = ref(true)
       </div>
     </header>
 
-    <div class="options">
-      <button
-        v-for="item in VARIANTS"
-        :key="item.id"
-        class="option"
-        type="button"
-        :class="{ on: pick === item.id }"
-        @click="pick = item.id"
-      >
-        {{ item.label }}
-      </button>
+    <div class="row">
+      <span class="row-label">Entrance</span>
+      <div class="options">
+        <button
+          v-for="item in VARIANTS"
+          :key="item.id"
+          class="option"
+          type="button"
+          :class="{ on: pick === item.id }"
+          @click="pick = item.id"
+        >
+          {{ item.label }}
+        </button>
+      </div>
     </div>
 
     <p class="option-note">{{ variant.note }}</p>
+
+    <div class="row">
+      <span class="row-label">Fog</span>
+      <div class="options">
+        <button
+          v-for="mode in FOG_MODES"
+          :key="mode.id"
+          class="option"
+          type="button"
+          :class="{ on: fogMode === mode.id }"
+          @click="fogMode = mode.id"
+        >
+          {{ mode.label }}
+        </button>
+      </div>
+    </div>
 
     <div class="stage-wrap">
       <LogoStage
@@ -93,6 +122,7 @@ const showHalo = ref(true)
         :logo="showLogo"
         :ring="showRing"
         :halo="showHalo"
+        :fog="fogMode"
         :snap="false"
       />
     </div>
@@ -171,11 +201,25 @@ const showHalo = ref(true)
   border-color: var(--acc);
 }
 
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.row-label {
+  min-width: 74px;
+  font: 500 11px var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
 .options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  max-width: 560px;
 }
 
 .option {

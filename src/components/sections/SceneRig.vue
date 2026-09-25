@@ -19,7 +19,7 @@
   The texture and the fog are read from the theme tokens and rebuilt when
   `data-theme` or `data-accent` changes.
 */
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
 import {
   BufferGeometry,
@@ -39,6 +39,8 @@ const props = defineProps({
   camZ: { type: Number, required: true },
   // The lab switches the halo off to see the tunnel without it.
   halo: { type: Boolean, default: true },
+  // How the tunnel fades out with depth. See FOG_MODES.
+  fog: { type: String, default: 'far' },
 })
 
 // The box's opening is cut to land exactly on the stage: at its distance the
@@ -60,10 +62,29 @@ const ROOM_DEPTH = 700
 // sit so its opening still lands on OPENING_Z.
 const k = computed(() => (props.camZ - OPENING_Z) / (BASE_CAM_Z - OPENING_Z))
 const roomZ = computed(() => OPENING_Z - (k.value * ROOM_DEPTH) / 2)
-// Just behind the mark the fog starts, and it has blacked the far wall well
-// before the box ends, so the tunnel has no bottom to see.
-const FOG_NEAR = 240
-const FOG_FAR = 560
+/*
+  How the tunnel fades out with depth.
+
+  - `off` is the tunnel with nothing between it and the page.
+  - `near` is where it started: the darkening begins just past the mark and is
+    complete well before the far wall, so the far end arrives on screen as a
+    defined dark shape in the middle of the grid — a hole rather than a depth.
+  - `far` starts deep and is only complete past the wall, so what you see is the
+    tunnel getting dark rather than a blob appearing.
+  - `haze` is the one that changes the character rather than the distance. The
+    first three fade to `--ink`, which in the dark theme is only 8/255 from the
+    walls, so they can darken the end but never lift it; a haze built from the
+    theme's own `--fg` mixed into `--ink` sits above the background, and the far
+    end reads as mist with light in it rather than as a hole.
+*/
+const FOG_MODES = {
+  off: null,
+  near: { near: 240, far: 560 },
+  far: { near: 430, far: 900 },
+  haze: { near: 430, far: 900, haze: true },
+}
+// How much of the theme's `--fg` goes into the haze, per cent.
+const HAZE_MIX = 22
 // The lean, sized to the frame: the opening is the stage, so a bigger one would
 // pull its edge out from under the frame's band.
 // The lean, sized to the slim frame: the band is 12px, and a bigger one would
@@ -103,8 +124,30 @@ function tokens() {
   return {
     surface: read('--surface', '#141416'),
     ink: read('--ink', '#0c0c0d'),
+    fg: read('--fg', '#f2f3f2'),
     grid: read('--line', 'rgba(255,255,255,.11)'),
   }
+}
+
+/*
+  A straight mix of two theme values, in hex. `color-mix` was the obvious route
+  and it does not work here: what the browser computes for it serialises as
+  `color(srgb …)`, and Three's `Color.set` does not parse that — it warns and
+  leaves the colour it had, so the haze silently came out as the plain fog.
+*/
+function mixHex(a, b, percentA) {
+  const parse = (value) => {
+    const hex = value.trim().replace('#', '')
+    if (!/^[0-9a-f]{3}$|^[0-9a-f]{6}$/i.test(hex)) return null
+    const full = hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex
+    return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16))
+  }
+  const one = parse(a)
+  const two = parse(b)
+  if (!one || !two) return b
+  const weight = percentA / 100
+  const channel = (i) => Math.round(one[i] * weight + two[i] * (1 - weight))
+  return `#${[0, 1, 2].map((i) => channel(i).toString(16).padStart(2, '0')).join('')}`
 }
 
 /*
@@ -207,13 +250,25 @@ function buildRoom() {
 }
 
 function buildFog() {
-  const { ink } = tokens()
+  const { ink, fg } = tokens()
+  const mode = FOG_MODES[props.fog] ?? FOG_MODES.far
+  if (!mode) {
+    scene.value.fog = null
+    return
+  }
+  const colour = mode.haze ? mixHex(fg, ink, HAZE_MIX) : ink
   if (!scene.value.fog) {
-    scene.value.fog = new Fog(ink, FOG_NEAR, FOG_FAR)
+    scene.value.fog = new Fog(colour, mode.near, mode.far)
   } else {
-    scene.value.fog.color.set(ink)
+    scene.value.fog.color.set(colour)
+    scene.value.fog.near = mode.near
+    scene.value.fog.far = mode.far
   }
 }
+
+// The lab flips this while the stage is up, so the whole fog is rebuilt, not just
+// recoloured.
+watch(() => props.fog, buildFog)
 
 /*
   The halo is a white radial mask; its colour is the page's own background, set
