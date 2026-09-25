@@ -306,19 +306,16 @@ function onTouchEnd(event) {
 }
 
 /*
-  The badge, in a chip in the photo's top-left corner. Its radius is the photo's,
-  so its corner sits exactly on the photo's own, and the blur keeps the label
-  readable over whatever the picture has there.
+  Over the photo, no chip: just the dot and the label, inside the top-left
+  corner. The shadow is what keeps them legible against whatever the picture has
+  there — the busy artwork in this one.
 */
 .availability {
   position: absolute;
   z-index: 1;
-  top: 0;
-  left: 0;
-  padding: 7px 13px 7px 9px;
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--ink) 74%, transparent);
-  backdrop-filter: blur(6px);
+  top: 14px;
+  left: 16px;
+  filter: drop-shadow(0 1px 2px var(--ink));
 }
 
 @media (max-width: 900px) {

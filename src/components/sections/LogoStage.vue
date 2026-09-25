@@ -311,8 +311,8 @@ function clamp(value) {
   inset: 12px;
   pointer-events: none;
   box-shadow:
-    inset 0 0 10px 0 color-mix(in srgb, var(--acc-solid) 90%, transparent),
-    inset 0 0 70px 14px color-mix(in srgb, var(--acc-solid) 55%, transparent);
+    inset 0 0 12px 1px color-mix(in srgb, var(--acc-solid) 100%, transparent),
+    inset 0 0 90px 20px color-mix(in srgb, var(--acc-solid) 82%, transparent);
   animation: glowBreathe 5.5s ease-in-out infinite;
 }
 
