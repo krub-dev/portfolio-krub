@@ -264,7 +264,8 @@ It is measured and snapped by `LogoStage`, since it depends on the viewport (dec
 `--line`, a flat `--ink` fill — only seen while the scene builds or if it fails — a slim brushed-metal
 frame over the canvas, whose sheen carries round its corners, and inside it a CSS entrance glow — hard
 on the frame's inner edge, fading inward (decision 81). A vignette that faded the grid into the metal
-was tried and dropped (decision 84).
+was tried and dropped (decision 84), and the opening starts closed behind a CSS roller blind that a
+click lifts and leaves up (decision 86).
 The whole stage is magnetic, and only the logo inside it turns. Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal

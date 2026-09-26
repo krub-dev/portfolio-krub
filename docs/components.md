@@ -48,11 +48,10 @@ App
 ├─ main (HomeView)
 │   ├─ HeroSection
 │   │   ├─ BrandName     (the animated KIKO / RUBIO reveal)
-│   │   ├─ LogoStage     (the stage; slot holds the badge — desktop only)
-│   │   │   ├─ LogoScene  (WebGL, lazy)
-│   │   │   │   ├─ SceneRig  (camera, room)
-│   │   │   │   └─ LogoModel (the mark)
-│   │   │   └─ AvailabilityBadge
+│   │   ├─ LogoStage     (the stage, its frame and its shutter; desktop only)
+│   │   │   └─ LogoScene  (WebGL, lazy)
+│   │   │       ├─ SceneRig  (camera, room)
+│   │   │       └─ LogoModel (the mark)
 │   │   └─ BaseButton ×2
 │   ├─ MarqueeBar
 │   ├─ AboutSection
@@ -254,13 +253,15 @@ copy, because the animation depends on where the word splits, so they are not in
 
 ### LogoStage
 The hero's square stage and the only thing on the page that turns in 3D. It owns the box, the 2D
-fallback mask, the frame that clips the canvas and the pointer gestures — a hover tilt and a drag
-spin that springs back — which it forwards to the scene as `tilt` / `spin` / `dragging`. It snaps
-its own box to the page's 72px grid (a square of whole cells, measured on mount and resize;
-decision 79) and draws the opaque frame over the canvas so the box's edges are covered (decision
-80). The scene is lazy (`defineAsyncComponent`), so Three never reaches the initial bundle, and
-`HeroSection` is what decides not to mount it below 900px (decision 37). The rotating glow that
-used to live here is gone (decision 71).
+fallback mask, the frame that clips the canvas, the shutter that opens it and the pointer gestures —
+a hover tilt and a drag spin that springs back — which it forwards to the scene as `tilt` / `spin` /
+`dragging`. It snaps its own box to the page's 72px grid (a square of whole cells, measured on mount
+and resize; decision 79) and draws the opaque frame over the canvas so the box's edges are covered
+(decision 80). The opening starts closed behind a roller blind of CSS slats — a real button, labelled
+from the locales, lifted once on a click and left up (decision 86) — and the entrance glow inside the
+frame ignites once the reveal is done (decisions 81 and 83); the rotating glow that used to live here
+is gone (decision 71). The scene is lazy (`defineAsyncComponent`), so Three never reaches the initial
+bundle, and `HeroSection` decides not to mount it below 900px (decision 37).
 
 ### LogoScene
 The `<TresCanvas>`: the light, the wheel-zoom (clamped, and it only takes the gesture while it can

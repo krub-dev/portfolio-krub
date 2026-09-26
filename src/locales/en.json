@@ -97,6 +97,7 @@
     "goToTestimonial": "Go to testimonial {n}",
     "goToProject": "Go to project {n}",
     "backToTop": "Back to top",
-    "openProject": "Open project: {name}"
+    "openProject": "Open project: {name}",
+    "raiseShutter": "Raise the shutter"
   }
 }

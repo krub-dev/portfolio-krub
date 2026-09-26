@@ -54,6 +54,8 @@ const fogMode = ref('far')
 const showLogo = ref(true)
 const showRing = ref(true)
 const showHalo = ref(true)
+// Off shows the stage as it was before the blind: the room already open.
+const showShutter = ref(true)
 </script>
 
 <template>
@@ -75,6 +77,10 @@ const showHalo = ref(true)
         <label class="toggle">
           <input v-model="showHalo" type="checkbox" />
           Halo
+        </label>
+        <label class="toggle">
+          <input v-model="showShutter" type="checkbox" />
+          Shutter
         </label>
         <button class="replay" type="button" @click="round++">Replay entrance</button>
       </div>
@@ -122,6 +128,7 @@ const showHalo = ref(true)
         :ring="showRing"
         :halo="showHalo"
         :fog="fogMode"
+        :shutter="showShutter"
         :snap="false"
       />
     </div>

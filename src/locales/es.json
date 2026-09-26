@@ -97,6 +97,7 @@
     "goToTestimonial": "Ir al testimonio {n}",
     "goToProject": "Ir al proyecto {n}",
     "backToTop": "Volver arriba",
-    "openProject": "Abrir proyecto: {name}"
+    "openProject": "Abrir proyecto: {name}",
+    "raiseShutter": "Subir la persiana"
   }
 }

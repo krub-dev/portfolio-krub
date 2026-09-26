@@ -29,9 +29,9 @@ new number to its range when a decision is appended.
 - **A UI pass — 70.** The testimonial dots, the grid cell off, scrollable tabs and the CTAs.
 - **Polish and accessibility — 71–74.** The cooler light grey and the glow gone, the one-quote
   vertical pager, the `/me` tabs as a real tablist, and the 24px dots with the live region.
-- **The hero's 3D stage — 75–85.** The mark as a real WebGL object, the room and its rig, the snap to
+- **The hero's 3D stage — 75–86.** The mark as a real WebGL object, the room and its rig, the snap to
   the page's grid, the frame and the glow, the mark's motion and light, the tube's ignition, the
-  shadow the frame casts into the tunnel, and how the render is finished.
+  shadow the frame casts into the tunnel, how the render is finished, and the shutter that opens it.
 
 ---
 
@@ -2170,13 +2170,18 @@ otherwise clip the box below a whole number of cells.
 - **The drag is constrained on both axes**, the vertical capped harder (0.45 rad against the
   horizontal's 1.1), and **cleared on release**: leaving the angles in place is what made a plain
   click snap the mark back to wherever it had last been orbited.
-- **The finish is a matcap** (`MeshMatcapMaterial` and one 128px texture), not a lit material. The
+- **The finish is a matcap** (`MeshMatcapMaterial` and one 256px texture), not a lit material. The
   lighting and the reflections are baked into the image, so there is no environment, no PMREM, no BRDF
   and no light in the scene at all: the directional light went with it, because the room was never lit
   either. It is the cheap route to a polished metal, and the mark barely moves, which is the case
-  matcaps are for. The image is neutral grey and the accent is multiplied over it by `material.color`,
-  so the matcap supplies the shading and the accent the hue.
-  Asset: `matcaps/128/3B3C3F_DAD9D5_929290_ABACA8-128px.png` from github.com/nidorx/matcaps.
+  matcaps are for.
+- **The matcap has to be high-key and low-contrast**, because the accent is multiplied over it by
+  `material.color`: every dark region it carries becomes a dark, desaturated patch once the accent
+  lands on it. The first one tried was dark (`3B3C3F` base) and 128px, and under a mark this large it
+  read as a low-resolution shadow rather than as metal — the magnified texture's own pixels showed as
+  blotches. The one in use is 256px, its brightest stop near white and its darkest about 67%, so the
+  shading stays inside the accent's own range.
+  Asset: `matcaps/256/E6E6E6_AAAAAA_C4C4C4_CCCCCC-256px.png` from github.com/nidorx/matcaps.
 
 ### 83. The tube strikes once the scene is up
 
@@ -2236,3 +2241,27 @@ otherwise clip the box below a whole number of cells.
   main thread for around half a second. The fetch starts immediately and only the parse, extrude and
   weld wait two frames, so the frame is up first. When the mark arrives as a glTF this goes: a glTF
   is a fetch and a parse of precomputed buffers, which does not block.
+
+### 86. A shutter opens the stage, once, on a click
+
+**Date:** 2026-09-26 · **Status:** active
+
+- **The stage starts closed.** A roller blind of metal slats fills the opening and the room builds
+  behind it, which makes the blind a loading cover that is not a fake loader: something is genuinely
+  being built, and nobody is asked to watch a bar. A click lifts it and it stays up; after that the
+  stage is exactly what it was before, the mark turning under the pointer.
+- **The blind is CSS, not an image.** A generated picture of a shutter bakes the slats and the pull
+  into place and can only be slid around, never rolled; it is one resolution and one grey, so it
+  fights the theme. Drawn from `--fg` into `--ink` the way the frame is, the slats roll: each travels
+  up by its own height plus the ones above it, so they gather at the top instead of moving as a single
+  sheet, and the coiled bundle there grows as they arrive. Reduced motion keeps the reveal and drops
+  the roll.
+- **A click opens it; a drag does not.** The same surface later carries the mark that spins, so a
+  press that moved more than 6px is read as a drag and is not counted as the click. While the blind is
+  down the stage's own press handler returns early — there is nothing to turn under it — so the two
+  gestures never share the surface at once.
+- **It is a real button.** Focusable, and labelled from the locales (`a11y.raiseShutter`), so the
+  keyboard opens it too. Once up it is `aria-hidden`, out of the tab order and takes no pointer, and
+  the stage has its surface back.
+- **The glow waits for the reveal.** With the blind the reveal *is* the entrance: the tube strikes
+  after the blind lifts rather than after a fade that played where nobody could see it.

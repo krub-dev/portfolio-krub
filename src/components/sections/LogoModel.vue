@@ -6,8 +6,8 @@
   `useTresContext` and the environment all need the renderer the canvas
   provides, and calling them in the component that renders the canvas throws.
 
-  The finish is a matcap: a `MeshMatcapMaterial` and one small texture, with no
-  lights and no environment behind it. See the note above the material.
+  The finish is a matcap: a `MeshMatcapMaterial` and one texture, with no lights
+  and no environment behind it. See the note above the material.
 
   The mesh is built once and never rebuilt.
 
@@ -56,12 +56,17 @@ let smoothSpinY = 0
 
   The image is neutral grey on purpose: the mark's colour is the accent, applied
   by `material.color` over it, so the matcap supplies the shading and the accent
-  supplies the hue.
+  supplies the hue. It has to be high-key and low-contrast for that: a matcap
+  carries its shading baked in, so every dark region it has becomes a dark,
+  desaturated patch once the accent is multiplied over it, and a 128px image under
+  a mark this large shows its own pixels as blotches. This one is 256px, its
+  brightest stop near white and its darkest about 67%, so the shading stays inside
+  the accent's own range instead of pulling it toward black.
 
-  Asset: `matcaps/128/3B3C3F_DAD9D5_929290_ABACA8-128px.png` from
+  Asset: `matcaps/256/E6E6E6_AAAAAA_C4C4C4_CCCCCC-256px.png` from
   github.com/nidorx/matcaps.
 */
-const matcap = new TextureLoader().load('/assets/img/matcap-metal.png')
+const matcap = new TextureLoader().load('/assets/img/matcap-satin.png')
 matcap.colorSpace = SRGBColorSpace
 
 const material = new MeshMatcapMaterial({ matcap })

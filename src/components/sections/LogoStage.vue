@@ -22,8 +22,12 @@
   with it.
 */
 import { defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { usePointer } from '../../composables/usePointer'
+
+// The shutter is a real button, so its label has to come from the locales.
+const { t } = useI18n()
 
 /*
   The scene is lazy: TresJS and Three are a chunk of their own, and the stage is
@@ -47,6 +51,11 @@ const props = defineProps({
   // The lab puts stages side by side and does not want them walking themselves
   // onto the page's grid.
   snap: { type: Boolean, default: true },
+  /*
+    The shutter: a closed metal blind over the stage that lifts once, on a click,
+    and stays up. The lab turns it off to compare the stage with and without it.
+  */
+  shutter: { type: Boolean, default: true },
 })
 
 const MAX_SPIN = 1.1 // radians, about 63 degrees each way, horizontally
@@ -54,6 +63,10 @@ const MAX_SPIN_Y = 0.45 // and much less vertically: tipping it up and down read
 // The page's background grid. The box is sized and placed on whole cells of it.
 const GRID = 72
 const MAX_CELLS = 7
+// The blind's slats. Fixed, and flexed to fill the opening: the count only has to
+// be plausible at the sizes the stage takes (about 30 to 45px each), and a fixed
+// number keeps the stylesheet out of the measuring.
+const SLATS = 12
 
 const frame = ref(null)
 const stage = ref(null)
@@ -91,9 +104,48 @@ let armFrameB = 0
 let armTimer = 0
 let failTimer = 0
 
-watch([ready, failed], ([isReady, isFailed]) => {
+/*
+  The shutter, and whether it has been raised. It opens once and stays open: the
+  stage spends the rest of the visit as it always was, the mark turning under the
+  pointer.
+*/
+const revealed = ref(false)
+/*
+  A press that became a drag must not also lift the blind. The same surface holds
+  the mark that spins, so a click counts as a click only if the pointer barely
+  moved between press and release.
+*/
+const DRAG_SLOP = 6
+let shutterDownAt = null
+
+function onShutterDown(event) {
+  shutterDownAt = { x: event.clientX, y: event.clientY }
+}
+
+function onShutterClick(event) {
+  if (shutterDownAt) {
+    const moved = Math.hypot(event.clientX - shutterDownAt.x, event.clientY - shutterDownAt.y)
+    shutterDownAt = null
+    if (moved > DRAG_SLOP) return
+  }
+  revealed.value = true
+}
+
+/*
+  The glow waits for the reveal. With the shutter the reveal *is* the entrance —
+  the blind lifts and the tube strikes behind it — so it does not wait out the
+  fade, which played where nobody could see it. Without the shutter the fade is
+  still the thing the tube follows.
+*/
+watch([ready, failed, revealed], ([isReady, isFailed, isRevealed]) => {
   if (!isReady && !isFailed) return
-  const beat = props.entrance === 'fade' ? FADE_MS + BEAT_MS : BEAT_MS
+  if (props.shutter && !isRevealed) return
+  // Re-enterable now that the reveal is a third source: drop whatever the last
+  // pass scheduled before scheduling again.
+  cancelAnimationFrame(armFrameA)
+  cancelAnimationFrame(armFrameB)
+  clearTimeout(armTimer)
+  const beat = props.shutter || props.entrance !== 'fade' ? BEAT_MS : FADE_MS + BEAT_MS
   armFrameA = requestAnimationFrame(() => {
     armFrameB = requestAnimationFrame(() => {
       armTimer = window.setTimeout(() => (armed.value = true), beat)
@@ -222,6 +274,9 @@ usePointer((pointer) => {
 
 function onDown(event) {
   if (!stage.value) return
+  // The blind is over the mark: there is nothing to turn yet, and this press
+  // belongs to the shutter.
+  if (props.shutter && !revealed.value) return
   // A double press puts the view back: the mark straight and the zoom home. It
   // is read here rather than with `dblclick` because the drag captures the
   // pointer, which can keep the native event from landing.
@@ -292,6 +347,31 @@ function clamp(value) {
         </Suspense>
       </div>
 
+      <!--
+        The shutter: a closed metal blind over the stage. It lifts once, on a
+        click, and stays up, revealing the room behind it. A real button, so the
+        keyboard can open it too. Once it is up it stops taking the pointer and
+        the stage's own gestures take the surface back.
+      -->
+      <button
+        v-if="props.shutter"
+        class="shutter"
+        :class="{ open: revealed }"
+        type="button"
+        :aria-label="t('a11y.raiseShutter')"
+        :aria-hidden="revealed"
+        :tabindex="revealed ? -1 : 0"
+        @pointerdown="onShutterDown"
+        @click="onShutterClick"
+      >
+        <span class="roll" aria-hidden="true" />
+        <span class="slats" aria-hidden="true">
+          <span v-for="n in SLATS" :key="n" class="slat" :style="{ '--i': n - 1 }">
+            <span v-if="n === SLATS" class="handle" />
+          </span>
+        </span>
+      </button>
+
       <!-- The frame: a slim brushed-metal band over the canvas. -->
       <div class="rim" aria-hidden="true" />
       <div
@@ -359,6 +439,133 @@ function clamp(value) {
   -webkit-mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
   mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
   pointer-events: none;
+}
+
+/*
+  The shutter: a roller blind of metal slats across the opening, closed until a
+  click lifts it. Built in CSS rather than from an image so it can actually roll —
+  a picture bakes the slats and the pull into place and cannot lift — and so it is
+  drawn in the theme's own greys (`--fg` mixed into `--ink`), the way the frame is.
+
+  Two things make the movement read as a roll rather than as a panel sliding off:
+  each slat travels up by its own height plus the ones above it
+  (`(var(--i) + 1) * -100%`), so they gather at the top instead of moving as one
+  sheet, and the coiled bundle there — `.roll` — grows as they arrive. The stagger
+  is the delay, top slat first, which is the order they vanish in on a real blind.
+*/
+.shutter {
+  position: absolute;
+  inset: 12px;
+  display: block;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: var(--ink);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Up, so the opening belongs to the stage and its gestures again. Transparent at
+   once, because the reveal is the slats clearing, not a panel fading. */
+.shutter.open {
+  pointer-events: none;
+  background: transparent;
+}
+
+.slats {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/*
+  A slat: brushed metal with the face of a curved profile — bright at the top
+  edge, falling off through the middle, a thin reflection, then the dark seam
+  where it meets the next one. All of it `--fg` into `--ink`, so it follows the
+  theme the way the frame does.
+*/
+.slat {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--fg) 5%, transparent) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--fg) 30%, var(--ink)) 0%,
+      color-mix(in srgb, var(--fg) 15%, var(--ink)) 26%,
+      color-mix(in srgb, var(--fg) 3%, var(--ink)) 66%,
+      var(--ink) 88%,
+      color-mix(in srgb, var(--fg) 12%, var(--ink)) 92%,
+      var(--ink) 100%
+    );
+  transition: transform 1.05s cubic-bezier(0.65, 0, 0.35, 1) calc(var(--i) * 42ms);
+  will-change: transform;
+}
+
+.shutter.open .slat {
+  transform: translateY(calc((var(--i) + 1) * -100%));
+}
+
+/*
+  The pull, on the bottom slat: a bar in the same greys with a dark line under it,
+  so it reads as standing proud of the metal.
+*/
+.handle {
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 44px;
+  height: 9px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fg) 42%, var(--ink)),
+    color-mix(in srgb, var(--fg) 12%, var(--ink))
+  );
+  box-shadow:
+    0 1px 0 var(--ink),
+    inset 0 -1px 0 color-mix(in srgb, var(--fg) 20%, var(--ink));
+}
+
+/*
+  The coiled blind at the top: nothing while it is closed, a bar that grows as the
+  slats wind onto it. Its bottom edge carries the shadow the bundle drops on the
+  metal still hanging below it.
+*/
+.roll {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 0;
+  background: linear-gradient(
+    180deg,
+    var(--ink) 0%,
+    color-mix(in srgb, var(--fg) 14%, var(--ink)) 55%,
+    var(--ink) 100%
+  );
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--ink) 85%, transparent);
+  transition: height 1.05s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.shutter.open .roll {
+  height: 22px;
+}
+
+/* Reduced motion keeps the reveal but drops the roll: the blind is simply up. */
+@media (prefers-reduced-motion: reduce) {
+  .slat,
+  .roll {
+    transition: none;
+  }
 }
 
 /*
