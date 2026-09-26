@@ -64,9 +64,10 @@ const MAX_SPIN_Y = 0.45 // and much less vertically: tipping it up and down read
 const GRID = 72
 const MAX_CELLS = 7
 // The blind's slats. Fixed, and flexed to fill the opening: the count only has to
-// be plausible at the sizes the stage takes (about 30 to 45px each), and a fixed
-// number keeps the stylesheet out of the measuring.
-const SLATS = 12
+// be plausible at the sizes the stage takes, and a fixed number keeps the
+// stylesheet out of the measuring. Few and thick on purpose — the slats read as
+// bars of metal, and a dozen thin ones read as a texture instead.
+const SLATS = 8
 
 const frame = ref(null)
 const stage = ref(null)
@@ -347,11 +348,24 @@ function clamp(value) {
         </Suspense>
       </div>
 
+      <!-- The frame: a slim brushed-metal band over the canvas. -->
+      <div class="rim" aria-hidden="true" />
+      <div
+        v-if="props.ring"
+        class="glow"
+        :class="{ on: armed }"
+        data-motion="decorative"
+        aria-hidden="true"
+      />
+
       <!--
         The shutter: a closed metal blind over the stage. It lifts once, on a
         click, and stays up, revealing the room behind it. A real button, so the
         keyboard can open it too. Once it is up it stops taking the pointer and
         the stage's own gestures take the surface back.
+
+        Last in here on purpose: the blind paints over the glow, so the coil it
+        leaves at the top stays in front of the lit edge rather than behind it.
       -->
       <button
         v-if="props.shutter"
@@ -366,21 +380,11 @@ function clamp(value) {
       >
         <span class="roll" aria-hidden="true" />
         <span class="slats" aria-hidden="true">
-          <span v-for="n in SLATS" :key="n" class="slat" :style="{ '--i': n - 1 }">
+          <span v-for="n in SLATS" :key="n" class="slat">
             <span v-if="n === SLATS" class="handle" />
           </span>
         </span>
       </button>
-
-      <!-- The frame: a slim brushed-metal band over the canvas. -->
-      <div class="rim" aria-hidden="true" />
-      <div
-        v-if="props.ring"
-        class="glow"
-        :class="{ on: armed }"
-        data-motion="decorative"
-        aria-hidden="true"
-      />
 
       <slot />
     </div>
@@ -447,11 +451,9 @@ function clamp(value) {
   a picture bakes the slats and the pull into place and cannot lift — and so it is
   drawn in the theme's own greys (`--fg` mixed into `--ink`), the way the frame is.
 
-  Two things make the movement read as a roll rather than as a panel sliding off:
-  each slat travels up by its own height plus the ones above it
-  (`(var(--i) + 1) * -100%`), so they gather at the top instead of moving as one
-  sheet, and the coiled bundle there — `.roll` — grows as they arrive. The stagger
-  is the delay, top slat first, which is the order they vanish in on a real blind.
+  It lifts as one piece: the whole stack translates up out of the opening and the
+  coil at the top — `.roll` — grows as it goes. Only the stack moves, and the slats
+  keep their spacing, so they stay contiguous the way a sheet of metal does.
 */
 .shutter {
   position: absolute;
@@ -467,7 +469,7 @@ function clamp(value) {
 }
 
 /* Up, so the opening belongs to the stage and its gestures again. Transparent at
-   once, because the reveal is the slats clearing, not a panel fading. */
+   once, because the reveal is the stack clearing, not a panel fading. */
 .shutter.open {
   pointer-events: none;
   background: transparent;
@@ -478,39 +480,36 @@ function clamp(value) {
   flex-direction: column;
   width: 100%;
   height: 100%;
+  transition: transform 1.05s cubic-bezier(0.55, 0, 0.35, 1);
+  will-change: transform;
+}
+
+.shutter.open .slats {
+  transform: translateY(-100%);
 }
 
 /*
-  A slat: brushed metal with the face of a curved profile — bright at the top
-  edge, falling off through the middle, a thin reflection, then the dark seam
-  where it meets the next one. All of it `--fg` into `--ink`, so it follows the
-  theme the way the frame does.
+  A slat: one bar of the same metal as the frame, finished as a convex profile —
+  a bright top edge catching the light, the face falling away through the middle,
+  then the recess that meets the slat below. The recess is what gives the volume:
+  the foot of each slat is near `--ink` and the head of the next is bright, so the
+  groove between them is a dark line the frame's flat sheen has nowhere. Nothing
+  vertical is drawn on it: the fine vertical brushing read as corduroy, not metal,
+  and at this size it was the only thing the eye saw.
 */
 .slat {
   position: relative;
   flex: 1 1 0;
   min-height: 0;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--fg) 5%, transparent) 0 1px,
-      transparent 1px 3px
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--fg) 30%, var(--ink)) 0%,
-      color-mix(in srgb, var(--fg) 15%, var(--ink)) 26%,
-      color-mix(in srgb, var(--fg) 3%, var(--ink)) 66%,
-      var(--ink) 88%,
-      color-mix(in srgb, var(--fg) 12%, var(--ink)) 92%,
-      var(--ink) 100%
-    );
-  transition: transform 1.05s cubic-bezier(0.65, 0, 0.35, 1) calc(var(--i) * 42ms);
-  will-change: transform;
-}
-
-.shutter.open .slat {
-  transform: translateY(calc((var(--i) + 1) * -100%));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--fg) 40%, var(--ink)) 0%,
+    color-mix(in srgb, var(--fg) 24%, var(--ink)) 12%,
+    color-mix(in srgb, var(--fg) 10%, var(--ink)) 48%,
+    color-mix(in srgb, var(--fg) 2%, var(--ink)) 82%,
+    color-mix(in srgb, var(--fg) 16%, var(--ink)) 100%
+  );
+  box-shadow: inset 0 -1px 0 var(--ink);
 }
 
 /*
@@ -520,9 +519,9 @@ function clamp(value) {
 .handle {
   position: absolute;
   left: 50%;
-  bottom: 5px;
-  width: 44px;
-  height: 9px;
+  bottom: 7px;
+  width: 52px;
+  height: 10px;
   transform: translateX(-50%);
   border-radius: 2px;
   background: linear-gradient(
@@ -536,9 +535,8 @@ function clamp(value) {
 }
 
 /*
-  The coiled blind at the top: nothing while it is closed, a bar that grows as the
-  slats wind onto it. Its bottom edge carries the shadow the bundle drops on the
-  metal still hanging below it.
+  The coil at the top: nothing while it is closed, a bar that grows as the stack
+  winds onto it. Its lower edge drops a shadow on the metal still hanging below.
 */
 .roll {
   position: absolute;
@@ -549,20 +547,20 @@ function clamp(value) {
   background: linear-gradient(
     180deg,
     var(--ink) 0%,
-    color-mix(in srgb, var(--fg) 14%, var(--ink)) 55%,
+    color-mix(in srgb, var(--fg) 16%, var(--ink)) 55%,
     var(--ink) 100%
   );
   box-shadow: 0 3px 8px color-mix(in srgb, var(--ink) 85%, transparent);
-  transition: height 1.05s cubic-bezier(0.65, 0, 0.35, 1);
+  transition: height 1.05s cubic-bezier(0.55, 0, 0.35, 1);
 }
 
 .shutter.open .roll {
-  height: 22px;
+  height: 24px;
 }
 
 /* Reduced motion keeps the reveal but drops the roll: the blind is simply up. */
 @media (prefers-reduced-motion: reduce) {
-  .slat,
+  .slats,
   .roll {
     transition: none;
   }

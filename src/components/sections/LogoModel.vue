@@ -56,14 +56,16 @@ let smoothSpinY = 0
 
   The image is neutral grey on purpose: the mark's colour is the accent, applied
   by `material.color` over it, so the matcap supplies the shading and the accent
-  supplies the hue. It has to be high-key and low-contrast for that: a matcap
-  carries its shading baked in, so every dark region it has becomes a dark,
-  desaturated patch once the accent is multiplied over it, and a 128px image under
-  a mark this large shows its own pixels as blotches. This one is 256px, its
-  brightest stop near white and its darkest about 67%, so the shading stays inside
-  the accent's own range instead of pulling it toward black.
+  supplies the hue. Two things bound the choice: a dark matcap turns the accent
+  into dark, desaturated patches, and a very light one leaves the mark looking
+  flat. This one spans about 55% to 87% — enough range for the bevels and the walls
+  to read as metal, no black in it.
+  What no matcap can do here is shade the front face: the extrusion's front is one
+  normal from edge to edge, and a matcap samples by the normal alone, so that face
+  comes out flat. Only a material that reads the environment along the view vector
+  puts a gradient on it, which is the price of not carrying one.
 
-  Asset: `matcaps/256/E6E6E6_AAAAAA_C4C4C4_CCCCCC-256px.png` from
+  Asset: `matcaps/256/8D8D8D_DDDDDD_CCCCCC_B7B7B7-256px.png` from
   github.com/nidorx/matcaps.
 */
 const matcap = new TextureLoader().load('/assets/img/matcap-satin.png')

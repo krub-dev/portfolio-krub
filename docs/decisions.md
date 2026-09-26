@@ -2175,13 +2175,15 @@ otherwise clip the box below a whole number of cells.
   and no light in the scene at all: the directional light went with it, because the room was never lit
   either. It is the cheap route to a polished metal, and the mark barely moves, which is the case
   matcaps are for.
-- **The matcap has to be high-key and low-contrast**, because the accent is multiplied over it by
-  `material.color`: every dark region it carries becomes a dark, desaturated patch once the accent
-  lands on it. The first one tried was dark (`3B3C3F` base) and 128px, and under a mark this large it
-  read as a low-resolution shadow rather than as metal — the magnified texture's own pixels showed as
-  blotches. The one in use is 256px, its brightest stop near white and its darkest about 67%, so the
-  shading stays inside the accent's own range.
-  Asset: `matcaps/256/E6E6E6_AAAAAA_C4C4C4_CCCCCC-256px.png` from github.com/nidorx/matcaps.
+- **The matcap's range is the whole tuning, and its ceiling is the flat face.** The accent is
+  multiplied over it by `material.color`, so a dark matcap turns the accent into dark, desaturated
+  patches: the first, at a `3B3C3F` base and 128px, read as a low-resolution shadow. A very light one
+  fails the other way — high-key and low-contrast left the mark looking like flat paint. The reason is
+  the geometry: the extrusion's front face is one normal from edge to edge, and a matcap samples by the
+  normal alone, so that face is a single flat colour whatever the matcap holds. The one in use spans
+  about 55% to 87% — enough range for the bevels and the walls to read as metal, no black in it — and
+  the front face stays flat, which is the price of carrying no environment.
+  Asset: `matcaps/256/8D8D8D_DDDDDD_CCCCCC_B7B7B7-256px.png` from github.com/nidorx/matcaps.
 
 ### 83. The tube strikes once the scene is up
 
@@ -2252,10 +2254,15 @@ otherwise clip the box below a whole number of cells.
   stage is exactly what it was before, the mark turning under the pointer.
 - **The blind is CSS, not an image.** A generated picture of a shutter bakes the slats and the pull
   into place and can only be slid around, never rolled; it is one resolution and one grey, so it
-  fights the theme. Drawn from `--fg` into `--ink` the way the frame is, the slats roll: each travels
-  up by its own height plus the ones above it, so they gather at the top instead of moving as a single
-  sheet, and the coiled bundle there grows as they arrive. Reduced motion keeps the reveal and drops
-  the roll.
+  fights the theme. Drawn from `--fg` into `--ink` the way the frame is, the slats lift as one piece:
+  the whole stack translates up out of the opening and the coil at the top grows as it goes, so the
+  slats stay contiguous the way a sheet of metal does. Eight thick bars, not a dozen thin ones, and
+  nothing drawn across them — a fine vertical brushing read as corduroy rather than as metal. Each bar
+  is a convex profile (bright head, face falling away, near-`--ink` foot), so the groove between two of
+  them is a dark line the frame's flat sheen has nowhere, which is what gives the blind its volume.
+  Reduced motion keeps the reveal and drops the roll.
+- **The blind paints over the glow.** It is last inside the stage, so the coil it leaves at the top
+  stays in front of the lit edge instead of disappearing behind it.
 - **A click opens it; a drag does not.** The same surface later carries the mark that spins, so a
   press that moved more than 6px is read as a drag and is not counted as the click. While the blind is
   down the stage's own press handler returns early — there is nothing to turn under it — so the two
