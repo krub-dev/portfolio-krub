@@ -35,7 +35,7 @@ const VARIANTS = [
 ]
 
 // What the hero ships.
-const pick = ref('fade')
+const pick = ref('plain')
 const variant = computed(() => VARIANTS.find((item) => item.id === pick.value))
 
 // Bumping the key remounts the stage, so the entrance plays again.
@@ -52,7 +52,6 @@ const fogMode = ref('far')
 
 // Live switches, so the stage is not remounted while they are flipped.
 const showLogo = ref(true)
-const showRing = ref(true)
 const showHalo = ref(true)
 // Off shows the stage as it was before the blind: the room already open.
 const showShutter = ref(true)
@@ -77,10 +76,6 @@ function onExport() {
           Mark
         </label>
         <label class="toggle">
-          <input v-model="showRing" type="checkbox" />
-          Ring
-        </label>
-        <label class="toggle">
           <input v-model="showHalo" type="checkbox" />
           Halo
         </label>
@@ -88,7 +83,7 @@ function onExport() {
           <input v-model="showShutter" type="checkbox" />
           Shutter
         </label>
-        <button class="replay" type="button" @click="round++">Replay entrance</button>
+        <button class="replay" type="button" @click="round++">Replay</button>
         <button class="replay" type="button" @click="onExport">Export GLB</button>
       </div>
     </header>
@@ -133,7 +128,6 @@ function onExport() {
         :key="`${variant.id}-${round}`"
         :entrance="variant.entrance"
         :logo="showLogo"
-        :ring="showRing"
         :halo="showHalo"
         :fog="fogMode"
         :shutter="showShutter"

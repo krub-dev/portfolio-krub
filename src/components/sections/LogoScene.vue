@@ -184,7 +184,8 @@ defineExpose({ geometry, exportModel })
 
       <!-- Lights for the PBR material: ambient for base illumination, directional for volume. -->
       <TresAmbientLight :intensity="0.6" />
-      <TresDirectionalLight :position="[5, 5, 5]" :intensity="1.2" />
+      <TresDirectionalLight :position="[0, 0, 10]" :intensity="1.5" />
+      <TresDirectionalLight :position="[5, 5, 5]" :intensity="0.6" />
 
       <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" :fog="props.fog" />
 

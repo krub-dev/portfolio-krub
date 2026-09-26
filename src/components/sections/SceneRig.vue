@@ -59,7 +59,10 @@ const CELLS = 7
 const ROOM_HALF = (BASE_CAM_Z - OPENING_Z) * Math.tan((FOV / 2) * (Math.PI / 180))
 const CELL = (ROOM_HALF * 2) / CELLS
 const SPAN = CELL * CELLS
-const ROOM_DEPTH = 700
+// Reduced from 700 to 400 so the transverse lines are not as compressed by the
+// perspective transform. The tunnel still reads as deep, but the grid cells look
+// more square on screen instead of elongated.
+const ROOM_DEPTH = 400
 // The zoom: how much nearer the camera is than at rest, and where the box has to
 // sit so its opening still lands on OPENING_Z.
 const k = computed(() => (props.camZ - OPENING_Z) / (BASE_CAM_Z - OPENING_Z))

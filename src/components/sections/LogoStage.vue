@@ -39,9 +39,10 @@ const props = defineProps({
   /*
     How the scene arrives: `fade` comes up out of the dark, `none` switches on.
     The scene builds asynchronously, so without this it pops the moment it is
-    ready.
+    ready. Default is `none` — the fade was dropped because it reads as a delay
+    rather than as an entrance.
   */
-  entrance: { type: String, default: 'fade' },
+  entrance: { type: String, default: 'none' },
   // The lab switches these off to show what is behind what. On in the site.
   logo: { type: Boolean, default: true },
   ring: { type: Boolean, default: true },
@@ -559,25 +560,42 @@ defineExpose({ exportModel })
 }
 
 /*
-  The pull, on the bottom slat: a bar in the same greys with a dark line under it,
-  so it reads as standing proud of the metal.
+  The pull, on the bottom slat: a rounded bar with a subtle gradient and a small
+  notch in the middle, so it reads as a mechanical handle rather than as a plain
+  rectangle. The notch is a dark inset that breaks the symmetry and gives the
+  eye a place to land.
 */
 .handle {
   position: absolute;
   left: 50%;
-  bottom: 7px;
-  width: 52px;
-  height: 10px;
+  bottom: 8px;
+  width: 64px;
+  height: 12px;
   transform: translateX(-50%);
-  border-radius: 2px;
+  border-radius: 6px;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--fg) 42%, var(--ink)),
-    color-mix(in srgb, var(--fg) 12%, var(--ink))
+    color-mix(in srgb, var(--fg) 48%, var(--ink)),
+    color-mix(in srgb, var(--fg) 18%, var(--ink))
   );
   box-shadow:
-    0 1px 0 var(--ink),
-    inset 0 -1px 0 color-mix(in srgb, var(--fg) 20%, var(--ink));
+    0 2px 4px var(--cast),
+    inset 0 1px 0 var(--specular),
+    inset 0 -1px 0 var(--ink);
+}
+
+/* The notch: a small dark rectangle in the middle of the handle. */
+.handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 3px;
+  transform: translate(-50%, -50%);
+  background: var(--ink);
+  border-radius: 1px;
+  box-shadow: inset 0 1px 0 var(--cast);
 }
 
 /*
