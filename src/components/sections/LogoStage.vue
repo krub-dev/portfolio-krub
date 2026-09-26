@@ -480,6 +480,21 @@ function clamp(value) {
   flex-direction: column;
   width: 100%;
   height: 100%;
+  /*
+    The same metal as the frame — the very same stops at the same angle — laid over
+    the whole stack at once, so the sheen runs unbroken across the blind the way it
+    runs around the frame. A real blind is one sheet; the slats only press the
+    profile into it.
+  */
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--fg) 30%, var(--ink)) 0%,
+    color-mix(in srgb, var(--fg) 3%, var(--ink)) 15%,
+    color-mix(in srgb, var(--fg) 26%, var(--ink)) 33%,
+    color-mix(in srgb, var(--fg) 2%, var(--ink)) 50%,
+    color-mix(in srgb, var(--fg) 24%, var(--ink)) 68%,
+    color-mix(in srgb, var(--fg) 4%, var(--ink)) 100%
+  );
   transition: transform 1.05s cubic-bezier(0.55, 0, 0.35, 1);
   will-change: transform;
 }
@@ -489,13 +504,12 @@ function clamp(value) {
 }
 
 /*
-  A slat: one bar of the same metal as the frame, finished as a convex profile —
-  a bright top edge catching the light, the face falling away through the middle,
-  then the recess that meets the slat below. The recess is what gives the volume:
-  the foot of each slat is near `--ink` and the head of the next is bright, so the
-  groove between them is a dark line the frame's flat sheen has nowhere. Nothing
-  vertical is drawn on it: the fine vertical brushing read as corduroy, not metal,
-  and at this size it was the only thing the eye saw.
+  A slat: the pressed profile, laid over the sheet's metal rather than instead of
+  it. The head is the frame's own bright stop and the foot its dark one, each
+  fading out through the middle so the sheen reads between them, and the groove is
+  one bar's foot meeting the next one's head. Nothing vertical is drawn on it: the
+  fine vertical brushing read as corduroy, not metal, and at this size the eye saw
+  nothing else.
 */
 .slat {
   position: relative;
@@ -503,11 +517,10 @@ function clamp(value) {
   min-height: 0;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--fg) 40%, var(--ink)) 0%,
-    color-mix(in srgb, var(--fg) 24%, var(--ink)) 12%,
-    color-mix(in srgb, var(--fg) 10%, var(--ink)) 48%,
-    color-mix(in srgb, var(--fg) 2%, var(--ink)) 82%,
-    color-mix(in srgb, var(--fg) 16%, var(--ink)) 100%
+    color-mix(in srgb, var(--fg) 30%, var(--ink)) 0%,
+    transparent 26%,
+    transparent 58%,
+    color-mix(in srgb, var(--fg) 2%, var(--ink)) 100%
   );
   box-shadow: inset 0 -1px 0 var(--ink);
 }

@@ -2257,10 +2257,11 @@ otherwise clip the box below a whole number of cells.
   fights the theme. Drawn from `--fg` into `--ink` the way the frame is, the slats lift as one piece:
   the whole stack translates up out of the opening and the coil at the top grows as it goes, so the
   slats stay contiguous the way a sheet of metal does. Eight thick bars, not a dozen thin ones, and
-  nothing drawn across them — a fine vertical brushing read as corduroy rather than as metal. Each bar
-  is a convex profile (bright head, face falling away, near-`--ink` foot), so the groove between two of
-  them is a dark line the frame's flat sheen has nowhere, which is what gives the blind its volume.
-  Reduced motion keeps the reveal and drops the roll.
+  nothing drawn across them — a fine vertical brushing read as corduroy rather than as metal. The metal
+  is the frame's own gradient, the same stops at the same angle, laid over the whole stack at once so
+  the sheen runs unbroken the way it runs around the frame; each bar then presses a profile into it,
+  its head the frame's bright stop and its foot its dark one, so the groove between two bars is a dark
+  line the frame's flat sheen has nowhere. Reduced motion keeps the reveal and drops the roll.
 - **The blind paints over the glow.** It is last inside the stage, so the coil it leaves at the top
   stays in front of the lit edge instead of disappearing behind it.
 - **A click opens it; a drag does not.** The same surface later carries the mark that spins, so a
