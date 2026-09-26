@@ -133,6 +133,11 @@ function tokens() {
   The walls, built by hand so the grid is world-uniform: a BoxGeometry maps each
   face to 0..1, which would stretch the grid on the deeper walls, so the UVs are
   taken straight from the world position here instead.
+
+  The Z axis uses a perspective transform so the transverse lines (at constant Z)
+  are spaced in screen space rather than world space. This makes the interior grid
+  coincide with the page's grid when projected, instead of the lines bunching up
+  near the frame.
 */
 function buildRoomGeometry() {
   const near = ROOM_HALF
@@ -162,14 +167,28 @@ function buildRoomGeometry() {
     indices.push(base, base + 1, base + 2, base, base + 2, base + 3)
   }
 
+  // Perspective transform for Z: maps Z to a value that, when used as a UV,
+  // spaces the transverse lines uniformly in screen space.
+  const zToPersp = (z) => {
+    const vRaw = 1 / (z - BASE_CAM_Z)
+    const vMin = 1 / (zn - BASE_CAM_Z)
+    const vMax = 1 / (zf - BASE_CAM_Z)
+    return (vRaw - vMin) / (vMax - vMin)
+  }
+
   const xz = (c) => [c[0] / SPAN, c[2] / SPAN]
   const zy = (c) => [c[2] / SPAN, c[1] / SPAN]
   const xy = (c) => [c[0] / SPAN, c[1] / SPAN]
 
-  addQuad([NBL, NBR, FBR, FBL], xz) // floor
-  addQuad([NBR, NTR, FTR, FBR], zy) // right wall
-  addQuad([NTR, NTL, FTL, FTR], xz) // ceiling
-  addQuad([NTL, NBL, FBL, FTL], zy) // left wall
+  // Floor and ceiling: X linear, Z in perspective.
+  const xzPersp = (c) => [c[0] / SPAN, zToPersp(c[2])]
+  // Side walls: Z in perspective, Y linear.
+  const zyPersp = (c) => [zToPersp(c[2]), c[1] / SPAN]
+
+  addQuad([NBL, NBR, FBR, FBL], xzPersp) // floor
+  addQuad([NBR, NTR, FTR, FBR], zyPersp) // right wall
+  addQuad([NTR, NTL, FTL, FTR], xzPersp) // ceiling
+  addQuad([NTL, NBL, FBL, FTL], zyPersp) // left wall
   addQuad([FBL, FBR, FTR, FTL], xy) // far wall
 
   const geo = new BufferGeometry()

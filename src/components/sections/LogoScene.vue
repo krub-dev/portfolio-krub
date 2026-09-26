@@ -26,7 +26,8 @@
 */
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { TresCanvas, useTresContext } from '@tresjs/core'
-import { ExtrudeGeometry, PMREMGenerator } from 'three'
+import { ExtrudeGeometry, Mesh, PMREMGenerator } from 'three'
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
@@ -147,6 +148,33 @@ async function build() {
   precomputed buffers, which does not block.
 */
 requestAnimationFrame(() => requestAnimationFrame(build))
+
+/*
+  Export the geometry as a GLB file. This lets the owner take the exact mesh that
+  Three builds from the SVG and use it in Blender or any other tool, so the glTF
+  import later matches what is on screen now.
+*/
+function exportModel() {
+  if (!geometry.value) return
+  const exporter = new GLTFExporter()
+  const tempMesh = new Mesh(geometry.value)
+  exporter.parse(
+    tempMesh,
+    (result) => {
+      const blob = new Blob([result], { type: 'application/octet-stream' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'krub-logo.glb'
+      a.click()
+      URL.revokeObjectURL(url)
+    },
+    (error) => console.error('Export failed:', error),
+    { binary: true },
+  )
+}
+
+defineExpose({ geometry, exportModel })
 </script>
 
 <template>
@@ -155,8 +183,8 @@ requestAnimationFrame(() => requestAnimationFrame(build))
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
 
       <!-- Lights for the PBR material: ambient for base illumination, directional for volume. -->
-      <TresAmbientLight :intensity="0.4" />
-      <TresDirectionalLight :position="[5, 5, 5]" :intensity="0.8" />
+      <TresAmbientLight :intensity="0.6" />
+      <TresDirectionalLight :position="[5, 5, 5]" :intensity="1.2" />
 
       <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" :fog="props.fog" />
 

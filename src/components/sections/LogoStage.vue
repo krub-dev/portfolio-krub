@@ -71,6 +71,7 @@ const SLATS = 8
 
 const frame = ref(null)
 const stage = ref(null)
+const sceneRef = ref(null)
 const tilt = ref({ x: 0, y: 0 })
 const spin = ref(0)
 const spinY = ref(0)
@@ -313,6 +314,17 @@ function onUp(event) {
 function clamp(value) {
   return Math.max(-1, Math.min(1, value))
 }
+
+/*
+  Export the geometry as a GLB file. Delegates to LogoScene, which owns the
+  geometry and the exporter. The lab uses this to let the owner download the
+  exact mesh that Three builds from the SVG.
+*/
+function exportModel() {
+  sceneRef.value?.exportModel()
+}
+
+defineExpose({ exportModel })
 </script>
 
 <template>
@@ -335,6 +347,7 @@ function clamp(value) {
       >
         <Suspense>
           <LogoScene
+            ref="sceneRef"
             :tilt="tilt"
             :spin="spin"
             :spin-y="spinY"
@@ -728,10 +741,10 @@ function clamp(value) {
 @keyframes glowBreathe {
   0%,
   100% {
-    opacity: 1;
+    opacity: 0.85;
   }
   50% {
-    opacity: 0.72;
+    opacity: 0.6;
   }
 }
 

@@ -56,6 +56,12 @@ const showRing = ref(true)
 const showHalo = ref(true)
 // Off shows the stage as it was before the blind: the room already open.
 const showShutter = ref(true)
+
+const stageRef = ref(null)
+
+function onExport() {
+  stageRef.value?.exportModel()
+}
 </script>
 
 <template>
@@ -83,6 +89,7 @@ const showShutter = ref(true)
           Shutter
         </label>
         <button class="replay" type="button" @click="round++">Replay entrance</button>
+        <button class="replay" type="button" @click="onExport">Export GLB</button>
       </div>
     </header>
 
@@ -122,6 +129,7 @@ const showShutter = ref(true)
 
     <div class="stage-wrap">
       <LogoStage
+        ref="stageRef"
         :key="`${variant.id}-${round}`"
         :entrance="variant.entrance"
         :logo="showLogo"
