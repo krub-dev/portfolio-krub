@@ -572,7 +572,7 @@ defineExpose({ exportModel })
   width: 64px;
   height: 12px;
   transform: translateX(-50%);
-  border-radius: 6px;
+  border-radius: 3px;
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--fg) 48%, var(--ink)),
@@ -584,7 +584,8 @@ defineExpose({ exportModel })
     inset 0 -1px 0 var(--ink);
 }
 
-/* The notch: a small dark rectangle in the middle of the handle. */
+/* The notch: a small accent-coloured rectangle in the middle of the handle, with
+   a soft glow so it reads as a lit indicator rather than as a scratch. */
 .handle::after {
   content: '';
   position: absolute;
@@ -593,9 +594,9 @@ defineExpose({ exportModel })
   width: 16px;
   height: 3px;
   transform: translate(-50%, -50%);
-  background: var(--ink);
+  background: var(--acc-solid);
   border-radius: 1px;
-  box-shadow: inset 0 1px 0 var(--cast);
+  box-shadow: 0 0 6px 1px color-mix(in srgb, var(--acc-solid) 60%, transparent);
 }
 
 /*
