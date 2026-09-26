@@ -2257,11 +2257,21 @@ otherwise clip the box below a whole number of cells.
   fights the theme. Drawn from `--fg` into `--ink` the way the frame is, the slats lift as one piece:
   the whole stack translates up out of the opening and the coil at the top grows as it goes, so the
   slats stay contiguous the way a sheet of metal does. Eight thick bars, not a dozen thin ones, and
-  nothing drawn across them — a fine vertical brushing read as corduroy rather than as metal. The metal
-  is the frame's own gradient, the same stops at the same angle, laid over the whole stack at once so
-  the sheen runs unbroken the way it runs around the frame; each bar then presses a profile into it,
-  its head the frame's bright stop and its foot its dark one, so the groove between two bars is a dark
-  line the frame's flat sheen has nowhere. Reduced motion keeps the reveal and drops the roll.
+  nothing drawn across them — a fine vertical brushing read as corduroy rather than as metal. Reduced
+  motion keeps the reveal and drops the roll.
+- **A slat is flat sheet, and all of its depth is in the joint.** A first pass gave each bar a strong
+  vertical gradient, which made it read as a rounded tube, and reused the frame's own sheen, which left
+  the blind and the frame indistinguishable. The face is nearly flat now with one wide reflection lying
+  across its middle, and no lateral bevel or shadow, because a roller blind's depth is not in the leaf.
+  The joint is three rules: the crisp lit edge of the bar above, the hard three-pixel shadow that bar
+  drops on this one, and the dark recess where this one's foot meets the next. A dark groove with a
+  bright edge over it is the whole difference from the frame, whose sheen is soft and has no joints.
+- **The stack runs inside guide rails**: dark insets down both sides and across the head, nothing at
+  the foot where the frame's own edge is, painted over the bars (`::after`) so they hug them rather
+  than sit behind them. They fade with the reveal, because the rails are not what should be seen
+  through once the window is open.
+- **The coil is the wound sheet, not a bar.** Round-under, lit across its middle, with the edge of
+  every wrap as a fine line, so what the blind leaves at the head reads as metal rolled up.
 - **The blind paints over the glow.** It is last inside the stage, so the coil it leaves at the top
   stays in front of the lit edge instead of disappearing behind it.
 - **A click opens it; a drag does not.** The same surface later carries the mark that spins, so a

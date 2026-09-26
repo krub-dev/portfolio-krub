@@ -475,26 +475,34 @@ function clamp(value) {
   background: transparent;
 }
 
+/*
+  The guide rails the blind runs inside: dark insets down both sides and across the
+  head, nothing at the foot, because that is where the frame's own edge is. They
+  hug the stack rather than sitting behind it, so they paint over it — `::after`,
+  not `::before` — and they fade out with the reveal, since the rails of a window
+  are not what should be seen through once the window is open.
+*/
+.shutter::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 13px 0 11px -9px var(--ink),
+    inset -13px 0 11px -9px var(--ink),
+    inset 0 11px 11px -9px var(--ink);
+  transition: opacity 0.6s ease;
+}
+
+.shutter.open::after {
+  opacity: 0;
+}
+
 .slats {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  /*
-    The same metal as the frame — the very same stops at the same angle — laid over
-    the whole stack at once, so the sheen runs unbroken across the blind the way it
-    runs around the frame. A real blind is one sheet; the slats only press the
-    profile into it.
-  */
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--fg) 30%, var(--ink)) 0%,
-    color-mix(in srgb, var(--fg) 3%, var(--ink)) 15%,
-    color-mix(in srgb, var(--fg) 26%, var(--ink)) 33%,
-    color-mix(in srgb, var(--fg) 2%, var(--ink)) 50%,
-    color-mix(in srgb, var(--fg) 24%, var(--ink)) 68%,
-    color-mix(in srgb, var(--fg) 4%, var(--ink)) 100%
-  );
   transition: transform 1.05s cubic-bezier(0.55, 0, 0.35, 1);
   will-change: transform;
 }
@@ -504,25 +512,40 @@ function clamp(value) {
 }
 
 /*
-  A slat: the pressed profile, laid over the sheet's metal rather than instead of
-  it. The head is the frame's own bright stop and the foot its dark one, each
-  fading out through the middle so the sheen reads between them, and the groove is
-  one bar's foot meeting the next one's head. Nothing vertical is drawn on it: the
-  fine vertical brushing read as corduroy, not metal, and at this size the eye saw
-  nothing else.
+  A slat: flat sheet metal, side to side, cut flush — no lateral bevel and no
+  lateral shadow, because the depth of a roller blind is not in the leaf. The face
+  drifts a couple of steps from head to foot and catches one wide reflection lying
+  across its middle, which is the brushed aluminium.
+
+  The depth is all in the joint, drawn as three rules: the crisp lit edge of the
+  leaf above, the hard shadow that leaf drops three pixels onto this one, and the
+  dark recess where this leaf's foot meets the next. A dark groove with a bright
+  edge over it is the whole difference from the frame, whose sheen is soft and has
+  no joints at all.
 */
 .slat {
   position: relative;
   flex: 1 1 0;
   min-height: 0;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--fg) 30%, var(--ink)) 0%,
-    transparent 26%,
-    transparent 58%,
-    color-mix(in srgb, var(--fg) 2%, var(--ink)) 100%
-  );
-  box-shadow: inset 0 -1px 0 var(--ink);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--fg) 15%, transparent) 18%,
+      color-mix(in srgb, var(--fg) 22%, transparent) 50%,
+      color-mix(in srgb, var(--fg) 13%, transparent) 82%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--fg) 5%, var(--ink)) 0%,
+      color-mix(in srgb, var(--fg) 13%, var(--ink)) 48%,
+      color-mix(in srgb, var(--fg) 7%, var(--ink)) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--fg) 55%, var(--ink)),
+    inset 0 5px 3px -3px var(--ink),
+    inset 0 -1px 0 var(--ink);
 }
 
 /*
@@ -548,8 +571,11 @@ function clamp(value) {
 }
 
 /*
-  The coil at the top: nothing while it is closed, a bar that grows as the stack
-  winds onto it. Its lower edge drops a shadow on the metal still hanging below.
+  The coil: nothing while the blind is closed, a bundle that grows at the head as
+  the stack winds onto it. A cylinder of the same metal — light across its middle,
+  dark at its top and under its belly — with the edge of every wrap showing as a
+  fine line, so it reads as the sheet wound up rather than as a bar left hanging.
+  Rounded underside, and a shadow dropped on the metal still down the opening.
 */
 .roll {
   position: absolute;
@@ -557,18 +583,27 @@ function clamp(value) {
   right: 0;
   left: 0;
   height: 0;
-  background: linear-gradient(
-    180deg,
-    var(--ink) 0%,
-    color-mix(in srgb, var(--fg) 16%, var(--ink)) 55%,
-    var(--ink) 100%
-  );
-  box-shadow: 0 3px 8px color-mix(in srgb, var(--ink) 85%, transparent);
+  border-radius: 0 0 11px 11px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ink) 75%, transparent) 0%,
+      transparent 32%,
+      transparent 60%,
+      color-mix(in srgb, var(--ink) 80%, transparent) 100%
+    ),
+    repeating-linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--fg) 24%, var(--ink)) 0 1px,
+      var(--ink) 1px 3px,
+      color-mix(in srgb, var(--fg) 9%, var(--ink)) 3px 7px
+    );
+  box-shadow: 0 5px 9px -3px color-mix(in srgb, var(--ink) 90%, transparent);
   transition: height 1.05s cubic-bezier(0.55, 0, 0.35, 1);
 }
 
 .shutter.open .roll {
-  height: 24px;
+  height: 34px;
 }
 
 /* Reduced motion keeps the reveal but drops the roll: the blind is simply up. */
