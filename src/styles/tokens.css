@@ -57,6 +57,19 @@
   --sec-idx: 0.16;                    /* opacity of the giant section number */
 
   /*
+    Element-specific colours — exceptions to the theme rule.
+
+    --specular is a specular highlight on metal (light reflecting off the surface),
+    not a theme colour. It is white in both themes because a highlight that turned
+    dark in light theme would be a bug, not a feature.
+
+    --cast is a shadow (darkness), not a theme colour. It is dark in both themes
+    because a shadow that turned light in light theme would be a bug, not a feature.
+  */
+  --specular: rgba(255, 255, 255, 0.16);
+  --cast: rgba(0, 0, 0, 0.85);
+
+  /*
     The accent at its most saturated — the colour the light theme paints --acc
     with — kept the same in both themes. Limonacho uses it: the pale pastel the
     dark theme fills with washes him out, and he reads better as the theme's

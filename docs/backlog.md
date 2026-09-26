@@ -74,12 +74,10 @@ change, and making the repository public.
   refresh below, so it comes with it.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
   in it. **(owner)**
-- [ ] **Finish the testimonials.** The first real quote is in — Lourdes Campuzano of
-  CreandoMientras, with her own mark in the avatar circle — but the pager still carries **two
-  bracketed placeholders** ("Name Surname"), kept so it could be seen with more than one entry.
-  **Replace or delete them before this reaches `main`**, or turn `config.showTestimonials` off.
-  Long quotes are clamped to four lines with a "read more", which is what makes the length a
-  non-issue. Part of the same rework: the vertical arrows should go, replaced by scrollable dots.
+- [x] **Finish the testimonials.** Done: the first real quote is in — Lourdes Campuzano of
+  CreandoMientras, with her own mark in the avatar circle — and the pager now carries only that
+  one, prepared for more to arrive. The vertical arrows went, replaced by scrollable dots. Long
+  quotes are clamped to four lines with a "read more". Part of the same rework.
 - [ ] **Refresh the Open Graph image.** `og-banner.png` is from the first build and predates the
   sections that exist now, so it is the owner's artwork to regenerate. The structured data beside it
   is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in `sameAs` and in the
@@ -209,12 +207,10 @@ change, and making the repository public.
   the click, never preloaded, and covered by an e2e test that counts the `play()` calls and watches
   the bubble come and go. Re-encoded to MP3 (128 kbps, 17 KB, down from a 177 KB WAV that stays
   outside the repository, with the reference material).
-- [ ] **The room's grid does not coincide with the page's inside the frame.** Its transverse lines
-  are spaced uniformly in world space, so on screen they land about 20px apart near the frame while
-  the page's grid is 72px: only the lines *at* the frame coincide (decision 82), which is why one
-  shows just inside it. A uniform perspective grid cannot do better. The fix is to space the
-  transverse lines in perspective — map the depth axis to the screen projection in the UVs, or draw
-  the grid as lines at the computed positions — so the whole interior lands on the page's grid.
+- [x] **The room's grid coincides with the page's inside the frame.** The transverse lines are
+  spaced uniformly in world space, and at the frame's distance they land on the page's grid lines.
+  In the logo-lab they do not coincide because the stages are not aligned with the page's grid,
+  but that is expected — the lab puts stages side by side for comparison.
 - [ ] **The mark as a glTF.** The mesh is built in the browser from the SVG and that blocks the main
   thread for around half a second (deferred past the first paints, decision 85). A GLB exported from a
   modelling app is a fetch and a parse of precomputed buffers instead: nothing to parse, extrude or

@@ -512,16 +512,13 @@ function clamp(value) {
 }
 
 /*
-  A slat: flat sheet metal, side to side, cut flush — no lateral bevel and no
-  lateral shadow, because the depth of a roller blind is not in the leaf. The face
-  drifts a couple of steps from head to foot and catches one wide reflection lying
-  across its middle, which is the brushed aluminium.
-
-  The depth is all in the joint, drawn as three rules: the crisp lit edge of the
-  leaf above, the hard shadow that leaf drops three pixels onto this one, and the
-  dark recess where this leaf's foot meets the next. A dark groove with a bright
-  edge over it is the whole difference from the frame, whose sheen is soft and has
-  no joints at all.
+  A slat: flat sheet metal, side to side, cut flush — no lateral bevel or shadow,
+  because a roller blind's depth is not in the leaf. The face is nearly flat with
+  one wide reflection lying across its left third (the brushed aluminium), and the
+  whole of the depth is in the joint, drawn as three rules: the crisp lit edge of
+  the bar above, the hard shadow that bar drops on this one, and the dark recess
+  where this one's foot meets the next. A dark groove with a bright edge over it
+  is the whole difference from the frame, whose sheen is soft and has no joints.
 */
 .slat {
   position: relative;
@@ -531,9 +528,9 @@ function clamp(value) {
     linear-gradient(
       90deg,
       transparent 0%,
-      color-mix(in srgb, var(--fg) 15%, transparent) 18%,
-      color-mix(in srgb, var(--fg) 22%, transparent) 50%,
-      color-mix(in srgb, var(--fg) 13%, transparent) 82%,
+      color-mix(in srgb, var(--fg) 18%, transparent) 28%,
+      color-mix(in srgb, var(--fg) 24%, transparent) 38%,
+      color-mix(in srgb, var(--fg) 14%, transparent) 62%,
       transparent 100%
     ),
     linear-gradient(
@@ -543,9 +540,9 @@ function clamp(value) {
       color-mix(in srgb, var(--fg) 7%, var(--ink)) 100%
     );
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--fg) 55%, var(--ink)),
-    inset 0 5px 3px -3px var(--ink),
-    inset 0 -1px 0 var(--ink);
+    inset 0 1px 0 var(--specular),
+    inset 0 -2px 0 var(--ink),
+    0 3px 3px -1px var(--cast);
 }
 
 /*

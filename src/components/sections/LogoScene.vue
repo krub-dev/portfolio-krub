@@ -25,10 +25,11 @@
   stage and its grid on the page's, so the zoom moves the mark and nothing else.
 */
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
-import { TresCanvas } from '@tresjs/core'
-import { ExtrudeGeometry } from 'three'
+import { TresCanvas, useTresContext } from '@tresjs/core'
+import { ExtrudeGeometry, PMREMGenerator } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 
 import LogoModel from './LogoModel.vue'
 import SceneRig from './SceneRig.vue'
@@ -53,6 +54,7 @@ const props = defineProps({
 const emit = defineEmits(['ready'])
 
 const root = ref(null)
+const rig = ref(null)
 const geometry = shallowRef(null)
 const onScreen = ref(false)
 const zoom = ref(1)
@@ -152,7 +154,11 @@ requestAnimationFrame(() => requestAnimationFrame(build))
     <TresCanvas :fps-limit="24" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
 
-      <SceneRig :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" :fog="props.fog" />
+      <!-- Lights for the PBR material: ambient for base illumination, directional for volume. -->
+      <TresAmbientLight :intensity="0.4" />
+      <TresDirectionalLight :position="[5, 5, 5]" :intensity="0.8" />
+
+      <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" :fog="props.fog" />
 
       <LogoModel
         v-if="geometry"
@@ -163,6 +169,7 @@ requestAnimationFrame(() => requestAnimationFrame(build))
         :dragging="props.dragging"
         :running="onScreen && !reduced"
         :logo="props.logo"
+        :environment="rig?.environment"
       />
     </TresCanvas>
   </div>

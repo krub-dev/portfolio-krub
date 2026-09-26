@@ -6,8 +6,11 @@
   `useTresContext` and the environment all need the renderer the canvas
   provides, and calling them in the component that renders the canvas throws.
 
-  The finish is a matcap: a `MeshMatcapMaterial` and one texture, with no lights
-  and no environment behind it. See the note above the material.
+  The finish is PBR: a `MeshStandardMaterial` with the environment map from
+  SceneRig, so the metal reflects the room and the front face gets a gradient
+  instead of coming out flat. The matcap was cheaper but could not shade the
+  front face — it samples by the normal alone, and the front is one normal from
+  edge to edge.
 
   The mesh is built once and never rebuilt.
 
@@ -17,7 +20,7 @@
 */
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
-import { Group, Mesh, MeshMatcapMaterial, SRGBColorSpace, TextureLoader } from 'three'
+import { Group, Mesh, MeshStandardMaterial } from 'three'
 
 const props = defineProps({
   geometry: { type: Object, required: true },
@@ -30,6 +33,8 @@ const props = defineProps({
   // `v-if` on the primitive rather than by unmounting, so the material and the
   // generated environment survive the toggle.
   logo: { type: Boolean, default: true },
+  // The environment map from SceneRig, so the metal has something to reflect.
+  environment: { type: Object, default: null },
 })
 
 // How far the hover turns it, in radians. Wider than it was: the room's lean is
@@ -48,30 +53,22 @@ let smoothSpin = 0
 let smoothSpinY = 0
 
 /*
-  A matcap, not a lit material. `MeshMatcapMaterial` colours each pixel from a
-  texture read by the surface normal in view space — the lighting and the
-  reflections are baked into the image — so there is no environment, no PMREM, no
-  BRDF and no light reaching it at all. It is the cheap route to a polished metal,
-  and the mark barely moves, which is exactly the case matcaps are for.
+  PBR, not a matcap. `MeshStandardMaterial` with the environment map gives the
+  metal something to reflect, and the front face gets a gradient because the
+  material samples the environment along the view vector — not just by the
+  normal. The matcap was cheaper (~0.35 MB vs ~4 MB of PMREM render target) but
+  could not shade the front face: the extrusion's front is one normal from edge
+  to edge, and a matcap samples by the normal alone, so that face came out flat.
 
-  The image is neutral grey on purpose: the mark's colour is the accent, applied
-  by `material.color` over it, so the matcap supplies the shading and the accent
-  supplies the hue. Two things bound the choice: a dark matcap turns the accent
-  into dark, desaturated patches, and a very light one leaves the mark looking
-  flat. This one spans about 55% to 87% — enough range for the bevels and the walls
-  to read as metal, no black in it.
-  What no matcap can do here is shade the front face: the extrusion's front is one
-  normal from edge to edge, and a matcap samples by the normal alone, so that face
-  comes out flat. Only a material that reads the environment along the view vector
-  puts a gradient on it, which is the price of not carrying one.
-
-  Asset: `matcaps/256/8D8D8D_DDDDDD_CCCCCC_B7B7B7-256px.png` from
-  github.com/nidorx/matcaps.
+  The metalness is high (0.9) and the roughness low (0.25), so the mark reads as
+  polished metal. The environment map is the room from SceneRig, processed by
+  PMREMGenerator into a cubemap.
 */
-const matcap = new TextureLoader().load('/assets/img/matcap-satin.png')
-matcap.colorSpace = SRGBColorSpace
-
-const material = new MeshMatcapMaterial({ matcap })
+const material = new MeshStandardMaterial({
+  metalness: 0.9,
+  roughness: 0.25,
+  envMapIntensity: 1.2,
+})
 // The mark is the foreground: the tunnel's fog must not wash it out.
 material.fog = false
 
@@ -87,7 +84,16 @@ const { renderer } = useTresContext()
 const { onBeforeRender } = useLoop()
 
 onBeforeUnmount(() => material.dispose())
-onBeforeUnmount(() => matcap.dispose())
+
+// The environment map arrives asynchronously from SceneRig. When it does, the
+// material picks it up and starts reflecting the room.
+watch(
+  () => props.environment,
+  (env) => {
+    material.envMap = env
+    material.needsUpdate = true
+  },
+)
 
 watch(
   () => props.running,

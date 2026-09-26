@@ -28,9 +28,11 @@ import {
   Float32BufferAttribute,
   Fog,
   MeshBasicMaterial,
+  PMREMGenerator,
   RepeatWrapping,
   SRGBColorSpace,
 } from 'three'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 
 const props = defineProps({
   // Pointer position over the stage, normalised to -1..1, from LogoStage.
@@ -103,12 +105,13 @@ const backlightMesh = ref(null)
 const backlightColor = ref('#0c0c0d')
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-const { camera, scene } = useTresContext()
+const { camera, scene, renderer } = useTresContext()
 const { onBeforeRender } = useLoop()
 
 let observer = null
 let smoothX = 0
 let smoothY = 0
+let environment = null
 
 function makeCanvas(size) {
   const canvas = document.createElement('canvas')
@@ -293,6 +296,13 @@ onMounted(() => {
     attributes: true,
     attributeFilter: ['data-theme', 'data-accent'],
   })
+  
+  // PBR environment for the logo: a neutral room that gives the metal something
+  // to reflect. The PMREMGenerator processes the room into a cubemap that
+  // MeshStandardMaterial can sample.
+  const pmrem = new PMREMGenerator(renderer.value)
+  environment = pmrem.fromScene(new RoomEnvironment()).texture
+  pmrem.dispose()
 })
 
 onUnmounted(() => {
@@ -300,7 +310,10 @@ onUnmounted(() => {
   room.value?.dispose()
   roomGeo.value?.dispose()
   backlight.value?.dispose()
+  environment?.dispose()
 })
+
+defineExpose({ environment })
 
 buildRoomGeometry()
 buildBacklight()
