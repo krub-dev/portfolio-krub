@@ -1,29 +1,25 @@
 <script setup>
 /*
-  The extruded mark: its material, its colour and its movement.
+  The loaded GLB model: its materials, colours and movement.
 
   A child of LogoScene's <TresCanvas> on purpose — TresJS's `useLoop`,
   `useTresContext` and the environment all need the renderer the canvas
   provides, and calling them in the component that renders the canvas throws.
 
-  The finish is PBR: a `MeshStandardMaterial` with the environment map from
-  SceneRig, so the metal reflects the room and the front face gets a gradient
-  instead of coming out flat. The matcap was cheaper but could not shade the
-  front face — it samples by the normal alone, and the front is one normal from
-  edge to edge.
+  The finish is PBR: `MeshStandardMaterial` with the environment map from
+  SceneRig, so the metal reflects the room and the surfaces get gradients
+  instead of coming out flat.
 
-  The mesh is built once and never rebuilt.
-
-  When the real glTF arrives, the mesh is taken from the loaded scene instead of
-  built from `props.geometry`. Lights, environment, colour, movement and pause
-  stay.
+  The GLB contains two meshes (front and back). Each gets its own material so
+  they can be coloured independently — the front takes the accent, the back a
+  darker neutral.
 */
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
-import { Group, Mesh, MeshStandardMaterial } from 'three'
+import { Box3, Group, MeshStandardMaterial, Vector3 } from 'three'
 
 const props = defineProps({
-  geometry: { type: Object, required: true },
+  logoGroup: { type: Object, required: true },
   running: { type: Boolean, default: true },
   tilt: { type: Object, default: () => ({ x: 0, y: 0 }) },
   spin: { type: Number, default: 0 },
@@ -53,45 +49,89 @@ let smoothSpin = 0
 let smoothSpinY = 0
 
 /*
-  PBR, not a matcap. `MeshStandardMaterial` with the environment map gives the
-  metal something to reflect, and the front face gets a gradient because the
-  material samples the environment along the view vector — not just by the
-  normal. The matcap was cheaper (~0.35 MB vs ~4 MB of PMREM render target) but
-  could not shade the front face: the extrusion's front is one normal from edge
-  to edge, and a matcap samples by the normal alone, so that face came out flat.
-
-  The metalness is high (0.9) and the roughness low (0.25), so the mark reads as
-  polished metal. The environment map is the room from SceneRig, processed by
-  PMREMGenerator into a cubemap.
+  Two materials: the front face gets the accent colour (yellow by default), the
+  back gets a dark neutral. Both are polished metal (metalness 0.9, roughness
+  0.25) with the environment map from SceneRig so they reflect the room.
 */
-const material = new MeshStandardMaterial({
+const frontMaterial = new MeshStandardMaterial({
   metalness: 0.9,
   roughness: 0.25,
   envMapIntensity: 1.2,
 })
-// The mark is the foreground: the tunnel's fog must not wash it out.
-material.fog = false
+frontMaterial.fog = false
+
+const backMaterial = new MeshStandardMaterial({
+  color: '#2a2a2a',
+  metalness: 0.9,
+  roughness: 0.25,
+  envMapIntensity: 1.2,
+})
+backMaterial.fog = false
 
 const group = new Group()
-group.add(new Mesh(props.geometry, material))
-group.scale.set(1.95)
-// SVGLoader lays the shapes out in SVG space (y down), so they come out mirrored
-// in three's y-up world. This one flip puts the mark back the way it reads in
-// the favicon.
-group.scale.y = -1.95
+// The GLB scene is a Group with the meshes (possibly nested in sub-groups).
+// Walk the whole tree and reparent every mesh into our group.
+const meshes = []
+props.logoGroup.traverse((child) => {
+  if (child.isMesh) meshes.push(child)
+})
+
+console.log(
+  '[LogoModel] GLB meshes:',
+  meshes.map((m) => ({
+    name: m.name,
+    pos: m.position.toArray(),
+    scale: m.scale.toArray(),
+  })),
+)
+
+meshes.forEach((child) => {
+  if (child.name.toLowerCase().includes('back')) {
+    child.material = backMaterial
+  } else {
+    child.material = frontMaterial
+  }
+  // Reset per-mesh transforms so the group's scale/rotation is the only transform.
+  child.position.set(0, 0, 0)
+  child.rotation.set(0, 0, 0)
+  child.scale.set(1, 1, 1)
+  group.add(child)
+})
+
+// Center the group so the logo sits at the origin.
+const box = new Box3().setFromObject(group)
+const center = box.getCenter(new Vector3())
+group.position.sub(center)
+
+// Scale to fit the stage. The logo should occupy ~58% of the 504px stage ≈ 292px.
+// At FOV 40, Z 205, one Three unit ≈ 3.38px at Z=0. So we need ~86 units wide.
+const size = box.getSize(new Vector3())
+const targetWidth = 86
+const currentWidth = size.x || 1
+const s = targetWidth / currentWidth
+group.scale.set(s, s, s)
+// The GLB was exported with the logo lying flat (rotation X=90° applied in Blender).
+// Rotate -90° on X to stand it up facing the camera (+Z). No Y flip needed — the
+// GLB is already Y-up from Blender, unlike the SVG which was y-down.
+group.rotation.x = -Math.PI / 2
 
 const { renderer } = useTresContext()
 const { onBeforeRender } = useLoop()
 
-onBeforeUnmount(() => material.dispose())
+onBeforeUnmount(() => {
+  frontMaterial.dispose()
+  backMaterial.dispose()
+})
 
-// The environment map arrives asynchronously from SceneRig. When it does, the
-// material picks it up and starts reflecting the room.
+// The environment map arrives asynchronously from SceneRig. When it does, both
+// materials pick it up and start reflecting the room.
 watch(
   () => props.environment,
   (env) => {
-    material.envMap = env
-    material.needsUpdate = true
+    frontMaterial.envMap = env
+    frontMaterial.needsUpdate = true
+    backMaterial.envMap = env
+    backMaterial.needsUpdate = true
   },
 )
 
@@ -114,7 +154,7 @@ onBeforeUnmount(() => appearance.disconnect())
 readAccent()
 
 onBeforeRender(({ elapsed, delta }) => {
-  material.color.set(accent.value)
+  frontMaterial.color.set(accent.value)
 
   // The drag angle, then the magnetic return: held by the pointer while
   // dragging, easing back to zero the moment it is let go. On both axes.

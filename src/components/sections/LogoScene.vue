@@ -26,10 +26,8 @@
 */
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { TresCanvas, useTresContext } from '@tresjs/core'
-import { ExtrudeGeometry, Mesh, PMREMGenerator } from 'three'
-import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
-import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { PMREMGenerator } from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 
 import LogoModel from './LogoModel.vue'
@@ -56,12 +54,11 @@ const emit = defineEmits(['ready'])
 
 const root = ref(null)
 const rig = ref(null)
-const geometry = shallowRef(null)
+const logoGroup = shallowRef(null)
 const onScreen = ref(false)
 const zoom = ref(1)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-const DEPTH = 12
 const CAM_Z = 205
 const ZOOM_MIN = 0.82
 const ZOOM_MAX = 1.22
@@ -102,79 +99,22 @@ function onWheel(event) {
   zoom.value = clamped
 }
 
-// Away immediately, so the wait for it overlaps the work below rather than
-// holding it up.
-const svgText = fetch('/assets/img/krub-logo.svg').then((response) => response.text())
-
-async function build() {
-  const svg = await svgText
-  const paths = new SVGLoader().parse(svg).paths
-  const shapes = paths.flatMap((path) => SVGLoader.createShapes(path))
-
-  let built = new ExtrudeGeometry(shapes, {
-    depth: DEPTH,
-    // A hair of a bevel: enough to catch the light on the edge, small enough
-    // that the mark keeps the shape it has in the SVG.
-    bevelEnabled: true,
-    bevelThickness: 0.8,
-    bevelSize: 0.6,
-    bevelSegments: 2,
-    curveSegments: 24,
-  })
-
-  /*
-    Smooth the wall without rounding the edges. ExtrudeGeometry does not share
-    vertices between the segments of a curve, so every facet of the wall carries
-    its own normal and the polished metal shows each polygon. `mergeVertices`
-    alone does nothing here — it compares the whole vertex, normals included, and
-    they all differ. Dropping the normals first lets it weld by position, and the
-    recomputed normals average across the curve.
-  */
-  built.deleteAttribute('normal')
-  built = mergeVertices(built, 1e-3)
-  built.computeVertexNormals()
-  built.center()
-  geometry.value = built
+/*
+  Load the GLB model. The file lives at public/assets/model/krub-logo.glb and
+  contains two meshes (front and back) that LogoModel will address separately.
+  Loading a GLB is a fetch and a parse of precomputed buffers — it does not
+  block the main thread the way parsing an SVG and extruding it does.
+*/
+async function loadModel() {
+  const loader = new GLTFLoader()
+  const gltf = await loader.loadAsync('/assets/model/krub-logo.glb')
+  logoGroup.value = gltf.scene
   emit('ready')
 }
 
-/*
-  Two frames before the heavy half: parsing the SVG and extruding it blocks the
-  main thread — around half a second, measured — and the frame has no business
-  waiting on that. The fetch is already away and the room is built by SceneRig, so
-  what this defers is only the parse, the extrude and the weld.
+requestAnimationFrame(() => requestAnimationFrame(loadModel))
 
-  When the mark arrives as a glTF this goes: loading one is a fetch and a parse of
-  precomputed buffers, which does not block.
-*/
-requestAnimationFrame(() => requestAnimationFrame(build))
-
-/*
-  Export the geometry as a GLB file. This lets the owner take the exact mesh that
-  Three builds from the SVG and use it in Blender or any other tool, so the glTF
-  import later matches what is on screen now.
-*/
-function exportModel() {
-  if (!geometry.value) return
-  const exporter = new GLTFExporter()
-  const tempMesh = new Mesh(geometry.value)
-  exporter.parse(
-    tempMesh,
-    (result) => {
-      const blob = new Blob([result], { type: 'application/octet-stream' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'krub-logo.glb'
-      a.click()
-      URL.revokeObjectURL(url)
-    },
-    (error) => console.error('Export failed:', error),
-    { binary: true },
-  )
-}
-
-defineExpose({ geometry, exportModel })
+defineExpose({ logoGroup })
 </script>
 
 <template>
@@ -190,8 +130,8 @@ defineExpose({ geometry, exportModel })
       <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" :fog="props.fog" />
 
       <LogoModel
-        v-if="geometry"
-        :geometry="geometry"
+        v-if="logoGroup"
+        :logo-group="logoGroup"
         :tilt="props.tilt"
         :spin="props.spin"
         :spin-y="props.spinY"
