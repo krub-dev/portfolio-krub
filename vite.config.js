@@ -52,19 +52,7 @@ export default defineConfig(({ mode }) => {
   if (env.WEB3FORMS_KEY) process.env.WEB3FORMS_KEY = env.WEB3FORMS_KEY
 
   return {
-    plugins: [
-      vue({
-        template: {
-          compilerOptions: {
-            // TresJS registers components like TresMesh, TresPerspectiveCamera, etc.
-            // dynamically. Tell Vue to treat them as custom elements so it doesn't
-            // warn about "Failed to resolve component" for each one.
-            isCustomElement: (tag) => tag.startsWith('Tres'),
-          },
-        },
-      }),
-      contactEndpoint(),
-    ],
+    plugins: [vue(), contactEndpoint()],
 
     server: {
       // Bind to every network interface, not just localhost, so a phone on the
