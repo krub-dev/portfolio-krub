@@ -516,9 +516,9 @@ defineExpose({ exportModel })
   inset: 0;
   pointer-events: none;
   box-shadow:
-    inset 13px 0 11px -9px var(--metal-dark),
-    inset -13px 0 11px -9px var(--metal-dark),
-    inset 0 11px 11px -9px var(--metal-dark);
+    inset 13px 0 11px -9px rgba(0, 0, 0, 0.4),
+    inset -13px 0 11px -9px rgba(0, 0, 0, 0.4),
+    inset 0 11px 11px -9px rgba(0, 0, 0, 0.4);
   transition: opacity 0.6s ease;
 }
 
@@ -568,9 +568,9 @@ defineExpose({ exportModel })
       var(--metal) 100%
     );
   box-shadow:
-    inset 0 1px 0 var(--specular),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -2px 0 var(--metal-dark),
-    0 3px 3px -1px var(--cast);
+    0 4px 4px -1px rgba(0, 0, 0, 0.5);
 }
 
 /*
@@ -593,8 +593,8 @@ defineExpose({ exportModel })
     var(--metal-dark)
   );
   box-shadow:
-    0 2px 4px var(--cast),
-    inset 0 1px 0 var(--specular),
+    0 3px 5px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 var(--metal-dark);
 }
 
@@ -641,7 +641,7 @@ defineExpose({ exportModel })
       var(--metal-dark) 1px 3px,
       color-mix(in srgb, var(--fg) 9%, var(--metal-dark)) 3px 7px
     );
-  box-shadow: 0 5px 9px -3px color-mix(in srgb, var(--metal-dark) 90%, transparent);
+  box-shadow: 0 6px 10px -3px rgba(0, 0, 0, 0.5);
   transition: height 1.05s cubic-bezier(0.55, 0, 0.35, 1);
 }
 

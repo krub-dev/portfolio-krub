@@ -145,8 +145,8 @@
     so they don't read as too heavy on the cream page, but still dark enough to
     look like brushed metal rather than inverted.
   */
-  --metal: #8a8a8a;
-  --metal-dark: #4a4a4a;
+  --metal: #a8a8a8;
+  --metal-dark: #686868;
   /*
     The fog fades to this colour at the tunnel's far end. In the dark theme it
     matches --ink so the tunnel disappears into the page. In the light theme it
