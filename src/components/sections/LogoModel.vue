@@ -81,11 +81,11 @@ props.logoGroup.traverse((child) => {
 console.log('[LogoModel] GLB meshes:', meshes.length, meshes.map((m) => m.name))
 
 meshes.forEach((child, index) => {
-  // If there are exactly 2 meshes, first is front, second is back.
+  // If there are exactly 2 meshes, first is back, second is front (reverse order in GLB).
   // Otherwise, try to match by name.
   let isBack = false
   if (meshes.length === 2) {
-    isBack = index === 1
+    isBack = index === 0 // Reversed: GLB exports back first, front second
   } else {
     isBack = child.name.toLowerCase().includes('back')
   }
