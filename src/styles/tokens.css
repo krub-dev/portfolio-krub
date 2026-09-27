@@ -72,8 +72,6 @@
   */
   --specular: rgba(255, 255, 255, 0.16);
   --cast: rgba(0, 0, 0, 0.85);
-  --metal: #6a6a6a;
-  --metal-dark: #3a3a3a;
 
   /*
     The accent at its most saturated — the colour the light theme paints --acc
