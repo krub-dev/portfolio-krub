@@ -57,15 +57,16 @@ const frontMaterial = new MeshStandardMaterial({
   metalness: 0.9,
   roughness: 0.25,
   envMapIntensity: 1.2,
+  side: 2, // DoubleSide: prevent holes when viewed at angles
 })
 frontMaterial.fog = false
 
 const backMaterial = new MeshStandardMaterial({
-  color: '#4a4a4a',
+  color: '#888888', // Medium grey - lighter so it doesn't read as black through the letter holes
   metalness: 0.9,
   roughness: 0.25,
   envMapIntensity: 1.2,
-  side: 2, // DoubleSide: render both faces so there are no holes when viewed through the front mesh
+  side: 2, // DoubleSide: render both faces
 })
 backMaterial.fog = false
 
