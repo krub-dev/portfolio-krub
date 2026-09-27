@@ -49,20 +49,30 @@ let smoothSpin = 0
 let smoothSpinY = 0
 
 /*
-  One material for the whole model. Polished metal (metalness 0.9, roughness 0.25)
-  with the environment map from SceneRig so it reflects the room. The colour is
-  the accent, updated every frame from the CSS token.
+  Two materials: the front face gets the accent colour, the back gets a dark
+  neutral. Both are polished metal (metalness 0.9, roughness 0.25) with the
+  environment map from SceneRig so they reflect the room.
 */
-const material = new MeshStandardMaterial({
+const frontMaterial = new MeshStandardMaterial({
   metalness: 0.9,
   roughness: 0.25,
   envMapIntensity: 1.2,
 })
-material.fog = false
+frontMaterial.fog = false
+
+const backMaterial = new MeshStandardMaterial({
+  color: '#4a4a4a',
+  metalness: 0.9,
+  roughness: 0.25,
+  envMapIntensity: 1.2,
+  side: 2, // DoubleSide: render both faces so there are no holes when viewed through the front mesh
+})
+backMaterial.fog = false
 
 const group = new Group()
 // The GLB scene is a Group with the meshes (possibly nested in sub-groups).
-// Walk the whole tree and reparent every mesh into our group with the same material.
+// Walk the whole tree and reparent every mesh into our group, keeping their
+// relative transforms so the front and back stay in their correct positions.
 const meshes = []
 props.logoGroup.traverse((child) => {
   if (child.isMesh) meshes.push(child)
@@ -70,12 +80,22 @@ props.logoGroup.traverse((child) => {
 
 console.log('[LogoModel] GLB meshes:', meshes.length, meshes.map((m) => m.name))
 
-meshes.forEach((child) => {
-  child.material = material
-  // Reset per-mesh transforms so the group's scale/rotation is the only transform.
-  child.position.set(0, 0, 0)
-  child.rotation.set(0, 0, 0)
-  child.scale.set(1, 1, 1)
+meshes.forEach((child, index) => {
+  // If there are exactly 2 meshes, first is front, second is back.
+  // Otherwise, try to match by name.
+  let isBack = false
+  if (meshes.length === 2) {
+    isBack = index === 1
+  } else {
+    isBack = child.name.toLowerCase().includes('back')
+  }
+  
+  console.log(`[LogoModel] Mesh ${index}: "${child.name}" → ${isBack ? 'back (grey)' : 'front (accent)'}`)
+  
+  child.material = isBack ? backMaterial : frontMaterial
+  // Keep the mesh's local transform — do NOT reset to zero. The front and back
+  // meshes have different positions in the GLB, and resetting them would make
+  // them overlap.
   group.add(child)
 })
 
@@ -98,15 +118,20 @@ group.rotation.x = -Math.PI / 2
 const { renderer } = useTresContext()
 const { onBeforeRender } = useLoop()
 
-onBeforeUnmount(() => material.dispose())
+onBeforeUnmount(() => {
+  frontMaterial.dispose()
+  backMaterial.dispose()
+})
 
-// The environment map arrives asynchronously from SceneRig. When it does, the
-// material picks it up and starts reflecting the room.
+// The environment map arrives asynchronously from SceneRig. When it does, both
+// materials pick it up and start reflecting the room.
 watch(
   () => props.environment,
   (env) => {
-    material.envMap = env
-    material.needsUpdate = true
+    frontMaterial.envMap = env
+    frontMaterial.needsUpdate = true
+    backMaterial.envMap = env
+    backMaterial.needsUpdate = true
   },
 )
 
@@ -129,7 +154,7 @@ onBeforeUnmount(() => appearance.disconnect())
 readAccent()
 
 onBeforeRender(({ elapsed, delta }) => {
-  material.color.set(accent.value)
+  frontMaterial.color.set(accent.value)
 
   // The drag angle, then the magnetic return: held by the pointer while
   // dragging, easing back to zero the moment it is let go. On both axes.
