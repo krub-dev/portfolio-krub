@@ -72,6 +72,8 @@
   */
   --specular: rgba(255, 255, 255, 0.16);
   --cast: rgba(0, 0, 0, 0.85);
+  --metal: #7a7a7a;
+  --metal-dark: #3a3a3a;
 
   /*
     The accent at its most saturated — the colour the light theme paints --acc
@@ -136,6 +138,13 @@
   --mark: var(--acc-text);
   --grid: rgba(12, 12, 13, 0.05);
   --sec-idx: 0.62;
+  /*
+    Metal tokens for the shutter and frame. Slightly lighter than the dark theme
+    so they don't read as too heavy on the cream page, but still dark enough to
+    look like brushed metal rather than inverted.
+  */
+  --metal: #8a8a8a;
+  --metal-dark: #4a4a4a;
 }
 
 /* ---------------------------------------------------------------------------
