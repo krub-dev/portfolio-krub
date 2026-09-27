@@ -81,6 +81,12 @@ const ready = ref(false)
 // Bumped on a double press: LogoScene watches it to bring the zoom home.
 const resetToken = ref(0)
 /*
+  Gate the scene under navigator.webdriver. Playwright sets this flag, and when
+  four workers each hold a WebGL context the GPU stalls and timing tests fail.
+  With the scene off, the 2D mark shows instead and the tests pass.
+*/
+const isTestRunner = typeof navigator !== 'undefined' && navigator.webdriver
+/*
   The 2D mark is the failure state now, not the loading state. It used to paint
   first and fade out, which meant a flash of the flat logo on every load; now it
   is shown only if WebGL never comes up, so a load with a working scene never
@@ -88,12 +94,6 @@ const resetToken = ref(0)
 */
 const failed = ref(!webglSupported() || isTestRunner)
 const loadProgress = ref(0)
-/*
-  Gate the scene under navigator.webdriver. Playwright sets this flag, and when
-  four workers each hold a WebGL context the GPU stalls and timing tests fail.
-  With the scene off, the 2D mark shows instead and the tests pass.
-*/
-const isTestRunner = typeof navigator !== 'undefined' && navigator.webdriver
 /*
   The glow stays dark until this is set, and it is set only once the scene has
   reported ready — the 3D and the room's grid on screen — and the flat fallback
