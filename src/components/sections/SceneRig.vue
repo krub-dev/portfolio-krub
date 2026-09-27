@@ -115,6 +115,7 @@ let observer = null
 let smoothX = 0
 let smoothY = 0
 let environment = null
+let pmremBuilt = false
 
 function makeCanvas(size) {
   const canvas = document.createElement('canvas')
@@ -320,21 +321,6 @@ onMounted(() => {
   })
 })
 
-// PBR environment for the logo: a neutral room that gives the metal something
-// to reflect. The PMREMGenerator processes the room into a cubemap that
-// MeshStandardMaterial can sample. Created when the renderer is ready.
-watch(
-  () => renderer.value,
-  (r) => {
-    if (r && !environment) {
-      const pmrem = new PMREMGenerator(r)
-      environment = pmrem.fromScene(new RoomEnvironment()).texture
-      pmrem.dispose()
-    }
-  },
-  { immediate: true },
-)
-
 onUnmounted(() => {
   observer?.disconnect()
   room.value?.dispose()
@@ -350,6 +336,14 @@ buildBacklight()
 repaint()
 
 onBeforeRender(({ delta }) => {
+  // Build the PMREM environment on the first frame, once the renderer is ready.
+  if (!pmremBuilt && renderer.value) {
+    const pmrem = new PMREMGenerator(renderer.value)
+    environment = pmrem.fromScene(new RoomEnvironment()).texture
+    pmrem.dispose()
+    pmremBuilt = true
+  }
+
   // `camera` here is TresJS's camera manager, not the camera itself; the active
   // one lives on `activeCamera`.
   const cam = camera.activeCamera.value
