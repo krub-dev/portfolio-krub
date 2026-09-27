@@ -25,6 +25,11 @@ if (import.meta.env.DEV) {
     name: 'preview',
     component: () => import('../views/PreviewView.vue'),
   })
+  routes.push({
+    path: '/logo-lab',
+    name: 'logo-lab',
+    component: () => import('../views/LogoLabView.vue'),
+  })
 }
 
 // Last, so it only catches what nothing above matched. Lazy-loaded: the 404 is

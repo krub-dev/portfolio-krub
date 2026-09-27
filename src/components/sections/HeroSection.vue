@@ -3,17 +3,15 @@
   The hero: name, headline, paragraph, two CTAs on the left; the square stage
   with the logo on the right.
 
-  The stage on the right is LogoStage: it owns the logo, the inner grid and the
-  3D parallax. The availability badge is passed into its slot, because it sits
-  inside the stage but has nothing to do with the tilt.
+  The stage on the right is LogoStage: it owns the 3D logo, the frame and the
+  pointer gestures.
 
   On a phone there is no stage at all — see the note above the media query in
-  the styles — so the badge moves into the text column instead.
+  the styles.
 */
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import AvailabilityBadge from '../base/AvailabilityBadge.vue'
 import BaseButton from '../base/BaseButton.vue'
 import { useLang } from '../../composables/useLang'
 import { copy } from '../../data'
@@ -28,15 +26,10 @@ const hero = computed(() => copy.hero[lang.value])
 /*
   Which layout is on screen, in JavaScript rather than CSS.
 
-  The badge exists once either way. Rendering it twice and hiding one with a
-  media query would be simpler to write, but a screen reader walks the DOM, not
-  the stylesheet — `display: none` does hide a node from it, yet the pattern
-  invites the version where it does not, and the badge is the one line on the
-  page that says I am open to work.
-
-  Matching the same 900px the stylesheet uses. Reactive because a phone can be
-  rotated, and because resizing a desktop window across the breakpoint has to
-  put the badge back where it belongs.
+  The stage exists on a desktop and not on a phone: below 900px the hero is one
+  column and the stage is what does not fit (decision 37). Matching the same
+  900px the stylesheet uses; reactive because a phone can be rotated and a
+  desktop window resized across the breakpoint.
 */
 const narrow = ref(false)
 let query = null
@@ -79,12 +72,9 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
           </BaseButton>
         </div>
 
-        <AvailabilityBadge v-if="narrow" class="availability-inline" :label="hero.badge" />
       </div>
 
-      <LogoStage v-if="!narrow">
-        <AvailabilityBadge class="availability" :label="hero.badge" />
-      </LogoStage>
+      <LogoStage v-if="!narrow" />
     </div>
   </section>
 </template>
@@ -157,14 +147,6 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
   padding: 14px 26px;
 }
 
-/* The stage, its grid and the logo all moved to LogoStage.vue in step 8, so
-   the parallax lives next to the markup it drives. */
-.availability {
-  position: absolute;
-  top: 14px;
-  left: 22px;
-}
-
 /*
   The phone layout.
 
@@ -176,17 +158,13 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 
   The stage is what does not fit, so on a phone it is not rendered at all.
   Every way of keeping it was worse than losing it: shrunk to fit it became a
-  ~130px square holding a logo that is already in the navbar directly above it,
-  with the availability badge wrapping onto two lines inside it. An empty box
-  reserved for a 3D scene earns its space on a desktop, where it is half the
+  ~130px square holding a logo that is already in the navbar directly above it.
+  A box that holds the 3D logo earns its space on a desktop, where it is half the
   composition. On a phone it was taking the marquee's place to show a smaller
   copy of the logo.
 
-  Two things follow. The badge moves into the text column, since it was living
-  inside the stage — that is the v-if in the script. And the parallax never
-  subscribes on a phone, because LogoStage does not mount, which also answers
-  the question of what a WebGL scene would cost on a mid-range device: nothing,
-  it will not be there.
+  And the WebGL scene never mounts on a phone, because LogoStage does not mount,
+  so it costs nothing on a mid-range device: it is not there.
 */
 @media (max-width: 900px) {
   .hero {
@@ -200,17 +178,6 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 
   .grid {
     grid-template-columns: 1fr;
-  }
-
-  /*
-    The badge in its phone position: below the buttons, which is where the
-    reading order puts it on desktop too — left column first, then the stage.
-    Static rather than absolutely positioned, since there is no stage corner to
-    pin it to any more.
-  */
-  .availability-inline {
-    position: static;
-    margin-top: 4px;
   }
 }
 </style>
