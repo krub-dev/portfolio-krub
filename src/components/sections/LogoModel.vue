@@ -79,14 +79,9 @@ props.logoGroup.traverse((child) => {
   if (child.isMesh) meshes.push(child)
 })
 
-console.log('[LogoModel] GLB meshes:', meshes.length, meshes.map((m) => m.name))
-
 meshes.forEach((child) => {
   // Skip helper curves from Blender (Curve00X). Only render the actual logo meshes.
-  if (child.name.startsWith('Curve')) {
-    console.log(`[LogoModel] Skipping helper curve: "${child.name}"`)
-    return
-  }
+  if (child.name.startsWith('Curve')) return
   
   // Only "krub-logo_front" gets the accent material. Everything else gets the
   // dark grey back material.
