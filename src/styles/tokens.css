@@ -74,6 +74,8 @@
   --cast: rgba(0, 0, 0, 0.85);
   --metal: #2a2a2a;
   --metal-dark: #1a1a1a;
+  --fog-end: #0c0c0d;
+  --stage-bg: #0c0c0d;
 
   /*
     The accent at its most saturated — the colour the light theme paints --acc
@@ -145,6 +147,19 @@
   */
   --metal: #8a8a8a;
   --metal-dark: #4a4a4a;
+  /*
+    The fog fades to this colour at the tunnel's far end. In the dark theme it
+    matches --ink so the tunnel disappears into the page. In the light theme it
+    is a medium-dark grey so the tunnel has depth instead of reading as a white
+    void.
+  */
+  --fog-end: #6a6a6a;
+  /*
+    The stage background. In the dark theme it is --ink (near black). In the
+    light theme it is a medium grey so the tunnel starts from a darker tone and
+    the fog has room to fade.
+  */
+  --stage-bg: #b8b8b8;
 }
 
 /* ---------------------------------------------------------------------------

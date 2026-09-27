@@ -129,6 +129,7 @@ function tokens() {
   return {
     surface: read('--surface', '#141416'),
     ink: read('--ink', '#0c0c0d'),
+    fogEnd: read('--fog-end', '#0c0c0d'),
     grid: read('--line', 'rgba(255,255,255,.11)'),
   }
 }
@@ -252,16 +253,16 @@ function buildRoom() {
 }
 
 function buildFog() {
-  const { ink } = tokens()
+  const { fogEnd } = tokens()
   const mode = FOG_MODES[props.fog] ?? FOG_MODES.far
   if (!mode) {
     scene.value.fog = null
     return
   }
   if (!scene.value.fog) {
-    scene.value.fog = new Fog(ink, mode.near, mode.far)
+    scene.value.fog = new Fog(fogEnd, mode.near, mode.far)
   } else {
-    scene.value.fog.color.set(ink)
+    scene.value.fog.color.set(fogEnd)
     scene.value.fog.near = mode.near
     scene.value.fog.far = mode.far
   }

@@ -444,12 +444,13 @@ defineExpose({ exportModel })
   height: 100%;
   border: 1px solid var(--line);
   /*
-    Flat, and the page's own background. It is only ever seen while the scene
-    builds or if it fails, and the `--surface`-to-`--ink` radial that used to be
-    here read as a shadow hanging in the empty slot — and it hid the entrance
+    Flat background. In the dark theme it is --ink (near black). In the light
+    theme it is --stage-bg (medium grey) so the tunnel starts from a darker tone
+    and the fog has room to fade. The `--surface`-to-`--ink` radial that used to
+    be here read as a shadow hanging in the empty slot — and it hid the entrance
     fade, because the room's walls are that same `--surface`.
   */
-  background: var(--ink);
+  background: var(--stage-bg, var(--ink));
   overflow: hidden;
   display: flex;
   align-items: center;
