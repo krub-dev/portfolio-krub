@@ -49,48 +49,29 @@ let smoothSpin = 0
 let smoothSpinY = 0
 
 /*
-  Two materials: the front face gets the accent colour (yellow by default), the
-  back gets a dark neutral. Both are polished metal (metalness 0.9, roughness
-  0.25) with the environment map from SceneRig so they reflect the room.
+  One material for the whole model. Polished metal (metalness 0.9, roughness 0.25)
+  with the environment map from SceneRig so it reflects the room. The colour is
+  the accent, updated every frame from the CSS token.
 */
-const frontMaterial = new MeshStandardMaterial({
+const material = new MeshStandardMaterial({
   metalness: 0.9,
   roughness: 0.25,
   envMapIntensity: 1.2,
 })
-frontMaterial.fog = false
-
-const backMaterial = new MeshStandardMaterial({
-  color: '#2a2a2a',
-  metalness: 0.9,
-  roughness: 0.25,
-  envMapIntensity: 1.2,
-})
-backMaterial.fog = false
+material.fog = false
 
 const group = new Group()
 // The GLB scene is a Group with the meshes (possibly nested in sub-groups).
-// Walk the whole tree and reparent every mesh into our group.
+// Walk the whole tree and reparent every mesh into our group with the same material.
 const meshes = []
 props.logoGroup.traverse((child) => {
   if (child.isMesh) meshes.push(child)
 })
 
-console.log(
-  '[LogoModel] GLB meshes:',
-  meshes.map((m) => ({
-    name: m.name,
-    pos: m.position.toArray(),
-    scale: m.scale.toArray(),
-  })),
-)
+console.log('[LogoModel] GLB meshes:', meshes.length, meshes.map((m) => m.name))
 
 meshes.forEach((child) => {
-  if (child.name.toLowerCase().includes('back')) {
-    child.material = backMaterial
-  } else {
-    child.material = frontMaterial
-  }
+  child.material = material
   // Reset per-mesh transforms so the group's scale/rotation is the only transform.
   child.position.set(0, 0, 0)
   child.rotation.set(0, 0, 0)
@@ -103,35 +84,29 @@ const box = new Box3().setFromObject(group)
 const center = box.getCenter(new Vector3())
 group.position.sub(center)
 
-// Scale to fit the stage. The logo should occupy ~58% of the 504px stage ≈ 292px.
-// At FOV 40, Z 205, one Three unit ≈ 3.38px at Z=0. So we need ~86 units wide.
+// Scale to fit the stage. The logo should occupy ~70% of the 504px stage ≈ 353px.
+// At FOV 40, Z 205, one Three unit ≈ 3.38px at Z=0. So we need ~104 units wide.
 const size = box.getSize(new Vector3())
-const targetWidth = 86
+const targetWidth = 104
 const currentWidth = size.x || 1
 const s = targetWidth / currentWidth
 group.scale.set(s, s, s)
 // The GLB was exported with the logo lying flat (rotation X=90° applied in Blender).
-// Rotate -90° on X to stand it up facing the camera (+Z). No Y flip needed — the
-// GLB is already Y-up from Blender, unlike the SVG which was y-down.
+// Rotate -90° on X to stand it up facing the camera (+Z).
 group.rotation.x = -Math.PI / 2
 
 const { renderer } = useTresContext()
 const { onBeforeRender } = useLoop()
 
-onBeforeUnmount(() => {
-  frontMaterial.dispose()
-  backMaterial.dispose()
-})
+onBeforeUnmount(() => material.dispose())
 
-// The environment map arrives asynchronously from SceneRig. When it does, both
-// materials pick it up and start reflecting the room.
+// The environment map arrives asynchronously from SceneRig. When it does, the
+// material picks it up and starts reflecting the room.
 watch(
   () => props.environment,
   (env) => {
-    frontMaterial.envMap = env
-    frontMaterial.needsUpdate = true
-    backMaterial.envMap = env
-    backMaterial.needsUpdate = true
+    material.envMap = env
+    material.needsUpdate = true
   },
 )
 
@@ -154,7 +129,7 @@ onBeforeUnmount(() => appearance.disconnect())
 readAccent()
 
 onBeforeRender(({ elapsed, delta }) => {
-  frontMaterial.color.set(accent.value)
+  material.color.set(accent.value)
 
   // The drag angle, then the magnetic return: held by the pointer while
   // dragging, easing back to zero the moment it is let go. On both axes.
