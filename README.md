@@ -11,8 +11,10 @@ Kiko Rubio — fullstack developer in Murcia, leaning toward backend.
 
 - **Vue 3** with `<script setup>`. Plain JavaScript, no TypeScript.
 - **Vite** for the dev server and the build.
-- **vue-router** — two routes: the page and a catch-all 404. There is also a dev-only preview
-  sheet, lazy-loaded and kept out of the production bundle.
+- **vue-router** — two routes: the page and a catch-all 404. There are also two dev-only screens,
+  `/preview` (the components sheet) and `/logo-lab` (the hero stage: the entrance, the fog modes, and
+  the mark, the ring and the halo switched on and off), lazy-loaded and kept out of the production
+  bundle.
 - **vue-i18n** — nested dictionaries, English by default.
 - **Vitest** and **Playwright** for tests.
 - No CSS framework and no preprocessor. Design tokens are CSS custom properties in one global
@@ -103,7 +105,8 @@ src/
   belong to a specific element rather than to the theme — the availability dot's green and
   Limonacho's palette — and the design spec names each one.
 - **One `requestAnimationFrame`** for everything that follows the mouse: the custom cursor, the
-  magnetic hover, the logo parallax and the lemon's pupils all subscribe to a single loop.
+  magnetic hover and the lemon's pupils all subscribe to a single loop. The 3D logo is the one
+  exception — Three's renderer owns its own loop, paused while off-screen.
 - **Content and interface are separate.** Sentences I wrote live in `src/data/`, with both
   languages side by side in one file. Strings the interface needs live in `src/locales/`.
 

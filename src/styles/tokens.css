@@ -57,6 +57,27 @@
   --sec-idx: 0.16;                    /* opacity of the giant section number */
 
   /*
+    Element-specific colours — exceptions to the theme rule.
+
+    --specular is a specular highlight on metal (light reflecting off the surface),
+    not a theme colour. It is white in both themes because a highlight that turned
+    dark in light theme would be a bug, not a feature.
+
+    --cast is a shadow (darkness), not a theme colour. It is dark in both themes
+    because a shadow that turned light in light theme would be a bug, not a feature.
+
+    --metal and --metal-dark are the brushed-metal colours for the frame and
+    shutter. They are neutral greys that work in both themes: dark enough to read
+    as metal on the light background, light enough to show detail on the dark one.
+  */
+  --specular: rgba(255, 255, 255, 0.16);
+  --cast: rgba(0, 0, 0, 0.85);
+  --metal: #2a2a2a;
+  --metal-dark: #1a1a1a;
+  --fog-end: #0c0c0d;
+  --stage-bg: #0c0c0d;
+
+  /*
     The accent at its most saturated — the colour the light theme paints --acc
     with — kept the same in both themes. Limonacho uses it: the pale pastel the
     dark theme fills with washes him out, and he reads better as the theme's
@@ -119,6 +140,26 @@
   --mark: var(--acc-text);
   --grid: rgba(12, 12, 13, 0.05);
   --sec-idx: 0.62;
+  /*
+    Metal tokens for the shutter and frame. Slightly lighter than the dark theme
+    so they don't read as too heavy on the cream page, but still dark enough to
+    look like brushed metal rather than inverted.
+  */
+  --metal: #a8a8a8;
+  --metal-dark: #686868;
+  /*
+    The fog fades to this colour at the tunnel's far end. In the dark theme it
+    matches --ink so the tunnel disappears into the page. In the light theme it
+    is a medium-dark grey so the tunnel has depth instead of reading as a white
+    void.
+  */
+  --fog-end: #6a6a6a;
+  /*
+    The stage background. In the dark theme it is --ink (near black). In the
+    light theme it is a medium grey so the tunnel starts from a darker tone and
+    the fog has room to fade.
+  */
+  --stage-bg: #b8b8b8;
 }
 
 /* ---------------------------------------------------------------------------

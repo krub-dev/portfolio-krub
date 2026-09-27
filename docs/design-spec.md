@@ -251,30 +251,38 @@ column and needs the room.
 Two-column grid `1.1fr .9fr`, `gap: clamp(32px,5vw,64px)`, vertically centred,
 `max-width:1180px`. One column on mobile.
 
-Left column: top mono label, a three-line headline with the key word in `--acc`, a paragraph
-(`--fg-2`, 46ch) and two buttons — primary "Let's talk ↗" (background `--acc`, radius 999,
-`padding:11px 24px`, 18px, weight 600, hover to `--acc-2`) and secondary "/projects" (border
-`--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and text yellow).
+Left column: the name, a three-line headline with the key word
+in `--acc`, a paragraph (`--fg-2`, 46ch) and two buttons — primary "Let's talk ↗" (background
+`--acc`, radius 999, `padding:11px 24px`, 18px, weight 600, hover to `--acc-2`) and secondary
+"/projects" (border `--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and
+text yellow).
 
-Right column, the **square stage**: `aspect-ratio:1/1`, `max-height:min(58vh,520px)`,
-`max-width:520px`, border `--line`, radius 24, a `radial-gradient` from `--surface` to `--ink`,
-and a **40px** inner grid — not the page's 72px, which reads as noise inside a 520px box. The
-whole stage is magnetic, and only the logo inside it tilts. Inside:
+Right column, the **square stage**: a square of whole 72px cells of the page's background grid —
+seven by seven (504×504) at the usual viewport, its four edges on the grid lines and nudged to the
+next cell right of its natural position (or kept a cell back when that would run off the screen).
+It is measured and snapped by `LogoStage`, since it depends on the viewport (decision 79). Border
+`--line`, a flat `--ink` fill — only seen while the scene builds or if it fails — a slim brushed-metal
+frame over the canvas, whose sheen carries round its corners, and inside it a CSS entrance glow — hard
+on the frame's inner edge, fading inward (decision 81). A vignette that faded the grid into the metal
+was tried and dropped (decision 84), and the opening starts closed behind a CSS roller blind that a
+click lifts and leaves up (decision 86).
+The whole stage is magnetic, and only the logo inside it turns. Inside:
 
-- The logo at 58% of the width, as a mask over `var(--mark)`, with **3D parallax**: it
-  follows the mouse with `perspective(700px) rotateY(±14deg) rotateX(∓10deg)`, proportional
-  to the cursor's distance from the centre of the stage.
-- **Availability indicator**, top left (`top:14px; left:22px`): a mono row of 10px uppercase,
-  `letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two
-  layers inside a 5×5px container:
-  - core: a solid `#39D98A` circle filling the container, **not animated**;
-  - ring: `inset:-5px`, `border:1px solid #39D98A`, `border-radius:50%`, animation
-    `dotHalo 2.6s cubic-bezier(.15,.6,.3,1) infinite` — born small, appears, grows and fades
-    out completely before restarting.
-  - Text: "Available for work" / "Disponible para trabajar".
+- **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
+  mark that tilts toward the cursor, spins with a drag and springs back to the front. The metal is a
+  matcap, so no light and no environment sit behind it (decision 82). Behind it a
+  deep open box recedes, its grid painted on every face and fading to the background through a fog,
+  and the camera leans a little with the pointer, so the depth shifts while the mark stays centred.
+  **The opening is cut to the stage** and divided into the stage's own seven cells, so its grid
+  lines fall on the page's at the frame; the box scales with the wheel's zoom to keep it so. A
+  neutral backlight — the theme's own background — clears the grid behind the mark. It is lazy,
+  pauses off-screen and never mounts below 900px (decision 37). It eases up into the frame on arrival
+  (decision 85). See decisions 78–85.
+- **The 2D mark is the failure state.** The PNG mask over `var(--mark)` at 58% of the width is
+  painted only if WebGL is missing or the scene never reports ready (decisions 77, 85), so a working
+  load shows the 3D alone rather than a flash of the flat logo.
 
-The stage is a reserved slot for a future 3D scene: it carries **no label and no explanatory
-text**.
+The stage carries **no label and no explanatory text**.
 
 ### 3.3 Marquee
 
@@ -304,6 +312,13 @@ Grid `1.3fr .7fr` (one column on mobile). Left: lead paragraph + two secondary p
 under it; no pills + the matching timeline + a "Download CV (PDF)" button (outlined pill). It is
 a real ARIA tablist: roving `tabindex`, `aria-controls`, a `role="tabpanel"` on the panel, and
 the arrows move the selection and the focus.
+
+Under the photo sits **the availability indicator**: a mono row of 10px uppercase,
+`letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two layers inside
+a 5×5px container: a core, a solid `#39D98A` circle filling it and **not animated**; and a ring,
+`inset:-5px`, `border:1px solid #39D98A`, `border-radius:50%`, animated
+`dotHalo 2.6s cubic-bezier(.15,.6,.3,1) infinite` — born small, appears, grows and fades out
+completely before restarting. Text: "Available" / "Disponible".
 
 Each timeline row: `display:grid`, columns `minmax(90px,130px) 1fr`,
 `gap: clamp(14px,3vw,32px)`, `padding:22px 0`, `border-top:1px solid var(--line)` (the last
@@ -892,8 +907,8 @@ These are deliberate. They are not rough edges to be tidied up later:
 - The yellow `#FFC800` is identical in both themes **as a fill**; what changes is whatever is
   painted with `--mark` or `--acc-text`.
 - The giant section number **overlaps** the title on purpose.
-- The square hero stage is empty on purpose: it is the slot for a future 3D scene. No
-  explanatory text goes inside it.
+- The square hero stage holds the 3D logo and carries **no explanatory text** inside it. The scene
+  is the mark and the room behind it; the frame around it is CSS.
 - There are no filler cards in projects and no user hints ("click to open", "optional
   section", photo captions). They were removed deliberately.
 - The lemon enters in a straight line from the right, with no tilt, and its body is flat

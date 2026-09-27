@@ -2,7 +2,7 @@ import { onMounted, onUnmounted } from 'vue'
 
 /*
   ONE mouse listener and ONE requestAnimationFrame for everything that follows
-  the cursor: the custom cursor, the magnetic hover, the logo parallax and the
+  the cursor: the custom cursor, the magnetic hover, the logo's tilt and the
   lemon's pupils.
 
   Why a subscription list instead of each component running its own loop: four

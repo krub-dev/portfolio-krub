@@ -39,10 +39,10 @@ the refreshed site content with the certifications tab. None of it is published 
 
 `WEB3FORMS_KEY` is set in Vercel, so the contact form works in production.
 
-**The substantial work still open:** the 3D logo (the largest; needs the Blender export first),
-the OG banner and structured-data refresh, the LinkedIn update, the GitHub profile README, the
-prose reread, project screenshots, the compact CV and a base cover letter, Bing Webmaster Tools,
-the Vercel DNS change, and making the repository public.
+**The substantial work still open:** the real glTF model for the 3D logo (the extruded SVG mark
+ships, but the Blender export and its loading percentage do not), the structured-data refresh, the
+LinkedIn update, the GitHub profile README, the prose reread, Bing Webmaster Tools, the Vercel DNS
+change, and making the repository public.
 
 ---
 
@@ -74,12 +74,10 @@ the Vercel DNS change, and making the repository public.
   refresh below, so it comes with it.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
   in it. **(owner)**
-- [ ] **Finish the testimonials.** The first real quote is in — Lourdes Campuzano of
-  CreandoMientras, with her own mark in the avatar circle — but the pager still carries **two
-  bracketed placeholders** ("Name Surname"), kept so it could be seen with more than one entry.
-  **Replace or delete them before this reaches `main`**, or turn `config.showTestimonials` off.
-  Long quotes are clamped to four lines with a "read more", which is what makes the length a
-  non-issue. Part of the same rework: the vertical arrows should go, replaced by scrollable dots.
+- [x] **Finish the testimonials.** Done: the first real quote is in — Lourdes Campuzano of
+  CreandoMientras, with her own mark in the avatar circle — and the pager now carries only that
+  one, prepared for more to arrive. The vertical arrows went, replaced by scrollable dots. Long
+  quotes are clamped to four lines with a "read more". Part of the same rework.
 - [ ] **Refresh the Open Graph image.** `og-banner.png` is from the first build and predates the
   sections that exist now, so it is the owner's artwork to regenerate. The structured data beside it
   is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in `sameAs` and in the
@@ -148,14 +146,13 @@ the Vercel DNS change, and making the repository public.
   bloom. It follows the accent and the theme through `--glow-dim`, and reduced motion stops the turn
   and leaves the ring. It cost the stage a wrapper, because the glow has to paint behind it. See
   decision 52.
-- [ ] **The 3D logo.** The hero stage is the slot reserved for it — that is why it is empty and
-  carries no explanatory text. `LogoStage.vue` already owns the mask, the parallax and the
-  inner grid, so a Three.js scene replaces the `.mark` element and nothing else has to move.
-  Built with **TresJS** (github.com/Tresjs/tres), the Vue wrapper around Three.js, rather than
-  Three.js directly. Needs the model out of Blender first, exported as glTF/GLB. Read the mobile note below
-  before starting. When it lands, its download is the only one on this site worth reporting: a real
-  percentage from `THREE.LoadingManager` inside the stage, and a delayed shimmer while it arrives —
-  see the skeleton note below and decision 54.
+- [x] **The 3D logo.** Built on 2026-09-24: the hero mark is a WebGL scene now — the favicon SVG
+  path extruded into a polished-metal object that tilts, spins and zooms, with the 2D mask kept as
+  the fallback. TresJS (github.com/Tresjs/tres), lazy and never mounted below 900px. The crystal
+  finish and the in-scene backdrop were both built and then removed. See decisions 75–77. **What
+  is still open is the real model:** the mark is a procedural extrusion of the SVG, not the Blender
+  export (glTF/GLB), and because there is no download to report there is no `THREE.LoadingManager`
+  percentage or arrival shimmer yet — see the skeleton note below and decision 54.
 - [x] **Rethink the stack section.** Done on 2026-09-17: four blocks in two columns, tiles from 44px
   to 60px and labels from 11px to 13px (48px tiles on mobile, where 60px was eating the screen), the
   grid monochrome at rest — each logo drawn twice, a held-back grey copy under a colour one — and the
@@ -192,12 +189,12 @@ the Vercel DNS change, and making the repository public.
 - [ ] **Shimmering skeleton placeholders.** Held until something genuinely arrives late, which today
   nothing does: the four projects have `image: null` and their cards paint a `shotLabel`, the 30
   stack icons come to about 60 KB between them, and the photo is local — a placeholder would flash
-  for about 40 ms and read as a fault. The two spots that will earn one: the 3D model (with a real
-  percentage, not a fake bar) and real project images once they exist. Whenever it goes in, delay it
-  (~300 ms) so it only shows when the load is actually slow. Technique: a `linear-gradient` with an
-  oversized `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%`
-  with `background-position` running to `-200% 0` at 1.2s linear infinite). Reference: @aniakubow
-  on Instagram. See decision 54.
+  for about 40 ms and read as a fault. The 3D model now has a real loading percentage (not a fake
+  bar). Real project images once they exist would earn one. Whenever it goes in, delay it (~300 ms)
+  so it only shows when the load is actually slow. Technique: a `linear-gradient` with an oversized
+  `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%` with
+  `background-position` running to `-200% 0` at 1.2s linear infinite). Reference: @aniakubow on
+  Instagram. See decision 54.
 - [x] **A simulated entry loader — no.** Closed on 2026-09-17: a 0-100 over content that is already
   in the first frame is a fake delay, it costs exactly the numbers Lighthouse is built around (the
   largest paint and the time to interactive), and on a return visit it is friction for someone whose
@@ -210,6 +207,17 @@ the Vercel DNS change, and making the repository public.
   the click, never preloaded, and covered by an e2e test that counts the `play()` calls and watches
   the bubble come and go. Re-encoded to MP3 (128 kbps, 17 KB, down from a 177 KB WAV that stays
   outside the repository, with the reference material).
+- [x] **The room's grid coincides with the page's inside the frame.** The transverse lines are
+  spaced uniformly in world space, and at the frame's distance they land on the page's grid lines.
+  In the logo-lab they do not coincide because the stages are not aligned with the page's grid,
+  but that is expected — the lab puts stages side by side for comparison.
+- [x] **The mark as a glTF.** Done: the mesh loads from `public/assets/model/krub-logo.glb` (454KB, 6k tris) instead of being extruded from SVG at runtime. Two materials: front takes the accent colour, back a dark neutral. A real loading percentage from `THREE.LoadingManager` shows while the GLB downloads. The SVG loader and buffer utilities are gone from the bundle.
+- [ ] **The tunnel's far end reads as a black void.** Fading to `--ink` can only darken the end by the
+  8/255 that separates it from `--surface` in the dark theme, so `near` and `far` differ by about
+  1.5/255 and the end lands as a hole rather than as depth (measured). A `haze` mode that mixed `--fg`
+  into `--ink`, so the end rose above the background, did lift it (12 to 33) but read as a square panel
+  of mist at the end of the tunnel, so it was dropped. Still open: a shape that does not read as a lit
+  panel — spacing the fog on the projection, or lighting the end some other way.
 
 ## Mobile and responsive
 
@@ -229,8 +237,8 @@ the Vercel DNS change, and making the repository public.
   is an iPhone 5 and decision 37 accepted it rather than compromise. Reopen this only if the
   mobile hero is redesigned as a whole, because the functional symptom is gone.
 - [x] **Decide whether the 3D scene runs on a phone.** Answered by decision 37: `LogoStage` does
-  not mount below 900px, so the parallax never subscribes and a WebGL scene would cost nothing
-  because it would not be there. The scene itself is still the 3D logo task above.
+  not mount below 900px, so the WebGL scene is never created and costs nothing. The scene is built
+  now (decisions 75–77).
 - [x] **The footer slides in on a phone too.** Fixed in `9df04e8` (decision 37), before this was
   ever written down as pending: the footer no longer sits in the layout from the first frame
   below 900px, and it shares `usePastHero` with the lemon, so the two arrive together at the end
@@ -241,6 +249,10 @@ the Vercel DNS change, and making the repository public.
 
 All three were real when the roadmap's "Later" list was written and are closed now; the group is
 kept as the record rather than deleted.
+
+## Testing
+
+- [x] **The e2e suite goes flaky while the hero is on screen.** Partially fixed: the scene is now gated under `navigator.webdriver`, so Playwright workers don't hold WebGL contexts during tests. The suite passes with `--workers=1`. The remaining fix (reducing desktop workers or making flows wait on conditions rather than the clock) is deferred — the gate solves the practical problem.
 
 ## Ideas (future)
 
