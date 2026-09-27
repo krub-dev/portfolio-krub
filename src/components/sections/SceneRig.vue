@@ -318,14 +318,22 @@ onMounted(() => {
     attributes: true,
     attributeFilter: ['data-theme', 'data-accent'],
   })
-  
-  // PBR environment for the logo: a neutral room that gives the metal something
-  // to reflect. The PMREMGenerator processes the room into a cubemap that
-  // MeshStandardMaterial can sample.
-  const pmrem = new PMREMGenerator(renderer.value)
-  environment = pmrem.fromScene(new RoomEnvironment()).texture
-  pmrem.dispose()
 })
+
+// PBR environment for the logo: a neutral room that gives the metal something
+// to reflect. The PMREMGenerator processes the room into a cubemap that
+// MeshStandardMaterial can sample. Created when the renderer is ready.
+watch(
+  () => renderer.value,
+  (r) => {
+    if (r && !environment) {
+      const pmrem = new PMREMGenerator(r)
+      environment = pmrem.fromScene(new RoomEnvironment()).texture
+      pmrem.dispose()
+    }
+  },
+  { immediate: true },
+)
 
 onUnmounted(() => {
   observer?.disconnect()

@@ -81,22 +81,17 @@ props.logoGroup.traverse((child) => {
 
 console.log('[LogoModel] GLB meshes:', meshes.length, meshes.map((m) => m.name))
 
-meshes.forEach((child, index) => {
-  // If there are exactly 2 meshes, first is back, second is front (reverse order in GLB).
-  // Otherwise, try to match by name.
-  let isBack = false
-  if (meshes.length === 2) {
-    isBack = index === 0 // Reversed: GLB exports back first, front second
-  } else {
-    isBack = child.name.toLowerCase().includes('back')
+meshes.forEach((child) => {
+  // Skip helper curves from Blender (Curve00X). Only render the actual logo meshes.
+  if (child.name.startsWith('Curve')) {
+    console.log(`[LogoModel] Skipping helper curve: "${child.name}"`)
+    return
   }
   
-  console.log(`[LogoModel] Mesh ${index}: "${child.name}" → ${isBack ? 'back (grey)' : 'front (accent)'}`)
-  
-  child.material = isBack ? backMaterial : frontMaterial
-  // Keep the mesh's local transform — do NOT reset to zero. The front and back
-  // meshes have different positions in the GLB, and resetting them would make
-  // them overlap.
+  // Only "krub-logo_front" gets the accent material. Everything else gets the
+  // dark grey back material.
+  const isFront = child.name === 'krub-logo_front'
+  child.material = isFront ? frontMaterial : backMaterial
   group.add(child)
 })
 
