@@ -65,9 +65,15 @@
 
     --cast is a shadow (darkness), not a theme colour. It is dark in both themes
     because a shadow that turned light in light theme would be a bug, not a feature.
+
+    --metal and --metal-dark are the brushed-metal colours for the frame and
+    shutter. They are neutral greys that work in both themes: dark enough to read
+    as metal on the light background, light enough to show detail on the dark one.
   */
   --specular: rgba(255, 255, 255, 0.16);
   --cast: rgba(0, 0, 0, 0.85);
+  --metal: #6a6a6a;
+  --metal-dark: #3a3a3a;
 
   /*
     The accent at its most saturated — the colour the light theme paints --acc

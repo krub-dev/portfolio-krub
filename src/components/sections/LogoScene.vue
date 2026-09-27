@@ -26,7 +26,7 @@
 */
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { TresCanvas, useTresContext } from '@tresjs/core'
-import { PMREMGenerator } from 'three'
+import { LoadingManager, PMREMGenerator } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 
@@ -50,7 +50,7 @@ const props = defineProps({
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
-const emit = defineEmits(['ready'])
+const emit = defineEmits(['ready', 'progress'])
 
 const root = ref(null)
 const rig = ref(null)
@@ -104,11 +104,20 @@ function onWheel(event) {
   contains two meshes (front and back) that LogoModel will address separately.
   Loading a GLB is a fetch and a parse of precomputed buffers — it does not
   block the main thread the way parsing an SVG and extruding it does.
+
+  The LoadingManager reports real progress as the file downloads, so the stage
+  can show a percentage instead of a fake bar.
 */
 async function loadModel() {
-  const loader = new GLTFLoader()
+  const manager = new LoadingManager()
+  manager.onProgress = (url, loaded, total) => {
+    emit('progress', Math.round((loaded / total) * 100))
+  }
+
+  const loader = new GLTFLoader(manager)
   const gltf = await loader.loadAsync('/assets/model/krub-logo.glb')
   logoGroup.value = gltf.scene
+  emit('progress', 100)
   emit('ready')
 }
 
