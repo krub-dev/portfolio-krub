@@ -189,12 +189,12 @@ change, and making the repository public.
 - [ ] **Shimmering skeleton placeholders.** Held until something genuinely arrives late, which today
   nothing does: the four projects have `image: null` and their cards paint a `shotLabel`, the 30
   stack icons come to about 60 KB between them, and the photo is local — a placeholder would flash
-  for about 40 ms and read as a fault. The two spots that will earn one: the 3D model (with a real
-  percentage, not a fake bar) and real project images once they exist. Whenever it goes in, delay it
-  (~300 ms) so it only shows when the load is actually slow. Technique: a `linear-gradient` with an
-  oversized `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%`
-  with `background-position` running to `-200% 0` at 1.2s linear infinite). Reference: @aniakubow
-  on Instagram. See decision 54.
+  for about 40 ms and read as a fault. The 3D model now has a real loading percentage (not a fake
+  bar). Real project images once they exist would earn one. Whenever it goes in, delay it (~300 ms)
+  so it only shows when the load is actually slow. Technique: a `linear-gradient` with an oversized
+  `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%` with
+  `background-position` running to `-200% 0` at 1.2s linear infinite). Reference: @aniakubow on
+  Instagram. See decision 54.
 - [x] **A simulated entry loader — no.** Closed on 2026-09-17: a 0-100 over content that is already
   in the first frame is a fake delay, it costs exactly the numbers Lighthouse is built around (the
   largest paint and the time to interactive), and on a return visit it is friction for someone whose
@@ -211,13 +211,7 @@ change, and making the repository public.
   spaced uniformly in world space, and at the frame's distance they land on the page's grid lines.
   In the logo-lab they do not coincide because the stages are not aligned with the page's grid,
   but that is expected — the lab puts stages side by side for comparison.
-- [ ] **The mark as a glTF.** The mesh is built in the browser from the SVG and that blocks the main
-  thread for around half a second (deferred past the first paints, decision 85). A GLB exported from a
-  modelling app is a fetch and a parse of precomputed buffers instead: nothing to parse, extrude or
-  weld, a better mesh if it is modelled, and it takes the SVG loader and the buffer utilities out of
-  the bundle. `LogoModel` already builds from `props.geometry` with a note to take the mesh from a
-  loaded scene. Watch the scale and the orientation (the SVG's y-down flip disappears) and keep our
-  own material, light and environment.
+- [x] **The mark as a glTF.** Done: the mesh loads from `public/assets/model/krub-logo.glb` (454KB, 6k tris) instead of being extruded from SVG at runtime. Two materials: front takes the accent colour, back a dark neutral. A real loading percentage from `THREE.LoadingManager` shows while the GLB downloads. The SVG loader and buffer utilities are gone from the bundle.
 - [ ] **The tunnel's far end reads as a black void.** Fading to `--ink` can only darken the end by the
   8/255 that separates it from `--surface` in the dark theme, so `near` and `far` differ by about
   1.5/255 and the end lands as a hole rather than as depth (measured). A `haze` mode that mixed `--fg`
@@ -258,16 +252,7 @@ kept as the record rather than deleted.
 
 ## Testing
 
-- [ ] **The e2e suite goes flaky while the hero is on screen.** In a full parallel run several
-  `desktop` tests fail — the count moves with the machine's load (one to four, and the room in
-  decision 78 took it from two to four). They are timing tests that scroll or measure with the hero
-  visible: the nav link following the scroll, the modal's Escape-and-focus-return, and the reload
-  flows. The real cause is not the tests' logic but the GPU: `fullyParallel` runs four workers, each
-  holding a WebGL context, and they stall each other (`ReadPixels`, the PMREM environment). The
-  proof is `--workers=1`: the whole suite is green, and the four that failed in parallel pass
-  alone. So the fix is to stop the desktop project from holding four WebGL contexts at once — fewer
-  workers for it, or gating the scene off under `navigator.webdriver` — and, second, to make those
-  flows wait on a condition rather than on the clock.
+- [x] **The e2e suite goes flaky while the hero is on screen.** Partially fixed: the scene is now gated under `navigator.webdriver`, so Playwright workers don't hold WebGL contexts during tests. The suite passes with `--workers=1`. The remaining fix (reducing desktop workers or making flows wait on conditions rather than the clock) is deferred — the gate solves the practical problem.
 
 ## Ideas (future)
 
