@@ -11,6 +11,10 @@
   the dot leads, the ring follows at 0.28s, the arrow at 0.32s — a hair behind, a
   hint of inertia rather than a lag you watch.
 
+  Its colour is `--acc-solid`, not `--mark`: the cursor is not text, and `--mark`
+  darkens in the light theme for legibility, which left the ring nearly invisible
+  on the light metal. `--acc-solid` is the same in both themes by design.
+
   The native cursor is hidden by the [data-hide-cursor] rule in tokens.css,
   which also reaches descendants — links and buttons ship their own
   `cursor: pointer` and would otherwise show the hand.
@@ -138,7 +142,7 @@ usePointer((pointer) => {
   width: 10px;
   height: 10px;
   margin: -5px 0 0 -5px;
-  background: var(--acc);
+  background: var(--acc-solid);
   border-radius: 50%;
   z-index: 301;
   transition: opacity 0.15s ease;
@@ -148,7 +152,7 @@ usePointer((pointer) => {
   width: 40px;
   height: 40px;
   margin: -20px 0 0 -20px;
-  border: 1.5px solid var(--mark);
+  border: 1.5px solid var(--acc-solid);
   border-radius: 50%;
   z-index: 300;
   opacity: 0;
@@ -179,7 +183,7 @@ usePointer((pointer) => {
 
 .cursor-hint {
   font: 700 18px var(--font-mono);
-  color: var(--mark);
+  color: var(--acc-solid);
   opacity: 0;
   /* Tucked back and small; it swings out whenever the hint arrives. Same
      entrance whichever it is, so only the glyph says what it wants. */
@@ -216,7 +220,7 @@ usePointer((pointer) => {
 .cursor-hint-wrap.rotate .cursor-hint {
   width: 18px;
   height: 18px;
-  background: var(--mark);
+  background: var(--acc-solid);
   -webkit-mask: url('/assets/img/360icon.svg') center / contain no-repeat;
   mask: url('/assets/img/360icon.svg') center / contain no-repeat;
 }

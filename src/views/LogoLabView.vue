@@ -2,57 +2,29 @@
 /*
   DEV SCAFFOLDING — not part of the site.
 
-  One hero stage, with a selector, to compare how the scene arrives: switching on
-  the instant it is ready, or easing up out of the dark.
+  The hero stage with live switches, so each part of the scene can be seen on its
+  own: the mark, the halo behind it, the ring round the opening and the blind.
+  `Replay` remounts the stage, which re-runs the tube's ignition.
 
   One stage rather than two side by side on purpose. Every stage is its own WebGL
   context with its own generated environment, so two at once is twice the cost of
-  the very thing being compared. Switching the selector remounts the stage, and
-  `Replay` does it again, which is what re-runs the entrance and the tube's
-  ignition.
+  the very thing being compared.
 
   Like PreviewView, this is exempt from the "no literal strings in a template"
   rule: the labels are the subject. It never ships — the route is dev-only and
   this file is deleted before launch.
 */
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 import LogoStage from '../components/sections/LogoStage.vue'
 
-const VARIANTS = [
-  {
-    id: 'plain',
-    label: 'Plain',
-    note: 'no fade — the scene switches on the moment it reports ready',
-    entrance: 'none',
-  },
-  {
-    id: 'fade',
-    label: 'Fade',
-    note: 'the scene eases up out of the dark as the opening settles into the frame',
-    entrance: 'fade',
-  },
-]
-
-// What the hero ships.
-const pick = ref('plain')
-const variant = computed(() => VARIANTS.find((item) => item.id === pick.value))
-
-// Bumping the key remounts the stage, so the entrance plays again.
+// Bumping the key remounts the stage, which re-runs the tube's ignition.
 const round = ref(0)
-
-// How the tunnel fades out with depth. See SceneRig for what each one means.
-const FOG_MODES = [
-  { id: 'off', label: 'Off' },
-  { id: 'near', label: 'Near' },
-  { id: 'far', label: 'Far' },
-]
-
-const fogMode = ref('far')
 
 // Live switches, so the stage is not remounted while they are flipped.
 const showLogo = ref(true)
 const showHalo = ref(true)
+const showRing = ref(true)
 // Off shows the stage as it was before the blind: the room already open.
 const showShutter = ref(true)
 
@@ -80,6 +52,10 @@ function onExport() {
           Halo
         </label>
         <label class="toggle">
+          <input v-model="showRing" type="checkbox" />
+          Ring
+        </label>
+        <label class="toggle">
           <input v-model="showShutter" type="checkbox" />
           Shutter
         </label>
@@ -88,48 +64,13 @@ function onExport() {
       </div>
     </header>
 
-    <div class="row">
-      <span class="row-label">Entrance</span>
-      <div class="options">
-        <button
-          v-for="item in VARIANTS"
-          :key="item.id"
-          class="option"
-          type="button"
-          :class="{ on: pick === item.id }"
-          @click="pick = item.id"
-        >
-          {{ item.label }}
-        </button>
-      </div>
-    </div>
-
-    <p class="option-note">{{ variant.note }}</p>
-
-    <div class="row">
-      <span class="row-label">Fog</span>
-      <div class="options">
-        <button
-          v-for="mode in FOG_MODES"
-          :key="mode.id"
-          class="option"
-          type="button"
-          :class="{ on: fogMode === mode.id }"
-          @click="fogMode = mode.id"
-        >
-          {{ mode.label }}
-        </button>
-      </div>
-    </div>
-
     <div class="stage-wrap">
       <LogoStage
         ref="stageRef"
-        :key="`${variant.id}-${round}`"
-        :entrance="variant.entrance"
+        :key="round"
         :logo="showLogo"
         :halo="showHalo"
-        :fog="fogMode"
+        :ring="showRing"
         :shutter="showShutter"
         :snap="false"
       />
@@ -207,58 +148,6 @@ function onExport() {
 .replay:hover {
   color: var(--acc);
   border-color: var(--acc);
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.row-label {
-  min-width: 74px;
-  font: 500 11px var(--font-mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--fg-3);
-}
-
-.options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.option {
-  padding: 10px 14px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--fg-2);
-  font: 500 13px var(--font-mono);
-  cursor: pointer;
-  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-}
-
-.option:hover {
-  color: var(--fg);
-}
-
-.option.on {
-  color: var(--on-acc);
-  background: var(--acc);
-  border-color: var(--acc);
-}
-
-/* It holds a line whether the note wraps or not, so the stage below never jumps
-   when the option changes. */
-.option-note {
-  margin: 0;
-  min-height: 22px;
-  font: 400 13px var(--font-sans);
-  line-height: 1.6;
-  color: var(--fg-3);
 }
 
 .stage-wrap {
