@@ -1,12 +1,14 @@
 <script setup>
 /*
-  The custom cursor: a solid dot that tracks the mouse exactly, and a ring that
-  trails behind it and opens up over anything clickable.
+  The custom cursor: a solid dot that tracks the mouse exactly, a ring that
+  trails behind it and opens up over anything clickable, and — over the blind —
+  an arrow that trails the ring in turn.
 
-  The trailing is not done in JavaScript. Both elements get the same position
-  every frame; the ring simply has a 0.28s transition on `transform`, so the
-  browser interpolates its way there while the dot arrives instantly. One line
-  of CSS instead of a spring simulation.
+  The trailing is not done in JavaScript. Every element gets the same position
+  every frame; each simply carries a longer transition on `transform` than the
+  one before it, so the browser interpolates its way there while the dot arrives
+  instantly. One line of CSS per link of the chain, no spring simulation: the
+  dot leads, the ring follows at 0.28s, the arrow at 0.42s.
 
   The native cursor is hidden by the [data-hide-cursor] rule in tokens.css,
   which also reaches descendants — links and buttons ship their own
@@ -30,9 +32,9 @@ const props = defineProps({
 const enabled = isPointerDevice()
 const dot = ref(null)
 const ring = ref(null)
+const hintBox = ref(null)
 
-// The ring's open/closed state changes rarely, so it is a class toggle rather
-// than a style write every frame.
+// These change rarely, so they are class toggles rather than per-frame style writes.
 let over = false
 let idle = false
 let lastHint = null
@@ -40,9 +42,10 @@ let lastHint = null
 usePointer((pointer) => {
   const move = `translate3d(${pointer.x}px, ${pointer.y}px, 0)`
   if (dot.value) dot.value.style.transform = move
+  if (hintBox.value) hintBox.value.style.transform = move
 
   /*
-    Gone, not frozen, while the pointer is outside the page. Both elements hide
+    Gone, not frozen, while the pointer is outside the page. Every element hides
     together through one class, and only when the state actually changes.
   */
   const away = !pointer.active
@@ -50,6 +53,7 @@ usePointer((pointer) => {
     idle = away
     dot.value?.classList.toggle('idle', away)
     ring.value?.classList.toggle('idle', away)
+    hintBox.value?.classList.toggle('idle', away)
   }
 
   /*
@@ -62,8 +66,8 @@ usePointer((pointer) => {
   const hot = Boolean(el?.closest(props.interactiveSelector))
   /*
     Over the blind the cursor becomes the hint and nothing else: the dot steps
-    aside and the ring carries an arrow. Up while the blind is closed, down once
-    the coil at its head is the thing left to press.
+    aside and the arrow stands in. Up while the blind is closed, down once the
+    coil at its head is the thing left to press.
   */
   const hint = el?.closest('.shutter:not(.open)')
     ? 'up'
@@ -81,8 +85,8 @@ usePointer((pointer) => {
 
   if (hint !== lastHint) {
     lastHint = hint
-    ring.value?.classList.toggle('hint', hint !== null)
-    ring.value?.classList.toggle('down', hint === 'down')
+    hintBox.value?.classList.toggle('hint', hint !== null)
+    hintBox.value?.classList.toggle('down', hint === 'down')
     dot.value?.classList.toggle('hint', hint !== null)
   }
 })
@@ -90,7 +94,8 @@ usePointer((pointer) => {
 
 <template>
   <template v-if="enabled">
-    <div ref="ring" class="cursor-ring" aria-hidden="true">
+    <div ref="ring" class="cursor-ring" aria-hidden="true" />
+    <div ref="hintBox" class="cursor-hint-wrap" aria-hidden="true">
       <span class="cursor-hint">↑</span>
     </div>
     <div ref="dot" class="cursor-dot" aria-hidden="true" />
@@ -99,12 +104,13 @@ usePointer((pointer) => {
 
 <style scoped>
 .cursor-dot,
-.cursor-ring {
+.cursor-ring,
+.cursor-hint-wrap {
   position: fixed;
   top: 0;
   left: 0;
   pointer-events: none;
-  /* Parked offscreen until the first mousemove, so neither flashes at 0,0. */
+  /* Parked offscreen until the first mousemove, so nothing flashes at 0,0. */
   transform: translate3d(-200px, -200px, 0);
 }
 
@@ -129,13 +135,26 @@ usePointer((pointer) => {
   transition:
     opacity 0.22s ease,
     transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .cursor-ring.hot {
   opacity: 1;
+}
+
+/*
+  The arrow's own box: same size and centring as the ring, so it sits inside it
+  at rest, but with a longer transform transition it is a beat behind — the same
+  chase the ring runs on the dot, one link further along.
+*/
+.cursor-hint-wrap {
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .cursor-hint {
@@ -151,13 +170,13 @@ usePointer((pointer) => {
   line-height: 1;
 }
 
-.cursor-ring.hint .cursor-hint {
+.cursor-hint-wrap.hint .cursor-hint {
   opacity: 1;
   transform: translateY(0) scale(1) rotate(0deg);
 }
 
 /* The same arrow, turned: the coil can only go down. */
-.cursor-ring.down .cursor-hint {
+.cursor-hint-wrap.down .cursor-hint {
   transform: translateY(0) scale(1) rotate(180deg);
 }
 
@@ -169,7 +188,8 @@ usePointer((pointer) => {
 /* After .hot on purpose: with equal specificity, this is the rule that wins
    while the pointer is outside the page, whatever the ring was over before. */
 .cursor-dot.idle,
-.cursor-ring.idle {
+.cursor-ring.idle,
+.cursor-hint-wrap.idle {
   opacity: 0;
 }
 
@@ -181,7 +201,8 @@ usePointer((pointer) => {
 */
 @media (max-width: 900px), (hover: none) {
   .cursor-dot,
-  .cursor-ring {
+  .cursor-ring,
+  .cursor-hint-wrap {
     display: none;
   }
 }
@@ -190,7 +211,8 @@ usePointer((pointer) => {
    theirs around the page. */
 @media (prefers-reduced-motion: reduce) {
   .cursor-dot,
-  .cursor-ring {
+  .cursor-ring,
+  .cursor-hint-wrap {
     display: none;
   }
 }
