@@ -1,8 +1,8 @@
 <script setup>
 /*
   The custom cursor: a solid dot that tracks the mouse exactly, a ring that
-  trails behind it and opens up over anything clickable, and — over the blind —
-  an arrow that trails the ring in turn.
+  trails behind it and opens up over anything clickable, and — over the blind or
+  the mark — a hint glyph that trails the ring in turn.
 
   The trailing is not done in JavaScript. Every element gets the same position
   every frame; each simply carries a slightly longer transition on `transform`
@@ -66,15 +66,19 @@ usePointer((pointer) => {
   const el = document.elementFromPoint(pointer.x, pointer.y)
   const hot = Boolean(el?.closest(props.interactiveSelector))
   /*
-    Over the blind the cursor becomes the hint and nothing else: the dot steps
-    aside and the arrow stands in. Up while the blind is closed, down once the
-    coil at its head is the thing left to press.
+    Over the blind or the stage the cursor becomes the hint and nothing else:
+    the dot steps aside and a glyph stands in — up while the blind is closed,
+    down once the coil is the thing left to press, and the turn gesture once the
+    blind is up and the mark is what the drag grabs. The coil is checked before
+    the stage because it lives inside it.
   */
   const hint = el?.closest('.shutter:not(.open)')
     ? 'up'
     : el?.closest('.shutter.open .roll')
       ? 'down'
-      : null
+      : el?.closest('.stage')
+        ? 'rotate'
+        : null
 
   if (ring.value) {
     ring.value.style.transform = `${move} scale(${hot ? 1 : 0.55})`
@@ -88,6 +92,7 @@ usePointer((pointer) => {
     lastHint = hint
     hintBox.value?.classList.toggle('hint', hint !== null)
     hintBox.value?.classList.toggle('down', hint === 'down')
+    hintBox.value?.classList.toggle('rotate', hint === 'rotate')
     dot.value?.classList.toggle('hint', hint !== null)
   }
 })
@@ -97,7 +102,7 @@ usePointer((pointer) => {
   <template v-if="enabled">
     <div ref="ring" class="cursor-ring" aria-hidden="true" />
     <div ref="hintBox" class="cursor-hint-wrap" aria-hidden="true">
-      <span class="cursor-hint">↑</span>
+      <span class="cursor-hint" />
     </div>
     <div ref="dot" class="cursor-dot" aria-hidden="true" />
   </template>
@@ -163,25 +168,35 @@ usePointer((pointer) => {
   color: var(--mark);
   opacity: 0;
   /* Tucked back and small; it swings out whenever the hint arrives. Same
-     entrance on either blind state, so only the arrow's angle says which. */
-  transform: translateY(4px) scale(0.4) rotate(0deg);
+     entrance whichever it is, so only the glyph says what it wants. */
+  transform: translateY(4px) scale(0.4);
   transition:
     opacity 0.18s ease,
     transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   line-height: 1;
 }
 
+.cursor-hint::before {
+  content: '↑';
+}
+
 .cursor-hint-wrap.hint .cursor-hint {
   opacity: 1;
-  transform: translateY(0) scale(1) rotate(0deg);
+  transform: translateY(0) scale(1);
 }
 
-/* The same arrow, turned: the coil can only go down. */
-.cursor-hint-wrap.down .cursor-hint {
-  transform: translateY(0) scale(1) rotate(180deg);
+/* The coil only goes down. */
+.cursor-hint-wrap.down .cursor-hint::before {
+  content: '↓';
 }
 
-/* Over the blind the dot steps aside so the arrow is the only thing there. */
+/* The mark takes a drag: side to side, the axis with the room to give. */
+.cursor-hint-wrap.rotate .cursor-hint::before {
+  content: '↔';
+}
+
+/* Over the blind or the stage the dot steps aside so the glyph is the only
+   thing there. */
 .cursor-dot.hint {
   opacity: 0;
 }

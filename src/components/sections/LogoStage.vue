@@ -343,6 +343,7 @@ defineExpose({ exportModel })
     <div
       ref="stage"
       class="stage"
+      data-interactive
       @pointerdown="onDown"
       @pointerup="onUp"
       @pointercancel="onUp"
