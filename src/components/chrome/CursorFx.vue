@@ -89,11 +89,16 @@ usePointer((pointer) => {
         ? 'rotate'
         : null
 
+  /*
+    The ring opens over anything clickable, and over the hint too: the mark is a
+    canvas, not a control, so its hint has to ask for the ring itself.
+  */
+  const open = hot || hint !== null
   if (ring.value) {
-    ring.value.style.transform = `${move} scale(${hot ? 1 : 0.55})`
-    if (hot !== over) {
-      ring.value.classList.toggle('hot', hot)
-      over = hot
+    ring.value.style.transform = `${move} scale(${open ? 1 : 0.55})`
+    if (open !== over) {
+      ring.value.classList.toggle('hot', open)
+      over = open
     }
   }
 
@@ -103,8 +108,6 @@ usePointer((pointer) => {
     hintBox.value?.classList.toggle('down', hint === 'down')
     hintBox.value?.classList.toggle('rotate', hint === 'rotate')
     dot.value?.classList.toggle('hint', hint !== null)
-    // Over the mark the 360 mark is the whole cursor: no ring around it.
-    ring.value?.classList.toggle('bare', hint === 'rotate')
   }
 })
 </script>
@@ -156,10 +159,6 @@ usePointer((pointer) => {
 
 .cursor-ring.hot {
   opacity: 1;
-}
-
-.cursor-ring.bare {
-  opacity: 0;
 }
 
 /*
@@ -215,8 +214,8 @@ usePointer((pointer) => {
 }
 
 .cursor-hint-wrap.rotate .cursor-hint {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   background: var(--mark);
   -webkit-mask: url('/assets/img/360icon.svg') center / contain no-repeat;
   mask: url('/assets/img/360icon.svg') center / contain no-repeat;
