@@ -597,6 +597,12 @@ defineExpose({ exportModel })
     0 3px 5px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 var(--metal-dark);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+
+.handle:hover {
+  transform: translateX(-50%) translateY(-3px);
 }
 
 /* The notch: a small accent-coloured rectangle in the middle of the handle, with
