@@ -140,22 +140,24 @@ been the subject of GDPR rulings in the EU.
 
 Both were considered and both are held, for the same reason: on this site nothing arrives late
 enough to deserve either. The honest version of a loader is a real percentage tied to a real
-download, which is what the 3D model will have through `THREE.LoadingManager`.
+download, and the 3D mark now has one: `THREE.LoadingManager` drives the percentage the stage shows
+while the GLB lands (decision 75). A skeleton is still held — real project images, once they exist,
+would be the first thing to earn one.
 
 ### 75. The hero stage is a real 3D logo, and it is metal only
 **Status:** active · **Archive:** 75
 
-The mark inside the stage is a WebGL scene: the same vector path as the favicon, parsed by Three's
-`SVGLoader` and extruded. TresJS renders it, lazy through `defineAsyncComponent`, and never below
-900px (decision 37).
+The mark inside the stage is a WebGL scene. The mesh is a **GLB**
+(`public/assets/model/krub-logo.glb`, ~6k triangles) modelled in Blender and loaded as precomputed
+buffers — nothing is extruded in the browser. It arrives with two meshes: `krub-logo_front` takes the
+accent colour and the rest a dark neutral. TresJS renders it, lazy through `defineAsyncComponent`,
+and never below 900px (decision 37).
 
+- **A real download reports its progress.** `THREE.LoadingManager` drives the percentage the stage
+  shows while the GLB lands (decision 54).
 - **Metal, and only metal.** A crystal finish (`MeshPhysicalMaterial` with `transmission`) was built
-  and then removed. Transmission refracts what is *behind* the object, and the mark is a flat
-  extrusion: at normal incidence its Fresnel is about 5%, so it read as a dark mass. The polished
-  `MeshStandardMaterial` is the finish that earned its place.
-- **The walls are welded and re-normalled.** `ExtrudeGeometry` does not share vertices between the
-  segments of a curve, so every facet carries its own normal. Dropping the normals, `mergeVertices`
-  by position and `computeVertexNormals` averages them across the curve without rounding the edges.
+  and then removed. Transmission refracts what is *behind* the object, and the mark read as a dark
+  mass. The finish that earned its place is in decision 82.
 - **The loop is paused off-screen** (IntersectionObserver at 60%), framed at 24fps and capped at
   1.5x DPR.
 
@@ -279,8 +281,8 @@ run it off the screen.
 ### 81. The frame is a slim brushed-metal band, and the badge hangs outside it
 **Status:** active · **Archive:** 81
 
-- **The frame is a slim brushed-metal band** — 12px, opaque, over the canvas — drawn in the theme's
-  own greys (`--fg` mixed into `--ink`) rather than a colour.
+- **The frame is a slim brushed-metal band** — 12px, opaque, over the canvas — drawn from the
+  `--metal` / `--metal-dark` tokens (a neutral grey pair with its own value per theme), not a colour.
 - **The entrance glow is CSS, not WebGL.** It is an `inset` shadow on a wrapper inside the frame now:
   hard on the frame's inner edge, fading inward, for nothing.
 
@@ -290,30 +292,31 @@ run it off the screen.
 - **The idle breathes on both axes** — a wider, quicker sway than the single slow one it had.
 - **The drag is constrained on both axes**, the vertical capped harder (0.45 rad against the
   horizontal's 1.1), and **cleared on release**.
-- **The finish is a matcap** (`MeshMatcapMaterial` and one 256px texture), not a lit material. The
-  lighting and the reflections are baked into the image, so there is no environment, no PMREM, no
-  BRDF and no light in the scene at all.
-- **The matcap's range is the whole tuning, and its ceiling is the flat face.** The accent is
-  multiplied over it by `material.color`. The extrusion's front face is one normal from edge to edge,
-  and a matcap samples by the normal alone, so that face is a single flat colour whatever the matcap
-  holds.
+- **The finish is PBR** (`MeshStandardMaterial`): metallic, low roughness, with the environment map
+  `SceneRig` generates from a `RoomEnvironment`, so the mark reflects the room and the accent is
+  carried on `material.color` as the palette changes.
+- **A matcap was the earlier finish and could not shade the front face.** A matcap samples by the
+  normal alone, and the mark's front is one normal from edge to edge, so that face came out a single
+  flat colour whatever the matcap held. An environment map reads along the view vector and puts a
+  gradient on it. The cost is a PMREM render target instead of a small texture.
 
 ### 83. The tube strikes once the scene is up
 **Status:** active · **Archive:** 83
 
-- **The glow is dark until the scene has reported ready and the flat fallback has faded**, then it
-  strikes — a flick, a pause, two flicks, then it holds — and only then starts to breathe.
-- **The strike is held back by two frames**, not counted straight from `ready`: the geometry build
-  blocks the main thread for a moment just after.
+- **The glow is dark until the scene has reported ready**, then it strikes — a flick, a pause, two
+  flicks, then it holds — and only then starts to breathe. With the blind, `ready` is not enough on
+  its own: the strike waits for the reveal too (decision 86).
+- **The strike is held back by two frames**, not counted straight from `ready`, so the first frame is
+  up and painted before the count starts.
 
-### 86. A shutter opens the stage, once, on a click
+### 86. A roller blind covers the stage, and opens and closes on a click
 **Status:** active · **Archive:** 86
 
 - **The stage starts closed.** A roller blind of metal slats fills the opening and the room builds
   behind it, which makes the blind a loading cover that is not a fake loader.
-- **The blind is CSS, not an image.** Drawn from `--fg` into `--ink` the way the frame is, the slats
-  lift as one piece: the whole stack translates up out of the opening and the coil at the top grows
-  as it goes.
+- **The blind is CSS, not an image.** Drawn from the metal tokens the way the frame is, the slats
+  lift as one piece and come back down the same way: the whole stack translates out of the opening
+  and the coil at the top grows as it goes.
 - **A slat is flat sheet, and all of its depth is in the joint.** The face is nearly flat with one
   wide reflection lying across its middle, and no lateral bevel or shadow. The joint is three rules:
   the crisp lit edge of the bar above, the hard three-pixel shadow that bar drops on this one, and
@@ -323,12 +326,34 @@ run it off the screen.
   than sit behind them.
 - **The coil is the wound sheet, not a bar.** Round-under, lit across its middle, with the edge of
   every wrap as a fine line.
-- **A click opens it; a drag does not.** The same surface later carries the mark that spins, so a
-  press that moved more than 6px is read as a drag and is not counted as the click.
+- **A click opens it; a click on the coil closes it.** The same surface later carries the mark that
+  spins, so a press that moved more than 6px is read as a drag and is not the click. With the blind
+  up, only the coil takes a pointer — the rest of the button is inert — and the stage steps aside
+  over it, because its own drag capture would otherwise retarget the click away.
 - **It is a real button.** Focusable, and labelled from the locales (`a11y.raiseShutter`), so the
-  keyboard opens it too. Once up it is `aria-hidden`, out of the tab order and takes no pointer.
+  keyboard opens it too. Once up it is `aria-hidden` and out of the tab order and takes no pointer,
+  except the coil: that stays pressable so the blind can be put back down.
 - **The glow waits for the reveal.** With the blind the reveal *is* the entrance: the tube strikes
   after the blind lifts rather than after a fade that played where nobody could see it.
+
+### 87. The cursor becomes the gesture over the hero
+**Status:** active · **Archive:** — (new, after the split)
+
+Over the blind, the coil and the mark, the custom cursor stops being a dot with a ring and becomes
+the gesture itself, with the dot stepping aside so the hint is the only thing there:
+
+- **Closed blind: an up arrow.** The blind can be raised, so the ring carries `↑`.
+- **Coil: the same arrow turned down.** With the blind up the coil is the thing left to press, so the
+  glyph points `↓`.
+- **The mark: a 360 mark.** The mark takes a drag, so the ring carries the `360icon.svg` mark, masked
+  in the cursor's colour at 18px. It is confined to the opening the shutter occupies — the frame's
+  12px band is not part of the gesture — so it does not light on the frame.
+- **The ring trails the dot, and the hint trails the ring.** Each element carries a slightly longer
+  `transform` transition than the one before it (0.28s, then 0.32s): the same chase, one link further.
+- **The colour is `--acc-solid`, not `--mark`.** The cursor is not text, and `--mark` darkens in the
+  light theme for legibility, which left the ring nearly invisible on the light metal.
+- **The scene is gated under `navigator.webdriver`** so the e2e suite never holds a WebGL context; the
+  2D mark stands in there instead (decision 77).
 
 ---
 

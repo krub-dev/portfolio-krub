@@ -17,32 +17,49 @@ not tasks and have no checkbox.
 This merges the pending list of 2026-09-16 with what used to live in the roadmap's "Later"
 section, folded together where they overlapped.
 
-## Where things stand — 2026-09-23
+## Where things stand — 2026-09-28
 
 A short snapshot so resuming work does not mean reading the whole file. The checklist below is
 the source of truth; this is the index into it.
 
-`main` is what `krub.dev` serves: the step-12 build. `dev` is well ahead of it and holds
-everything built since launch — the accent palettes and the appearance control, the reworked
-Stack and Contact, the contact form, the projects rail, the testimonials pager, the 404, the
-self-hosted fonts, the interactive grid cell, the CV pipeline (four PDFs, light and dark), and
-the refreshed site content with the certifications tab. None of it is published yet
-(`git log main..dev` lists it).
+`main` is what `krub.dev` serves; `dev` is where the work happens. Since launch the site gained the
+accent palettes and the appearance control, the reworked Stack and Contact, the contact form, the
+projects rail, the testimonials pager, the 404, the self-hosted fonts, the interactive grid cell, the
+CV pipeline (four PDFs, light and dark), the refreshed content with the certifications tab, and the
+3D hero — the GLB mark, the portal room, the roller blind and the cursor hints. The 3D branch is
+merged into both; `git log main..dev` lists whatever else is on `dev` but not yet published.
 
 **Before `dev` can become `main`:**
 
-1. Replace or delete the two placeholder testimonials, or turn `config.showTestimonials` off. The
-   pager itself is reworked now (one quote at a time, dots instead of the arrows, read-more); only
-   the content is left.
-2. The pre-publication documentation review.
-3. Re-measure Lighthouse against the merged deployment.
+1. The pre-publication documentation review.
+2. Re-measure Lighthouse against the merged deployment.
+3. Real screenshots for the projects and the Open Graph artwork.
 
-`WEB3FORMS_KEY` is set in Vercel, so the contact form works in production.
+The contact form is the one thing actually broken in production — see the **Contact form** group
+below.
 
-**The substantial work still open:** the real glTF model for the 3D logo (the extruded SVG mark
-ships, but the Blender export and its loading percentage do not), the structured-data refresh, the
-LinkedIn update, the GitHub profile README, the prose reread, Bing Webmaster Tools, the Vercel DNS
-change, and making the repository public.
+**The substantial work still open:** the contact form (production failure, privacy, antispam), the
+backlight behind the mark without a plane, the tunnel's far end, the project screenshots and Open
+Graph artwork, the LinkedIn update, the GitHub profile README, the prose reread, Bing Webmaster Tools,
+the Vercel DNS change, and making the repository public.
+
+---
+
+## Contact form
+
+The form is built and lives in Contact; it posts to `/api/contact`, a Vercel function holding
+`WEB3FORMS_KEY`. What is left is making it survive production and the law.
+
+- [ ] **The form fails in production.** `GET /api/contact` already answers 405 from the deployed
+  function, so the route is fine and the `rewrites` catch-all is not swallowing it. The failure is
+  inside the handler: either `WEB3FORMS_KEY` is missing for the **Production** environment in Vercel
+  (the handler answers `not-configured`), or Web3Forms rejects the submission (`send-failed`).
+  Reproduce on krub.dev with the Network panel open and read the POST's body to tell which.
+- [ ] **A privacy notice for the form (GDPR).** A short note under the form, a `/privacy` page, and a
+  consent checkbox — the three together, since the name, email and message are personal data.
+- [ ] **Rate-limit the endpoint and add Turnstile.** The honeypot alone is not enough. The limit
+  belongs in `api/contact.js` (per IP, per window); Cloudflare Turnstile, verified server-side, is
+  the captcha — no cookies, no visible puzzle, and the DNS already sits on Cloudflare.
 
 ---
 
@@ -127,6 +144,10 @@ change, and making the repository public.
   the real deployment after the merge, together with the pre-publication documentation review. The
   one thing that got worse is the TBT — the bundle grew with the new sections — so it is worth a
   second look then. **(owner)**
+- [ ] **An address on the domain, like `work@krub.dev`.** Cloudflare Email Routing forwards inbound
+  mail to an existing inbox for free, so receiving needs only DNS (the domain already sits on
+  Cloudflare). Sending *as* that address needs more: either Gmail's "Send mail as" over an app
+  password with SPF and DKIM records in Cloudflare, or a paid sender. **(owner)**
 
 ## Design and sections
 
@@ -146,13 +167,12 @@ change, and making the repository public.
   bloom. It follows the accent and the theme through `--glow-dim`, and reduced motion stops the turn
   and leaves the ring. It cost the stage a wrapper, because the glow has to paint behind it. See
   decision 52.
-- [x] **The 3D logo.** Built on 2026-09-24: the hero mark is a WebGL scene now — the favicon SVG
-  path extruded into a polished-metal object that tilts, spins and zooms, with the 2D mask kept as
-  the fallback. TresJS (github.com/Tresjs/tres), lazy and never mounted below 900px. The crystal
-  finish and the in-scene backdrop were both built and then removed. See decisions 75–77. **What
-  is still open is the real model:** the mark is a procedural extrusion of the SVG, not the Blender
-  export (glTF/GLB), and because there is no download to report there is no `THREE.LoadingManager`
-  percentage or arrival shimmer yet — see the skeleton note below and decision 54.
+- [x] **The 3D logo.** Built on 2026-09-24 and finished with the real model: the hero mark is a
+  WebGL scene — the Blender GLB (`public/assets/model/krub-logo.glb`, ~6k tris) rendered as polished
+  metal that tilts, spins and zooms, with the 2D mask kept as the fallback. TresJS
+  (github.com/Tresjs/tres), lazy and never mounted below 900px. The crystal finish, the in-scene
+  backdrop and the backlight were all built and then removed, and the loader is a real
+  `THREE.LoadingManager` percentage. See decisions 75–83 and 86–87.
 - [x] **Rethink the stack section.** Done on 2026-09-17: four blocks in two columns, tiles from 44px
   to 60px and labels from 11px to 13px (48px tiles on mobile, where 60px was eating the screen), the
   grid monochrome at rest — each logo drawn twice, a held-back grey copy under a colour one — and the
@@ -224,6 +244,19 @@ change, and making the repository public.
   into `--ink`, so the end rose above the background, did lift it (12 to 33) but read as a square panel
   of mist at the end of the tunnel, so it was dropped. Still open: a shape that does not read as a lit
   panel — spacing the fog on the projection, or lighting the end some other way.
+- [ ] **The project modal's media is cluttered.** The image is small and the carousel carries big
+  arrows and an `IMAGEN 1 / 4 · NAME` label over it. Replace them with dots, as the other pagers do,
+  and give the media a larger, taller slot.
+- [ ] **Fixed blur bands.** A band under the navbar and another above the footer, from the hero down
+  (not over the hero), that blur the content as it passes behind them. On a phone the navbar is a
+  centred pill, so the band reads at its sides. Watch `backdrop-filter`: it makes the element a
+  backdrop root, which is what once stopped the navbar's settings panel from matching the bar
+  (decision 48).
+- [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
+  already has his "acho" (decision 51). Fetched on first use, never preloaded.
+- [ ] **Finish the design-system page.** The page in the site's own style that documents the tokens,
+  components and patterns is out of date and little iterated — the one Claude Design seeded. Bring it
+  up to what the site is now.
 
 ## Mobile and responsive
 
@@ -252,6 +285,13 @@ change, and making the repository public.
 - [x] **The certifications tab on a phone.** Done: the pills were the problem, not the row. As
   folder labels on a hairline track the three tabs fit a phone at 12px with no tracking (decision
   73), and the long certification names wrap in the single-column timeline below 900px.
+- [ ] **The badge on /me on a phone.** It sits under the photo, left-aligned but with a gap that
+  reads as stray. Put it bottom-left of the photo — beside it, not stamped inside — and let the photo
+  take more width on a phone.
+- [ ] **A movable navbar on a phone.** Let the compact bar be dragged: it snaps up or down and can
+  also be moved sideways within the gutter, and the position is remembered in `localStorage` — so a
+  visitor the bar gets in the way of can move it. Mobile only for now. Watch the footer and the
+  lemon, which already own the bottom of the screen.
 
 All three were real when the roadmap's "Later" list was written and are closed now; the group is
 kept as the record rather than deleted.
@@ -296,3 +336,9 @@ Not tasks. No urgency and no order — written down so they do not evaporate.
   properties, no new listeners); the magnet is not (CSS cannot bend a line, so pulling the lines
   toward the cursor means rebuilding the grid as ~33 DOM or SVG lines and transforming them per
   frame, plus a decision about the two crossfading instances and the mask).
+- **A blog or case studies.** A home for the longer write-up each project wants and the modal's body
+  cannot hold. Static, from `src/data/`, one file per article.
+- **Rethink the background.** Keep the grid in the hero — it is now tied to the room's own grid
+  (decision 80) — fade to a gradient after it, and give Contact something of its own at the close: a
+  shape rather than another grid. A sketch; the grid is too woven in to move lightly.
+- **Meetings (Cal.com).** An embed to book a slot, if it ever earns a place beside the form.
