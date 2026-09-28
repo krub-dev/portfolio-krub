@@ -16,7 +16,7 @@
 */
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
-import { Box3, Group, MeshStandardMaterial, Vector3 } from 'three'
+import { Box3, Color, Group, MeshStandardMaterial, Vector3 } from 'three'
 
 const props = defineProps({
   logoGroup: { type: Object, required: true },
@@ -47,12 +47,15 @@ const SWAY_X = 0.1
 const BREATH = 0.7
 
 const accent = ref('#ffc800')
+// The "off" colour: dark grey in dark theme, light grey in light theme.
+// Matches the page background so the logo reads as part of the scene before
+// the halo lights it up.
+const off = ref('#1a1a1a')
 let smoothSpin = 0
 let smoothSpinY = 0
-
-// Pop animation when the halo lights up: scale and envMapIntensity bump.
-let popScale = 1
-let popIntensity = 1.2
+// Strike progress: 0 = off, 1 = fully lit. Driven by the same timing as
+// glowStrike in LogoStage (flickers at 8%, 44%, 58%, 80%, hold at 100%).
+let strikeProgress = 0
 
 /*
   Two materials: the front face gets the accent colour, the back gets a dark
@@ -132,41 +135,43 @@ watch(
   },
 )
 
-// When the halo lights up, the logo does a quick "pop": scale bumps to 1.05 and
-// envMapIntensity to 2.0, then eases back. Simulates a flexo turning on.
+// When the halo lights up, the logo colour follows the same flicker pattern
+// as glowStrike: off → flicker → off → flicker → flicker → off → hold.
+// The colour interpolates between off (dark/light grey) and the accent.
 watch(
   () => props.haloOn,
   (on) => {
-    if (!on) return
-    
-    const start = performance.now()
-    const duration = 400
-    
-    const animate = (now) => {
-      const elapsed = now - start
-      const progress = Math.min(elapsed / duration, 1)
-      // Ease out cubic
-      const ease = 1 - Math.pow(1 - progress, 3)
-      
-      if (progress < 0.5) {
-        const t = ease * 2
-        popScale = 1 + 0.05 * t
-        popIntensity = 1.2 + 0.8 * t
-      } else {
-        const t = (ease - 0.5) * 2
-        popScale = 1.05 - 0.05 * t
-        popIntensity = 2.0 - 0.8 * t
-      }
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate)
-      } else {
-        popScale = 1
-        popIntensity = 1.2
-      }
+    if (!on) {
+      strikeProgress = 0
+      return
     }
-    
-    requestAnimationFrame(animate)
+    // glowStrike is 2.1s with steps at 8, 14, 36, 44, 50, 58, 64, 80, 100%.
+    // We mirror those steps: on at 8-14, 44-50, 58-64, 80-100.
+    const steps = [
+      { at: 0.08, on: true },
+      { at: 0.14, on: false },
+      { at: 0.44, on: true },
+      { at: 0.50, on: false },
+      { at: 0.58, on: true },
+      { at: 0.64, on: false },
+      { at: 0.80, on: true },
+      { at: 1.00, on: true },
+    ]
+    const duration = 2100
+    const start = performance.now()
+
+    const tick = (now) => {
+      const elapsed = now - start
+      const t = Math.min(elapsed / duration, 1)
+      let lit = false
+      for (const step of steps) {
+        if (t >= step.at) lit = step.on
+        else break
+      }
+      strikeProgress = lit ? 1 : 0
+      if (t < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
   },
 )
 
@@ -180,18 +185,29 @@ onBeforeUnmount(() => renderer.loop.stop())
 // Follow the appearance control: the accent is written on <html>, and the theme
 // changes the same attributes.
 function readAccent() {
-  const value = getComputedStyle(document.documentElement).getPropertyValue('--acc-solid')
-  if (value) accent.value = value.trim()
+  const css = getComputedStyle(document.documentElement)
+  const acc = css.getPropertyValue('--acc-solid').trim()
+  if (acc) accent.value = acc
+  // The off colour matches the page background so the logo blends in before
+  // the halo lights it. Dark theme: near-black. Light theme: near-white.
+  const ink = css.getPropertyValue('--ink').trim()
+  if (ink) off.value = ink
 }
 const appearance = new MutationObserver(readAccent)
 appearance.observe(document.documentElement, { attributes: true })
 onBeforeUnmount(() => appearance.disconnect())
 readAccent()
 
+const offColor = new Color()
+const accentColor = new Color()
+const currentColor = new Color()
+
 onBeforeRender(({ elapsed, delta }) => {
-  frontMaterial.color.set(accent.value)
-  frontMaterial.envMapIntensity = popIntensity
-  backMaterial.envMapIntensity = popIntensity
+  // Interpolate between off colour and accent based on strike progress.
+  offColor.set(off.value)
+  accentColor.set(accent.value)
+  currentColor.lerpColors(offColor, accentColor, strikeProgress)
+  frontMaterial.color.copy(currentColor)
 
   // The drag angle, then the magnetic return: held by the pointer while
   // dragging, easing back to zero the moment it is let go. On both axes.
@@ -213,9 +229,6 @@ onBeforeRender(({ elapsed, delta }) => {
       smoothSpinY -
       group.rotation.x) *
     ease
-
-  // Apply the pop scale on top of the base scale.
-  group.scale.set(s * popScale, s * popScale, s * popScale)
 })
 </script>
 
