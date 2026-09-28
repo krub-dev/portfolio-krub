@@ -5,10 +5,11 @@
   an arrow that trails the ring in turn.
 
   The trailing is not done in JavaScript. Every element gets the same position
-  every frame; each simply carries a longer transition on `transform` than the
-  one before it, so the browser interpolates its way there while the dot arrives
-  instantly. One line of CSS per link of the chain, no spring simulation: the
-  dot leads, the ring follows at 0.28s, the arrow at 0.42s.
+  every frame; each simply carries a slightly longer transition on `transform`
+  than the one before it, so the browser interpolates its way there while the dot
+  arrives instantly. One line of CSS per link of the chain, no spring simulation:
+  the dot leads, the ring follows at 0.28s, the arrow at 0.32s — a hair behind, a
+  hint of inertia rather than a lag you watch.
 
   The native cursor is hidden by the [data-hide-cursor] rule in tokens.css,
   which also reaches descendants — links and buttons ship their own
@@ -143,8 +144,8 @@ usePointer((pointer) => {
 
 /*
   The arrow's own box: same size and centring as the ring, so it sits inside it
-  at rest, but with a longer transform transition it is a beat behind — the same
-  chase the ring runs on the dot, one link further along.
+  at rest, but a hair slower — the same chase the ring runs on the dot, one link
+  further along and barely there.
 */
 .cursor-hint-wrap {
   width: 40px;
@@ -154,7 +155,7 @@ usePointer((pointer) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .cursor-hint {
