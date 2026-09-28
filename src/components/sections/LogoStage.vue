@@ -496,15 +496,19 @@ defineExpose({ exportModel })
   padding: 0;
   border: 0;
   overflow: hidden;
+  /* Transparent, and it has to be said: a <button> ships the UA's own grey face,
+     which would paint over the scene the moment the slats clear it. The slats are
+     the cover; the button is only the surface the gestures land on. */
+  background: transparent;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
 }
 
 /*
-  No background of its own: the slats are the cover, so whatever is behind shows
+  No panel of its own: the slats are the cover, so whatever is behind shows
   through the opening the moment they clear it — on the way up and on the way
-  down alike. An opaque panel here would flash grey across the reveal.
+  down alike.
 */
 .shutter.open {
   pointer-events: none;
