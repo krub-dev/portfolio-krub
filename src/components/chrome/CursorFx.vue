@@ -94,6 +94,8 @@ usePointer((pointer) => {
     hintBox.value?.classList.toggle('down', hint === 'down')
     hintBox.value?.classList.toggle('rotate', hint === 'rotate')
     dot.value?.classList.toggle('hint', hint !== null)
+    // Over the mark the 360 mark is the whole cursor: no ring around it.
+    ring.value?.classList.toggle('bare', hint === 'rotate')
   }
 })
 </script>
@@ -145,6 +147,10 @@ usePointer((pointer) => {
 
 .cursor-ring.hot {
   opacity: 1;
+}
+
+.cursor-ring.bare {
+  opacity: 0;
 }
 
 /*
