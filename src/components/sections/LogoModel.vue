@@ -29,6 +29,8 @@ const props = defineProps({
   // `v-if` on the primitive rather than by unmounting, so the material and the
   // generated environment survive the toggle.
   logo: { type: Boolean, default: true },
+  // Whether the halo is lit. Triggers the "pop" animation when it turns on.
+  haloOn: { type: Boolean, default: false },
   // The environment map from SceneRig, so the metal has something to reflect.
   environment: { type: Object, default: null },
 })
@@ -47,6 +49,10 @@ const BREATH = 0.7
 const accent = ref('#ffc800')
 let smoothSpin = 0
 let smoothSpinY = 0
+
+// Pop animation when the halo lights up: scale and envMapIntensity bump.
+let popScale = 1
+let popIntensity = 1.2
 
 /*
   Two materials: the front face gets the accent colour, the back gets a dark
@@ -126,6 +132,44 @@ watch(
   },
 )
 
+// When the halo lights up, the logo does a quick "pop": scale bumps to 1.05 and
+// envMapIntensity to 2.0, then eases back. Simulates a flexo turning on.
+watch(
+  () => props.haloOn,
+  (on) => {
+    if (!on) return
+    
+    const start = performance.now()
+    const duration = 400
+    
+    const animate = (now) => {
+      const elapsed = now - start
+      const progress = Math.min(elapsed / duration, 1)
+      // Ease out cubic
+      const ease = 1 - Math.pow(1 - progress, 3)
+      
+      if (progress < 0.5) {
+        const t = ease * 2
+        popScale = 1 + 0.05 * t
+        popIntensity = 1.2 + 0.8 * t
+      } else {
+        const t = (ease - 0.5) * 2
+        popScale = 1.05 - 0.05 * t
+        popIntensity = 2.0 - 0.8 * t
+      }
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        popScale = 1
+        popIntensity = 1.2
+      }
+    }
+    
+    requestAnimationFrame(animate)
+  },
+)
+
 watch(
   () => props.running,
   (run) => (run ? renderer.loop.start() : renderer.loop.stop()),
@@ -146,6 +190,8 @@ readAccent()
 
 onBeforeRender(({ elapsed, delta }) => {
   frontMaterial.color.set(accent.value)
+  frontMaterial.envMapIntensity = popIntensity
+  backMaterial.envMapIntensity = popIntensity
 
   // The drag angle, then the magnetic return: held by the pointer while
   // dragging, easing back to zero the moment it is let go. On both axes.
@@ -167,6 +213,9 @@ onBeforeRender(({ elapsed, delta }) => {
       smoothSpinY -
       group.rotation.x) *
     ease
+
+  // Apply the pop scale on top of the base scale.
+  group.scale.set(s * popScale, s * popScale, s * popScale)
 })
 </script>
 

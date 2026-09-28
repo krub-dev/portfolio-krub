@@ -45,6 +45,8 @@ const props = defineProps({
   logo: { type: Boolean, default: true },
   // Same, for the halo the rig puts behind the mark.
   halo: { type: Boolean, default: true },
+  // Whether the halo is currently lit. Used to trigger the logo "pop" animation.
+  haloOn: { type: Boolean, default: false },
   // How the tunnel fades out with depth.
   fog: { type: String, default: 'far' },
 })
@@ -147,6 +149,7 @@ defineExpose({ logoGroup })
         :dragging="props.dragging"
         :running="onScreen && !reduced"
         :logo="props.logo"
+        :halo-on="props.haloOn"
         :environment="rig?.environment"
       />
     </TresCanvas>

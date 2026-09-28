@@ -368,6 +368,7 @@ defineExpose({ exportModel })
             :reset="resetToken"
             :logo="props.logo"
             :halo="props.halo"
+            :halo-on="armed"
             :fog="props.fog"
             @ready="ready = true"
             @progress="loadProgress = $event"
