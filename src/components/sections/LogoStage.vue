@@ -115,13 +115,13 @@ let armTimer = 0
 let failTimer = 0
 
 /*
-  The shutter, and whether it has been raised. It opens once and stays open: the
-  stage spends the rest of the visit as it always was, the mark turning under the
-  pointer.
+  The shutter, and whether it is up. A click on the closed blind raises it; a
+  click on the coil it leaves at the head lowers it again. The stage spends the
+  rest of the visit as it always was, the mark turning under the pointer.
 */
 const revealed = ref(false)
 /*
-  A press that became a drag must not also lift the blind. The same surface holds
+  A press that became a drag must not also work the blind. The same surface holds
   the mark that spins, so a click counts as a click only if the pointer barely
   moved between press and release.
 */
@@ -138,7 +138,7 @@ function onShutterClick(event) {
     shutterDownAt = null
     if (moved > DRAG_SLOP) return
   }
-  revealed.value = true
+  revealed.value = !revealed.value
 }
 
 /*
@@ -287,6 +287,9 @@ function onDown(event) {
   // The blind is over the mark: there is nothing to turn yet, and this press
   // belongs to the shutter.
   if (props.shutter && !revealed.value) return
+  // With the blind up the coil is its own control. Capturing the pointer for a
+  // drag would retarget the pointerup and steal the click that lowers it.
+  if (event.target.closest?.('.roll')) return
   // A double press puts the view back: the mark straight and the zoom home. It
   // is read here rather than with `dblclick` because the drag captures the
   // pointer, which can keep the native event from landing.
@@ -654,8 +657,14 @@ defineExpose({ exportModel })
   transition: height 1.05s cubic-bezier(0.55, 0, 0.35, 1);
 }
 
+/*
+  Once the blind is up its button takes no pointer, so the stage has its surface
+  back. The coil is the exception: it is the one thing left of the blind, and the
+  press that lowers it again belongs to it.
+*/
 .shutter.open .roll {
   height: 34px;
+  pointer-events: auto;
 }
 
 /* Reduced motion keeps the reveal but drops the roll: the blind is simply up. */

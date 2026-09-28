@@ -35,7 +35,7 @@ const ring = ref(null)
 // than a style write every frame.
 let over = false
 let idle = false
-let overShutter = false
+let lastHint = null
 
 usePointer((pointer) => {
   const move = `translate3d(${pointer.x}px, ${pointer.y}px, 0)`
@@ -60,8 +60,16 @@ usePointer((pointer) => {
   */
   const el = document.elementFromPoint(pointer.x, pointer.y)
   const hot = Boolean(el?.closest(props.interactiveSelector))
-  // Over the closed shutter the cursor becomes the hint: no dot, just the arrow.
-  const isOverShutter = Boolean(el?.closest('.shutter:not(.open)'))
+  /*
+    Over the blind the cursor becomes the hint and nothing else: the dot steps
+    aside and the ring carries an arrow. Up while the blind is closed, down once
+    the coil at its head is the thing left to press.
+  */
+  const hint = el?.closest('.shutter:not(.open)')
+    ? 'up'
+    : el?.closest('.shutter.open .roll')
+      ? 'down'
+      : null
 
   if (ring.value) {
     ring.value.style.transform = `${move} scale(${hot ? 1 : 0.55})`
@@ -71,10 +79,11 @@ usePointer((pointer) => {
     }
   }
 
-  if (isOverShutter !== overShutter) {
-    overShutter = isOverShutter
-    ring.value?.classList.toggle('hint', isOverShutter)
-    dot.value?.classList.toggle('hint', isOverShutter)
+  if (hint !== lastHint) {
+    lastHint = hint
+    ring.value?.classList.toggle('hint', hint !== null)
+    ring.value?.classList.toggle('down', hint === 'down')
+    dot.value?.classList.toggle('hint', hint !== null)
   }
 })
 </script>
@@ -133,7 +142,9 @@ usePointer((pointer) => {
   font: 700 18px var(--font-mono);
   color: var(--mark);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   line-height: 1;
 }
 
@@ -141,7 +152,12 @@ usePointer((pointer) => {
   opacity: 1;
 }
 
-/* Over the shutter the dot steps aside so the arrow is the only thing there. */
+/* The same arrow, turned: the coil can only go down. */
+.cursor-ring.down .cursor-hint {
+  transform: rotate(180deg);
+}
+
+/* Over the blind the dot steps aside so the arrow is the only thing there. */
 .cursor-dot.hint {
   opacity: 0;
 }
