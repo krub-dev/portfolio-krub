@@ -212,6 +212,12 @@ change, and making the repository public.
   In the logo-lab they do not coincide because the stages are not aligned with the page's grid,
   but that is expected — the lab puts stages side by side for comparison.
 - [x] **The mark as a glTF.** Done: the mesh loads from `public/assets/model/krub-logo.glb` (454KB, 6k tris) instead of being extruded from SVG at runtime. Two materials: front takes the accent colour, back a dark neutral. A real loading percentage from `THREE.LoadingManager` shows while the GLB downloads. The SVG loader and buffer utilities are gone from the bundle.
+- [ ] **A backlight behind the mark, without a plane.** The plane that cleared the grid behind the
+  mark was removed (decision 80): near enough to project wider than the mark, the mark's corners
+  crossed it when it turned; deeper, the tunnel's aperture clipped it smaller than the mark, so a
+  flat quad cannot both cover the mark and stay behind it. The job — separating the mark from the
+  grid behind it — wants something with depth: a back-side sphere around the mark, or a darkening
+  in the room's own material.
 - [ ] **The tunnel's far end reads as a black void.** Fading to `--ink` can only darken the end by the
   8/255 that separates it from `--surface` in the dark theme, so `near` and `far` differ by about
   1.5/255 and the end lands as a hole rather than as depth (measured). A `haze` mode that mixed `--fg`

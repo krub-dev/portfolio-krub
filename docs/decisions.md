@@ -268,8 +268,13 @@ run it off the screen.
 - **The opening is cut to the stage** — its half-size is `d * tan(fov/2)` at its distance — and
   divided into the stage's own **seven cells**, so its grid lines land on the page's at the frame.
 - **The wheel zooms, and the box scales with it** so its opening stays on the stage at any zoom.
-- **The fog falls off to `--ink`** so the tunnel has no bottom to see, and the **backlight** is the
-  theme's own background, placed each frame on the camera's axis behind the mark.
+- **The fog falls off to `--ink`** so the tunnel has no bottom to see.
+- **A backlight behind the mark was removed.** It was a neutral plane on the camera's axis that
+  cleared the grid behind the mark. As a plane it cannot do that job: to project wider than the mark
+  it has to sit just behind it, and there the mark's own corners cross it once it is turned (the
+  model is ~13 deep at rest but its corners sweep to ~60 in z across the drag), so it cut a seam
+  across the mark. Pushed deeper to clear that, the tunnel's own aperture clips it smaller than the
+  mark. See `docs/backlog.md` for a revisitable version that is not a plane.
 
 ### 81. The frame is a slim brushed-metal band, and the badge hangs outside it
 **Status:** active · **Archive:** 81

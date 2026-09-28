@@ -43,8 +43,6 @@ const props = defineProps({
   reset: { type: Number, default: 0 },
   // The lab hides the mark to show what is behind it. On in the site.
   logo: { type: Boolean, default: true },
-  // Same, for the halo the rig puts behind the mark.
-  halo: { type: Boolean, default: true },
   // Whether the halo is currently lit. Used to trigger the logo "pop" animation.
   haloOn: { type: Boolean, default: false },
   // How the tunnel fades out with depth.
@@ -138,7 +136,7 @@ defineExpose({ logoGroup })
       <TresDirectionalLight :position="[0, 0, 10]" :intensity="1.5" />
       <TresDirectionalLight :position="[5, 5, 5]" :intensity="0.6" />
 
-      <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" :fog="props.fog" />
+      <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :fog="props.fog" />
 
       <LogoModel
         v-if="logoGroup"

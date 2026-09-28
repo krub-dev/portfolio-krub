@@ -3,8 +3,8 @@
   DEV SCAFFOLDING — not part of the site.
 
   The hero stage with live switches, so each part of the scene can be seen on its
-  own: the mark, the halo behind it, the ring round the opening and the blind.
-  `Replay` remounts the stage, which re-runs the tube's ignition.
+  own: the mark, the ring round the opening and the blind. `Replay` remounts the
+  stage, which re-runs the tube's ignition.
 
   One stage rather than two side by side on purpose. Every stage is its own WebGL
   context with its own generated environment, so two at once is twice the cost of
@@ -23,7 +23,6 @@ const round = ref(0)
 
 // Live switches, so the stage is not remounted while they are flipped.
 const showLogo = ref(true)
-const showHalo = ref(true)
 const showRing = ref(true)
 // Off shows the stage as it was before the blind: the room already open.
 const showShutter = ref(true)
@@ -48,10 +47,6 @@ function onExport() {
           Mark
         </label>
         <label class="toggle">
-          <input v-model="showHalo" type="checkbox" />
-          Halo
-        </label>
-        <label class="toggle">
           <input v-model="showRing" type="checkbox" />
           Ring
         </label>
@@ -69,7 +64,6 @@ function onExport() {
         ref="stageRef"
         :key="round"
         :logo="showLogo"
-        :halo="showHalo"
         :ring="showRing"
         :shutter="showShutter"
         :snap="false"

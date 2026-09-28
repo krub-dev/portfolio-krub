@@ -269,15 +269,13 @@ click lifts and leaves up (decision 86).
 The whole stage is magnetic, and only the logo inside it turns. Inside:
 
 - **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
-  mark that tilts toward the cursor, spins with a drag and springs back to the front. The metal is a
-  matcap, so no light and no environment sit behind it (decision 82). Behind it a
-  deep open box recedes, its grid painted on every face and fading to the background through a fog,
-  and the camera leans a little with the pointer, so the depth shifts while the mark stays centred.
-  **The opening is cut to the stage** and divided into the stage's own seven cells, so its grid
-  lines fall on the page's at the frame; the box scales with the wheel's zoom to keep it so. A
-  neutral backlight — the theme's own background — clears the grid behind the mark. It is lazy,
-  pauses off-screen and never mounts below 900px (decision 37). It eases up into the frame on arrival
-  (decision 85). See decisions 78–85.
+  mark that tilts toward the cursor, spins with a drag and springs back to the front. The metal is
+  PBR — a `MeshStandardMaterial` reading the scene's generated environment (decision 82). Behind it
+  a deep open box recedes, its grid painted on every face and fading to the background through a
+  fog, and the camera leans a little with the pointer, so the depth shifts while the mark stays
+  centred. **The opening is cut to the stage** and divided into the stage's own seven cells, so its
+  grid lines fall on the page's at the frame; the box scales with the wheel's zoom to keep it so. It
+  is lazy, pauses off-screen and never mounts below 900px (decision 37). See decisions 78–85.
 - **The 2D mark is the failure state.** The PNG mask over `var(--mark)` at 58% of the width is
   painted only if WebGL is missing or the scene never reports ready (decisions 77, 85), so a working
   load shows the 3D alone rather than a flash of the flat logo.

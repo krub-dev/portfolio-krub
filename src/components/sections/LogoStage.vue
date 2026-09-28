@@ -46,7 +46,6 @@ const props = defineProps({
   // The lab switches these off to show what is behind what. On in the site.
   logo: { type: Boolean, default: true },
   ring: { type: Boolean, default: true },
-  halo: { type: Boolean, default: true },
   // How the tunnel fades out with depth. See SceneRig for the modes and why.
   fog: { type: String, default: 'far' },
   // The lab puts stages side by side and does not want them walking themselves
@@ -370,7 +369,6 @@ defineExpose({ exportModel })
             :dragging="dragging"
             :reset="resetToken"
             :logo="props.logo"
-            :halo="props.halo"
             :halo-on="armed"
             :fog="props.fog"
             @ready="ready = true"
