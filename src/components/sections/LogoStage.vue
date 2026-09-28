@@ -731,6 +731,13 @@ defineExpose({ exportModel })
   inset: 12px;
   pointer-events: none;
   /*
+    screen, not normal: a flat inset shadow veils whatever it crosses, and the
+    mark reaches into the inward falloff when it is turned, so the veil read as a
+    stain across it. Adding light instead means the mark brightens under the glow
+    the way a bloom would, and stops reading as a panel over the scene.
+  */
+  mix-blend-mode: screen;
+  /*
     Dark until `on`. The strike is paused, which holds its first frame — and its
     first frame is dark — and the base opacity is the belt for when the
     reduced-motion rule has taken the animation away altogether.
@@ -755,6 +762,15 @@ defineExpose({ exportModel })
 .glow.on {
   opacity: 1;
   animation-play-state: running;
+}
+
+/*
+  In the light theme the room is white and screen over white is white, so the
+  glow would vanish. There it keeps the plain veil, which over a light room is
+  subtle enough not to read as a panel.
+*/
+[data-theme='light'] .glow {
+  mix-blend-mode: normal;
 }
 
 /*
