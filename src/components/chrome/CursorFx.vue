@@ -66,17 +66,26 @@ usePointer((pointer) => {
   const el = document.elementFromPoint(pointer.x, pointer.y)
   const hot = Boolean(el?.closest(props.interactiveSelector))
   /*
-    Over the blind or the stage the cursor becomes the hint and nothing else:
-    the dot steps aside and a glyph stands in — up while the blind is closed,
-    down once the coil is the thing left to press, and the turn gesture once the
-    blind is up and the mark is what the drag grabs. The coil is checked before
-    the stage because it lives inside it.
+    Over the blind or the mark the cursor becomes the hint and nothing else: the
+    dot steps aside and a glyph stands in — up while the blind is closed, down
+    once the coil is left to press, and the turn mark once the blind is up. The
+    turn one is confined to the opening the shutter occupies, so the frame's band
+    around it is not part of the gesture; the coil is checked before the stage
+    because it lives inside it.
   */
+  const opening = el?.closest('.stage')?.querySelector('.shutter')?.getBoundingClientRect()
+  const overOpening =
+    opening &&
+    pointer.x > opening.left &&
+    pointer.x < opening.right &&
+    pointer.y > opening.top &&
+    pointer.y < opening.bottom
+
   const hint = el?.closest('.shutter:not(.open)')
     ? 'up'
     : el?.closest('.shutter.open .roll')
       ? 'down'
-      : el?.closest('.stage')
+      : overOpening
         ? 'rotate'
         : null
 
