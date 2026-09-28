@@ -2,7 +2,7 @@
 /*
   The custom cursor: a solid dot that tracks the mouse exactly, a ring that
   trails behind it and opens up over anything clickable, and — over the blind or
-  the mark — a hint glyph that trails the ring in turn.
+  the mark — a hint that trails the ring in turn.
 
   The trailing is not done in JavaScript. Every element gets the same position
   every frame; each simply carries a slightly longer transition on `transform`
@@ -190,9 +190,21 @@ usePointer((pointer) => {
   content: '↓';
 }
 
-/* The mark takes a drag: side to side, the axis with the room to give. */
+/*
+  The mark takes a drag, and its hint is the 360 mark rather than a glyph — as
+  text it read too small. Drawn from the SVG and masked in the cursor's colour,
+  so it follows the theme like everything else.
+*/
 .cursor-hint-wrap.rotate .cursor-hint::before {
-  content: '↔';
+  content: none;
+}
+
+.cursor-hint-wrap.rotate .cursor-hint {
+  width: 24px;
+  height: 24px;
+  background: var(--mark);
+  -webkit-mask: url('/assets/img/360icon.svg') center / contain no-repeat;
+  mask: url('/assets/img/360icon.svg') center / contain no-repeat;
 }
 
 /* Over the blind or the stage the dot steps aside so the glyph is the only
