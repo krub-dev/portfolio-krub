@@ -50,11 +50,12 @@ the Vercel DNS change, and making the repository public.
 The form is built and lives in Contact; it posts to `/api/contact`, a Vercel function holding
 `WEB3FORMS_KEY`. What is left is making it survive production and the law.
 
-- [ ] **The form fails in production.** `GET /api/contact` already answers 405 from the deployed
-  function, so the route is fine and the `rewrites` catch-all is not swallowing it. The failure is
-  inside the handler: either `WEB3FORMS_KEY` is missing for the **Production** environment in Vercel
-  (the handler answers `not-configured`), or Web3Forms rejects the submission (`send-failed`).
-  Reproduce on krub.dev with the Network panel open and read the POST's body to tell which.
+- [ ] **The form fails in production: a 502 from Web3Forms.** The route is fine — `GET /api/contact`
+  answers 405 from the deployed function, so the `rewrites` catch-all is not swallowing it — and the
+  key is present, since the answer is `send-failed`, not `not-configured`. The handler used to
+  swallow Web3Forms' own reason; it now logs it and echoes it back as `detail`, so both the function
+  logs and the Network panel say why. The key is trimmed too (a paste with spaces or wrapping quotes
+  is a silent rejection). Re-test and read the detail.
 - [ ] **A privacy notice for the form (GDPR).** A short note under the form, a `/privacy` page, and a
   consent checkbox — the three together, since the name, email and message are personal data.
 - [ ] **Rate-limit the endpoint and add Turnstile.** The honeypot alone is not enough. The limit
@@ -254,9 +255,10 @@ The form is built and lives in Contact; it posts to `/api/contact`, a Vercel fun
   (decision 48).
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
-- [ ] **Finish the design-system page.** The page in the site's own style that documents the tokens,
-  components and patterns is out of date and little iterated — the one Claude Design seeded. Bring it
-  up to what the site is now.
+- [ ] **Finish the design-system page.** The `/preview` page in the site's own style that documents
+  the tokens, components and patterns is out of date and little iterated — the one Claude Design
+  seeded. Bring it up to what the site is now. It is dev-only today (`import.meta.env.DEV`); whether
+  it should also ship on `main` is a separate call, and for now it stays local.
 
 ## Mobile and responsive
 
