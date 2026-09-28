@@ -721,22 +721,17 @@ defineExpose({ exportModel })
   only, which the compositor handles — and the reduced-motion rule switches it
   off with the rest of the decorative motion.
 
-  The shape is the point: the blur stays tight at the edge, so it reads as a line
-  just past the frame rather than a haze. What is tuned is strength, the two
-  alphas, like dimming the bulb behind it — and the reach inward, the second
-  shadow, is the one that was reading as glare, so it sits far below the edge's.
+  It has a budget: the reach inward must stay short of the mark. A flat shadow
+  cannot know about depth, so anything it covers it veils, and the mark reaches
+  ~38px from the edge at full zoom. The first shadow is the hard edge line; the
+  second, the soft reach, is capped so the whole thing dies inside ~30px and
+  never crosses the mark. Widening it brings back the seam across the mark — the
+  fix for that would be a glow inside the scene, where the mark can occlude it.
 */
 .glow {
   position: absolute;
   inset: 12px;
   pointer-events: none;
-  /*
-    screen, not normal: a flat inset shadow veils whatever it crosses, and the
-    mark reaches into the inward falloff when it is turned, so the veil read as a
-    stain across it. Adding light instead means the mark brightens under the glow
-    the way a bloom would, and stops reading as a panel over the scene.
-  */
-  mix-blend-mode: screen;
   /*
     Dark until `on`. The strike is paused, which holds its first frame — and its
     first frame is dark — and the base opacity is the belt for when the
@@ -745,7 +740,7 @@ defineExpose({ exportModel })
   opacity: 0;
   box-shadow:
     inset 0 0 12px 1px color-mix(in srgb, var(--acc-solid) 84%, transparent),
-    inset 0 0 90px 20px color-mix(in srgb, var(--acc-solid) 24%, transparent);
+    inset 0 0 24px 0 color-mix(in srgb, var(--acc-solid) 45%, transparent);
   /*
     Two runs, in order: the tube striking, once, then the slow breath. Both are on
     opacity, so the breath waits the strike out with a delay of the strike's own
@@ -762,15 +757,6 @@ defineExpose({ exportModel })
 .glow.on {
   opacity: 1;
   animation-play-state: running;
-}
-
-/*
-  In the light theme the room is white and screen over white is white, so the
-  glow would vanish. There it keeps the plain veil, which over a light room is
-  subtle enough not to read as a panel.
-*/
-[data-theme='light'] .glow {
-  mix-blend-mode: normal;
 }
 
 /*
