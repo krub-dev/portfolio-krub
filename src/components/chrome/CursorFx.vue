@@ -142,19 +142,23 @@ usePointer((pointer) => {
   font: 700 18px var(--font-mono);
   color: var(--mark);
   opacity: 0;
+  /* Tucked back and small; it swings out whenever the hint arrives. Same
+     entrance on either blind state, so only the arrow's angle says which. */
+  transform: translateY(4px) scale(0.4) rotate(0deg);
   transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+    opacity 0.18s ease,
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   line-height: 1;
 }
 
 .cursor-ring.hint .cursor-hint {
   opacity: 1;
+  transform: translateY(0) scale(1) rotate(0deg);
 }
 
 /* The same arrow, turned: the coil can only go down. */
 .cursor-ring.down .cursor-hint {
-  transform: rotate(180deg);
+  transform: translateY(0) scale(1) rotate(180deg);
 }
 
 /* Over the blind the dot steps aside so the arrow is the only thing there. */

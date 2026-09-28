@@ -479,13 +479,15 @@ defineExpose({ exportModel })
 
 /*
   The shutter: a roller blind of metal slats across the opening, closed until a
-  click lifts it. Built in CSS rather than from an image so it can actually roll —
-  a picture bakes the slats and the pull into place and cannot lift — and so it is
-  drawn in the theme's own greys (`--fg` mixed into `--ink`), the way the frame is.
+  click lifts it and lowered again by a click on the coil it leaves at the head.
+  Built in CSS rather than from an image so it can actually roll — a picture bakes
+  the slats and the pull into place and cannot lift — and so it is drawn in the
+  metal tokens, the way the frame is.
 
-  It lifts as one piece: the whole stack translates up out of the opening and the
-  coil at the top — `.roll` — grows as it goes. Only the stack moves, and the slats
-  keep their spacing, so they stay contiguous the way a sheet of metal does.
+  It moves as one piece: the whole stack translates up out of the opening and the
+  coil at the top — `.roll` — grows as it goes, both ways. Only the stack moves,
+  and the slats keep their spacing, so they stay contiguous the way a sheet of
+  metal does.
 */
 .shutter {
   position: absolute;
@@ -494,17 +496,18 @@ defineExpose({ exportModel })
   padding: 0;
   border: 0;
   overflow: hidden;
-  background: var(--metal-dark);
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
 }
 
-/* Up, so the opening belongs to the stage and its gestures again. Transparent at
-   once, because the reveal is the stack clearing, not a panel fading. */
+/*
+  No background of its own: the slats are the cover, so whatever is behind shows
+  through the opening the moment they clear it — on the way up and on the way
+  down alike. An opaque panel here would flash grey across the reveal.
+*/
 .shutter.open {
   pointer-events: none;
-  background: transparent;
 }
 
 /*
@@ -678,11 +681,11 @@ defineExpose({ exportModel })
 /*
   The frame: a slim brushed-metal band over the canvas. Opaque, so it masks the
   box's edges — whatever the camera's small lean does to them — and drawn in the
-  theme's own greys (`--fg` mixed into `--ink`), a sheen in both themes rather
-  than a colour. `border-image` is what lets a border carry the gradient, and the
-  slice is the band's own width so the corners take a real piece of it: sliced at
-  one pixel the corners were each a single colour stretched over 12px, and the
-  brushed streaks stopped dead at the edges.
+  metal tokens, a sheen in both themes rather than a colour. `border-image` is
+  what lets a border carry the gradient, and the slice is the band's own width so
+  the corners take a real piece of it: sliced at one pixel the corners were each
+  a single colour stretched over 12px, and the brushed streaks stopped dead at the
+  edges.
 
   No hairline on its inner edge, and no vignette either: the glow's own hard edge
   is the line there, and a dark rule or a soft inset shadow on top of it read as a
