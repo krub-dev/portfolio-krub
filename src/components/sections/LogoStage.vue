@@ -598,10 +598,12 @@ defineExpose({ exportModel })
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 var(--metal-dark);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  cursor: pointer;
 }
 
-.handle:hover {
+/* The pull answers the whole blind, not just its own 64px: hovering anywhere on
+   the shutter lifts it, so the invitation reads as "raise this", not "grab the
+   handle". */
+.shutter:not(.open):hover .handle {
   transform: translateX(-50%) translateY(-3px);
 }
 

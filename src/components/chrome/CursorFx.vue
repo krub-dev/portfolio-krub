@@ -30,7 +30,6 @@ const props = defineProps({
 const enabled = isPointerDevice()
 const dot = ref(null)
 const ring = ref(null)
-const hint = ref(null)
 
 // The ring's open/closed state changes rarely, so it is a class toggle rather
 // than a style write every frame.
@@ -61,9 +60,8 @@ usePointer((pointer) => {
   */
   const el = document.elementFromPoint(pointer.x, pointer.y)
   const hot = Boolean(el?.closest(props.interactiveSelector))
-  // Check if we're over the shutter (and it's closed)
-  const shutter = el?.closest('.shutter:not(.open)')
-  const isOverShutter = Boolean(shutter)
+  // Over the closed shutter the cursor becomes the hint: no dot, just the arrow.
+  const isOverShutter = Boolean(el?.closest('.shutter:not(.open)'))
 
   if (ring.value) {
     ring.value.style.transform = `${move} scale(${hot ? 1 : 0.55})`
@@ -73,10 +71,10 @@ usePointer((pointer) => {
     }
   }
 
-  // Show hint only over closed shutter
   if (isOverShutter !== overShutter) {
     overShutter = isOverShutter
-    hint.value?.classList.toggle('visible', isOverShutter)
+    ring.value?.classList.toggle('hint', isOverShutter)
+    dot.value?.classList.toggle('hint', isOverShutter)
   }
 })
 </script>
@@ -84,7 +82,7 @@ usePointer((pointer) => {
 <template>
   <template v-if="enabled">
     <div ref="ring" class="cursor-ring" aria-hidden="true">
-      <span ref="hint" class="cursor-hint" aria-hidden="true">↑</span>
+      <span class="cursor-hint">↑</span>
     </div>
     <div ref="dot" class="cursor-dot" aria-hidden="true" />
   </template>
@@ -132,15 +130,20 @@ usePointer((pointer) => {
 }
 
 .cursor-hint {
-  font: 500 10px var(--font-mono);
+  font: 700 18px var(--font-mono);
   color: var(--mark);
   opacity: 0;
   transition: opacity 0.2s ease;
   line-height: 1;
 }
 
-.cursor-hint.visible {
+.cursor-ring.hint .cursor-hint {
   opacity: 1;
+}
+
+/* Over the shutter the dot steps aside so the arrow is the only thing there. */
+.cursor-dot.hint {
+  opacity: 0;
 }
 
 /* After .hot on purpose: with equal specificity, this is the rule that wins
