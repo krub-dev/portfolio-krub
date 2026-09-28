@@ -37,7 +37,9 @@ function safeParse(text) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'method' })
 
-  const key = process.env.WEB3FORMS_KEY
+  // Trim it, and strip wrapping quotes: a key pasted into a dashboard with a
+  // stray space or quotes is a silent rejection from Web3Forms.
+  const key = (process.env.WEB3FORMS_KEY ?? '').trim().replace(/^['"]|['"]$/g, '')
   if (!key) return json(res, 500, { ok: false, error: 'not-configured' })
 
   const body = typeof req.body === 'string' ? safeParse(req.body) : req.body ?? {}
@@ -76,10 +78,21 @@ export default async function handler(req, res) {
     })
 
     const data = await response.json().catch(() => ({}))
-    if (!response.ok || data.success === false) throw new Error('rejected')
+    if (!response.ok || data.success === false) {
+      /*
+        Web3Forms' own reason — an invalid key, a domain lock, a submission it
+        read as spam. It is logged for the deploy's function logs and echoed back,
+        because the handler swallowing it is what made the first failure a
+        mystery: the browser only ever saw a bare 502.
+      */
+      const detail = data.message ?? data.error ?? `http ${response.status}`
+      console.error('[contact] web3forms rejected:', detail)
+      return json(res, 502, { ok: false, error: 'send-failed', detail })
+    }
 
     return json(res, 200, { ok: true })
-  } catch {
-    return json(res, 502, { ok: false, error: 'send-failed' })
+  } catch (error) {
+    console.error('[contact] web3forms unreachable:', error)
+    return json(res, 502, { ok: false, error: 'send-failed', detail: 'unreachable' })
   }
 }
