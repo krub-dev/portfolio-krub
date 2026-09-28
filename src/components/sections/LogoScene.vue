@@ -6,10 +6,10 @@
   parsed by Three's SVGLoader and extruded — which is the whole reason a vector
   copy exists: an ExtrudeGeometry needs outlines, and a raster PNG has none.
 
-  The scene is only the mark. The stage's own gradient and grid show through the
-  transparent canvas behind it, so the box is painted once, by CSS, and the 3D
-  sits on top of it rather than rebuilding a second copy of the same backdrop in
-  WebGL.
+  The scene is the mark and the rig around it (SceneRig): a deep box open at the
+  front, its grid fading into the page's background, and a camera that leans a
+  little with the pointer. The box's opening is cut to land exactly on the stage,
+  so its grid lines fall on the page's own grid at the frame.
 
   It is deliberately cheap for what it is:
 
@@ -18,37 +18,47 @@
   - **The loop only runs while the stage is mostly on screen** (60%), so the
     reflections cost nothing during the scroll.
   - Framed at 24fps and capped at 1.5x DPR.
+  - The room is one unlit box of ten triangles and one small grid texture.
   - Never on a phone: the stage is not mounted below 900px (decision 37).
 
-  The wheel zooms the camera, not the mesh, so the perspective stays honest. It
-  is clamped, and it only takes the gesture while it can still move — at either
-  end the page keeps its scroll.
+  The camera zooms; the room scales with it, which keeps its opening on the
+  stage and its grid on the page's, so the zoom moves the mark and nothing else.
 */
-import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
-import { TresCanvas } from '@tresjs/core'
-import { ExtrudeGeometry } from 'three'
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
-import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { TresCanvas, useTresContext } from '@tresjs/core'
+import { LoadingManager, PMREMGenerator } from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 
 import LogoModel from './LogoModel.vue'
+import SceneRig from './SceneRig.vue'
 
 const props = defineProps({
   // Pointer position over the stage, normalised to -1..1, from LogoStage.
   tilt: { type: Object, default: () => ({ x: 0, y: 0 }) },
   spin: { type: Number, default: 0 },
+  spinY: { type: Number, default: 0 },
   dragging: { type: Boolean, default: false },
+  // Bumped by a double press in LogoStage: bring the zoom home.
+  reset: { type: Number, default: 0 },
+  // The lab hides the mark to show what is behind it. On in the site.
+  logo: { type: Boolean, default: true },
+  // Same, for the halo the rig puts behind the mark.
+  halo: { type: Boolean, default: true },
+  // How the tunnel fades out with depth.
+  fog: { type: String, default: 'far' },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
-const emit = defineEmits(['ready'])
+const emit = defineEmits(['ready', 'progress'])
 
 const root = ref(null)
-const geometry = shallowRef(null)
+const rig = ref(null)
+const logoGroup = shallowRef(null)
 const onScreen = ref(false)
 const zoom = ref(1)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-const DEPTH = 12
 const CAM_Z = 205
 const ZOOM_MIN = 0.82
 const ZOOM_MAX = 1.22
@@ -68,6 +78,19 @@ onMounted(() => {
 
 onUnmounted(() => observer?.disconnect())
 
+// A double press in LogoStage (its `reset` token) brings the zoom back to rest.
+watch(
+  () => props.reset,
+  () => {
+    zoom.value = 1
+  },
+)
+
+/*
+  The wheel zooms the camera. The room keeps its opening on the stage by scaling
+  with the distance (SceneRig), so the zoom moves the mark without taking the
+  grid off the page's.
+*/
 function onWheel(event) {
   const next = zoom.value * (event.deltaY > 0 ? 0.94 : 1.06)
   const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next))
@@ -76,54 +99,55 @@ function onWheel(event) {
   zoom.value = clamped
 }
 
-async function build() {
-  const svg = await fetch('/assets/img/krub-logo.svg').then((r) => r.text())
-  const paths = new SVGLoader().parse(svg).paths
-  const shapes = paths.flatMap((path) => SVGLoader.createShapes(path))
+/*
+  Load the GLB model. The file lives at public/assets/model/krub-logo.glb and
+  contains two meshes (front and back) that LogoModel will address separately.
+  Loading a GLB is a fetch and a parse of precomputed buffers — it does not
+  block the main thread the way parsing an SVG and extruding it does.
 
-  let built = new ExtrudeGeometry(shapes, {
-    depth: DEPTH,
-    // A hair of a bevel: enough to catch the light on the edge, small enough
-    // that the mark keeps the shape it has in the SVG.
-    bevelEnabled: true,
-    bevelThickness: 0.8,
-    bevelSize: 0.6,
-    bevelSegments: 2,
-    curveSegments: 24,
-  })
+  The LoadingManager reports real progress as the file downloads, so the stage
+  can show a percentage instead of a fake bar.
+*/
+async function loadModel() {
+  const manager = new LoadingManager()
+  manager.onProgress = (url, loaded, total) => {
+    emit('progress', Math.round((loaded / total) * 100))
+  }
 
-  /*
-    Smooth the wall without rounding the edges. ExtrudeGeometry does not share
-    vertices between the segments of a curve, so every facet of the wall carries
-    its own normal and the polished metal shows each polygon. `mergeVertices`
-    alone does nothing here — it compares the whole vertex, normals included, and
-    they all differ. Dropping the normals first lets it weld by position, and the
-    recomputed normals average across the curve.
-  */
-  built.deleteAttribute('normal')
-  built = mergeVertices(built, 1e-3)
-  built.computeVertexNormals()
-  built.center()
-  geometry.value = built
+  const loader = new GLTFLoader(manager)
+  const gltf = await loader.loadAsync('/assets/model/krub-logo.glb')
+  logoGroup.value = gltf.scene
+  emit('progress', 100)
   emit('ready')
 }
 
-build()
+requestAnimationFrame(() => requestAnimationFrame(loadModel))
+
+defineExpose({ logoGroup })
 </script>
 
 <template>
   <div ref="root" class="scene" @wheel="onWheel">
     <TresCanvas :fps-limit="24" :dpr="[1, 1.5]" clear-color="#00000000" alpha>
       <TresPerspectiveCamera :position="[0, 0, camZ]" :fov="40" />
-      <TresDirectionalLight :position="[120, 160, 200]" :intensity="1.6" />
+
+      <!-- Lights for the PBR material: ambient for base illumination, directional for volume. -->
+      <TresAmbientLight :intensity="0.6" />
+      <TresDirectionalLight :position="[0, 0, 10]" :intensity="1.5" />
+      <TresDirectionalLight :position="[5, 5, 5]" :intensity="0.6" />
+
+      <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :halo="props.halo" :fog="props.fog" />
 
       <LogoModel
-        v-if="geometry"
-        :geometry="geometry"
+        v-if="logoGroup"
+        :logo-group="logoGroup"
         :tilt="props.tilt"
         :spin="props.spin"
+        :spin-y="props.spinY"
         :dragging="props.dragging"
         :running="onScreen && !reduced"
+        :logo="props.logo"
+        :environment="rig?.environment"
       />
     </TresCanvas>
   </div>

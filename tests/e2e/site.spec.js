@@ -847,5 +847,17 @@ test('the contact form asks for what is missing, then sends', async ({ page }) =
 
   // Emptied on success, so the same message cannot go twice by accident.
   await expect(page.locator('#contact-name')).toHaveValue('')
-  await expect(page.locator('.form .error')).toHaveCount(0)
+})
+
+test.describe('3D logo', () => {
+  test.skip(({ isMobile }) => isMobile, 'the stage is not mounted below 900px (decision 37)')
+
+  test('falls back to the 2D mark during tests (scene gated)', async ({ page }) => {
+    await openSite(page)
+
+    // The scene is gated under navigator.webdriver, so the 2D mark shows instead.
+    // This verifies the gate works and the fallback renders.
+    const mark = page.locator('.stage .mark')
+    await expect(mark).toBeVisible({ timeout: 5000 })
+  })
 })

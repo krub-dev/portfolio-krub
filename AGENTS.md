@@ -47,6 +47,13 @@ the bundle. Production sets the variable in Vercel.
   with `behavior: 'instant'`.
 - Decorative animation opts into `prefers-reduced-motion` with `data-motion="decorative"` on the
   animated element itself, not on an ancestor.
+- **Screenshots are a last resort.** Every image the assistant reads stays in its conversation, and
+  its provider refuses a request once there are more than thirty — which cuts the work off mid-step
+  and is expensive to recover from. Diagnose with text first (the console, `getBoundingClientRect`,
+  computed styles); when a picture is genuinely needed, read one, once, and never re-read it.
+  Deleting the temporary files afterwards is tidiness, not what keeps the count down. **Keep a
+  running count aloud and say when it passes about twenty**, so the owner can `/compact` before it
+  reaches thirty.
 
 ## Non-negotiable
 
@@ -89,7 +96,7 @@ code in [`docs/decisions.md`](docs/decisions.md).
 - The yellow `#FFC800` is the same in both themes; what changes is what is painted with `--mark`.
 - The giant section number overlaps the title on purpose.
 - The square hero stage holds the 3D logo and carries no explanatory text inside it. The scene is
-  only the mark; the box around it is CSS.
+  the mark and the room behind it; the frame around it is CSS.
 - No filler project cards, no user hints ("click to open", "optional section", photo captions).
 - The lemon enters in a straight line from the right, no tilt, flat yellow body, no gradient.
 - The project card arrow is `↗`, not `→`.

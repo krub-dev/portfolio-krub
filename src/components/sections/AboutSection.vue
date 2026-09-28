@@ -11,17 +11,21 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../base/BaseButton.vue'
+import AvailabilityBadge from '../base/AvailabilityBadge.vue'
 import SectionHeading from '../base/SectionHeading.vue'
 import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
 import { useLang } from '../../composables/useLang'
 import { useTheme } from '../../composables/useTheme'
+import { useLemonVoice } from '../../composables/useLemonVoice'
 import { certifications, config, copy, cvPath, education, experience, photoPath } from '../../data'
 import { formatPeriod } from '../../utils/format'
 
 const { lang } = useLang()
 const { theme } = useTheme()
 const { t } = useI18n()
+// Limonacho greets you when the pointer lands on the photo.
+const { say, hush } = useLemonVoice()
 
 const tab = ref('exp')
 // The id that ties the tab row to the panel it switches, for the ARIA tablist.
@@ -155,7 +159,10 @@ function onTouchEnd(event) {
       </div>
 
       <div class="photo-wrap" data-pfp-wrap>
-        <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
+        <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
+        <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
+          <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
+        </div>
       </div>
     </div>
   </section>
@@ -284,12 +291,24 @@ function onTouchEnd(event) {
   gap: 10px;
 }
 
+/* The photo, and the badge that sits on it. */
+.photo-box {
+  position: relative;
+}
+
 .photo {
+  display: block;
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 18px;
   border: 1px solid var(--line);
+}
+
+/* Above the photo, out of the picture and nudged in off the corner. */
+.availability {
+  align-self: flex-end;
+  transform: translate(-8px, 6px);
 }
 
 @media (max-width: 900px) {

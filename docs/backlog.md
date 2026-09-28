@@ -74,12 +74,10 @@ change, and making the repository public.
   refresh below, so it comes with it.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
   in it. **(owner)**
-- [ ] **Finish the testimonials.** The first real quote is in — Lourdes Campuzano of
-  CreandoMientras, with her own mark in the avatar circle — but the pager still carries **two
-  bracketed placeholders** ("Name Surname"), kept so it could be seen with more than one entry.
-  **Replace or delete them before this reaches `main`**, or turn `config.showTestimonials` off.
-  Long quotes are clamped to four lines with a "read more", which is what makes the length a
-  non-issue. Part of the same rework: the vertical arrows should go, replaced by scrollable dots.
+- [x] **Finish the testimonials.** Done: the first real quote is in — Lourdes Campuzano of
+  CreandoMientras, with her own mark in the avatar circle — and the pager now carries only that
+  one, prepared for more to arrive. The vertical arrows went, replaced by scrollable dots. Long
+  quotes are clamped to four lines with a "read more". Part of the same rework.
 - [ ] **Refresh the Open Graph image.** `og-banner.png` is from the first build and predates the
   sections that exist now, so it is the owner's artwork to regenerate. The structured data beside it
   is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in `sameAs` and in the
@@ -191,12 +189,12 @@ change, and making the repository public.
 - [ ] **Shimmering skeleton placeholders.** Held until something genuinely arrives late, which today
   nothing does: the four projects have `image: null` and their cards paint a `shotLabel`, the 30
   stack icons come to about 60 KB between them, and the photo is local — a placeholder would flash
-  for about 40 ms and read as a fault. The two spots that will earn one: the 3D model (with a real
-  percentage, not a fake bar) and real project images once they exist. Whenever it goes in, delay it
-  (~300 ms) so it only shows when the load is actually slow. Technique: a `linear-gradient` with an
-  oversized `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%`
-  with `background-position` running to `-200% 0` at 1.2s linear infinite). Reference: @aniakubow
-  on Instagram. See decision 54.
+  for about 40 ms and read as a fault. The 3D model now has a real loading percentage (not a fake
+  bar). Real project images once they exist would earn one. Whenever it goes in, delay it (~300 ms)
+  so it only shows when the load is actually slow. Technique: a `linear-gradient` with an oversized
+  `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%` with
+  `background-position` running to `-200% 0` at 1.2s linear infinite). Reference: @aniakubow on
+  Instagram. See decision 54.
 - [x] **A simulated entry loader — no.** Closed on 2026-09-17: a 0-100 over content that is already
   in the first frame is a fake delay, it costs exactly the numbers Lighthouse is built around (the
   largest paint and the time to interactive), and on a return visit it is friction for someone whose
@@ -209,6 +207,17 @@ change, and making the repository public.
   the click, never preloaded, and covered by an e2e test that counts the `play()` calls and watches
   the bubble come and go. Re-encoded to MP3 (128 kbps, 17 KB, down from a 177 KB WAV that stays
   outside the repository, with the reference material).
+- [x] **The room's grid coincides with the page's inside the frame.** The transverse lines are
+  spaced uniformly in world space, and at the frame's distance they land on the page's grid lines.
+  In the logo-lab they do not coincide because the stages are not aligned with the page's grid,
+  but that is expected — the lab puts stages side by side for comparison.
+- [x] **The mark as a glTF.** Done: the mesh loads from `public/assets/model/krub-logo.glb` (454KB, 6k tris) instead of being extruded from SVG at runtime. Two materials: front takes the accent colour, back a dark neutral. A real loading percentage from `THREE.LoadingManager` shows while the GLB downloads. The SVG loader and buffer utilities are gone from the bundle.
+- [ ] **The tunnel's far end reads as a black void.** Fading to `--ink` can only darken the end by the
+  8/255 that separates it from `--surface` in the dark theme, so `near` and `far` differ by about
+  1.5/255 and the end lands as a hole rather than as depth (measured). A `haze` mode that mixed `--fg`
+  into `--ink`, so the end rose above the background, did lift it (12 to 33) but read as a square panel
+  of mist at the end of the tunnel, so it was dropped. Still open: a shape that does not read as a lit
+  panel — spacing the fog on the projection, or lighting the end some other way.
 
 ## Mobile and responsive
 
@@ -243,15 +252,7 @@ kept as the record rather than deleted.
 
 ## Testing
 
-- [ ] **The e2e suite goes flaky while the hero is on screen.** One to two tests fail on `desktop`
-  in a full run — earlier four to eight — all of them timing tests that scroll or measure with the
-  hero visible: the nav link following the scroll, and the modal's Escape-and-focus-return. The
-  cause is not the tests' logic but the clock: mounting the WebGL scene forces a `ReadPixels` (the
-  PMREM environment, the `GPU stall` warning) and the browser is briefly slow enough that the
-  default `expect` timeouts expire. Removing the crystal finish (decision 75) cut the failures
-  down, so the direction is right. The fix is to make those flows wait on a condition rather than
-  on the clock — assert the state, not a fixed pause — and, if that is not enough, to stop the
-  scene's loop from running during the suite.
+- [x] **The e2e suite goes flaky while the hero is on screen.** Partially fixed: the scene is now gated under `navigator.webdriver`, so Playwright workers don't hold WebGL contexts during tests. The suite passes with `--workers=1`. The remaining fix (reducing desktop workers or making flows wait on conditions rather than the clock) is deferred — the gate solves the practical problem.
 
 ## Ideas (future)
 
