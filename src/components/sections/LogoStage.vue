@@ -252,14 +252,6 @@ usePointer((pointer) => {
 
   const rect = el.getBoundingClientRect()
 
-  if (dragging.value) {
-    // Both axes, both clamped the same way, so the mark can be thrown up and
-    // down as well as left and right.
-    spin.value = clamp(startSpin + ((pointer.x - startX) / rect.width) * 3, -MAX_SPIN, MAX_SPIN)
-    spinY.value = clamp(startSpinY + ((pointer.y - startY) / rect.height) * 3, -MAX_SPIN_Y, MAX_SPIN_Y)
-    return
-  }
-
   if (rect.bottom < 0 || rect.top > window.innerHeight) return // offscreen, skip the work
 
   // The scene only follows the pointer over the stage. Outside it the tilt goes
@@ -280,6 +272,31 @@ usePointer((pointer) => {
     y: clamp((pointer.y - (rect.top + rect.height / 2)) / (rect.height / 2)),
   }
 })
+
+/*
+  The drag is its own handler on the stage, not part of the shared pointer loop.
+  That loop listens to `mousemove` and switches itself off unless there is a
+  hovering pointer, so on a tablet it never runs at all: the mark did not turn
+  under a finger. Pointer events here cover mouse, pen and touch alike, and the
+  capture taken in onDown keeps them coming while the finger is down. The tilt
+  above stays mouse-only, which is right — there is no hover on a finger.
+*/
+function onDragMove(event) {
+  if (!dragging.value) return
+
+  const el = stage.value
+  if (!el) return
+
+  const rect = el.getBoundingClientRect()
+  // Both axes, both clamped the same way, so the mark can be thrown up and down
+  // as well as left and right.
+  spin.value = clamp(startSpin + ((event.clientX - startX) / rect.width) * 3, -MAX_SPIN, MAX_SPIN)
+  spinY.value = clamp(
+    startSpinY + ((event.clientY - startY) / rect.height) * 3,
+    -MAX_SPIN_Y,
+    MAX_SPIN_Y,
+  )
+}
 
 function onDown(event) {
   if (!stage.value) return
@@ -343,6 +360,7 @@ defineExpose({ exportModel })
       ref="stage"
       class="stage"
       @pointerdown="onDown"
+      @pointermove="onDragMove"
       @pointerup="onUp"
       @pointercancel="onUp"
     >

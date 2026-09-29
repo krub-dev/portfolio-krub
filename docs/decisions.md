@@ -297,10 +297,13 @@ Two things an iPad (iOS 17.4) showed that no desktop browser did.
   and render fine there, so the ring is a background now, cut to the border band with a mask
   (`mask-composite: exclude`, and the legacy `-webkit-mask-composite: xor`), keeping the same brushed
   gradient and dropping `border-image`.
-- **The mark did not spin under a finger.** The stage had no `touch-action`, so the browser claimed a
-  horizontal swipe as a scroll and cancelled the pointer before the drag began. It takes
-  `touch-action: pan-y` now, the same declaration the project rail uses: the page keeps the vertical
-  swipe, the stage gets the horizontal drag.
+- **The mark did not spin under a finger**, for two reasons at once. `usePointer` — the one loop
+  behind the tilt and the drag — listens to `mousemove` and switches itself off unless the device
+  reports `(hover: hover)`, which an iPad does not, so the loop never ran there. And the stage had no
+  `touch-action`, so the browser claimed a horizontal swipe as a scroll. The drag is now its own
+  pointer-event handler on the stage, covering mouse, pen and touch alike and independent of the
+  cursor loop, and the stage takes `touch-action: pan-y` so the page keeps the vertical swipe. The
+  tilt stays mouse-only, which is right: there is no hover on a finger.
 
 ### 82. The mark's motion and light
 **Status:** active · **Archive:** 82
