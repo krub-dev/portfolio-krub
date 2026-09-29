@@ -42,7 +42,6 @@ App
 │   ├─ AppearanceControl (compact only)
 │   └─ LangButton        (compact only)
 ├─ ScrollProgress       (only where the route has a hero)
-├─ BlurBands            (only where the route has a hero; two strips of blur)
 ├─ CursorFx
 ├─ LemonPet             (only where the route has a hero)
 │   └─ SpeechBubble
@@ -386,12 +385,6 @@ it; the pointer subscription never happens there.
 ### ScrollProgress
 Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress from
 `useScroll()` rather than taking it as a prop.
-
-### BlurBands
-No props. Two full-width strips of `backdrop-filter` — one under the bar, one above the footer — each
-masked so it fades at its inner edge, so content softens as it passes under the fixed chrome. They ride
-`usePastHero()`, so they arrive with the footer and the lemon. Below the chrome in the stack and taking
-no pointer. See decisions.md 100.
 
 ---
 

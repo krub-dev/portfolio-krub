@@ -648,6 +648,10 @@ Two things an iPad showed once the CV dialog was there.
   `isScrollLocked()`; `useMagnetic` releases every element home and stops while a dialog is over the
   page. Elements leaning behind a backdrop read as the page wobbling under it, which is the opposite of
   what a dialog is for.
+- **And the chrome stops believing the zero.** A body taken out of flow reports the scroll as zero, so
+  `useScroll` keeps the last real position while a dialog holds the page still. Without it the navbar
+  read "zero" as "back at the top" and expanded to its full width the moment any dialog opened, on
+  desktop and on a phone.
 
 ### 99. The dialog header sticks, and Limonacho explains what will not go
 **Status:** active
@@ -663,23 +667,6 @@ Two things an iPad showed once the CV dialog was there.
   because a disabled control takes no mouse events: the button steps out of the way
   (`pointer-events: none`) and the wrapper takes the pointer, so the reason is heard at the moment it
   is needed.
-
-### 100. The fixed chrome carries its own blur bands
-**Status:** active
-
-A band under the bar and another above the footer, each a full-width strip with `backdrop-filter` and a
-mask that fades it at its inner edge, so the content softens as it passes under the fixed chrome instead
-of being cut off by it. They arrive with the footer and the lemon — once the hero is behind you — and
-only on a route with a hero.
-
-- **One strip, not a filter per element.** Blurring each element as it went under the chrome would mean
-  a filter per element and a different look for each.
-- **Below the chrome in the stack (z-index 90) and taking no pointer,** so the bar and the footer paint
-  over them and nothing behind them is blocked.
-- **And the bar had to stop believing the scroll lock.** Taking the body out of flow reports the scroll
-  as zero, and the navbar read that as "back at the top": it expanded to its full width the moment any
-  dialog opened, on desktop and on a phone. `useScroll` keeps the last real position while a dialog
-  holds the page still.
 
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62

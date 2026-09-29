@@ -252,11 +252,10 @@ the privacy notice and the consent the law asks for.
 - [ ] **The project modal's media is cluttered.** The image is small and the carousel carries big
   arrows and an `IMAGEN 1 / 4 · NAME` label over it. Replace them with dots, as the other pagers do,
   and give the media a larger, taller slot.
-- [x] **Fixed blur bands.** Done on 2026-09-30: a strip of `backdrop-filter` under the bar and another
-  above the footer, each masked so it fades at its inner edge, arriving with the footer and the lemon.
-  One strip per edge rather than a filter per element, below the chrome and taking no pointer. Watch
-  `backdrop-filter` — it makes its element a backdrop root (decision 48); nothing that blurs sits inside
-  these. See decision 100.
+- [ ] **Fixed blur bands.** Tried on 2026-09-30 and **dropped**: a strip of `backdrop-filter` under the
+  bar and another above the footer read as a smudge lying over the page rather than as the page going
+  under something. What was built and why it failed is in decisions-archive.md 100. Reopen only with a
+  different idea for softening those edges.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
 - [ ] **Finish the design-system page.** The `/preview` page in the site's own style that documents
@@ -291,9 +290,9 @@ the privacy notice and the consent the law asks for.
 - [x] **The certifications tab on a phone.** Done: the pills were the problem, not the row. As
   folder labels on a hairline track the three tabs fit a phone at 12px with no tracking (decision
   73), and the long certification names wrap in the single-column timeline below 900px.
-- [ ] **The badge on /me on a phone.** It sits under the photo, left-aligned but with a gap that
-  reads as stray. Put it bottom-left of the photo — beside it, not stamped inside — and let the photo
-  take more width on a phone.
+- [x] **The badge on /me on a phone.** Closed on 2026-09-30 the other way round from what this asked:
+  under the photo it read as a third item between the photo and the CV, so it stays where a wide screen
+  puts it — above the photo's right corner — and the photo takes the full width.
 - [ ] **A movable navbar on a phone.** Let the compact bar be dragged: it snaps up or down and can
   also be moved sideways within the gutter, and the position is remembered in `localStorage` — so a
   visitor the bar gets in the way of can move it. Mobile only for now. Watch the footer and the

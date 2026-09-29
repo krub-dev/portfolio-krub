@@ -369,8 +369,10 @@ onUnmounted(() => observer?.disconnect())
   }
 
   /*
-    The photo takes the full width and the badge goes under its left edge. Beside
-    it, at this size, the label was left hanging in a gap and read as stray.
+    The photo takes the full width. The badge stays where it is on a wide screen
+    — above the photo's right corner — instead of dropping under it: down there it
+    landed between the photo and the CV and read as a third item in the column
+    rather than as part of the picture.
   */
   .photo-wrap {
     /* No travel on a phone: the photo lands at the end of the section here, so
@@ -383,18 +385,6 @@ onUnmounted(() => observer?.disconnect())
 
   .photo {
     max-width: none;
-  }
-
-  .availability {
-    order: 2;
-    align-self: flex-start;
-    transform: none;
-  }
-
-  /* Under the badge, still at the photo's width, so the section closes with the
-     same block it closes with on a wide screen. */
-  .cv {
-    order: 3;
   }
 }
 </style>

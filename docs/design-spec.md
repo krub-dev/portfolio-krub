@@ -346,7 +346,8 @@ icon-only download in that dialog's header. **On a wide screen that whole column
 scroll**:
 `position:sticky` at `top: calc(var(--navbar-h, 88px) + 20px)`, riding down while the timeline runs
 past and stopping with its foot just above the section's bottom (the section's own padding). On mobile
-there is no travel — the photo lands at the end of the section — and the order is photo, badge, CV.
+there is no travel — the photo lands at the end of the section — and the badge stays above the photo's
+right corner, as on a wide screen, with the CV closing the column.
 
 ### 3.6 Projects
 
@@ -857,17 +858,6 @@ capsule's own `backdrop-filter` makes it a backdrop root, and a blur inside it w
 capsule's content rather than the page, so it would not match the bar. It holds the appearance
 control and the language button, and closes on the trigger, on Escape, on a click outside, on a
 scroll and when the bar expands again.
-
-### 3.20 Blur bands
-
-Two full-width strips of `backdrop-filter: blur(12px)`: one at the top, as tall as the bar plus 10px
-(`calc(var(--navbar-h, 88px) + 10px)`), and one sitting on the footer's own top edge (`bottom:
-var(--footer-h, 52px)`, 56px tall). Each is masked so it fades at its inner edge — `#000` at 55% to
-transparent downwards for the top, 40% upwards for the bottom — so the blur has no edge of its own. On a
-phone the bar is a centred pill, so the top band is what reads either side of it. They arrive with the
-footer and the lemon, once the hero is behind you, and only on a route with a hero; `z-index:90`, below
-the footer (95) and the bar (100), `pointer-events:none`. One strip per edge, not a filter per element
-(decision 100).
 
 ---
 

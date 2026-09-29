@@ -18,7 +18,6 @@ import { onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import BackgroundGrid from './components/chrome/BackgroundGrid.vue'
-import BlurBands from './components/chrome/BlurBands.vue'
 import CursorFx from './components/chrome/CursorFx.vue'
 import GridCell from './components/chrome/GridCell.vue'
 import LemonPet from './components/chrome/LemonPet.vue'
@@ -128,11 +127,6 @@ onBeforeUnmount(() => landTimers.forEach(clearTimeout))
       pointing at something that is not there.
     -->
     <ScrollProgress v-if="route.meta.hero" />
-    <!--
-      The blur bands belong to the fixed chrome a page scrolls under, so they
-      only render where there is a hero to scroll past.
-    -->
-    <BlurBands v-if="route.meta.hero" />
     <CursorFx />
 
     <RouterView />
