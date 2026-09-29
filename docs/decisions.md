@@ -380,9 +380,11 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
   12px band is not part of the gesture — so it does not light on the frame.
 - **The ring trails the dot, and the hint trails the ring.** Each element carries a slightly longer
   `transform` transition than the one before it (0.28s, then 0.32s): the same chase, one link further.
-- **And it waits for the blind to settle.** The mark is only offered once the slats have finished their
-  travel (`settled`, reported on the element and read off it): while they are still crossing the opening
-  the arrow is the honest hint, and the 360 used to appear over a half-raised blind.
+- **The turn mark follows the blind's own edge.** It is offered on the strip of the opening below the
+  slats' lower edge, read from their live rect, not from an "is it open" flag: it becomes available the
+  moment the blind starts moving and grows with that strip, going up or coming down alike, and the
+  arrow holds over the slats themselves. The two faces crossfade (0.2s), because swapping the glyph for
+  the mask in a single frame read as a jump.
 - **The two-second idle fade is gone.** The cursor and the grid cell used to disappear after two seconds
   without a `mousemove`, `active` going false until the next one. It never read as deliberate enough to
   keep, so it was dropped and the cursor now stays put; `active` survives as "the pointer has been seen

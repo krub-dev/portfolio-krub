@@ -72,30 +72,31 @@ usePointer((pointer) => {
   const hot = Boolean(el?.closest(props.interactiveSelector))
   /*
     Over the blind or the mark the cursor becomes the hint and nothing else: the
-    dot steps aside and a glyph stands in — up while the blind is closed, down
-    once the coil is left to press, and the turn mark once the blind is up. The
-    turn one waits for the blind to settle: while the slats are still crossing the
-    opening they are what is under the cursor, so the arrow is the honest hint
-    until they have finished. Both are confined to the opening the shutter
-    occupies, so the frame's band around it is not part of the gesture; the coil
-    is checked before the stage because it lives inside it.
+    dot steps aside and a glyph stands in — up over the blind, down over the coil,
+    and the turn mark over the part of the opening the blind has cleared. That
+    last one is decided by the slats' own edge, not by an "is it open" flag: the
+    mark is offered on the strip below their lower edge, so it is available from
+    the moment the blind starts moving and grows with it, going up or coming down
+    alike. All of it is confined to the opening the shutter occupies, so the
+    frame's band is not part of the gesture; the coil is checked first because it
+    lives inside it.
   */
   const shutter = el?.closest('.stage')?.querySelector('.shutter')
-  const box = shutter?.getBoundingClientRect()
-  const overOpening =
-    box &&
-    pointer.x > box.left &&
-    pointer.x < box.right &&
-    pointer.y > box.top &&
-    pointer.y < box.bottom
-
   let hint = null
-  if (el?.closest('.shutter:not(.open)')) {
-    hint = 'up' // the closed blind
-  } else if (el?.closest('.shutter.open .roll')) {
-    hint = 'down' // the coil, the one part of the open blind still interactive
-  } else if (overOpening) {
-    hint = shutter.classList.contains('settled') ? 'rotate' : 'up'
+  if (shutter) {
+    const box = shutter.getBoundingClientRect()
+    const overOpening =
+      pointer.x > box.left &&
+      pointer.x < box.right &&
+      pointer.y > box.top &&
+      pointer.y < box.bottom
+
+    if (el?.closest('.roll')) {
+      hint = 'down' // the coil, the one part of the open blind still interactive
+    } else if (overOpening) {
+      const slats = shutter.querySelector('.slats')?.getBoundingClientRect()
+      hint = slats && pointer.y > slats.bottom ? 'rotate' : 'up'
+    }
   }
 
   /*
@@ -125,7 +126,10 @@ usePointer((pointer) => {
   <template v-if="enabled">
     <div ref="ring" class="cursor-ring" aria-hidden="true" />
     <div ref="hintBox" class="cursor-hint-wrap" aria-hidden="true">
-      <span class="cursor-hint" />
+      <span class="cursor-hint">
+        <span class="hint-glyph" />
+        <span class="hint-turn" />
+      </span>
     </div>
     <div ref="dot" class="cursor-dot" aria-hidden="true" />
   </template>
@@ -187,20 +191,15 @@ usePointer((pointer) => {
 }
 
 .cursor-hint {
-  font: 700 18px var(--font-mono);
-  color: var(--acc-solid);
+  position: relative;
+  width: 18px;
+  height: 18px;
   opacity: 0;
-  /* Tucked back and small; it swings out whenever the hint arrives. Same
-     entrance whichever it is, so only the glyph says what it wants. */
+  /* Tucked back and small; it swings out whenever a hint arrives. */
   transform: translateY(4px) scale(0.4);
   transition:
     opacity 0.18s ease,
     transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-  line-height: 1;
-}
-
-.cursor-hint::before {
-  content: '↑';
 }
 
 .cursor-hint-wrap.hint .cursor-hint {
@@ -208,26 +207,55 @@ usePointer((pointer) => {
   transform: translateY(0) scale(1);
 }
 
+/*
+  The two faces of the hint: the arrow and the 360 mark. They crossfade, so
+  changing the gesture reads as a change rather than as a swap — the arrow used to
+  be replaced by the mark in a single frame.
+*/
+.hint-glyph,
+.hint-turn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.hint-glyph {
+  font: 700 18px var(--font-mono);
+  color: var(--acc-solid);
+  line-height: 1;
+  opacity: 1;
+}
+
+.hint-glyph::before {
+  content: '↑';
+}
+
 /* The coil only goes down. */
-.cursor-hint-wrap.down .cursor-hint::before {
+.cursor-hint-wrap.down .hint-glyph::before {
   content: '↓';
 }
 
 /*
-  The mark takes a drag, and its hint is the 360 mark rather than a glyph — as
-  text it read too small. Drawn from the SVG and masked in the cursor's colour,
-  so it follows the theme like everything else.
+  The mark takes a drag, so its hint is the 360 mark rather than a glyph — as text
+  it read too small. Drawn from the SVG and masked in the cursor's colour, so it
+  follows the theme like everything else.
 */
-.cursor-hint-wrap.rotate .cursor-hint::before {
-  content: none;
-}
-
-.cursor-hint-wrap.rotate .cursor-hint {
-  width: 18px;
-  height: 18px;
+.hint-turn {
   background: var(--acc-solid);
   -webkit-mask: url('/assets/img/360icon.svg') center / contain no-repeat;
   mask: url('/assets/img/360icon.svg') center / contain no-repeat;
+  opacity: 0;
+}
+
+.cursor-hint-wrap.rotate .hint-glyph {
+  opacity: 0;
+}
+
+.cursor-hint-wrap.rotate .hint-turn {
+  opacity: 1;
 }
 
 /* Over the blind or the stage the dot steps aside so the glyph is the only

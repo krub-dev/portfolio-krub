@@ -120,28 +120,6 @@ let failTimer = 0
 */
 const revealed = ref(false)
 /*
-  Whether the blind has finished its travel. The turn hint waits for this: while
-  the slats are still crossing the opening they are what is under the cursor, not
-  the mark, so the 360 used to appear over a half-raised blind. Reported as the
-  `settled` class so the cursor can read it off the element.
-*/
-const settled = ref(false)
-// Under reduced motion there is no transition to end, so the blind is settled the
-// moment it is revealed.
-const reduceMotion =
-  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-
-watch(revealed, (isRevealed) => {
-  settled.value = isRevealed && reduceMotion
-})
-
-function onShutterEnd(event) {
-  // The slats' own transform, not the coil growing at the head.
-  if (event.target?.classList?.contains('slats') && event.propertyName === 'transform') {
-    settled.value = revealed.value
-  }
-}
-/*
   A press that became a drag must not also work the blind. The same surface holds
   the mark that spins, so a click counts as a click only if the pointer barely
   moved between press and release.
@@ -457,14 +435,13 @@ defineExpose({ exportModel })
       <button
         v-if="props.shutter"
         class="shutter"
-        :class="{ open: revealed, settled }"
+        :class="{ open: revealed }"
         type="button"
         :aria-label="t('a11y.raiseShutter')"
         :aria-hidden="revealed"
         :tabindex="revealed ? -1 : 0"
         @pointerdown="onShutterDown"
         @click="onShutterClick"
-        @transitionend="onShutterEnd"
       >
         <span class="roll" aria-hidden="true" />
         <span class="slats" aria-hidden="true">

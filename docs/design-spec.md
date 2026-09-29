@@ -733,11 +733,12 @@ cursor is not text, and `--mark` darkens in the light theme for legibility, whic
 nearly invisible on the light metal (decision 87).
 
 **Over the hero the cursor becomes the gesture** (decision 87). The dot steps aside and the ring
-carries `↑` over the closed blind, `↓` over the coil once the blind is up, and the `360icon.svg`
-mark — 18px, masked — over the mark itself, where the drag turns it. The turn hint is confined to
-the opening the shutter occupies, so it does not light on the frame's band, and it waits for the
-blind to finish its travel (`settled`): until then the arrow is what shows over the opening, because
-the slats are still what is there.
+carries `↑` over the blind, `↓` over the coil once the blind is up, and the `360icon.svg` mark —
+18px, masked — over the mark itself, where the drag turns it. The hint is confined to the opening the
+shutter occupies, so it does not light on the frame's band. The turn mark follows the blind's edge: it
+shows on the strip below the slats' lower edge while the arrow holds over the slats, so it arrives with
+the blind's first move and grows as the opening clears, up or down alike. The arrow and the mark
+crossfade (0.2s) rather than swapping in a frame.
 
 The cursor no longer fades while the pointer sits still; it is hidden only until the first move
 (decision 87).
