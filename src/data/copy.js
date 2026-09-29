@@ -71,12 +71,25 @@ export const copy = {
     },
   },
 
-  // What Limonacho says the first time you poke him in a visit — the bubble and
-  // the "acho" are one greeting. It hides itself after a few seconds; turn the
-  // whole mascot off in config.js.
+  /*
+    What Limonacho says the first time you poke him in a visit — the bubble and
+    the "acho" are one greeting. It hides itself after a few seconds; turn the
+    whole mascot off in config.js.
+
+    `cv` and `form` are the two hover hints: over the CV button, and over the
+    send button while the form is not ready to go.
+  */
   lemon: {
-    en: { bubble: "Welcome! I'm Limonacho" },
-    es: { bubble: '¡Bienvenido! Soy Limonacho' },
+    en: {
+      bubble: "Welcome! I'm Limonacho",
+      cv: 'Have a look',
+      form: 'Fill the fields in first',
+    },
+    es: {
+      bubble: '¡Bienvenido! Soy Limonacho',
+      cv: 'Échale un ojo',
+      form: 'Rellena antes los campos',
+    },
   },
 }
 

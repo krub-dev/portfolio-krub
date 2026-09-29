@@ -17,9 +17,15 @@ import { RouterLink } from 'vue-router'
 
 import BaseButton from '../base/BaseButton.vue'
 import { useContactForm } from '../../composables/useContactForm'
-import { email } from '../../data'
+import { useLang } from '../../composables/useLang'
+import { useLemonVoice } from '../../composables/useLemonVoice'
+import { copy, email } from '../../data'
 
 const { t } = useI18n()
+const { lang } = useLang()
+// Limonacho says why the send button will not go, when you hover it.
+const { say, hush } = useLemonVoice()
+const lemon = computed(() => copy.lemon[lang.value])
 
 // A function, not an object: the labels have to be read at validation time, in
 // whatever language is on screen then.
@@ -88,6 +94,15 @@ async function onSubmit() {
     window.turnstile.reset(widgetId)
     token.value = ''
   }
+}
+
+/*
+  A disabled button does not take mouse events, so the hint is heard on the
+  wrapper around it: hovering the send button while it cannot go is the one
+  moment the visitor needs telling why.
+*/
+function onSendHover() {
+  if (!canSend.value) say(lemon.value.form)
 }
 </script>
 
@@ -191,9 +206,16 @@ async function onSubmit() {
     </div>
 
     <div class="foot">
-      <BaseButton variant="solid" size="md" type="submit" :disabled="!canSend">
-        {{ status === 'sending' ? t('form.sending') : t('form.send') }}
-      </BaseButton>
+      <span
+        class="send"
+        :class="{ blocked: !canSend }"
+        @mouseenter="onSendHover"
+        @mouseleave="hush()"
+      >
+        <BaseButton variant="solid" size="md" type="submit" :disabled="!canSend">
+          {{ status === 'sending' ? t('form.sending') : t('form.send') }}
+        </BaseButton>
+      </span>
 
       <p class="note">{{ t('form.note', { email }) }}</p>
     </div>
@@ -338,6 +360,23 @@ textarea.input {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 18px;
+}
+
+/*
+  The wrapper around the send button. A disabled control does not take mouse
+  events, so the hint about why it will not go is heard here; the button keeps
+  the click target when it is live and steps out of the way when it is not.
+*/
+.send {
+  display: inline-flex;
+}
+
+.send.blocked {
+  cursor: not-allowed;
+}
+
+.send.blocked :deep(.btn) {
+  pointer-events: none;
 }
 
 .note {

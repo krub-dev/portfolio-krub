@@ -31,6 +31,9 @@ const { t } = useI18n()
 
 const pages = ref(null)
 const state = ref('idle') // idle | loading | ready | error
+// The reason, in development only: a phone has no console to open, and "could
+// not be shown" on its own is a dead end.
+const detail = ref('')
 
 // Bumped on every start and on every close: a render that a close overtook must
 // not paint into a dialog that is gone, nor after a theme change.
@@ -41,8 +44,15 @@ async function render() {
   state.value = 'loading'
 
   try {
-    const pdfjs = await import('pdfjs-dist')
-    const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url')
+    /*
+      The legacy build, not the modern one. The modern core leans on APIs a
+      slightly older iOS does not have (`Promise.withResolvers` and friends), and
+      the failure is silent: the dialog just says it could not be shown. The
+      legacy build is the same pdf.js transpiled and polyfilled for exactly this,
+      and it costs a few kilobytes more.
+    */
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
+    const worker = await import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url')
     pdfjs.GlobalWorkerOptions.workerSrc = worker.default
 
     const doc = await pdfjs.getDocument({ url: props.href }).promise
@@ -84,7 +94,10 @@ async function render() {
     // Logged for the console, like the contact endpoint: a dialog that silently
     // shows "could not be shown" is a mystery to whoever has to fix it.
     console.error('[cv] the document could not be rendered:', error)
-    if (mine === token) state.value = 'error'
+    if (mine === token) {
+      state.value = 'error'
+      detail.value = import.meta.env.DEV ? String(error?.message ?? error) : ''
+    }
   }
 }
 
@@ -114,17 +127,42 @@ watch(
       <span id="cv-modal-title" class="title">{{ t('actions.cv') }}</span>
     </template>
 
+    <!--
+      The download lives in the header with the close, not at the foot of the
+      document: it is the one thing you want whatever page you are on, and the
+      header stays put while the pages scroll. Icon only — an arrow into a tray
+      says "download" without a word, and the label is for the screen reader.
+    -->
+    <template #actions>
+      <BaseButton
+        variant="outline"
+        size="sm"
+        :href="href"
+        download
+        :aria-label="t('cvModal.download')"
+        class="download"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
+        </svg>
+      </BaseButton>
+    </template>
+
     <div class="body">
       <p v-if="state === 'loading'" class="note">{{ t('cvModal.loading') }}</p>
-      <p v-else-if="state === 'error'" class="note">{{ t('cvModal.error') }}</p>
+      <p v-else-if="state === 'error'" class="note">
+        {{ t('cvModal.error') }}<span v-if="detail" class="detail">{{ detail }}</span>
+      </p>
 
       <div ref="pages" class="pages" />
-
-      <div class="foot">
-        <BaseButton variant="solid" size="md" :href="href" download>
-          {{ t('cvModal.download') }}
-        </BaseButton>
-      </div>
     </div>
   </BaseModal>
 </template>
@@ -145,12 +183,31 @@ watch(
   color: var(--fg-2);
 }
 
+/* A square icon button: the same padding all round, no text to make room for. */
+.download {
+  padding: 9px;
+}
+
+.download svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
 .note {
   margin: 0;
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.1em;
   color: var(--fg-3);
+}
+
+/* The reason, under the sentence and dimmer: development only. */
+.detail {
+  display: block;
+  margin-top: 6px;
+  letter-spacing: 0;
+  opacity: 0.7;
 }
 
 /* The pages stack, each a sheet of its own. */
@@ -167,12 +224,5 @@ watch(
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
-}
-
-.foot {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 4px;
-  border-top: 1px solid var(--line);
 }
 </style>

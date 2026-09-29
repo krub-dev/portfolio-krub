@@ -34,6 +34,7 @@ const tab = ref('exp')
 // The id that ties the tab row to the panel it switches, for the ARIA tablist.
 const panelId = 'me-tabs'
 const about = computed(() => copy.about[lang.value])
+const lemon = computed(() => copy.lemon[lang.value])
 const options = computed(() => [
   { value: 'exp', label: t('tab.exp') },
   { value: 'edu', label: t('tab.edu') },
@@ -161,6 +162,8 @@ function onTouchEnd(event) {
           size="md"
           magnetic
           class="cv"
+          @mouseenter="say(lemon.cv)"
+          @mouseleave="hush()"
           @click="$emit('open-cv')"
         >
           {{ t('actions.cv') }}

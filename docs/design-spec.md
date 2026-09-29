@@ -341,8 +341,9 @@ current period, `--fg-3` if it is past. Right: title 18px weight 600 + descripti
 Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`. **No caption.**
 **The "Résumé/CV" button sits under it, at the photo's own width**, solid in the accent because it is
 the section's one call to action, so the column closes with one block. It opens **the CV dialog**
-(decision 97): the same pages as the PDF, rendered with pdf.js inside the dialog shell of §3.7, with
-the download at its foot. **On a wide screen that whole column travels with the scroll**:
+(decision 97): the same pages as the PDF, rendered with pdf.js inside the dialog shell of §3.7, with an
+icon-only download in that dialog's header. **On a wide screen that whole column travels with the
+scroll**:
 `position:sticky` at `top: calc(var(--navbar-h, 88px) + 20px)`, riding down while the timeline runs
 past and stopping with its foot just above the section's bottom (the section's own padding). On mobile
 there is no travel — the photo lands at the end of the section — and the order is photo, badge, CV.
@@ -429,7 +430,8 @@ on instead, with the same yellow border, and it moves as you scroll the rail.
 ### 3.7 Project detail modal
 
 The dialog shell — backdrop, panel, scroll lock, focus trap, Escape and the ✕ — is `BaseModal`, shared
-with the CV dialog (§3.5).
+with the CV dialog (§3.5). Its header is sticky and opaque (the title on the left, an optional action
+and the ✕ on the right), so it stays reachable however far the body scrolls.
 
 Opens on card click. Backdrop a flat `color-mix(in srgb, var(--ink) 90%, transparent)` — no
 `backdrop-filter`, which turned the page behind into smudges and made the backdrop a backdrop root

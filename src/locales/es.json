@@ -48,7 +48,7 @@
     "g4": "Tools & AI"
   },
   "actions": {
-    "cv": "Currículum/CV",
+    "cv": "Résumé/CV",
     "talk": "Hablemos ↗",
     "readMore": "Leer más",
     "readLess": "Leer menos",
@@ -77,8 +77,8 @@
   },
   "cvModal": {
     "loading": "Cargando el CV…",
-    "error": "No se ha podido mostrar el CV. Descárgalo abajo.",
-    "download": "Descargar PDF"
+    "error": "No se ha podido mostrar el CV.",
+    "download": "Descargar el CV"
   },
   "notFound": {
     "title": "/not-found",

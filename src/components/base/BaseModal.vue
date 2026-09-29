@@ -77,9 +77,12 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
       >
         <header class="head">
           <slot name="head" />
-          <button class="close" type="button" :aria-label="closeLabel" @click="emit('close')">
-            ✕
-          </button>
+          <div class="head-actions">
+            <slot name="actions" />
+            <button class="close" type="button" :aria-label="closeLabel" @click="emit('close')">
+              ✕
+            </button>
+          </div>
         </header>
 
         <slot />
@@ -119,12 +122,27 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 }
 
 .head {
+  /*
+    Sticky, and opaque. A dialog with a document in it scrolls for a long way, and
+    the header is where the title, the close and whatever action the dialog has
+    live: they have to stay put, and they have to hide the pages passing under.
+  */
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 18px 22px;
   border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .close {

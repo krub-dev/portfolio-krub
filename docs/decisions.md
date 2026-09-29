@@ -613,10 +613,12 @@ dialog.
 - **The document is the one the site already offers,** picked from the theme and language exactly as
   the old button did (`cvPath`). Nothing new to keep in step, and the dialog and the download cannot
   disagree about which file it is.
-- **pdf.js, not an `<iframe>` and not page images.** An iframe hands over to the browser's viewer,
-  which on iOS Safari is unreliable and brings its own chrome; page images would need a rasteriser in
-  the cv tool, and there is none on this machine — a new binary for a portfolio. pdf.js renders the
-  real pages into canvases, in the site's own shell, and it is one dependency instead of a pipeline.
+- **pdf.js, the legacy build — not an `<iframe>` and not page images.** An iframe hands over to the
+  browser's viewer, which on iOS Safari is unreliable and brings its own chrome; page images would need
+  a rasteriser in the cv tool, and there is none on this machine — a new binary for a portfolio. pdf.js
+  renders the real pages into canvases, in the site's own shell. It is the **legacy** build: the modern
+  core leans on APIs a slightly older iOS does not have (`Promise.withResolvers` and friends), and that
+  failure is silent — the dialog only says it could not be shown.
 - **Lazy, and only on open.** pdf.js and its worker are their own chunks (about 430 KB and 1.2 MB)
   imported when the dialog first opens, so a visitor who never looks at the CV downloads neither. Each
   page is painted at the device pixel ratio, because a PDF scaled to a CSS width and left at 1:1 is
@@ -624,6 +626,35 @@ dialog.
 - **The dialog shell is shared.** The backdrop, panel, scroll lock, focus trap, Escape and close button
   were lifted out of the project modal into `BaseModal`, so there is one set of dialog rules rather
   than two that drift — the same reason the pagers were merged.
+
+### 98. The page is held still under a dialog
+**Status:** active
+
+Two things an iPad showed once the CV dialog was there.
+
+- **The scroll lock takes the body out of flow.** `overflow: hidden` on the body is enough on a
+  desktop, but iOS ignores it: the document still scrolls, which is how a finger could drag the page
+  around behind an open dialog. The lock sets `position: fixed` with the scroll offset in `top`, and
+  puts the page back — at once, with the global smooth behaviour turned off for the jump — on unlock.
+- **The magnetic hover stands down.** `useBodyScrollLock` keeps a module counter and exports
+  `isScrollLocked()`; `useMagnetic` releases every element home and stops while a dialog is over the
+  page. Elements leaning behind a backdrop read as the page wobbling under it, which is the opposite of
+  what a dialog is for.
+
+### 99. The dialog header sticks, and Limonacho explains what will not go
+**Status:** active
+
+- **The header sticks.** `position: sticky; top: 0` with an opaque background on the panel's header,
+  because a dialog with a document in it scrolls a long way and the title, the close and the action
+  have to stay reachable. The shell gained an `actions` slot for that action, beside the close.
+- **The CV's download moved into that header**, from the foot of the document: it is the one thing you
+  want on whatever page you are reading. It is an icon only — an arrow into a tray — with the words on
+  the `aria-label`; no "PDF", which the arrow already says.
+- **Limonacho explains the two buttons that will not go.** He says a line over the CV button, and over
+  the send button while the form is not ready. The send one is heard on a wrapper around the button,
+  because a disabled control takes no mouse events: the button steps out of the way
+  (`pointer-events: none`) and the wrapper takes the pointer, so the reason is heard at the moment it
+  is needed.
 
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62

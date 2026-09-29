@@ -124,7 +124,10 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
   await expect(dots.nth(0)).not.toHaveClass(/active/)
   await expect.poll(() => trackShift(track)).toBeLessThan(-100)
 
-  // And a drag takes the next slide, the way the rail does.
+  // And a drag takes the next slide, the way the rail does. The media is brought
+  // back into view first: the tab loop above leaves the panel scrolled to whatever
+  // it focused, and a drag measured off a half-hidden strip lands on nothing.
+  await bringIntoView(dialog.locator('.carousel'))
   const box = await dialog.locator('.carousel').boundingBox()
   const midY = box.y + box.height / 2
   await page.mouse.move(box.x + box.width * 0.75, midY)

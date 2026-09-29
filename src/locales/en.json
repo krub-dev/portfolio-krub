@@ -77,8 +77,8 @@
   },
   "cvModal": {
     "loading": "Loading the CV…",
-    "error": "The CV could not be shown. Download it below.",
-    "download": "Download PDF"
+    "error": "The CV could not be shown.",
+    "download": "Download the CV"
   },
   "notFound": {
     "title": "/not-found",
