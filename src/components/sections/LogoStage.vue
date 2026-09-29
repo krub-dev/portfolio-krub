@@ -179,6 +179,24 @@ let lastDownAt = 0
 let snapFrame = 0
 
 /*
+  The viewport height as the stylesheet sees it — `100vh` — rather than
+  `window.innerHeight`. On iOS the latter shrinks with the browser toolbar, so the
+  same page snapped to a smaller box when the toolbar happened to be out at load
+  and the frame changed size on a refresh while nothing else did. `vh` is the
+  large viewport and does not move with the toolbar, so the box is the same at
+  first paint and after a reload. Measured with a throwaway element because there
+  is no JS property for the large viewport.
+*/
+function viewportHeight() {
+  const probe = document.createElement('div')
+  probe.style.cssText = 'position:absolute;top:0;left:0;width:0;height:100vh;visibility:hidden'
+  document.body.appendChild(probe)
+  const height = probe.offsetHeight
+  probe.remove()
+  return height
+}
+
+/*
   Snap the box to the page's grid: a square of whole 72px cells, its left edge on
   the next line to the right and its top on the nearest one, so a box that is
   otherwise centred in its column lands on the background it sits on. Done in JS
@@ -198,7 +216,7 @@ function snapToGrid() {
 
   const natural = el.getBoundingClientRect().width
   const byWidth = Math.round(natural / GRID)
-  const byHeight = Math.floor((window.innerHeight - 200) / GRID)
+  const byHeight = Math.floor((viewportHeight() - 200) / GRID)
   const cells = Math.max(1, Math.min(MAX_CELLS, byWidth, byHeight))
   const size = cells * GRID
   el.style.width = `${size}px`

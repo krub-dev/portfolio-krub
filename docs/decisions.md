@@ -305,6 +305,17 @@ Two things an iPad (iOS 17.4) showed that no desktop browser did.
   cursor loop, and the stage takes `touch-action: pan-y` so the page keeps the vertical swipe. The
   tilt stays mouse-only, which is right: there is no hover on a finger.
 
+### 93. The stage snaps to `100vh`, not to `window.innerHeight`
+**Status:** active
+
+The stage's box is a whole number of 72px cells, and its vertical limit came from `window.innerHeight
+- 200`. On iOS `innerHeight` shrinks with the browser toolbar, so the same page snapped to six cells
+when the toolbar was out at load and seven when it was not: refreshing made the frame change size while
+the rest of the page stayed put. The limit is measured from `100vh` now — the large viewport, the same
+unit the stylesheet uses and stable against the toolbar — so the box is the same at first paint and
+after a reload. There is no JS property for the large viewport, so it is read from a throwaway
+`height:100vh` element.
+
 ### 82. The mark's motion and light
 **Status:** active · **Archive:** 82
 
