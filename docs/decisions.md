@@ -559,21 +559,22 @@ stacked cards made the section **2319px against an 839px viewport**.
 - **The drag needed a click guard.** The whole card is a click target behind an overlay, so a drag
   that ends over one would open it.
 
-### 94. The modal's media is a taller slot, and the dots page it
+### 94. The modal's media slides, and pages with the rail's own dots
 **Status:** active
 
 The carousel at the top of the project modal carried ← → arrows and an `IMAGE n / total · SLUG` label
-over the shot, and at `16/9` with a `40svh` ceiling it read as a letterbox: `object-fit: cover` cropped
-most of every screenshot away.
+over the shot, at `16/9` with a `40svh` ceiling, and it swapped the image in a single frame.
 
-- **Taller.** `aspect-ratio: 16/10` with a `56svh` ceiling, so the shot has room without taking over
-  the panel.
-- **Dots, not arrows or a label.** Real buttons, the way the rail and the testimonials page: a 24px
-  target each with an 8px mark inside, the current one in `--acc`, on a chip of the ink so they read
-  over any shot. They only appear when there is more than one slide, and the `prevImage` / `nextImage`
-  labels and the `modal.image` string went with the arrows.
-- **No swipe yet.** The dots page it; a finger drag would be the next thing if the touch path needs
-  one.
+- **The slides are a horizontal track moved by `transform`,** the way the projects rail moves: every
+  screenshot sits side by side at 100% of the box and the index picks the framed one, so a change
+  slides. `16/10` with a `56svh` ceiling, matching the card's own frame.
+- **The dots are the rail's and the testimonials' indicator,** laid on its side rather than a second
+  system invented for the modal: a 24px target with an 8px mark inside (WCAG 2.2), the current one a
+  longer pill in `--acc`. They sit under the media on the panel, not over the shot, so the marks read
+  against the panel and not against whatever the screenshot shows. The arrows, the label and the
+  `prevImage` / `nextImage` / `modal.image` strings went with them.
+- **No drag yet.** The dots page it; a finger drag like the rail's would be the next thing if the
+  touch path wants one.
 
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62

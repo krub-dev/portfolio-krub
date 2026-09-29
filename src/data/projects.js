@@ -10,8 +10,8 @@
     const content = computed(() => project[lang.value])
 
   Fields:
-    slug      URL-ish id. Also the modal path (/projects/<slug>) and the
-              carousel label. Lowercase, no spaces.
+    slug      URL-ish id. Also the modal path (/projects/<slug>). Lowercase, no
+              spaces.
     shotLabel Placeholder text drawn over the striped frame until there is a
               real screenshot. Drop it once `image` is set.
     image     Path under public/ for the card's frame, or null while there is

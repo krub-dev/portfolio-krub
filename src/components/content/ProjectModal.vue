@@ -99,6 +99,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
           :slides="project.slides"
           :slug="project.slug"
           :name="content.name"
+          :shot-label="project.shotLabel"
         />
 
         <div class="body" data-two-col>

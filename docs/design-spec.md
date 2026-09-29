@@ -437,14 +437,15 @@ radius 22, background `--surface`, border `--line`.
 
 - Header (`padding:18px 22px`, bottom border): the `[0N]` index in yellow mono 11px, the path
   `/projects/<slug>` in mono 13px `--fg-2`, and a 38×38 radius-10 ✕ button.
-- Carousel: `width:100%` **and** `aspect-ratio:16/10` with `max-height:56svh` — taller than the
-  16/9 × 40svh it was, which read as a letterbox and cropped most of every shot. The width is
-  explicit because with only an aspect-ratio and a max-height the width is derived *from* the
-  height, which left the right of the row empty. The same diagonal stripes while there are no
-  screenshots. Paging is the dots, the way the rail and the testimonials page: a 24px target each
-  with an 8px mark inside, on a chip of `color-mix(in srgb, var(--ink) 62%, transparent)` so they
-  read over any shot, the current one in `--acc`. They only show when there is more than one slide.
-  The ← → arrows and the `IMAGE n / total · SLUG` label are gone (decision 94).
+- Carousel: `width:100%` **and** `aspect-ratio:16/10` with `max-height:56svh` — the card's own frame;
+  it was 16/9 × 40svh and read as a letterbox. The width is explicit because with only an aspect-ratio
+  and a max-height the width is derived *from* the height, which left the right of the row empty. The
+  slides are a horizontal track moved by `transform` (0.4s, the pagers' curve), each at 100% of the
+  box; while there are no screenshots each is the striped frame carrying the project's `shotLabel`.
+  Paging is the dots, the rail's indicator on its side: a 24px target with an 8px mark inside, the
+  current one a longer pill in `--acc`, under the media on the panel rather than over the shot, and
+  only shown when there is more than one slide. The ← → arrows and the `IMAGE n / total · SLUG` label
+  are gone (decision 94).
 - Body: grid `1.4fr .6fr` (one column on mobile), `padding: clamp(22px,4vw,40px)`. Left: name
   `clamp(26px,3.4vw,40px)` weight 700, lead 18px, two 16px `--fg-2` paragraphs, and two
   buttons (repository outlined, demo in yellow). Right: a mono definition list with Role, Year

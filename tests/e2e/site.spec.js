@@ -112,14 +112,17 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
     expect(await dialog.evaluate((el) => el.contains(document.activeElement))).toBe(true)
   }
 
-  // The media pages by its dots, and the one you are on carries the accent. Last
-  // before closing, because WebKit does not focus a button on click, and an
-  // earlier click would leave the focus assertions above with nothing focused.
+  // The media slides and pages by its dots: the track moves, and the dot you are
+  // on is the longer pill. Last before closing, because WebKit does not focus a
+  // button on click and an earlier click would leave the focus checks above with
+  // nothing focused.
   const dots = dialog.locator('.dots .dot')
   await expect(dots).toHaveCount(4)
+  const track = dialog.locator('.carousel .track')
   await dots.nth(2).click()
-  await expect(dots.nth(2)).toHaveClass(/on/)
-  await expect(dots.nth(0)).not.toHaveClass(/on/)
+  await expect(dots.nth(2)).toHaveClass(/active/)
+  await expect(dots.nth(0)).not.toHaveClass(/active/)
+  await expect.poll(() => trackShift(track)).toBeLessThan(-100)
 
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
