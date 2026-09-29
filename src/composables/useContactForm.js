@@ -18,6 +18,12 @@ export function useContactForm(labels) {
   const fields = reactive({ name: '', email: '', message: '', trap: '' })
   const errors = reactive({ name: '', email: '', message: '' })
   const status = ref('idle')
+  // The endpoint's error code, so the form can say more than "failed" — a captcha
+  // that expired reads differently from a send that broke.
+  const errorCode = ref('')
+  // The Turnstile token, set by the widget in ContactForm. Empty without the key,
+  // which is how the form runs locally.
+  const token = ref('')
 
   async function send() {
     // The button is disabled while sending, but a second Enter press can still
@@ -28,6 +34,7 @@ export function useContactForm(labels) {
     if (hasErrors(errors)) return
 
     status.value = 'sending'
+    errorCode.value = ''
 
     try {
       const response = await fetch(config.contactEndpoint, {
@@ -38,11 +45,15 @@ export function useContactForm(labels) {
           email: fields.email.trim(),
           message: fields.message.trim(),
           trap: fields.trap,
+          token: token.value,
         }),
       })
 
       const data = await response.json().catch(() => ({}))
-      if (!response.ok || !data.ok) throw new Error(data.error ?? 'request failed')
+      if (!response.ok || !data.ok) {
+        errorCode.value = data.error ?? ''
+        throw new Error(data.error ?? 'request failed')
+      }
 
       status.value = 'sent'
       fields.name = ''
@@ -55,5 +66,5 @@ export function useContactForm(labels) {
     }
   }
 
-  return { fields, errors, status, send }
+  return { fields, errors, status, errorCode, token, send }
 }
