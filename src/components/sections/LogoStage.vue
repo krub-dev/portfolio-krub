@@ -446,6 +446,13 @@ defineExpose({ exportModel })
   height: 100%;
   border: 1px solid var(--line);
   /*
+    pan-y, the same declaration the project rail uses: the browser keeps the
+    vertical swipe for the page and hands the horizontal drag to us, which is what
+    lets the mark spin under a finger. Without it the browser claimed the gesture
+    as a scroll and cancelled the pointer, so touch turned nothing.
+  */
+  touch-action: pan-y;
+  /*
     Flat background. In the dark theme it is --ink (near black). In the light
     theme it is --stage-bg (medium grey) so the tunnel starts from a darker tone
     and the fog has room to fade. The `--surface`-to-`--ink` radial that used to
@@ -683,33 +690,40 @@ defineExpose({ exportModel })
 /*
   The frame: a slim brushed-metal band over the canvas. Opaque, so it masks the
   box's edges — whatever the camera's small lean does to them — and drawn in the
-  metal tokens, a sheen in both themes rather than a colour. `border-image` is
-  what lets a border carry the gradient, and the slice is the band's own width so
-  the corners take a real piece of it: sliced at one pixel the corners were each
-  a single colour stretched over 12px, and the brushed streaks stopped dead at the
-  edges.
+  metal tokens, a sheen in both themes rather than a colour.
 
-  No hairline on its inner edge, and no vignette either: the glow's own hard edge
-  is the line there, and a dark rule or a soft inset shadow on top of it read as a
-  second edge running round the frame. The vignette lasted a while and measured at
-  only about 4/255, but it was the shape — a rounded rectangle, brighter at the
-  sides than at its corners — that kept reading as a shadow cast into the slot.
+  Drawn as a background with a mask, not as a `border-image`. The border-image
+  version of this same gradient did not paint at all on an iPad, while the very
+  same kind of gradient as a background (the shutter's slats) does, so the frame
+  uses the combination that is known to work there (decision 92). The ring is the
+  border box minus the padding box, cut with the mask `exclude` and the legacy
+  `-webkit-mask-composite: xor` for older WebKit. The border itself stays
+  transparent; it is only there to give the mask its padding box.
 */
 .rim {
   position: absolute;
   inset: 0;
   pointer-events: none;
   border: 12px solid transparent;
-  border-image: linear-gradient(
-      135deg,
-      var(--metal) 0%,
-      color-mix(in srgb, var(--metal) 40%, var(--metal-dark)) 15%,
-      var(--metal) 33%,
-      color-mix(in srgb, var(--metal) 20%, var(--metal-dark)) 50%,
-      var(--metal) 68%,
-      var(--metal-dark) 100%
-    )
-    12;
+  background:
+    linear-gradient(
+        135deg,
+        var(--metal) 0%,
+        color-mix(in srgb, var(--metal) 40%, var(--metal-dark)) 15%,
+        var(--metal) 33%,
+        color-mix(in srgb, var(--metal) 20%, var(--metal-dark)) 50%,
+        var(--metal) 68%,
+        var(--metal-dark) 100%
+      )
+      border-box;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
 }
 
 /*

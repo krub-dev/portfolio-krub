@@ -286,6 +286,22 @@ run it off the screen.
 - **The entrance glow is CSS, not WebGL.** It is an `inset` shadow on a wrapper inside the frame now:
   hard on the frame's inner edge, fading inward, for nothing.
 
+### 92. The frame is a masked background, and the stage takes touch
+**Status:** active
+
+Two things an iPad (iOS 17.4) showed that no desktop browser did.
+
+- **The frame did not paint.** It was a `border-image` over a transparent border, and on iOS that
+  gradient — with `color-mix` and `var()` in it — did not render at all, so the transparent border
+  showed through as nothing. The shutter's slats use the very same kind of gradient as a `background`
+  and render fine there, so the ring is a background now, cut to the border band with a mask
+  (`mask-composite: exclude`, and the legacy `-webkit-mask-composite: xor`), keeping the same brushed
+  gradient and dropping `border-image`.
+- **The mark did not spin under a finger.** The stage had no `touch-action`, so the browser claimed a
+  horizontal swipe as a scroll and cancelled the pointer before the drag began. It takes
+  `touch-action: pan-y` now, the same declaration the project rail uses: the page keeps the vertical
+  swipe, the stage gets the horizontal drag.
+
 ### 82. The mark's motion and light
 **Status:** active · **Archive:** 82
 
