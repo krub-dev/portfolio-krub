@@ -40,9 +40,9 @@ carries its privacy notice and a required consent box, both linking to `/privacy
 a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, sending as through
 Resend's SMTP), and the site points at it everywhere.
 
-**The substantial work still open:** the backlight behind the mark without a plane, the tunnel's far
-end, the project screenshots and Open Graph artwork, the LinkedIn update, the GitHub profile README,
-the prose reread, Bing Webmaster Tools, and making the repository public.
+**The substantial work still open:** the project screenshots and Open Graph artwork, the LinkedIn
+update, the GitHub profile README, the prose reread, Bing Webmaster Tools, and making the repository
+public.
 
 ---
 
@@ -214,15 +214,13 @@ the privacy notice and the consent the law asks for.
   mascot. Wants its own context and a reset/clear. Needs a server-side endpoint: an API key
   cannot live in a static bundle. The speech bubble and its timers are already built and would
   become the chat surface.
-- [ ] **Shimmering skeleton placeholders.** Held until something genuinely arrives late, which today
-  nothing does: the four projects have `image: null` and their cards paint a `shotLabel`, the 30
-  stack icons come to about 60 KB between them, and the photo is local — a placeholder would flash
-  for about 40 ms and read as a fault. The 3D model now has a real loading percentage (not a fake
-  bar). Real project images once they exist would earn one. Whenever it goes in, delay it (~300 ms)
-  so it only shows when the load is actually slow. Technique: a `linear-gradient` with an oversized
-  `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%` with
-  `background-position` running to `-200% 0` at 1.2s linear infinite). Reference: @aniakubow on
-  Instagram. See decision 54.
+- [x] **Shimmering skeleton placeholders.** Closed on 2026-09-30 as not needed: nothing arrives late
+  enough to earn one. The four projects paint a `shotLabel` while they have no image, the ~30 stack
+  icons are about 60 KB between them, the photo is local, and the 3D model has a real percentage from
+  `THREE.LoadingManager`. A placeholder would flash for about 40 ms and read as a fault. Reopen when
+  real project screenshots exist, and delay it (~300 ms) so it only shows on a genuinely slow load.
+  Technique, for the day: a `linear-gradient` with `background-size: 200% 100%` and a `@keyframes`
+  sweeping `background-position` to `-200% 0` at 1.2s linear infinite.
 - [x] **A simulated entry loader — no.** Closed on 2026-09-17: a 0-100 over content that is already
   in the first frame is a fake delay, it costs exactly the numbers Lighthouse is built around (the
   largest paint and the time to interactive), and on a return visit it is friction for someone whose
@@ -240,18 +238,13 @@ the privacy notice and the consent the law asks for.
   In the logo-lab they do not coincide because the stages are not aligned with the page's grid,
   but that is expected — the lab puts stages side by side for comparison.
 - [x] **The mark as a glTF.** Done: the mesh loads from `public/assets/model/krub-logo.glb` (454KB, 6k tris) instead of being extruded from SVG at runtime. Two materials: front takes the accent colour, back a dark neutral. A real loading percentage from `THREE.LoadingManager` shows while the GLB downloads. The SVG loader and buffer utilities are gone from the bundle.
-- [ ] **A backlight behind the mark, without a plane.** The plane that cleared the grid behind the
-  mark was removed (decision 80): near enough to project wider than the mark, the mark's corners
-  crossed it when it turned; deeper, the tunnel's aperture clipped it smaller than the mark, so a
-  flat quad cannot both cover the mark and stay behind it. The job — separating the mark from the
-  grid behind it — wants something with depth: a back-side sphere around the mark, or a darkening
-  in the room's own material.
-- [ ] **The tunnel's far end reads as a black void.** Fading to `--ink` can only darken the end by the
-  8/255 that separates it from `--surface` in the dark theme, so `near` and `far` differ by about
-  1.5/255 and the end lands as a hole rather than as depth (measured). A `haze` mode that mixed `--fg`
-  into `--ink`, so the end rose above the background, did lift it (12 to 33) but read as a square panel
-  of mist at the end of the tunnel, so it was dropped. Still open: a shape that does not read as a lit
-  panel — spacing the fog on the projection, or lighting the end some other way.
+- [x] **A backlight behind the mark, without a plane.** Closed on 2026-09-30: not doing it. The plane was
+  removed (decision 80) and a flat quad cannot both cover the mark and stay behind it; anything with
+  depth for it (a back-side sphere, darkening the room's material) is more scene than the effect is
+  worth.
+- [x] **The tunnel's far end reads as a black void.** Closed on 2026-09-30: not doing it. Fading to
+  `--ink` can only darken the end by the 8/255 that separates it from `--surface`, so it lands as a hole;
+  the `haze` mode that lifted it read as a square panel of mist and was dropped. Accepted as it is.
 - [x] **The project modal's media is cluttered.** Done on 2026-09-30: the slides are a horizontal track
   moved by `transform`, paged by the rail's own dots and draggable, at `16/10 × 56svh` to match the
   card's frame. The arrows and the `IMAGEN 1 / 4 · NAME` label are gone. See decision 94.
@@ -262,10 +255,11 @@ the privacy notice and the consent the law asks for.
   different idea for those edges.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
-- [ ] **Finish the design-system page.** The `/preview` page in the site's own style that documents
-  the tokens, components and patterns is out of date and little iterated — the one Claude Design
-  seeded. Bring it up to what the site is now. It is dev-only today (`import.meta.env.DEV`); whether
-  it should also ship on `main` is a separate call, and for now it stays local.
+- [x] **Finish the design-system page.** Brought up to date on 2026-09-30: the token list is complete
+  (21 swatches, including the element-specific metal/fog/stage ones), and it gained a live `BaseModal`
+  specimen, a content-components block (`ProjectCard`, `MediaCarousel`, `SpecList`, `TestimonialCard`),
+  and a config-and-composables block read live from `src/data/config.js`. Still dev-only
+  (`import.meta.env.DEV`), so it never ships; whether it should is a separate call.
 
 ## Mobile and responsive
 

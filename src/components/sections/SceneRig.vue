@@ -252,14 +252,30 @@ function buildFog() {
     scene.value.fog = new Fog(fogEnd, mode.near, mode.far)
   } else {
     scene.value.fog.color.set(fogEnd)
-    scene.value.fog.near = mode.near
-    scene.value.fog.far = mode.far
   }
+  applyFogScale()
+}
+
+/*
+  The fog distances are measured from the camera, and the camera's distance to the
+  room's far wall scales with the zoom (`k`) — so the fog has to scale with it
+  too. Left in fixed world units, the same wall sat at a different point of the
+  fade: the tunnel's dark end lightened as you zoomed in and darkened as you
+  zoomed out, so the background changed under the mark. Tied to `k`, the end holds
+  however near or far the camera is.
+*/
+function applyFogScale() {
+  const fog = scene.value?.fog
+  const mode = FOG_MODES[props.fog] ?? FOG_MODES.far
+  if (!fog || !mode) return
+  fog.near = mode.near * k.value
+  fog.far = mode.far * k.value
 }
 
 // The lab flips this while the stage is up, so the whole fog is rebuilt, not just
-// recoloured.
+// recoloured. The zoom only re-scales it.
 watch(() => props.fog, buildFog)
+watch(k, applyFogScale)
 
 function repaint() {
   buildRoom()

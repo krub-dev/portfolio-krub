@@ -15,12 +15,17 @@ import { useI18n } from 'vue-i18n'
 
 import AvailabilityBadge from '../components/base/AvailabilityBadge.vue'
 import BaseButton from '../components/base/BaseButton.vue'
+import BaseModal from '../components/base/BaseModal.vue'
 import SectionHeading from '../components/base/SectionHeading.vue'
 import SocialLink from '../components/base/SocialLink.vue'
 import SpeechBubble from '../components/base/SpeechBubble.vue'
 import StackGroup from '../components/base/StackGroup.vue'
 import TabSwitch from '../components/base/TabSwitch.vue'
 import TimelineItem from '../components/base/TimelineItem.vue'
+import MediaCarousel from '../components/content/MediaCarousel.vue'
+import ProjectCard from '../components/content/ProjectCard.vue'
+import SpecList from '../components/content/SpecList.vue'
+import TestimonialCard from '../components/content/TestimonialCard.vue'
 import { useLang } from '../composables/useLang'
 import { useTheme } from '../composables/useTheme'
 import { formatPeriod } from '../utils/format'
@@ -71,6 +76,12 @@ const tabOptions = computed(() => [
 ])
 const timeline = computed(() => (tab.value === 'exp' ? experience : education))
 
+// Live state for the specimens that need it: the dialog, and the first entry of
+// two collections so the content components have something real to paint.
+const dialogOpen = ref(false)
+const firstProject = computed(() => ({ ...projects[0], ...projects[0][lang.value] }))
+const firstTestimonial = computed(() => ({ ...testimonials[0], ...testimonials[0][lang.value] }))
+
 // Read back what the browser actually computed for each custom property, so
 // the swatch labels cannot drift from tokens.css.
 const resolved = ref({})
@@ -84,11 +95,44 @@ const COLOR_TOKENS = [
   ['--fg-2', 'secondary text'],
   ['--fg-3', 'tertiary text, mono labels'],
   ['--acc', 'brand yellow — fills only'],
-  ['--acc-text', 'accent text on --ink'],
   ['--acc-2', 'yellow on hover'],
+  ['--acc-text', 'accent text on --ink'],
+  ['--acc-text-2', 'hover of the above'],
+  ['--acc-solid', 'the accent at full saturation: cursor, Limonacho'],
   ['--on-acc', 'text on yellow'],
   ['--mark', 'logo and footer heart'],
   ['--grid', 'background grid lines'],
+  ['--specular', 'specular highlight on metal (white in both themes)'],
+  ['--cast', 'shadow (dark in both themes)'],
+  ['--metal', 'brushed metal: frame and shutter'],
+  ['--metal-dark', 'its dark side'],
+  ['--fog-end', 'where the tunnel fades to'],
+  ['--stage-bg', 'the hero stage behind the scene'],
+]
+
+// The switches in src/data/config.js, read live so the page cannot drift.
+const CONFIG_FLAGS = Object.entries(config).map(([name, value]) => [
+  name,
+  typeof value === 'boolean' ? (value ? 'on' : 'off') : String(value),
+])
+
+// One entry per composable, and what it exposes. Kept by hand, from
+// docs/components.md.
+const COMPOSABLES = [
+  ['useTheme()', 'theme, toggle(); writes data-theme and persists'],
+  ['useLang()', 'lang, toggle(); persists in localStorage'],
+  ['useAccent()', 'accent, set(id); writes data-accent and persists'],
+  ['useScrollSpy(ids)', 'reactive activeId'],
+  ['useScroll()', 'y, progress, atEnd — one listener for the whole app'],
+  ['useFocusTrap(el, active)', 'keeps focus inside an open dialog'],
+  ['useMagnetic()', 'the magnetic hover loop for [data-magnetic]'],
+  ['usePointer()', 'shared pointer position, one rAF for everything that follows it'],
+  ['useBodyScrollLock(active)', 'holds the page still under a dialog; isScrollLocked()'],
+  ['useContactForm(labels)', 'the contact form: fields, errors, canSend, send()'],
+  ['useCv()', 'warmCv(href): fetches pdf.js and the PDF on intent'],
+  ['useLemonVoice()', 'say(text) / hush() for whatever Limonacho says'],
+  ['usePastHero()', 'true once the hero is behind you'],
+  ['useFooterHeight(el)', 'publishes --footer-h'],
 ]
 
 const TYPE_SCALE = [
@@ -148,8 +192,8 @@ onMounted(readTokens)
   <main class="preview">
     <header class="head">
       <div>
-        <p class="eyebrow">Step 05 · base components</p>
-        <h1 class="title">components/base</h1>
+        <p class="eyebrow">Design system · the site's own sheet</p>
+        <h1 class="title">krub.dev / design system</h1>
       </div>
       <div class="controls">
         <button class="toggle" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
@@ -160,6 +204,12 @@ onMounted(readTokens)
         </button>
       </div>
     </header>
+
+    <p class="note">
+      Dev-only: this route is registered under <code>import.meta.env.DEV</code> and never ships. The
+      chrome around it (navbar, footer, cursor, Limonacho) is the real one — this is a route like any
+      other — so the appearance control in the bar switches the accent here too.
+    </p>
 
     <section class="block">
       <h2 class="h2">Base components</h2>
@@ -187,7 +237,7 @@ onMounted(readTokens)
       </div>
 
       <p class="note"><code>TabSwitch</code> + <code>TimelineItem</code> — live, click the tabs.</p>
-      <TabSwitch v-model="tab" :options="tabOptions" />
+      <TabSwitch v-model="tab" :options="tabOptions" panel-id="preview-tabs" />
       <div class="timeline">
         <TimelineItem
           v-for="(entry, i) in timeline"
@@ -221,6 +271,72 @@ onMounted(readTokens)
       </div>
       <div class="specimens">
         <SpeechBubble :text="lang === 'en' ? `Welcome! I'm Limonacho` : '¡Bienvenido! Soy Limonacho'" />
+      </div>
+
+      <p class="note">
+        <code>BaseModal</code> — the shell every dialog uses: backdrop, panel, scroll lock, focus trap,
+        Escape, a sticky header and the close. Open it and tab through; the content is the caller's.
+      </p>
+      <div class="specimens">
+        <BaseButton variant="solid" size="md" @click="dialogOpen = true">Open a dialog</BaseButton>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="h2">Content components · src/components/content</h2>
+
+      <p class="note">
+        <code>ProjectCard</code> — the whole card is the click target while the button stays around the
+        title alone, so the accessible name is the project's name.
+      </p>
+      <div class="card-demo">
+        <ProjectCard
+          :name="firstProject.name"
+          :tag="firstProject.tag"
+          :summary="firstProject.summary"
+          :shot-label="firstProject.shotLabel"
+          :image="firstProject.image"
+          :stack="firstProject.stack"
+          @open="dialogOpen = true"
+        />
+      </div>
+
+      <p class="note">
+        <code>MediaCarousel</code> — the modal's media: a horizontal track of slides, paged by the dots
+        (the rail's indicator) and by a drag.
+      </p>
+      <div class="media-demo">
+        <MediaCarousel
+          :images="firstProject.images ?? []"
+          :slides="firstProject.slides"
+          :slug="firstProject.slug"
+          :name="firstProject.name"
+          :shot-label="firstProject.shotLabel"
+        />
+      </div>
+
+      <p class="note"><code>SpecList</code> — the modal's right column: Role, Year and the stack chips.</p>
+      <div class="spec-demo">
+        <SpecList
+          :role="firstProject.role"
+          :year="firstProject.year"
+          :stack="firstProject.stack"
+        />
+      </div>
+
+      <p class="note">
+        <code>TestimonialCard</code> — one quote, clamped to four lines with a read more; the pager owns
+        the open state and sizes the pane.
+      </p>
+      <div class="quote-demo">
+        <TestimonialCard
+          :quote="firstTestimonial.quote"
+          :name="firstTestimonial.name"
+          :role="firstTestimonial.role"
+          :avatar="firstTestimonial.avatar"
+          :open="false"
+          @toggle="() => {}"
+        />
       </div>
     </section>
 
@@ -281,6 +397,29 @@ onMounted(readTokens)
             <code class="row-spec">{{ key }}</code>
           </div>
           <div class="row-demo dict">{{ t(key) }}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="h2">Config and composables</h2>
+      <p class="note">The switches in <code>src/data/config.js</code>, read live so this page cannot drift:</p>
+      <div class="rows">
+        <div v-for="[name, value] in CONFIG_FLAGS" :key="name" class="row">
+          <div class="row-meta">
+            <code class="row-spec">{{ name }}</code>
+          </div>
+          <div class="row-demo dict wrap">{{ value }}</div>
+        </div>
+      </div>
+
+      <p class="note">The shared logic, from <code>src/composables/</code> — one owner per concern:</p>
+      <div class="rows">
+        <div v-for="[name, what] in COMPOSABLES" :key="name" class="row">
+          <div class="row-meta">
+            <code class="row-spec">{{ name }}</code>
+          </div>
+          <div class="row-demo dict wrap">{{ what }}</div>
         </div>
       </div>
     </section>
@@ -376,6 +515,25 @@ onMounted(readTokens)
       <div class="grid-demo" />
       <p class="note">72&times;72px pattern, 1px lines in <code>--grid</code>.</p>
     </section>
+
+    <BaseModal
+      :open="dialogOpen"
+      labelledby="preview-dialog-title"
+      close-label="Close the dialog"
+      @close="dialogOpen = false"
+    >
+      <template #head>
+        <span id="preview-dialog-title" class="dialog-title">A dialog</span>
+      </template>
+
+      <div class="dialog-body">
+        <p class="note">
+          The panel and its behaviour are the shell's; what is inside is the caller's. This header is
+          sticky — scroll and it stays; the backdrop is one soft blur over a flat scrim.
+        </p>
+        <p v-for="n in 12" :key="n" class="note">Scroll line {{ n }}.</p>
+      </div>
+    </BaseModal>
   </main>
 </template>
 
@@ -741,6 +899,44 @@ onMounted(readTokens)
   background-image: linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 72px 72px;
+}
+
+/* Content specimens ------------------------------------------------------- */
+.card-demo {
+  max-width: 380px;
+}
+
+.media-demo {
+  max-width: 640px;
+}
+
+.spec-demo {
+  max-width: 320px;
+}
+
+.quote-demo {
+  max-width: 560px;
+}
+
+/* The dialog specimen ----------------------------------------------------- */
+.dialog-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+}
+
+/* Long values wrap instead of being cut off. */
+.row-demo.wrap {
+  white-space: normal;
 }
 
 @media (max-width: 900px) {
