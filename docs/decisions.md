@@ -376,16 +376,21 @@ was answered by Vercel and the router never saw it. A catch-all `rewrites` to `/
 bundle, and it is safe because Vercel checks the filesystem **before** applying a rewrite. The cost
 is the status code: the page is served **200 with the 404 content**, a soft 404.
 
-### 57. The form posts to our own endpoint, never to Web3Forms
+### 57. The form posts to our own endpoint, and the endpoint sends by Resend
 **Status:** active · **Archive:** 57
 
-The contact form sends a real message, and the service behind it is Web3Forms. What it does **not**
-do is post to Web3Forms from the browser.
+The contact form sends a real message, and the browser never talks to the mail provider directly: it
+posts to `/api/contact`, a Vercel function holding the secret as an environment variable, which
+rebuilds the payload field by field. No key in the bundle, and validation, a rate limit and the
+captcha check sit where a caller cannot skip them.
 
-Web3Forms' access key is designed to be public. Hiding it is still strictly better: no key in the
-bundle, validation and rate-limiting possible on the server, and the provider becomes something that
-can be swapped in one file. So the browser posts to `/api/contact`, which is a Vercel function
-holding the key as an environment variable.
+**The provider is Resend, not Web3Forms.** The form was built on Web3Forms first, proxyed exactly
+like this — and it broke in production. Web3Forms sits behind Cloudflare and serves a JavaScript
+challenge to any server-side caller: a browser passes it, a `fetch` from a server never can. Their
+own docs say the API "is expected to run on client side", must not be proxied, and that server-side
+use needs the server's IP whitelisted **and a paid plan** — so the proxy is impossible on the free
+tier. Resend is a plain server API with a secret key: exactly the provider swap this endpoint was
+shaped for, one file.
 
 ---
 

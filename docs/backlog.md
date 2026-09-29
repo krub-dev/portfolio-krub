@@ -35,32 +35,30 @@ merged into both; `git log main..dev` lists whatever else is on `dev` but not ye
 2. Re-measure Lighthouse against the merged deployment.
 3. Real screenshots for the projects and the Open Graph artwork.
 
-The contact form is the one thing actually broken in production — see the **Contact form** group
-below.
+The contact form is mid-swap to Resend with Turnstile and a rate limit (see the **Contact form**
+group below); it needs the accounts before it works in production.
 
-**The substantial work still open:** the contact form (production failure, privacy, antispam), the
-backlight behind the mark without a plane, the tunnel's far end, the project screenshots and Open
-Graph artwork, the LinkedIn update, the GitHub profile README, the prose reread, Bing Webmaster Tools,
-the Vercel DNS change, and making the repository public.
+**The substantial work still open:** the contact form's Resend and Turnstile setup and its privacy
+notice, the backlight behind the mark without a plane, the tunnel's far end, the project screenshots
+and Open Graph artwork, the LinkedIn update, the GitHub profile README, the prose reread, Bing
+Webmaster Tools, the Vercel DNS change, and making the repository public.
 
 ---
 
 ## Contact form
 
-The form is built and lives in Contact; it posts to `/api/contact`, a Vercel function holding
-`WEB3FORMS_KEY`. What is left is making it survive production and the law.
+The form is built and lives in Contact; it posts to `/api/contact`, a Vercel function that now sends
+**by Resend**, with a per-IP rate limit and a Cloudflare Turnstile check (decision 57). What is left
+is the accounts behind it and the law.
 
-- [ ] **The form fails in production: a 502 from Web3Forms.** The route is fine — `GET /api/contact`
-  answers 405 from the deployed function, so the `rewrites` catch-all is not swallowing it — and the
-  key is present, since the answer is `send-failed`, not `not-configured`. The handler used to
-  swallow Web3Forms' own reason; it now logs it and echoes it back as `detail`, so both the function
-  logs and the Network panel say why. The key is trimmed too (a paste with spaces or wrapping quotes
-  is a silent rejection). Re-test and read the detail.
+- [ ] **Set Resend and Turnstile up.** The endpoint is written for them (decision 57), but it answers
+  `not-configured` until the settings exist: verify `krub.dev` in Resend and set `RESEND_API_KEY`,
+  `CONTACT_TO` and `CONTACT_FROM` in Vercel, and create the Turnstile site and secret keys
+  (`VITE_TURNSTILE_SITE_KEY` reaches the bundle, which is fine — it is the public one;
+  `TURNSTILE_SECRET_KEY` stays server-side). Then the form works on both, and without them it still
+  runs locally.
 - [ ] **A privacy notice for the form (GDPR).** A short note under the form, a `/privacy` page, and a
   consent checkbox — the three together, since the name, email and message are personal data.
-- [ ] **Rate-limit the endpoint and add Turnstile.** The honeypot alone is not enough. The limit
-  belongs in `api/contact.js` (per IP, per window); Cloudflare Turnstile, verified server-side, is
-  the captcha — no cookies, no visible puzzle, and the DNS already sits on Cloudflare.
 
 ---
 
