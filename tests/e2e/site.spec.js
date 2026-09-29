@@ -112,6 +112,15 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
     expect(await dialog.evaluate((el) => el.contains(document.activeElement))).toBe(true)
   }
 
+  // The media pages by its dots, and the one you are on carries the accent. Last
+  // before closing, because WebKit does not focus a button on click, and an
+  // earlier click would leave the focus assertions above with nothing focused.
+  const dots = dialog.locator('.dots .dot')
+  await expect(dots).toHaveCount(4)
+  await dots.nth(2).click()
+  await expect(dots.nth(2)).toHaveClass(/on/)
+  await expect(dots.nth(0)).not.toHaveClass(/on/)
+
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')

@@ -73,8 +73,7 @@
   "modal": {
     "role": "Role",
     "year": "Year",
-    "stack": "Stack",
-    "image": "IMAGE"
+    "stack": "Stack"
   },
   "notFound": {
     "title": "/not-found",
@@ -100,11 +99,11 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "closeModal": "Close project",
-    "prevImage": "Previous image",
-    "nextImage": "Next image",
     "projectsRail": "Projects",
+    "projectImages": "Project images",
     "goToTestimonial": "Go to testimonial {n}",
     "goToProject": "Go to project {n}",
+    "goToImage": "Go to image {n}",
     "backToTop": "Back to top",
     "openProject": "Open project: {name}",
     "raiseShutter": "Raise the shutter"

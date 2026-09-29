@@ -437,12 +437,14 @@ radius 22, background `--surface`, border `--line`.
 
 - Header (`padding:18px 22px`, bottom border): the `[0N]` index in yellow mono 11px, the path
   `/projects/<slug>` in mono 13px `--fg-2`, and a 38×38 radius-10 ✕ button.
-- Carousel: `width:100%` **and** `aspect-ratio:16/9` with `max-height:40svh` — the width is explicit
-  because with only an aspect-ratio and a max-height the width is derived *from* the height, which
-  left the right of the row empty. The same diagonal stripes, label
-  "IMAGE n / total · SLUG"; ← → arrows at 44×44 radius 12 with background
-  `color-mix(in srgb, var(--ink) 70%, transparent)`; 7px dots centred at the bottom (active
-  yellow, the rest `--line`). Indices wrap around (modulo).
+- Carousel: `width:100%` **and** `aspect-ratio:16/10` with `max-height:56svh` — taller than the
+  16/9 × 40svh it was, which read as a letterbox and cropped most of every shot. The width is
+  explicit because with only an aspect-ratio and a max-height the width is derived *from* the
+  height, which left the right of the row empty. The same diagonal stripes while there are no
+  screenshots. Paging is the dots, the way the rail and the testimonials page: a 24px target each
+  with an 8px mark inside, on a chip of `color-mix(in srgb, var(--ink) 62%, transparent)` so they
+  read over any shot, the current one in `--acc`. They only show when there is more than one slide.
+  The ← → arrows and the `IMAGE n / total · SLUG` label are gone (decision 94).
 - Body: grid `1.4fr .6fr` (one column on mobile), `padding: clamp(22px,4vw,40px)`. Left: name
   `clamp(26px,3.4vw,40px)` weight 700, lead 18px, two 16px `--fg-2` paragraphs, and two
   buttons (repository outlined, demo in yellow). Right: a mono definition list with Role, Year
@@ -924,7 +926,7 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
   decorative animations too (dot halo, marquee, lemon).
 - Every decorative element carries `aria-hidden="true"`: grids, cursor, dot, marquee, lemon
   texture dots, separators.
-- Text-free buttons (theme, language, menu, close, carousel arrows) carry an `aria-label`.
+- Text-free buttons (theme, language, menu, close, carousel dots) carry an `aria-label`.
 - Touch targets: 44px or more on mobile (carousel arrows 44px, social icons 46px, navbar
   buttons 36px with spacing), and the pagers' dots are 24px — the WCAG 2.2 minimum — with an 8px
   mark drawn inside, so the target can grow without the dot growing.

@@ -73,8 +73,7 @@
   "modal": {
     "role": "Rol",
     "year": "Año",
-    "stack": "Stack",
-    "image": "IMAGEN"
+    "stack": "Stack"
   },
   "notFound": {
     "title": "/not-found",
@@ -100,11 +99,11 @@
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",
     "closeModal": "Cerrar proyecto",
-    "prevImage": "Imagen anterior",
-    "nextImage": "Imagen siguiente",
     "projectsRail": "Proyectos",
+    "projectImages": "Imágenes del proyecto",
     "goToTestimonial": "Ir al testimonio {n}",
     "goToProject": "Ir al proyecto {n}",
+    "goToImage": "Ir a la imagen {n}",
     "backToTop": "Volver arriba",
     "openProject": "Abrir proyecto: {name}",
     "raiseShutter": "Subir la persiana"

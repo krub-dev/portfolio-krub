@@ -559,6 +559,22 @@ stacked cards made the section **2319px against an 839px viewport**.
 - **The drag needed a click guard.** The whole card is a click target behind an overlay, so a drag
   that ends over one would open it.
 
+### 94. The modal's media is a taller slot, and the dots page it
+**Status:** active
+
+The carousel at the top of the project modal carried ← → arrows and an `IMAGE n / total · SLUG` label
+over the shot, and at `16/9` with a `40svh` ceiling it read as a letterbox: `object-fit: cover` cropped
+most of every screenshot away.
+
+- **Taller.** `aspect-ratio: 16/10` with a `56svh` ceiling, so the shot has room without taking over
+  the panel.
+- **Dots, not arrows or a label.** Real buttons, the way the rail and the testimonials page: a 24px
+  target each with an 8px mark inside, the current one in `--acc`, on a chip of the ink so they read
+  over any shot. They only appear when there is more than one slide, and the `prevImage` / `nextImage`
+  labels and the `modal.image` string went with the arrows.
+- **No swipe yet.** The dots page it; a finger drag would be the next thing if the touch path needs
+  one.
+
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62
 
