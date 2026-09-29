@@ -50,13 +50,28 @@ routes.push({
 export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  // Section jumps are anchors within the same page, so we let the global
-  // `scroll-behavior: smooth` handle the animation.
+  /*
+    A route change lands at the top at once. `html { scroll-behavior: smooth }`
+    is global, so this has to beat it, and `behavior: 'instant'` is not enough on
+    its own: a browser that does not know the value falls back to the global
+    smooth and glides there, which is how the new page first showed at the old
+    offset on a phone. Turning the smooth behaviour off for this one jump, then
+    back on, is what makes it land. Section jumps are anchors within the same
+    page, so those keep the global smooth, on purpose.
+  */
   scrollBehavior(to) {
     if (to.hash) return { el: to.hash }
-    // A route change lands at the top at once. Left to the global smooth
-    // behaviour, the new page first painted at the old offset — on a phone,
-    // entering /privacy from the form showed its bottom — and then glided up.
-    return { top: 0, behavior: 'instant' }
+
+    const root = document.documentElement
+    const smooth = root.style.scrollBehavior
+    root.style.scrollBehavior = 'auto'
+    // Reading layout first: without it the style is not applied yet and
+    // Chromium still used the CSS smooth behaviour, gliding to the top instead.
+    void root.offsetHeight
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    root.style.scrollBehavior = smooth
+
+    // Handled here: the router must not scroll a second time.
+    return false
   },
 })

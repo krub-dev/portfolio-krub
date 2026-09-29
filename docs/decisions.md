@@ -411,6 +411,21 @@ them; the consent is one of those rules.
   accountability the notice promises. Keeping the message for longer than it takes to answer would
   contradict the retention the page states, so it is not stored anywhere else.
 
+### 90. A route change lands at the top at once
+**Status:** active
+
+`html { scroll-behavior: smooth }` is global, which is right for the section anchors but wrong for a
+route change: returning `{ top: 0 }` made the new page first appear at the old offset — on a phone,
+opening `/privacy` from the form showed its bottom, then glided up.
+
+- **`behavior: 'instant'` is not enough on its own.** A browser that does not know the value falls
+  back to the global smooth behaviour and glides there anyway.
+- **The inline `scroll-behavior: auto` needs a layout read.** Setting it around the jump and scrolling
+  straight away still glided in Chromium: the style had not been applied yet. Reading layout
+  (`void root.offsetHeight`) between the two is what makes the jump instant everywhere.
+- **The `scrollBehavior` does the jump itself and returns `false`,** so the router does not scroll a
+  second time. The section anchors keep the global smooth, on purpose.
+
 ---
 
 ## Responsive y mobile
