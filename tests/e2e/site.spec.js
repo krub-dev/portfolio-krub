@@ -883,6 +883,28 @@ test('the CV opens in a dialog, rendered page by page', async ({ page }) => {
   await expect(dialog).toBeHidden()
 })
 
+test('the navbar stays compact while a dialog is open', async ({ page }) => {
+  await openSite(page)
+  await scrollTo(page, 800)
+
+  const capsule = page.locator('.capsule')
+  await expect(capsule).toHaveClass(/compact/)
+
+  await page.locator('.card .open').first().click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+
+  /*
+    The scroll lock takes the body out of flow, and a fixed body reports the
+    scroll as zero — the bar used to believe it and expand to its full width the
+    moment a dialog opened.
+  */
+  await expect(capsule).toHaveClass(/compact/)
+
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await expect(capsule).toHaveClass(/compact/)
+})
+
 test.describe('3D logo', () => {
   test.skip(({ isMobile }) => isMobile, 'the stage is not mounted below 900px (decision 37)')
 

@@ -135,7 +135,7 @@ watch(
     -->
     <template #actions>
       <BaseButton
-        variant="outline"
+        variant="solid"
         size="sm"
         :href="href"
         download

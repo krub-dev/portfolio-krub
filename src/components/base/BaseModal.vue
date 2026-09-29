@@ -97,12 +97,15 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   inset: 0;
   z-index: 250;
   /*
-    A flat scrim, no blur. The blur turned the page behind into smudges that read
-    as shapes of their own, and it made this element a backdrop root — the thing
-    decision 48 ran into. One uniform layer of ink does the only job a backdrop
-    has, pushing the page back, without drawing the eye to it.
+    A uniform scrim with a gentle blur. The first version blurred hard (10px) and
+    the page behind turned into smudges that read as shapes of their own; taking
+    the blur away altogether left a flat dark sheet, which reads as a blackout
+    rather than as a layer over the page. This is the middle: one soft blur
+    across everything behind, not one per element, over the same flat scrim.
   */
-  background: color-mix(in srgb, var(--ink) 90%, transparent);
+  background: color-mix(in srgb, var(--ink) 82%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: flex-start;
   justify-content: center;

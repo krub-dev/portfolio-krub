@@ -252,11 +252,11 @@ the privacy notice and the consent the law asks for.
 - [ ] **The project modal's media is cluttered.** The image is small and the carousel carries big
   arrows and an `IMAGEN 1 / 4 · NAME` label over it. Replace them with dots, as the other pagers do,
   and give the media a larger, taller slot.
-- [ ] **Fixed blur bands.** A band under the navbar and another above the footer, from the hero down
-  (not over the hero), that blur the content as it passes behind them. On a phone the navbar is a
-  centred pill, so the band reads at its sides. Watch `backdrop-filter`: it makes the element a
-  backdrop root, which is what once stopped the navbar's settings panel from matching the bar
-  (decision 48).
+- [x] **Fixed blur bands.** Done on 2026-09-30: a strip of `backdrop-filter` under the bar and another
+  above the footer, each masked so it fades at its inner edge, arriving with the footer and the lemon.
+  One strip per edge rather than a filter per element, below the chrome and taking no pointer. Watch
+  `backdrop-filter` — it makes its element a backdrop root (decision 48); nothing that blurs sits inside
+  these. See decision 100.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
 - [ ] **Finish the design-system page.** The `/preview` page in the site's own style that documents

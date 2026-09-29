@@ -42,6 +42,7 @@ App
 │   ├─ AppearanceControl (compact only)
 │   └─ LangButton        (compact only)
 ├─ ScrollProgress       (only where the route has a hero)
+├─ BlurBands            (only where the route has a hero; two strips of blur)
 ├─ CursorFx
 ├─ LemonPet             (only where the route has a hero)
 │   └─ SpeechBubble
@@ -386,6 +387,12 @@ it; the pointer subscription never happens there.
 Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress from
 `useScroll()` rather than taking it as a prop.
 
+### BlurBands
+No props. Two full-width strips of `backdrop-filter` — one under the bar, one above the footer — each
+masked so it fades at its inner edge, so content softens as it passes under the fixed chrome. They ride
+`usePastHero()`, so they arrive with the footer and the lemon. Below the chrome in the stack and taking
+no pointer. See decisions.md 100.
+
 ---
 
 ## Composables (shared logic, no interface)
@@ -396,7 +403,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useLang()` | `lang`, `toggle()`; persists in `localStorage["krub-lang"]` |
 | `useAccent()` | `accent`, `set(id)`; writes `data-accent` on `<html>` and persists |
 | `useScrollSpy(ids, threshold = 0.35)` | reactive `activeId` |
-| `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener |
+| `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener. It keeps the last position while a dialog holds the page still, because the lock reports the scroll as zero |
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
 | `useMagnetic()` | registers the magnetic hover loop for `[data-magnetic]` |
 | `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) and `active`, which is true once the pointer has been seen at least once — it used to go false after two seconds of stillness, and no longer does, so the cursor stays put |
@@ -405,7 +412,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it, and it is true from the start on a route with no hero (the 404) |
 | `useAcho()` | `playOnce()`: true on the first poke of a visit — the one that says "acho" and shows the bubble — and false after. Module scope, so it is per page load and nothing is stored |
 | `useLemonVoice()` | `say(text)` / `hush()` for whatever Limonacho should be saying, plus `message`, `listening` and the lemon's `listen()` registration. Owner-aware, so the four Stack groups do not talk over each other, and a `shallowRef` because the owner check is an identity check and a plain `ref` would hand back a proxy |
-| `useBodyScrollLock(active)` | locks scrolling while the modal is open |
+| `useBodyScrollLock(active)` | locks scrolling while a dialog is open — `overflow: hidden` on the desktop, `position: fixed` on the body for iOS, which ignores the former. Also exports `isScrollLocked()`, which the magnetic hover and the scroll reader use to stand down |
 | `useContactForm(labels)` | `fields`, `errors`, `status`, `errorCode`, `token`, `canSend`, `touch(field)` and `send()`. The validation is live but late: a field is shown its error once it has been left, and the button is off until all four rules pass |
 | `useCv()` | `warmCv(href)`: fetches pdf.js, its worker and the PDF in the background on a sign of intent (the button hovered or focused, the photo column in view), once per visit. See decisions.md 97 |
 

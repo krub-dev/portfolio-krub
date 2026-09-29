@@ -433,9 +433,9 @@ The dialog shell — backdrop, panel, scroll lock, focus trap, Escape and the �
 with the CV dialog (§3.5). Its header is sticky and opaque (the title on the left, an optional action
 and the ✕ on the right), so it stays reachable however far the body scrolls.
 
-Opens on card click. Backdrop a flat `color-mix(in srgb, var(--ink) 90%, transparent)` — no
-`backdrop-filter`, which turned the page behind into smudges and made the backdrop a backdrop root
-(decision 48) — `z-index:250`, vertical scroll,
+Opens on card click. Backdrop `color-mix(in srgb, var(--ink) 82%, transparent)` with
+`backdrop-filter: blur(4px)` — one soft blur across everything behind, not one per element (decision
+96) — `z-index:250`, vertical scroll,
 `padding: clamp(12px,4vw,48px)`. Closes on backdrop click (only when the click is on the
 backdrop itself), on the ✕ button, and on the Escape key. While open,
 `body { overflow: hidden }` and focus is trapped inside the panel. The backdrop carries
@@ -857,6 +857,17 @@ capsule's own `backdrop-filter` makes it a backdrop root, and a blur inside it w
 capsule's content rather than the page, so it would not match the bar. It holds the appearance
 control and the language button, and closes on the trigger, on Escape, on a click outside, on a
 scroll and when the bar expands again.
+
+### 3.20 Blur bands
+
+Two full-width strips of `backdrop-filter: blur(12px)`: one at the top, as tall as the bar plus 10px
+(`calc(var(--navbar-h, 88px) + 10px)`), and one sitting on the footer's own top edge (`bottom:
+var(--footer-h, 52px)`, 56px tall). Each is masked so it fades at its inner edge — `#000` at 55% to
+transparent downwards for the top, 40% upwards for the bottom — so the blur has no edge of its own. On a
+phone the bar is a centred pill, so the top band is what reads either side of it. They arrive with the
+footer and the lemon, once the hero is behind you, and only on a route with a hero; `z-index:90`, below
+the footer (95) and the bar (100), `pointer-events:none`. One strip per edge, not a filter per element
+(decision 100).
 
 ---
 

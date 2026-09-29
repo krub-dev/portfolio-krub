@@ -594,14 +594,16 @@ wrong side.
 - **No travel on a phone.** The photo lands at the end of the section there, so there is nothing to
   ride past; the order is photo, badge, CV.
 
-### 96. The modal backdrop is a flat scrim, not a blur
+### 96. The modal backdrop is a uniform scrim with a gentle blur
 **Status:** active
 
-The project modal's backdrop was `backdrop-filter: blur(10px)` over an 82% ink. The blur turned
-whatever was behind it into soft shapes that read as smudges of their own, competing with the panel,
-and it made the backdrop a backdrop root — the property decision 48 ran into with the navbar's settings
-panel. It is one flat layer of ink at 90% now: the only job a backdrop has is to push the page back,
-and it does that without drawing the eye.
+The project modal's backdrop was `backdrop-filter: blur(10px)` over an 82% ink, and the page behind
+turned into soft shapes that read as smudges of their own, competing with the panel. It was flattened to
+a plain sheet with no blur — and that read as a blackout instead: the page was not softened, it was just
+dark. It is one soft blur (4px) over the same flat scrim now.
+
+**One blur across everything behind, not one per element.** That is the part that matters: a filter per
+element gives every element its own edge, which is what "blurring specific spots" was.
 
 ### 97. The CV opens in a dialog, rendered from the PDF with pdf.js
 **Status:** active
@@ -661,6 +663,23 @@ Two things an iPad showed once the CV dialog was there.
   because a disabled control takes no mouse events: the button steps out of the way
   (`pointer-events: none`) and the wrapper takes the pointer, so the reason is heard at the moment it
   is needed.
+
+### 100. The fixed chrome carries its own blur bands
+**Status:** active
+
+A band under the bar and another above the footer, each a full-width strip with `backdrop-filter` and a
+mask that fades it at its inner edge, so the content softens as it passes under the fixed chrome instead
+of being cut off by it. They arrive with the footer and the lemon — once the hero is behind you — and
+only on a route with a hero.
+
+- **One strip, not a filter per element.** Blurring each element as it went under the chrome would mean
+  a filter per element and a different look for each.
+- **Below the chrome in the stack (z-index 90) and taking no pointer,** so the bar and the footer paint
+  over them and nothing behind them is blocked.
+- **And the bar had to stop believing the scroll lock.** Taking the body out of flow reports the scroll
+  as zero, and the navbar read that as "back at the top": it expanded to its full width the moment any
+  dialog opened, on desktop and on a phone. `useScroll` keeps the last real position while a dialog
+  holds the page still.
 
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62
