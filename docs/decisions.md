@@ -573,8 +573,25 @@ over the shot, at `16/9` with a `40svh` ceiling, and it swapped the image in a s
   longer pill in `--acc`. They sit under the media on the panel, not over the shot, so the marks read
   against the panel and not against whatever the screenshot shows. The arrows, the label and the
   `prevImage` / `nextImage` / `modal.image` strings went with them.
-- **No drag yet.** The dots page it; a finger drag like the rail's would be the next thing if the
-  touch path wants one.
+- **The drag is the rail's too.** A pointer takes the track over, the pixels it travels are added to
+  the slide's position, and a drag past a fifth of the box takes the next slide while a shorter one
+  falls back to where it was. `DRAG_SLOP` and `FLICK` are the rail's own numbers, and capture is taken
+  in the move rather than on the press, so a plain click is not swallowed.
+
+### 95. The photo's column travels with the scroll
+**Status:** active
+
+The About photo sat still in its column while the timeline ran past it, and the CV button closed the
+text column instead — so on a wide screen the two halves drifted apart and the button belonged to the
+wrong side.
+
+- **The CV moved under the photo, at the photo's own width.** The column closes with one block now:
+  photo, then button.
+- **That column is `position: sticky`** at `top: calc(var(--navbar-h, 88px) + 20px)`. It rides down
+  while the timeline scrolls past and stops with its foot just above the section's bottom, which is the
+  section's own padding — no second value to keep in step with it.
+- **No travel on a phone.** The photo lands at the end of the section there, so there is nothing to
+  ride past; the order is photo, badge, CV.
 
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62

@@ -144,6 +144,13 @@ function onTouchEnd(event) {
             </div>
           </Transition>
         </div>
+      </div>
+
+      <div class="photo-wrap" data-pfp-wrap>
+        <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
+        <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
+          <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
+        </div>
 
         <BaseButton
           v-if="config.showCv"
@@ -156,13 +163,6 @@ function onTouchEnd(event) {
         >
           {{ t('actions.cv') }}
         </BaseButton>
-      </div>
-
-      <div class="photo-wrap" data-pfp-wrap>
-        <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
-        <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
-          <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
-        </div>
       </div>
     </div>
   </section>
@@ -281,14 +281,27 @@ function onTouchEnd(event) {
   }
 }
 
+/* The CV closes the photo's column now, at the photo's own width, and travels
+   with it. */
 .cv {
-  align-self: flex-start;
+  align-self: stretch;
+  margin-top: 6px;
 }
 
 .photo-wrap {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /*
+    The photo travels with the scroll instead of sitting still while the timeline
+    runs past it. It sticks under the bar and rides down until the column ends, so
+    its foot stops just above the section's own bottom — that is the section's
+    padding, and it is what keeps the last row of the timeline from ending level
+    with the photo.
+  */
+  position: sticky;
+  top: calc(var(--navbar-h, 88px) + 20px);
+  align-self: start;
 }
 
 /* The photo, and the badge that sits on it. */
@@ -321,6 +334,9 @@ function onTouchEnd(event) {
     it, at this size, the label was left hanging in a gap and read as stray.
   */
   .photo-wrap {
+    /* No travel on a phone: the photo lands at the end of the section here, so
+       there is nothing to ride past. */
+    position: static;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
@@ -334,6 +350,12 @@ function onTouchEnd(event) {
     order: 2;
     align-self: flex-start;
     transform: none;
+  }
+
+  /* Under the badge, still at the photo's width, so the section closes with the
+     same block it closes with on a wide screen. */
+  .cv {
+    order: 3;
   }
 }
 </style>

@@ -11,6 +11,12 @@
   With no `images` each slide is the striped frame and a `slides` count stands in
   for the screenshots that are coming.
 
+  The drag is the rail's too: the pointer takes the track over, the pixels it has
+  travelled are added to the current slide, and on release a drag past a fifth of
+  the box takes the next slide while a shorter one falls back to where it was.
+  `DRAG_SLOP` is the line between a drag and a click, and capture is taken in the
+  move rather than on the press, so a plain click is never swallowed.
+
   The dots are the rail's and the testimonials' indicator, laid on its side: a
   24px target each with an 8px mark inside (the WCAG 2.2 minimum), the current one
   a longer pill in the accent. That is why the arrows and the `IMAGE n / total`
@@ -27,6 +33,12 @@ const props = defineProps({
   shotLabel: { type: String, default: '' }, // the striped frame's caption
 })
 
+// How far a drag has to travel before it is a drag and not a click, and how much
+// of the box it has to cover to count as "the next slide". Same values as the
+// rail, so a flick behaves the same in both.
+const DRAG_SLOP = 6
+const FLICK = 0.2
+
 const { t } = useI18n()
 const index = ref(0)
 
@@ -35,13 +47,75 @@ watch(() => props.slug, () => (index.value = 0))
 
 const total = computed(() => props.images.length || props.slides)
 
-const trackStyle = computed(() => ({ transform: `translate3d(-${index.value * 100}%, 0, 0)` }))
+const carousel = ref(null)
+const dragging = ref(false)
+const dragX = ref(0)
+let startX = 0
+let travelled = 0
+let pointerId = null
+
+const trackStyle = computed(() => {
+  const base = `-${index.value * 100}%`
+  return {
+    // During a drag the pixels are added to the slide's own position; at rest the
+    // index alone decides, and the transition carries it there.
+    transform: dragging.value
+      ? `translate3d(calc(${base} + ${dragX.value}px), 0, 0)`
+      : `translate3d(${base}, 0, 0)`,
+  }
+})
+
+function onPointerDown(event) {
+  if (total.value < 2) return
+  dragging.value = true
+  dragX.value = 0
+  travelled = 0
+  startX = event.clientX
+  pointerId = event.pointerId
+}
+
+function onPointerMove(event) {
+  if (pointerId === null || pointerId !== event.pointerId) return
+  const delta = event.clientX - startX
+  travelled = Math.max(travelled, Math.abs(delta))
+
+  if (!carousel.value?.hasPointerCapture(event.pointerId)) {
+    if (travelled <= DRAG_SLOP) return
+    carousel.value?.setPointerCapture(event.pointerId)
+  }
+
+  dragX.value = delta
+}
+
+function onPointerUp(event) {
+  if (pointerId === null || pointerId !== event.pointerId) return
+  pointerId = null
+  dragging.value = false
+
+  if (carousel.value?.hasPointerCapture(event.pointerId)) {
+    carousel.value.releasePointerCapture(event.pointerId)
+  }
+
+  const width = carousel.value?.clientWidth || 1
+  const moved = dragX.value
+  // Dragging left brings the next slide in, so the step is the opposite sign.
+  const step = Math.abs(moved) > width * FLICK ? -Math.sign(moved) : 0
+  index.value = Math.min(Math.max(index.value + step, 0), total.value - 1)
+  dragX.value = 0
+}
 </script>
 
 <template>
   <div class="media">
-    <div class="carousel">
-      <div class="track" :style="trackStyle">
+    <div
+      ref="carousel"
+      class="carousel"
+      @pointerdown="onPointerDown"
+      @pointermove="onPointerMove"
+      @pointerup="onPointerUp"
+      @pointercancel="onPointerUp"
+    >
+      <div class="track" :class="{ dragging }" :style="trackStyle">
         <div v-for="n in total" :key="n" class="slide">
           <img v-if="images.length" class="image" :src="images[n - 1]" :alt="name" />
           <span v-else class="shot-label">{{ shotLabel }}</span>
@@ -88,15 +162,29 @@ const trackStyle = computed(() => ({ transform: `translate3d(-${index.value * 10
   display: flex;
   overflow: hidden;
   background: var(--ink);
+  /* The rail's declaration: a vertical swipe is left to the page (here, the
+     scrolling panel) and a horizontal one comes to the drag. */
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+
+.carousel.dragging {
+  cursor: grabbing;
 }
 
 /* The travel: the same arrive-and-settle curve the pagers use, so the slide
-   lands with the pill rather than after it. */
+   lands with the pill rather than after it. Off while a finger is on it, or the
+   track would chase the pointer a transition behind. */
 .track {
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.track.dragging {
+  transition: none;
 }
 
 .slide {
@@ -124,6 +212,8 @@ const trackStyle = computed(() => ({ transform: `translate3d(-${index.value * 10
   object-fit: cover;
   object-position: top;
   display: block;
+  /* A dragged image must not be grabbed as a file. */
+  -webkit-user-drag: none;
 }
 
 .shot-label {

@@ -124,6 +124,15 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
   await expect(dots.nth(0)).not.toHaveClass(/active/)
   await expect.poll(() => trackShift(track)).toBeLessThan(-100)
 
+  // And a drag takes the next slide, the way the rail does.
+  const box = await dialog.locator('.carousel').boundingBox()
+  const midY = box.y + box.height / 2
+  await page.mouse.move(box.x + box.width * 0.75, midY)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.15, midY, { steps: 6 })
+  await page.mouse.up()
+  await expect(dots.nth(3)).toHaveClass(/active/)
+
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')

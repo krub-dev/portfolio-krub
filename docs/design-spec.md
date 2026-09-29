@@ -322,9 +322,8 @@ weight 700, yellow, `vertical-align:super`).
 Grid `1.3fr .7fr` (one column on mobile). Left: lead paragraph + two secondary paragraphs +
 **tabs** `/experience`, `/education` and `/certifications` — a row of folder labels (mono 13px,
 12px on a phone) on a hairline track, the active one in `--acc-text` with a 3px `--acc` rule
-under it; no pills + the matching timeline + a "Download CV (PDF)" button (outlined pill). It is
-a real ARIA tablist: roving `tabindex`, `aria-controls`, a `role="tabpanel"` on the panel, and
-the arrows move the selection and the focus.
+under it; no pills + the matching timeline. It is a real ARIA tablist: roving `tabindex`,
+`aria-controls`, a `role="tabpanel"` on the panel, and the arrows move the selection and the focus.
 
 Under the photo sits **the availability indicator**: a mono row of 10px uppercase,
 `letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two layers inside
@@ -340,7 +339,11 @@ current period, `--fg-3` if it is past. Right: title 18px weight 600 + descripti
 `--fg-2` at 60ch. On mobile it collapses to one column with `gap:8px`.
 
 Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`. **No caption.**
-On mobile it is capped at 210px wide with `aspect-ratio:4/5`.
+**The "Download CV (PDF)" button sits under it, at the photo's own width**, so the column closes with
+one block, and **on a wide screen that whole column travels with the scroll**: `position:sticky` at
+`top: calc(var(--navbar-h, 88px) + 20px)`, riding down while the timeline runs past and stopping with
+its foot just above the section's bottom (the section's own padding). On mobile there is no travel —
+the photo lands at the end of the section — and the order is photo, badge, CV.
 
 ### 3.6 Projects
 
