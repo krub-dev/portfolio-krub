@@ -134,9 +134,9 @@ is the accounts behind it and the law.
 - [x] **A real 404 page.** An unknown path falls through to Vercel's plain text. It should be the
   site's own: the grid, the type, the cursor, and a way back to the top of the page.
   Responsive. A second route also puts the router to the use it was wired up for.
-- [ ] **Update Vercel's DNS records.** The domain answers on the legacy records and Vercel says
-  they will keep working; the dashboard shows an amber "DNS Change Recommended". Optional,
-  five minutes. **(owner)**
+- [x] **Update Vercel's DNS records.** Done: krub.dev resolves on the current records — `A @ →
+  76.76.21.21` and `CNAME www → cname.vercel-dns.com` — checked against the live DNS. They now live
+  in Cloudflare, where the mail records also went. **(owner)**
 - [ ] **Re-measure Lighthouse once `dev` is on `main`.** The numbers so far are not the ones that
   count: the deployed `krub.dev` is an older build (still loading Google Fonts; mobile 84 / desktop
   98) and the `dev` figures came from a local preview (mobile 84–85 / desktop 99). Run it against
