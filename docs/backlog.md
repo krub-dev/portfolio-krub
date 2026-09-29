@@ -151,9 +151,12 @@ the privacy notice and the consent the law asks for.
   `send`/`rsend` and `resend._domainkey`, and a `_dmarc` at `p=none`. Confirmed on a fresh message:
   `SPF PASS`, `DKIM PASS` for `krub.dev` and **`DMARC PASS`** (the first tests read `FAIL` only
   because the record was not yet live). **(owner)**
-- [ ] **Raise the DMARC policy.** `p=none` only monitors. Once the reports (and the inbox placement)
-  look clean, tighten it — `p=quarantine`, then `p=reject` — so a forged `@krub.dev` sender is
-  actually stopped.
+- [ ] **Raise the DMARC policy.** The record itself is done and passing (`_dmarc.krub.dev` at
+  `v=DMARC1; p=none`, verified on a real send). `p=none` only *monitors*: a forged `@krub.dev` sender
+  gets reported, not stopped. Tightening it to `p=quarantine`, then `p=reject`, is what actually blocks
+  the forgery. To do it safely: add a `rua=` to the record first so the aggregate reports arrive
+  somewhere (today there is none, so nothing is being collected), watch a week, then raise it. All our
+  sending aligns — SPF and DKIM both pass for `krub.dev` — so the risk is low.
 
 ## Design and sections
 
@@ -252,10 +255,11 @@ the privacy notice and the consent the law asks for.
 - [x] **The project modal's media is cluttered.** Done on 2026-09-30: the slides are a horizontal track
   moved by `transform`, paged by the rail's own dots and draggable, at `16/10 × 56svh` to match the
   card's frame. The arrows and the `IMAGEN 1 / 4 · NAME` label are gone. See decision 94.
-- [ ] **Fixed blur bands.** Tried on 2026-09-30 and **dropped**: a strip of `backdrop-filter` under the
-  bar and another above the footer read as a smudge lying over the page rather than as the page going
-  under something. What was built and why it failed is in decisions-archive.md 100. Reopen only with a
-  different idea for softening those edges.
+- [x] **Fixed blur bands.** Closed on 2026-09-30 as **dropped**: built (a strip of `backdrop-filter`
+  under the bar and another above the footer, masked at the inner edge) and it read as a smudge lying
+  over the page rather than as the page going under something. Removed. The full account is in
+  decisions-archive.md 100. The navbar fix it turned up stays (decision 98). Reopen only with a
+  different idea for those edges.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
 - [ ] **Finish the design-system page.** The `/preview` page in the site's own style that documents
@@ -303,7 +307,7 @@ kept as the record rather than deleted.
 
 ## Testing
 
-- [x] **The e2e suite goes flaky while the hero is on screen.** Partially fixed: the scene is now gated under `navigator.webdriver`, so Playwright workers don't hold WebGL contexts during tests. The suite passes with `--workers=1`. The remaining fix (reducing desktop workers or making flows wait on conditions rather than the clock) is deferred — the gate solves the practical problem.
+- [x] **The e2e suite went flaky while the hero was on screen.** Explained: Playwright runs several browsers at once, and each Chromium worker holding the hero's WebGL context made the frames stall, so tests that depend on animation timing failed at random. Fixed by skipping the 3D scene under `navigator.webdriver` (Playwright sets that flag), so no worker opens a WebGL context. The suite is run with `--workers=1` by habit; parallel workers are still occasionally flaky, and that part is deferred — it costs time, not correctness.
 
 ## Ideas (future)
 
