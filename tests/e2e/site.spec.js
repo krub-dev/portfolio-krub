@@ -831,22 +831,52 @@ test('the contact form asks for what is missing, then sends', async ({ page }) =
 
   const send = page.locator('.form button[type="submit"]')
 
-  // Empty: it asks for the three fields and posts nothing.
-  await send.click()
-  await expect(page.locator('.form .error')).toHaveCount(3)
-  expect(posted).toBeNull()
+  // Nothing filled: the button is off, and no field has been scolded yet.
+  await expect(send).toBeDisabled()
+  await expect(page.locator('.form .error')).toHaveCount(0)
 
+  // Leaving a field shows its error, and it clears the moment it is fixed.
+  await page.locator('#contact-name').focus()
+  await page.locator('#contact-name').blur()
+  await expect(page.locator('#contact-name-error')).toBeVisible()
   await page.locator('#contact-name').fill('Kiko')
+  await expect(page.locator('#contact-name-error')).toHaveCount(0)
+
   await page.locator('#contact-email').fill('kikorubioillan@gmail.com')
   await page.locator('#contact-message').fill('Hola, te escribo por lo del backend.')
+
+  // The three fields are right, but the consent is still missing.
+  await expect(send).toBeDisabled()
+
+  // Ticking the box is what arms the button.
+  await page.locator('.form .box').check()
+  await expect(send).toBeEnabled()
+
   await send.click()
 
   await expect(page.locator('.form .status')).toHaveText(/Thanks/)
   expect(posted.name).toBe('Kiko')
   expect(posted.message).toContain('backend')
+  expect(posted.consent).toBe(true)
 
-  // Emptied on success, so the same message cannot go twice by accident.
+  // Emptied on success, so the same message cannot go twice by accident, and the
+  // button goes back to off.
   await expect(page.locator('#contact-name')).toHaveValue('')
+  await expect(send).toBeDisabled()
+})
+
+test('the privacy link opens the notice on its own route', async ({ page }) => {
+  await openSite(page)
+  await scrollToTopOf(page, '.form', 150)
+  // The form sits near the end of the home page, so the route has to leave the
+  // old offset behind: the new page opens at its top, at once.
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(1000)
+
+  await page.locator('.form .policy').first().click()
+
+  await expect(page).toHaveURL(/\/privacy$/)
+  await expect(page.locator('main h1')).toBeVisible()
+  expect(await page.evaluate(() => window.scrollY)).toBe(0)
 })
 
 test.describe('3D logo', () => {

@@ -73,6 +73,8 @@ App
 │   └─ SpecList
 ├─ NotFoundView         (the 404 route)
 │   └─ BaseButton
+├─ PrivacyView          (the /privacy route: the form's privacy notice)
+│   └─ BaseButton
 └─ TheFooter
     └─ LiveClock
 ```
@@ -237,8 +239,10 @@ columns carry the measurements, one above the band (the heading) and one below (
 form).
 
 ### ContactForm
-The panel: the three fields, the send button, the mono note with the address, the honeypot and the
-live region. It paints; the state is in `useContactForm`. Every string comes from `src/locales/`.
+The panel: the three fields, the consent box (the line that links to `/privacy`), the send button, the
+mono note with the address, the honeypot and the live region. It paints; the state is in
+`useContactForm`, and the consent rule is the fourth one in `utils/contact.js`. Every string comes from
+`src/locales/`; the notice behind the link lives in `src/data/privacy.js`.
 
 ### TalkBand
 `text`. The band in Contact, between the heading and the rows: on the accent background, display type
@@ -378,6 +382,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useAcho()` | `playOnce()`: true on the first poke of a visit — the one that says "acho" and shows the bubble — and false after. Module scope, so it is per page load and nothing is stored |
 | `useLemonVoice()` | `say(text)` / `hush()` for whatever Limonacho should be saying, plus `message`, `listening` and the lemon's `listen()` registration. Owner-aware, so the four Stack groups do not talk over each other, and a `shallowRef` because the owner check is an identity check and a plain `ref` would hand back a proxy |
 | `useBodyScrollLock(active)` | locks scrolling while the modal is open |
+| `useContactForm(labels)` | `fields`, `errors`, `status`, `errorCode`, `token`, `canSend`, `touch(field)` and `send()`. The validation is live but late: a field is shown its error once it has been left, and the button is off until all four rules pass |
 
 One single `requestAnimationFrame` drives everything that follows the mouse (cursor, lemon
 pupils, the logo's tilt, magnetic hover). No per-component loops. The 3D logo is the one
@@ -398,6 +403,7 @@ src/
 │   ├─ education.js
 │   ├─ stack.js
 │   ├─ socials.js        + email, cvPath, photoPath
+│   ├─ privacy.js        the /privacy notice, the form's other half
 │   ├─ sound.js          the one audio clip: the "acho" Limonacho says once a visit
 │   ├─ sections.js       the scrollable sections: id, label key, index
 │   ├─ testimonials.js
@@ -416,8 +422,8 @@ Outside `src/`, at the repository root:
 
 ```
 api/
-└─ contact.js            the form's endpoint: a Vercel function holding WEB3FORMS_KEY, and
-                         the same handler mounted by vite.config.js in development
+└─ contact.js            the form's endpoint: a Vercel function that sends by Resend with
+                         the key server-side, and the same handler mounted by vite.config.js
 ```
 
 The split is deliberate and it is the rule to keep:

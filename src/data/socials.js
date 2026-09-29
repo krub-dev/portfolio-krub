@@ -20,8 +20,9 @@ export const socials = [
 ]
 
 // The address behind every "Let's talk ↗" button on the page, and the one the
-// contact form writes to.
-export const email = 'kikorubioillan@gmail.com'
+// contact form writes to. Its own mailbox on the domain: Cloudflare Email
+// Routing receives for it, Gmail sends as it (decision 88).
+export const email = 'contact@krub.dev'
 
 /*
   Paths to files in public/, kept here rather than written into a template.

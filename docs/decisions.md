@@ -392,6 +392,25 @@ use needs the server's IP whitelisted **and a paid plan** — so the proxy is im
 tier. Resend is a plain server API with a secret key: exactly the provider swap this endpoint was
 shaped for, one file.
 
+### 89. The form carries a privacy notice and a required consent box
+**Status:** active
+
+The form sends personal data, so the notice and the consent are part of the form, not an extra page
+somewhere. The whole point of decision 57's endpoint is that the rules live where a caller cannot skip
+them; the consent is one of those rules.
+
+- **The consent is required.** `validateContact` blocks the send while the box is empty, and the
+  endpoint refuses any payload whose `consent` is not `true` — a direct post has to tick it too.
+- **One line and a page.** The consent label itself carries the link, so the form mentions privacy
+  once; `/privacy` behind it renders the whole policy from `src/data/privacy.js` in both languages.
+  The page is an ordinary route: the chrome is shared with the rest of the site, the text is content,
+  and only the labels (`/privacy`, "Last updated") live in `src/locales/`.
+- **The box is the browser's own,** tinted with `--acc-text`. A hand-drawn control would add states to
+  get right for no gain, and the native one is announced correctly for free.
+- **The endpoint records the consent.** The email carries the time the box was ticked, which is the
+  accountability the notice promises. Keeping the message for longer than it takes to answer would
+  contradict the retention the page states, so it is not stored anywhere else.
+
 ---
 
 ## Responsive y mobile
@@ -493,3 +512,19 @@ and the dark pair to match the site on screen.
 - **One quote in the DOM.** The current one, swapped on change. Nothing is stacked, so there is no
   scroll to fight, no window to keep a fixed height and no entry sliding past the one on show.
 - **The pager never claims the page's scroll.** The wheel and a swipe belong to the page.
+
+### 88. The site's address is `contact@krub.dev`, a mailbox on the domain
+**Status:** active
+
+The portfolio carried a personal Gmail: in the contact rows, in the form's fallback and in the
+structured data. It now has its own address on the domain, and the whole path to it is the domain's,
+so the address a visitor copies is the one the site is about.
+
+- **Receiving is Cloudflare Email Routing.** An MX record and a DKIM record forward anything sent to
+  `contact@krub.dev` to the owner's real inbox, well before any of the rest.
+- **Sending as it is "Send mail as" over Resend's SMTP,** not Gmail's: a reply goes out signed for
+  `krub.dev`, carries no "via gmail.com", and passes `DMARC` because both `SPF` and the `DKIM` domain
+  align. A `_dmarc` record already sits at `p=none`.
+- **One address, in one place.** `src/data/socials.js` holds it; the contact rows, the form's fallback
+  and the JSON-LD head read from it and are kept in step by hand (the static `<head>` cannot import a
+  module).

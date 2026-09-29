@@ -36,7 +36,10 @@
     "required": "Required",
     "badEmail": "Check the address",
     "shortMessage": "A little more, please",
-    "captcha": "The verification expired. Please try again."
+    "captcha": "The verification expired. Please try again.",
+    "policyLink": "privacy policy",
+    "consent": "I have read and accept the {policy}.",
+    "consentRequired": "Tick the box to continue"
   },
   "stack": {
     "g1": "Languages",
@@ -76,6 +79,11 @@
   "notFound": {
     "title": "/not-found",
     "code": "404"
+  },
+  "privacy": {
+    "label": "/privacy",
+    "title": "Privacy policy",
+    "updated": "Last updated"
   },
   "accent": {
     "label": "Accent colour",

@@ -31,9 +31,10 @@ The CV is not built from this repository. Its plain-text sources and the generat
 artefacts here are the four compiled PDFs in `public/uploads/` — light and dark, one per language —
 copied in by hand when they change.
 
-`api/contact.js` is the same handler Vercel runs; `vite.config.js` mounts it in development. It reads
-`WEB3FORMS_KEY` from `.env.local` — deliberately **not** `VITE_`-prefixed, so the key never reaches
-the bundle. Production sets the variable in Vercel.
+`api/contact.js` is the same handler Vercel runs; `vite.config.js` mounts it in development. It sends
+through Resend and reads `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM` and `TURNSTILE_SECRET_KEY`
+from `.env.local` — deliberately **not** `VITE_`-prefixed, so the key never reaches the bundle. Only
+`VITE_TURNSTILE_SITE_KEY` is public. Production sets them all in Vercel.
 
 ## Tests
 

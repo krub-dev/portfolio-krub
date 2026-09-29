@@ -24,7 +24,7 @@ vertical order:
 
 Floating above all of the above: the fixed navigation bar, the custom cursor, the vertical
 scroll indicator, the "Limonacho" mascot (a lemon with eyes) and the mobile menu. The mascot and
-the scroll indicator only appear where the route has a hero — not on the 404.
+the scroll indicator only appear where the route has a hero — not on the 404 or `/privacy`.
 
 ---
 
@@ -619,7 +619,7 @@ inner columns carry the gutter and the 1180px cap the other sections use, one ab
 heading) and one below (the rows and the form).
 
 **The rows**, separated by `--line`: the label in mono 10px uppercase `--fg-3`, the address below it
-(`kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev` — a network's address is
+(`contact@krub.dev`, `linkedin.com/in/krub`, `github.com/krub-dev` — a network's address is
 derived from its href), `clamp(22px,3.2vw,40px)` weight 700, and `↗` on the right spanning both
 lines. Hover turns the address and the arrow `--acc-text` and moves the arrow 3px up and right. The
 email row is the mailto — there is no separate button; one address, one way in.
@@ -634,21 +634,30 @@ fields are **a line, not a box**: `border-bottom:1px solid var(--line)`, transpa
 not copied. The footer holds the "Send ↗" button (solid, `size="md"`, `type="submit"`) and the mono
 note "Or write direct to …" with the address.
 
+Below the fields, the **consent**: a native checkbox tinted with `--acc-text` and, in 13px sans
+`--fg-2`, "I have read and accept the privacy policy", the link underlined and turning `--acc-text` on
+hover. It links to `/privacy`, which holds the whole policy. The box is **required**: it is validated
+like an empty field, and the endpoint refuses a payload without it.
+
 Four states, and one live region (`role="status"`, `aria-live="polite"`) that is empty and hidden
 while idle: sending (the button says so and is dimmed), sent (a thank-you, and the fields are
-emptied), error (write to me at …). Validation: name ≥2, a plausible email, message ≥10, each error
-tied to its field with `aria-invalid` and `aria-describedby`. A hidden honeypot field is filled by
-bots and dropped by the endpoint.
+emptied), error (write to me at …). **Validation is live but late**: a field shows its error only once
+it has been left, and updates as it is typed from then on, so a mistake clears the moment it is fixed,
+and the **Send button stays disabled** (`opacity:.5`) until the four rules pass. They are: name ≥2, a
+plausible email, message ≥10, the consent box ticked. Each error is tied to its field with
+`aria-invalid` and `aria-describedby`. A hidden honeypot field is filled by bots and dropped by the
+endpoint.
 
-The form posts to `config.contactEndpoint` — our own `/api/contact`, never Web3Forms directly: the
-key is `WEB3FORMS_KEY` on the server (`api/contact.js` on Vercel, the same file mounted by
-`vite.config.js` in development), so it is not in the bundle. The endpoint validates everything again
-and rebuilds the payload field by field before forwarding it.
+The form posts to `config.contactEndpoint` — our own `/api/contact`, never the provider directly: the
+key is `RESEND_API_KEY` on the server and `VITE_TURNSTILE_SITE_KEY` in the bundle (`api/contact.js` on
+Vercel, the same file mounted by `vite.config.js` in development), so the secret is not in the bundle.
+The endpoint validates everything again, checks the Turnstile token and rebuilds the payload field by
+field before sending it with Resend.
 
 On mobile the inner column takes `padding-bottom:34px` so the last row and the form do not collide
 with the fixed footer.
 
-Links: `mailto:kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev`.
+Links: `mailto:contact@krub.dev`, `linkedin.com/in/krub`, `github.com/krub-dev`.
 
 ### 3.11 Footer (fixed)
 
@@ -875,7 +884,10 @@ None of this belongs inside a template, and there are two homes for it (decision
   `en` / `es` object with `title` and `body`.
 - **Stack** (`stack.js`): four groups with a name and a list of technologies; each technology
   with a name, an icon file and whether it needs inverting in dark theme.
-- **Socials** (`socials.js`): name, URL and icon, plus `email`, `cvPath` and `photoPath`.
+- **Socials** (`socials.js`): name, URL and icon, plus `email`, `cvPath` and `photoPath`. The email is
+  the domain's own address, `contact@krub.dev`.
+- **Privacy** (`privacy.js`): the form's notice, a `date`, an `intro` and `sections` (each a `heading`
+  and a `body`), both languages. `/privacy` renders it and the form links to it.
 - **Testimonials** (`testimonials.js`): quote, name, role, avatar. One real quote and two
   placeholders; the section is on.
 

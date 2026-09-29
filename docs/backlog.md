@@ -35,28 +35,31 @@ main..dev` lists whatever is on `dev` and not yet published.
 2. Re-measure Lighthouse against the deployment, now that it is the current build.
 3. Real screenshots for the projects and the Open Graph artwork.
 
-The contact form works end to end now — it sends by Resend, with Turnstile and a rate limit — and the
-domain carries a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, sending
-as through Resend's SMTP). What is left of it is the privacy notice.
+The contact form works end to end now — it sends by Resend, with Turnstile and a rate limit — and it
+carries its privacy notice and a required consent box, both linking to `/privacy`. The domain carries
+a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, sending as through
+Resend's SMTP), and the site points at it everywhere.
 
-**The substantial work still open:** the form's privacy notice, the backlight behind the mark without
-a plane, the tunnel's far end, the project screenshots and Open Graph artwork, the LinkedIn update,
-the GitHub profile README, the prose reread, Bing Webmaster Tools, and making the repository public.
+**The substantial work still open:** the backlight behind the mark without a plane, the tunnel's far
+end, the project screenshots and Open Graph artwork, the LinkedIn update, the GitHub profile README,
+the prose reread, Bing Webmaster Tools, and making the repository public.
 
 ---
 
 ## Contact form
 
 The form is built and lives in Contact; it posts to `/api/contact`, a Vercel function that now sends
-**by Resend**, with a per-IP rate limit and a Cloudflare Turnstile check (decision 57). What is left
-is the accounts behind it and the law.
+**by Resend**, with a per-IP rate limit and a Cloudflare Turnstile check (decision 57), and it carries
+the privacy notice and the consent the law asks for.
 
 - [x] **Set Resend and Turnstile up.** Done: `krub.dev` is verified in Resend and the endpoint sends
   by it (decision 57), with the Turnstile widget live — `VITE_TURNSTILE_SITE_KEY` in the bundle and
   the secret server-side. The five variables are set in Vercel's Production environment and the
   release has gone out; a real send from krub.dev would confirm it end to end.
-- [ ] **A privacy notice for the form (GDPR).** A short note under the form, a `/privacy` page, and a
-  consent checkbox — the three together, since the name, email and message are personal data.
+- [x] **A privacy notice for the form (GDPR).** Built on 2026-09-29, the three parts together: a
+  required consent box under the fields, carrying the link to `/privacy`, which renders the policy
+  from `src/data/privacy.js` in both languages. The box is enforced in `utils/contact.js` and again
+  in `api/contact.js`, and the endpoint stamps the consent into the email. See decision 89.
 
 ---
 
@@ -145,9 +148,9 @@ is the accounts behind it and the law.
   it and forwards to the owner's Gmail, and Gmail sends *as* it through Resend's SMTP
   (`smtp.resend.com`, user `resend`, the API key), so the mail is DKIM-signed for `krub.dev` and
   carries no "via gmail.com". The DNS carries it all: the routing MX and DKIM/SPF, Resend's
-  `send`/`rsend` and `resend._domainkey`, and a `_dmarc` at `p=none`. **One last check:** confirm
-  `dmarc=pass` on a fresh message once the DNS cache clears — the first tests read `FAIL` only because
-  the record was not yet live. **(owner)**
+  `send`/`rsend` and `resend._domainkey`, and a `_dmarc` at `p=none`. Confirmed on a fresh message:
+  `SPF PASS`, `DKIM PASS` for `krub.dev` and **`DMARC PASS`** (the first tests read `FAIL` only
+  because the record was not yet live). **(owner)**
 - [ ] **Raise the DMARC policy.** `p=none` only monitors. Once the reports (and the inbox placement)
   look clean, tighten it — `p=quarantine`, then `p=reject` — so a forged `@krub.dev` sender is
   actually stopped.
@@ -194,10 +197,9 @@ is the accounts behind it and the law.
 - [x] **A simple contact form**, in addition to the mailto. Built on 2026-09-17: name, email and
   message in a panel above the rows, with validation, the four states, `aria-live`, a honeypot and
   the theme's border colour with the accent caret. It posts to `/api/contact`, a Vercel function
-  holding `WEB3FORMS_KEY` as an environment variable, so the key never reaches the bundle; the same
-  handler is mounted by `vite.config.js` in development, and `.env.local` carries the key locally.
-  See decision 57. **Still to do by hand: set `WEB3FORMS_KEY` in the Vercel project settings**, or
-  production answers 500 and the form falls back to its error state. **(owner)**
+  that sends through Resend, keeping the key as a server-side environment variable so it never
+  reaches the bundle; the same handler is mounted by `vite.config.js` in development, and
+  `.env.local` carries the keys locally. See decision 57.
 - [x] **The projects grid with four cards.** Closed on 2026-09-17 by turning the grid into a rail: a
   native scroll container with snap, three cards and the sliver of a fourth on a desktop and one and a
   sliver on a phone, with arrows that page one card and a mouse drag with a click guard. It came from

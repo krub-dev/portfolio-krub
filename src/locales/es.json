@@ -36,7 +36,10 @@
     "required": "Obligatorio",
     "badEmail": "Revisa la dirección",
     "shortMessage": "Cuéntame un poco más",
-    "captcha": "La verificación ha caducado. Inténtalo otra vez."
+    "captcha": "La verificación ha caducado. Inténtalo otra vez.",
+    "policyLink": "política de privacidad",
+    "consent": "He leído y acepto la {policy}.",
+    "consentRequired": "Marca la casilla para continuar"
   },
   "stack": {
     "g1": "Languages",
@@ -76,6 +79,11 @@
   "notFound": {
     "title": "/not-found",
     "code": "404"
+  },
+  "privacy": {
+    "label": "/privacy",
+    "title": "Política de privacidad",
+    "updated": "Última actualización"
   },
   "accent": {
     "label": "Color de acento",

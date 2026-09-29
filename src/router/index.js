@@ -14,6 +14,13 @@ const routes = [
     // whether there is a hero to scroll past at all.
     meta: { hero: true },
   },
+  {
+    // The form's privacy notice. Lazy-loaded: it is reached from the form, not
+    // on the way in, and it has no business in the initial bundle.
+    path: '/privacy',
+    name: 'privacy',
+    component: () => import('../views/PrivacyView.vue'),
+  },
 ]
 
 // Dev-only scaffolding: a visual sheet for the tokens now, and for the base
@@ -47,6 +54,9 @@ export default createRouter({
   // `scroll-behavior: smooth` handle the animation.
   scrollBehavior(to) {
     if (to.hash) return { el: to.hash }
-    return { top: 0 }
+    // A route change lands at the top at once. Left to the global smooth
+    // behaviour, the new page first painted at the old offset — on a phone,
+    // entering /privacy from the form showed its bottom — and then glided up.
+    return { top: 0, behavior: 'instant' }
   },
 })

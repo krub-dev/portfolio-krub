@@ -11,8 +11,8 @@
 const MIN = { name: 2, message: 10 }
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
-export function validateContact({ name, email, message }, labels) {
-  const errors = { name: '', email: '', message: '' }
+export function validateContact({ name, email, message, consent }, labels) {
+  const errors = { name: '', email: '', message: '', consent: '' }
 
   const trimmedEmail = email.trim()
   if (name.trim().length < MIN.name) errors.name = labels.required
@@ -21,6 +21,9 @@ export function validateContact({ name, email, message }, labels) {
   if (message.trim().length < MIN.message) {
     errors.message = message.trim() ? labels.shortMessage : labels.required
   }
+  // The consent is the form's legal basis, so an empty box blocks the send the
+  // same way an empty field does.
+  if (!consent) errors.consent = labels.consent
 
   return errors
 }

@@ -98,6 +98,11 @@ export default async function handler(req, res) {
   if (message.length < MIN.message || message.length > LIMITS.message) {
     return json(res, 400, { ok: false, error: 'message' })
   }
+  // The consent is the form's legal basis, so a direct post without it is
+  // refused like any other invalid payload.
+  if (body.consent !== true) {
+    return json(res, 400, { ok: false, error: 'consent' })
+  }
 
   // Turnstile is required only when its secret is configured, so the form and
   // this handler can still be exercised locally without the keys.
@@ -111,6 +116,10 @@ export default async function handler(req, res) {
 
   const from = (process.env.CONTACT_FROM ?? 'krub.dev <contact@krub.dev>').trim()
 
+  // The consent line is a record of when the box was ticked, which is what an
+  // accountability check asks for.
+  const text = `Name: ${name}\nEmail: ${email}\n\n${message}\n\nConsent: given ${new Date().toISOString()}`
+
   try {
     const response = await fetch(RESEND, {
       method: 'POST',
@@ -121,7 +130,7 @@ export default async function handler(req, res) {
         subject: `krub.dev — ${name}`,
         // Resend replies to this address, so the answer goes straight back.
         reply_to: email,
-        text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
+        text,
       }),
     })
 
