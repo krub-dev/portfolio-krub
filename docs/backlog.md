@@ -17,31 +17,31 @@ not tasks and have no checkbox.
 This merges the pending list of 2026-09-16 with what used to live in the roadmap's "Later"
 section, folded together where they overlapped.
 
-## Where things stand — 2026-09-28
+## Where things stand — 2026-09-29
 
 A short snapshot so resuming work does not mean reading the whole file. The checklist below is
 the source of truth; this is the index into it.
 
-`main` is what `krub.dev` serves; `dev` is where the work happens. Since launch the site gained the
-accent palettes and the appearance control, the reworked Stack and Contact, the contact form, the
-projects rail, the testimonials pager, the 404, the self-hosted fonts, the interactive grid cell, the
-CV pipeline (four PDFs, light and dark), the refreshed content with the certifications tab, and the
-3D hero — the GLB mark, the portal room, the roller blind and the cursor hints. The 3D branch is
-merged into both; `git log main..dev` lists whatever else is on `dev` but not yet published.
+`main` is what `krub.dev` serves and `dev` is where the work happens. The hero's 3D stage, the cursor
+hints, the roller blind, the glow and the contact form's move to Resend were released to `main`
+together, so the two are level but for that release's merge commit. Since launch the site also gained
+the accent palettes and the appearance control, the reworked Stack and Contact, the testimonials
+pager, the 404, the self-hosted fonts, the interactive grid cell and the CV pipeline. `git log
+main..dev` lists whatever is on `dev` and not yet published.
 
-**Before `dev` can become `main`:**
+**Before the next release:**
 
 1. The pre-publication documentation review.
-2. Re-measure Lighthouse against the merged deployment.
+2. Re-measure Lighthouse against the deployment, now that it is the current build.
 3. Real screenshots for the projects and the Open Graph artwork.
 
-The contact form is mid-swap to Resend with Turnstile and a rate limit (see the **Contact form**
-group below); it needs the accounts before it works in production.
+The contact form works end to end now — it sends by Resend, with Turnstile and a rate limit — and the
+domain carries a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, sending
+as through Resend's SMTP). What is left of it is the privacy notice.
 
-**The substantial work still open:** the contact form's Resend and Turnstile setup and its privacy
-notice, the backlight behind the mark without a plane, the tunnel's far end, the project screenshots
-and Open Graph artwork, the LinkedIn update, the GitHub profile README, the prose reread, Bing
-Webmaster Tools, the Vercel DNS change, and making the repository public.
+**The substantial work still open:** the form's privacy notice, the backlight behind the mark without
+a plane, the tunnel's far end, the project screenshots and Open Graph artwork, the LinkedIn update,
+the GitHub profile README, the prose reread, Bing Webmaster Tools, and making the repository public.
 
 ---
 
@@ -51,12 +51,10 @@ The form is built and lives in Contact; it posts to `/api/contact`, a Vercel fun
 **by Resend**, with a per-IP rate limit and a Cloudflare Turnstile check (decision 57). What is left
 is the accounts behind it and the law.
 
-- [ ] **Set Resend and Turnstile up.** The endpoint is written for them (decision 57), but it answers
-  `not-configured` until the settings exist: verify `krub.dev` in Resend and set `RESEND_API_KEY`,
-  `CONTACT_TO` and `CONTACT_FROM` in Vercel, and create the Turnstile site and secret keys
-  (`VITE_TURNSTILE_SITE_KEY` reaches the bundle, which is fine — it is the public one;
-  `TURNSTILE_SECRET_KEY` stays server-side). Then the form works on both, and without them it still
-  runs locally.
+- [x] **Set Resend and Turnstile up.** Done: `krub.dev` is verified in Resend and the endpoint sends
+  by it (decision 57), with the Turnstile widget live — `VITE_TURNSTILE_SITE_KEY` in the bundle and
+  the secret server-side. The five variables are set in Vercel's Production environment and the
+  release has gone out; a real send from krub.dev would confirm it end to end.
 - [ ] **A privacy notice for the form (GDPR).** A short note under the form, a `/privacy` page, and a
   consent checkbox — the three together, since the name, email and message are personal data.
 
@@ -143,10 +141,16 @@ is the accounts behind it and the law.
   the real deployment after the merge, together with the pre-publication documentation review. The
   one thing that got worse is the TBT — the bundle grew with the new sections — so it is worth a
   second look then. **(owner)**
-- [ ] **An address on the domain, like `work@krub.dev`.** Cloudflare Email Routing forwards inbound
-  mail to an existing inbox for free, so receiving needs only DNS (the domain already sits on
-  Cloudflare). Sending *as* that address needs more: either Gmail's "Send mail as" over an app
-  password with SPF and DKIM records in Cloudflare, or a paid sender. **(owner)**
+- [x] **An address on the domain, `contact@krub.dev`.** Done: Cloudflare Email Routing receives for
+  it and forwards to the owner's Gmail, and Gmail sends *as* it through Resend's SMTP
+  (`smtp.resend.com`, user `resend`, the API key), so the mail is DKIM-signed for `krub.dev` and
+  carries no "via gmail.com". The DNS carries it all: the routing MX and DKIM/SPF, Resend's
+  `send`/`rsend` and `resend._domainkey`, and a `_dmarc` at `p=none`. **One last check:** confirm
+  `dmarc=pass` on a fresh message once the DNS cache clears — the first tests read `FAIL` only because
+  the record was not yet live. **(owner)**
+- [ ] **Raise the DMARC policy.** `p=none` only monitors. Once the reports (and the inbox placement)
+  look clean, tighten it — `p=quarantine`, then `p=reject` — so a forged `@krub.dev` sender is
+  actually stopped.
 
 ## Design and sections
 
