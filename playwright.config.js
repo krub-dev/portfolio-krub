@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
 /*
-  End-to-end tests, in a real Chromium.
+  End-to-end tests, in real browsers: Chromium on a desktop and a phone, and
+  WebKit on a phone.
 
   These exist for one specific reason: the navbar shrinking, the footer sliding
   in, the scroll spy and the modal's focus handling all depend on scroll events,
@@ -38,6 +39,10 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
+    // WebKit, not only Chromium: several real bugs here only show there (pointer
+    // capture retargeting a click, `overflow-clip-margin` unsupported, and the
+    // scroll a route change lands on, which iOS puts back). See decisions.md.
+    { name: 'webkit', use: { ...devices['iPhone 13'] } },
   ],
 
   // No local server when the target is a deployment that is already running.

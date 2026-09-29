@@ -40,37 +40,60 @@ export function useFocusTrap(containerRef, active) {
     )
   }
 
+  /*
+    Tab is handled entirely here rather than only at the ends. The end-only
+    version assumes the browser can reach the last element, and on WebKit it
+    cannot: Safari leaves links out of the tab order by default, so Tab walked
+    from the last button straight to the page behind without ever passing the
+    last link, and the wrap never fired. Moving focus ourselves makes the dialog
+    the only thing that decides where Tab goes, whatever the engine's own order.
+  */
   function onKeydown(event) {
     if (event.key !== 'Tab') return
 
     const items = focusable()
     if (items.length === 0) return
 
-    const first = items[0]
-    const last = items[items.length - 1]
+    const index = items.indexOf(document.activeElement)
+    event.preventDefault()
 
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault()
-      last.focus()
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault()
-      first.focus()
+    if (event.shiftKey) {
+      items[index <= 0 ? items.length - 1 : index - 1].focus()
+    } else {
+      items[index === -1 ? 0 : (index + 1) % items.length].focus()
     }
+  }
+
+  /*
+    A second net for escapes that are not a Tab: a programmatic focus, or a click
+    that lands behind the dialog. It does not catch focus lost to the document
+    (WebKit's own tabbing past the end), because `focusin` has no target then —
+    that is the keydown handler's job.
+  */
+  function onFocusIn(event) {
+    if (!containerRef.value) return
+    if (containerRef.value.contains(event.target)) return
+    focusable()[0]?.focus()
   }
 
   watch(active, async (isActive) => {
     if (isActive) {
       previouslyFocused = document.activeElement
       document.addEventListener('keydown', onKeydown)
+      document.addEventListener('focusin', onFocusIn)
       // Wait for the dialog to actually be in the DOM before reaching into it.
       await nextTick()
       focusable()[0]?.focus()
     } else {
       document.removeEventListener('keydown', onKeydown)
+      document.removeEventListener('focusin', onFocusIn)
       previouslyFocused?.focus?.()
       previouslyFocused = null
     }
   })
 
-  onUnmounted(() => document.removeEventListener('keydown', onKeydown))
+  onUnmounted(() => {
+    document.removeEventListener('keydown', onKeydown)
+    document.removeEventListener('focusin', onFocusIn)
+  })
 }

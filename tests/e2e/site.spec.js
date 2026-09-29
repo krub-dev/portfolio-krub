@@ -530,8 +530,10 @@ test('opening a quote reveals the rest, and closing hides it again', async ({ pa
   await expect.poll(height).toBe(clamped)
 })
 
-test('the project rail drags with a finger too', async ({ page, isMobile }) => {
+test('the project rail drags with a finger too', async ({ page, isMobile, browserName }) => {
   test.skip(!isMobile, 'there is no finger on a desktop')
+  // The drag is dispatched over CDP, which only Chromium speaks.
+  test.skip(browserName !== 'chromium', 'the finger drag uses CDP')
 
   await openSite(page, { reduced: true })
 

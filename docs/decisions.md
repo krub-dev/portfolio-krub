@@ -411,20 +411,43 @@ them; the consent is one of those rules.
   accountability the notice promises. Keeping the message for longer than it takes to answer would
   contradict the retention the page states, so it is not stored anywhere else.
 
-### 90. A route change lands at the top at once
+### 90. A route change is scrolled to the top more than once
 **Status:** active
 
 `html { scroll-behavior: smooth }` is global, which is right for the section anchors but wrong for a
 route change: returning `{ top: 0 }` made the new page first appear at the old offset — on a phone,
 opening `/privacy` from the form showed its bottom, then glided up.
 
-- **`behavior: 'instant'` is not enough on its own.** A browser that does not know the value falls
-  back to the global smooth behaviour and glides there anyway.
-- **The inline `scroll-behavior: auto` needs a layout read.** Setting it around the jump and scrolling
-  straight away still glided in Chromium: the style had not been applied yet. Reading layout
-  (`void root.offsetHeight`) between the two is what makes the jump instant everywhere.
-- **The `scrollBehavior` does the jump itself and returns `false`,** so the router does not scroll a
-  second time. The section anchors keep the global smooth, on purpose.
+- **The router jumps once, with `{ top: 0, behavior: 'instant' }`,** and that is the whole story on a
+  desktop.
+- **On iOS that is not enough.** The page can be put back at its old offset while the browser settles
+  its own viewport, so the new view opens at the bottom of the page it just navigated to. `App.vue`
+  watches the route and repeats the jump across a few frames (`0, 60, 140, 240, 360ms`), with the CSS
+  smooth behaviour off for the length of the passes. It is the same "wait until it holds" idea as the
+  footer's TOP button.
+- **It only jumps when the scroll is not already at the top,** so it does not fight a scroll someone
+  starts right after navigating, and it does not run on the first load, where the router's one jump is
+  what is wanted.
+- **A rejected attempt, for the record:** doing the jump inside `scrollBehavior` with the inline
+  `scroll-behavior: auto` needed a layout read (`void root.offsetHeight`) or Chromium still glided.
+  That worked, but a single jump is the wrong shape for the iOS case, so it was replaced by the repeat
+  in `App.vue` and the router went back to returning a position.
+
+### 91. The browser suite runs WebKit too, and the focus trap owns the Tab
+**Status:** active
+
+The suite was Chromium only, a desktop and a Pixel 7. It now runs WebKit on an iPhone as well
+(`playwright.config.js`), because the bugs that matter here keep being the ones only WebKit shows.
+
+**The first bug it caught.** The project modal's focus trap let Tab escape. `useFocusTrap` only wrapped
+at the ends — Tab from the last element back to the first — which assumes the browser can reach the
+last element. WebKit leaves links out of the tab order by default, so Tab went from the last button
+straight to the page behind without ever touching the last link, and the wrap never fired. The trap now
+moves focus itself on every Tab, so the engine's own order never enters into it, with a `focusin` net
+for escapes that are not a Tab.
+
+The finger drag is dispatched over CDP, which only Chromium speaks, so that one test is skipped on
+WebKit.
 
 ---
 

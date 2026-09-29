@@ -51,27 +51,15 @@ export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   /*
-    A route change lands at the top at once. `html { scroll-behavior: smooth }`
-    is global, so this has to beat it, and `behavior: 'instant'` is not enough on
-    its own: a browser that does not know the value falls back to the global
-    smooth and glides there, which is how the new page first showed at the old
-    offset on a phone. Turning the smooth behaviour off for this one jump, then
-    back on, is what makes it land. Section jumps are anchors within the same
-    page, so those keep the global smooth, on purpose.
+    Section jumps are anchors within the same page, so we let the global
+    `scroll-behavior: smooth` handle the animation.
+
+    A plain route change lands here at the top at once, but that single jump is
+    not enough on a phone: the page can be put back at its old offset while the
+    browser settles. App.vue repeats the jump until it holds; see decision 91.
   */
   scrollBehavior(to) {
     if (to.hash) return { el: to.hash }
-
-    const root = document.documentElement
-    const smooth = root.style.scrollBehavior
-    root.style.scrollBehavior = 'auto'
-    // Reading layout first: without it the style is not applied yet and
-    // Chromium still used the CSS smooth behaviour, gliding to the top instead.
-    void root.offsetHeight
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-    root.style.scrollBehavior = smooth
-
-    // Handled here: the router must not scroll a second time.
-    return false
+    return { top: 0, behavior: 'instant' }
   },
 })

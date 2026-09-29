@@ -14,7 +14,7 @@
   the effect: it watches the document for [data-magnetic] and drives whichever
   element is nearest the cursor. One owner, one loop.
 */
-import { ref } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import BackgroundGrid from './components/chrome/BackgroundGrid.vue'
@@ -70,6 +70,40 @@ function goTop() {
   }
   requestAnimationFrame(settle)
 }
+
+/*
+  A route change lands at the top. The router makes the jump for the load and for
+  the change, but one jump is not enough everywhere: on iOS the page can be put
+  back at its old offset while the browser settles its own viewport, so the jump
+  is repeated over a few frames, the same "wait until it holds" idea as goTop()
+  above. Anchor navigations are left to the router and the global smooth
+  behaviour, and it only ever jumps when it is off the top, so it does not fight
+  a scroll someone starts right after a navigation.
+*/
+let landTimers = []
+
+function landAtTop() {
+  if (route.hash) return
+
+  const root = document.documentElement
+  const smooth = root.style.scrollBehavior
+  // Jump, do not glide, while the passes run.
+  root.style.scrollBehavior = 'auto'
+
+  const jump = () => {
+    if (window.scrollY !== 0) window.scrollTo(0, 0)
+  }
+
+  landTimers.forEach(clearTimeout)
+  landTimers = [0, 60, 140, 240, 360].map((delay) => setTimeout(jump, delay))
+  // Back to the CSS smooth once the last pass has had its frame.
+  landTimers.push(setTimeout(() => (root.style.scrollBehavior = smooth), 420))
+}
+
+// Not on the first load: the router's own scrollBehavior covers that, and firing
+// here would fight the first scroll for the length of the passes.
+watch(() => route.fullPath, landAtTop)
+onBeforeUnmount(() => landTimers.forEach(clearTimeout))
 </script>
 
 <template>
