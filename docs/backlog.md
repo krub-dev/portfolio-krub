@@ -249,9 +249,9 @@ the privacy notice and the consent the law asks for.
   into `--ink`, so the end rose above the background, did lift it (12 to 33) but read as a square panel
   of mist at the end of the tunnel, so it was dropped. Still open: a shape that does not read as a lit
   panel — spacing the fog on the projection, or lighting the end some other way.
-- [ ] **The project modal's media is cluttered.** The image is small and the carousel carries big
-  arrows and an `IMAGEN 1 / 4 · NAME` label over it. Replace them with dots, as the other pagers do,
-  and give the media a larger, taller slot.
+- [x] **The project modal's media is cluttered.** Done on 2026-09-30: the slides are a horizontal track
+  moved by `transform`, paged by the rail's own dots and draggable, at `16/10 × 56svh` to match the
+  card's frame. The arrows and the `IMAGEN 1 / 4 · NAME` label are gone. See decision 94.
 - [ ] **Fixed blur bands.** Tried on 2026-09-30 and **dropped**: a strip of `backdrop-filter` under the
   bar and another above the footer read as a smudge lying over the page rather than as the page going
   under something. What was built and why it failed is in decisions-archive.md 100. Reopen only with a
