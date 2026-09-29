@@ -8,9 +8,9 @@
   component that only paints does not own state" rule from COMPONENTS.md.
 
   The CV button opens the dialog the page owns, so it emits rather than holding
-  the state itself.
+  the state itself; it also asks for the CV to be warmed before it is opened.
 */
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../base/BaseButton.vue'
@@ -23,7 +23,7 @@ import { useLemonVoice } from '../../composables/useLemonVoice'
 import { certifications, config, copy, education, experience, photoPath } from '../../data'
 import { formatPeriod } from '../../utils/format'
 
-defineEmits(['open-cv'])
+const emit = defineEmits(['open-cv', 'warm-cv'])
 
 const { lang } = useLang()
 const { t } = useI18n()
@@ -52,7 +52,6 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
 
 // Which way the content slides when the tab changes, for the transition.
 const direction = ref('left')
-
 watch(tab, (next, previous) => {
   const values = options.value.map((option) => option.value)
   direction.value = values.indexOf(next) > values.indexOf(previous) ? 'left' : 'right'
@@ -101,6 +100,40 @@ function onTouchEnd(event) {
   const next = values.indexOf(tab.value) + (dx < 0 ? 1 : -1)
   if (next >= 0 && next < values.length) tab.value = values[next]
 }
+
+/*
+  Two signs of intent warm the CV dialog (see useCv): the pointer over its button
+  or the button focused, and — for a phone, where there is no hover before the tap
+  — the photo column reaching the viewport. The second waits for idle time, so it
+  never competes with what is being painted.
+*/
+const photoWrap = ref(null)
+let observer = null
+
+function warm() {
+  emit('warm-cv')
+}
+
+function onCvEnter() {
+  say(lemon.value.cv)
+  warm()
+}
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      // Safari has no requestIdleCallback; a plain delay is close enough.
+      if (window.requestIdleCallback) window.requestIdleCallback(warm)
+      else setTimeout(warm, 400)
+    },
+    { rootMargin: '200px' },
+  )
+  observer.observe(photoWrap.value)
+})
+
+onUnmounted(() => observer?.disconnect())
 </script>
 
 <template>
@@ -150,7 +183,7 @@ function onTouchEnd(event) {
         </div>
       </div>
 
-      <div class="photo-wrap" data-pfp-wrap>
+      <div ref="photoWrap" class="photo-wrap" data-pfp-wrap>
         <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
         <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
           <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
@@ -162,9 +195,10 @@ function onTouchEnd(event) {
           size="md"
           magnetic
           class="cv"
-          @mouseenter="say(lemon.cv)"
+          @mouseenter="onCvEnter"
+          @focus="warm"
           @mouseleave="hush()"
-          @click="$emit('open-cv')"
+          @click="emit('open-cv')"
         >
           {{ t('actions.cv') }}
         </BaseButton>

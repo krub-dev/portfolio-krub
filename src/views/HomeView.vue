@@ -24,6 +24,7 @@ import ProjectsSection from '../components/sections/ProjectsSection.vue'
 import StackSection from '../components/sections/StackSection.vue'
 import { useLang } from '../composables/useLang'
 import { useTheme } from '../composables/useTheme'
+import { warmCv } from '../composables/useCv'
 import { config, copy, cvPath, projects } from '../data'
 
 const { lang } = useLang()
@@ -57,7 +58,7 @@ const cvHref = computed(() => cvPath[theme.value][lang.value])
       <MarqueeBar :items="marqueeItems" />
     </div>
 
-    <AboutSection @open-cv="cvOpen = true" />
+    <AboutSection @open-cv="cvOpen = true" @warm-cv="warmCv(cvHref)" />
     <ProjectsSection @open="openIndex = $event" />
     <StackSection />
     <Testimonials v-if="config.showTestimonials" />

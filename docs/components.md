@@ -407,6 +407,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useLemonVoice()` | `say(text)` / `hush()` for whatever Limonacho should be saying, plus `message`, `listening` and the lemon's `listen()` registration. Owner-aware, so the four Stack groups do not talk over each other, and a `shallowRef` because the owner check is an identity check and a plain `ref` would hand back a proxy |
 | `useBodyScrollLock(active)` | locks scrolling while the modal is open |
 | `useContactForm(labels)` | `fields`, `errors`, `status`, `errorCode`, `token`, `canSend`, `touch(field)` and `send()`. The validation is live but late: a field is shown its error once it has been left, and the button is off until all four rules pass |
+| `useCv()` | `warmCv(href)`: fetches pdf.js, its worker and the PDF in the background on a sign of intent (the button hovered or focused, the photo column in view), once per visit. See decisions.md 97 |
 
 One single `requestAnimationFrame` drives everything that follows the mouse (cursor, lemon
 pupils, the logo's tilt, magnetic hover). No per-component loops. The 3D logo is the one

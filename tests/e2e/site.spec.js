@@ -859,7 +859,15 @@ test('the privacy link opens the notice on its own route', async ({ page }) => {
 test('the CV opens in a dialog, rendered page by page', async ({ page }) => {
   await openSite(page)
 
+  /*
+    Intent warms it: reaching the button (and hovering it) starts the download in
+    the background, so the dialog is usually ready by the time it is opened. The
+    document is asked for first, which is what this checks.
+  */
   await bringIntoView(page.locator('.cv'))
+  await page.locator('.cv').hover()
+  await expect(page.locator('link[rel="prefetch"][href$="cv-en-dark.pdf"]')).toBeAttached()
+
   await page.locator('.cv').click()
 
   const dialog = page.getByRole('dialog')

@@ -623,6 +623,12 @@ dialog.
   imported when the dialog first opens, so a visitor who never looks at the CV downloads neither. Each
   page is painted at the device pixel ratio, because a PDF scaled to a CSS width and left at 1:1 is
   soft on a retina screen.
+- **Warmed on intent, not on load.** The three downloads together are about 610 KB gzipped — more than
+  the 3D scene — so they are not fetched with the page: hovering or focusing the CV button, or the
+  photo column reaching the viewport (for a phone, where there is no hover before the tap), starts them
+  in the background (`useCv`, once per visit). Whoever never looks at the CV never pays, and by the
+  time the button is pressed it is usually ready. `vercel.json` also gives `/uploads/` a day of caching,
+  so the document is not revalidated on every open.
 - **The dialog shell is shared.** The backdrop, panel, scroll lock, focus trap, Escape and close button
   were lifted out of the project modal into `BaseModal`, so there is one set of dialog rules rather
   than two that drift — the same reason the pagers were merged.
