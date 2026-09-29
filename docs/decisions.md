@@ -603,6 +603,28 @@ and it made the backdrop a backdrop root — the property decision 48 ran into w
 panel. It is one flat layer of ink at 90% now: the only job a backdrop has is to push the page back,
 and it does that without drawing the eye.
 
+### 97. The CV opens in a dialog, rendered from the PDF with pdf.js
+**Status:** active
+
+The CV button downloaded a PDF and that was it: to read it you left the site for the browser's viewer.
+It opens a dialog now, with the same pages inside it, and the download moved to the foot of that
+dialog.
+
+- **The document is the one the site already offers,** picked from the theme and language exactly as
+  the old button did (`cvPath`). Nothing new to keep in step, and the dialog and the download cannot
+  disagree about which file it is.
+- **pdf.js, not an `<iframe>` and not page images.** An iframe hands over to the browser's viewer,
+  which on iOS Safari is unreliable and brings its own chrome; page images would need a rasteriser in
+  the cv tool, and there is none on this machine — a new binary for a portfolio. pdf.js renders the
+  real pages into canvases, in the site's own shell, and it is one dependency instead of a pipeline.
+- **Lazy, and only on open.** pdf.js and its worker are their own chunks (about 430 KB and 1.2 MB)
+  imported when the dialog first opens, so a visitor who never looks at the CV downloads neither. Each
+  page is painted at the device pixel ratio, because a PDF scaled to a CSS width and left at 1:1 is
+  soft on a retina screen.
+- **The dialog shell is shared.** The backdrop, panel, scroll lock, focus trap, Escape and close button
+  were lifted out of the project modal into `BaseModal`, so there is one set of dialog rules rather
+  than two that drift — the same reason the pagers were merged.
+
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62
 

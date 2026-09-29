@@ -1,29 +1,16 @@
 <script setup>
 /*
-  The project detail dialog.
+  The project detail dialog: the media, the copy and the spec list, inside the
+  site's shared dialog shell.
 
-  Three ways out, and all three matter: the ✕ button, a click on the backdrop,
-  and Escape. Escape is not in the prototype — it was added here, because a
-  dialog you cannot dismiss from the keyboard is a trap for anyone not using a
-  mouse, and it is what every user expects.
-
-  The backdrop click checks `event.target === event.currentTarget`. Without
-  that, a click that starts inside the panel and drifts onto the backdrop —
-  selecting text, dragging — would close the dialog under you.
-
-  role="dialog" + aria-modal + aria-labelledby is what tells a screen reader
-  this is a layer over the page and gives it a name to announce. The focus trap
-  is what makes that true in practice.
-
-  Rendered in a <Teleport> to <body>: the modal is fixed and must sit above
-  everything, and inside .app it would be subject to that element's stacking
-  context and its overflow-x: hidden.
+  The shell (BaseModal) owns the backdrop, the panel, the scroll lock, the focus
+  trap, the Escape key and the close button; this owns what is inside it — the
+  `[0N]` label and the path in the header, then the media and the two columns.
 */
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { useBodyScrollLock } from '../../composables/useBodyScrollLock'
-import { useFocusTrap } from '../../composables/useFocusTrap'
+import BaseModal from '../base/BaseModal.vue'
 import { useLang } from '../../composables/useLang'
 import MediaCarousel from './MediaCarousel.vue'
 import SpecList from './SpecList.vue'
@@ -38,133 +25,57 @@ const emit = defineEmits(['close'])
 const { lang } = useLang()
 const { t } = useI18n()
 
-const panel = ref(null)
 const open = computed(() => props.project !== null)
 const content = computed(() => (props.project ? props.project[lang.value] : null))
 // [01], [02]… one-based and zero-padded, matching the section numbering.
 const label = computed(() => `[${String(props.index + 1).padStart(2, '0')}]`)
-
-useBodyScrollLock(open)
-useFocusTrap(panel, open)
-
-function onBackdrop(event) {
-  if (event.target === event.currentTarget) emit('close')
-}
-
-/*
-  Escape is handled on the document, not on the dialog element. The focus trap
-  means keystrokes would bubble up from inside anyway, but this way closing
-  does not depend on where focus happens to be — and the listener only exists
-  while the dialog is open.
-*/
-function onKeydown(event) {
-  if (event.key === 'Escape') emit('close')
-}
-
-watch(open, (isOpen) => {
-  if (isOpen) document.addEventListener('keydown', onKeydown)
-  else document.removeEventListener('keydown', onKeydown)
-})
-
-onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
-  <Teleport to="body">
-    <div
-      v-if="open"
-      class="backdrop"
-      data-hide-cursor
-      @click="onBackdrop"
-    >
-      <div
-        ref="panel"
-        class="panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="project-modal-title"
-      >
-        <header class="head">
-          <div class="path">
-            <span class="index">{{ label }}</span>
-            <span class="slug">/projects/{{ project.slug }}</span>
-          </div>
-          <button class="close" type="button" :aria-label="t('a11y.closeModal')" @click="emit('close')">
-            ✕
-          </button>
-        </header>
+  <BaseModal
+    :open="open"
+    labelledby="project-modal-title"
+    :close-label="t('a11y.closeModal')"
+    @close="emit('close')"
+  >
+    <template #head>
+      <div class="path">
+        <span class="index">{{ label }}</span>
+        <span class="slug">/projects/{{ project.slug }}</span>
+      </div>
+    </template>
 
-        <MediaCarousel
-          :images="project.images ?? []"
-          :slides="project.slides"
-          :slug="project.slug"
-          :name="content.name"
-          :shot-label="project.shotLabel"
-        />
+    <MediaCarousel
+      :images="project.images ?? []"
+      :slides="project.slides"
+      :slug="project.slug"
+      :name="content.name"
+      :shot-label="project.shotLabel"
+    />
 
-        <div class="body" data-two-col>
-          <div class="main">
-            <h2 id="project-modal-title" class="name">{{ content.name }}</h2>
-            <p class="lead">{{ content.lead }}</p>
-            <p class="para">{{ content.body }}</p>
-            <p class="para">{{ content.body2 }}</p>
+    <div class="body" data-two-col>
+      <div class="main">
+        <h2 id="project-modal-title" class="name">{{ content.name }}</h2>
+        <p class="lead">{{ content.lead }}</p>
+        <p class="para">{{ content.body }}</p>
+        <p class="para">{{ content.body2 }}</p>
 
-            <div class="links">
-              <a class="link outline" :href="project.repo" target="_blank" rel="noopener" data-magnetic>
-                {{ content.repoLabel }}
-              </a>
-              <a class="link solid" :href="project.live" target="_blank" rel="noopener" data-magnetic>
-                {{ content.liveLabel }}
-              </a>
-            </div>
-          </div>
-
-          <SpecList :role="content.role" :year="content.year" :stack="project.stack" />
+        <div class="links">
+          <a class="link outline" :href="project.repo" target="_blank" rel="noopener" data-magnetic>
+            {{ content.repoLabel }}
+          </a>
+          <a class="link solid" :href="project.live" target="_blank" rel="noopener" data-magnetic>
+            {{ content.liveLabel }}
+          </a>
         </div>
       </div>
+
+      <SpecList :role="content.role" :year="content.year" :stack="project.stack" />
     </div>
-  </Teleport>
+  </BaseModal>
 </template>
 
 <style scoped>
-.backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 250;
-  /*
-    A flat scrim, no blur. The blur turned the page behind into smudges that read
-    as shapes of their own, and it made this element a backdrop root — the thing
-    decision 48 ran into. One uniform layer of ink does the only job a backdrop
-    has, pushing the page back, without drawing the eye to it.
-  */
-  background: color-mix(in srgb, var(--ink) 90%, transparent);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  overflow-y: auto;
-  padding: clamp(12px, 4vw, 48px);
-}
-
-.panel {
-  width: min(1000px, 100%);
-  max-height: calc(100svh - clamp(24px, 8vw, 96px));
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  background: var(--surface);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--line);
-}
-
 .path {
   display: flex;
   align-items: baseline;
@@ -184,27 +95,6 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   color: var(--fg-2);
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.close {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 auto;
-  border-radius: 10px;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--fg);
-  cursor: pointer;
-  font-size: 14px;
-  transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    color 0.16s ease;
-}
-
-.close:hover {
-  border-color: var(--acc-text);
-  color: var(--acc-text);
 }
 
 .body {

@@ -75,6 +75,11 @@
     "year": "Year",
     "stack": "Stack"
   },
+  "cvModal": {
+    "loading": "Loading the CV…",
+    "error": "The CV could not be shown. Download it below.",
+    "download": "Download PDF"
+  },
   "notFound": {
     "title": "/not-found",
     "code": "404"
@@ -99,6 +104,7 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "closeModal": "Close project",
+    "closeCv": "Close the CV",
     "projectsRail": "Projects",
     "projectImages": "Project images",
     "goToTestimonial": "Go to testimonial {n}",

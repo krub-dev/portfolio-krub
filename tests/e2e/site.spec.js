@@ -853,6 +853,25 @@ test('the privacy link opens the notice on its own route', async ({ page }) => {
   expect(await page.evaluate(() => window.scrollY)).toBe(0)
 })
 
+test('the CV opens in a dialog, rendered page by page', async ({ page }) => {
+  await openSite(page)
+
+  await bringIntoView(page.locator('.cv'))
+  await page.locator('.cv').click()
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+
+  // The pages are painted from the PDF the site already offers for this theme
+  // and language, so the dialog and the download cannot disagree about the file.
+  await expect(dialog.locator('canvas.page').first()).toBeVisible()
+  expect(await dialog.locator('canvas.page').count()).toBeGreaterThan(0)
+  await expect(dialog.locator('a[download]')).toHaveAttribute('href', /cv-en-dark\.pdf$/)
+
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+})
+
 test.describe('3D logo', () => {
   test.skip(({ isMobile }) => isMobile, 'the stage is not mounted below 900px (decision 37)')
 

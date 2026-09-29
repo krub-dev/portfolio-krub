@@ -6,6 +6,9 @@
   The tab state lives here rather than in TabSwitch: the switch only reports
   what was clicked, this section decides what that means. That is the "a
   component that only paints does not own state" rule from COMPONENTS.md.
+
+  The CV button opens the dialog the page owns, so it emits rather than holding
+  the state itself.
 */
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -16,13 +19,13 @@ import SectionHeading from '../base/SectionHeading.vue'
 import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
 import { useLang } from '../../composables/useLang'
-import { useTheme } from '../../composables/useTheme'
 import { useLemonVoice } from '../../composables/useLemonVoice'
-import { certifications, config, copy, cvPath, education, experience, photoPath } from '../../data'
+import { certifications, config, copy, education, experience, photoPath } from '../../data'
 import { formatPeriod } from '../../utils/format'
 
+defineEmits(['open-cv'])
+
 const { lang } = useLang()
-const { theme } = useTheme()
 const { t } = useI18n()
 // Limonacho greets you when the pointer lands on the photo.
 const { say, hush } = useLemonVoice()
@@ -157,9 +160,8 @@ function onTouchEnd(event) {
           variant="solid"
           size="md"
           magnetic
-          external
-          :href="cvPath[theme][lang]"
           class="cv"
+          @click="$emit('open-cv')"
         >
           {{ t('actions.cv') }}
         </BaseButton>

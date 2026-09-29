@@ -68,9 +68,11 @@ App
 │       ├─ TalkBand
 │       ├─ ContactForm
 │       └─ BaseButton
-├─ ProjectModal
+├─ ProjectModal          (inside BaseModal)
 │   ├─ MediaCarousel
 │   └─ SpecList
+├─ CvModal               (inside BaseModal: the CV, page by page)
+│   └─ BaseButton        (the download)
 ├─ NotFoundView         (the 404 route)
 │   └─ BaseButton
 ├─ PrivacyView          (the /privacy route: the form's privacy notice)
@@ -93,10 +95,19 @@ App
 | `href` | string | — | external link; renders an `<a>` |
 | `to` | string | — | internal route; renders a `RouterLink`, so no reload |
 | `external` | boolean | `false` | adds `target="_blank" rel="noopener"` |
+| `download` | boolean | `false` | `<a>` only: saves the linked file instead of opening it |
 | `magnetic` | boolean | `false` | opts into magnetic hover |
 
 Renders a `<button>` when neither `to` nor `href` is given. Default slot: the content. Emits
 `click`.
+
+### BaseModal
+The shell every dialog uses: the fixed backdrop (a flat scrim, no blur), the panel, the scroll lock
+behind it, the focus trap, the Escape key and the backdrop click. Props: `open`, `labelledby` (the id
+that names the dialog), `closeLabel` and `width` (the panel's cap — the CV wants a narrower one).
+Slots: `head` for whatever sits beside the close button, and the default for the body. Emits `close`.
+The project modal and the CV dialog are its two callers, so there is one set of dialog rules rather
+than two that drift.
 
 ### SectionHeading
 | Prop | Type | Notes |
@@ -173,9 +184,21 @@ Emits `open`.
 | `project` | object \| null (`null` = closed) |
 | `index` | number (for the `[0N]` in the header) |
 
-Emits `close`. Locks body scroll while open. Contains `MediaCarousel` (props `slides`, `slug`;
-owns its own index state, wrapping around) and `SpecList` (props `role`, `year`, `stack`; it
-resolves its own Role / Year / Stack labels through i18n).
+Emits `close`. Renders inside `BaseModal` (the shared dialog shell), with its `[0N]` and path in the
+header slot, then `MediaCarousel` (props `images`, `slides`, `slug`, `name`, `shotLabel`; owns its own
+index, paged by the dots and by a drag) and `SpecList` (props `role`, `year`, `stack`; it resolves its
+own Role / Year / Stack labels through i18n).
+
+### CvModal
+| Prop | Type |
+|---|---|
+| `open` | boolean |
+| `href` | string (the PDF for the current theme and language) |
+
+Emits `close`. Renders inside `BaseModal` (a narrower panel) with the title in the header slot, then
+the CV's pages — painted from the PDF with pdf.js, which is imported on first open — and the download
+at the foot. It owns the render, not the state: `HomeView` decides whether it is open and which file.
+See decisions.md 97.
 
 ### TestimonialCard
 `quote`, `name`, `role`, `avatar`, `open`. One entry as the pager's content: the attribution first, then

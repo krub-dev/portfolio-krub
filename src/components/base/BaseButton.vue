@@ -27,6 +27,8 @@ const props = defineProps({
   href: { type: String, default: null },
   to: { type: String, default: null }, // internal route, navigated without a reload
   external: { type: Boolean, default: false },
+  // The <a> branch: save the linked file instead of opening it.
+  download: { type: Boolean, default: false },
   magnetic: { type: Boolean, default: false },
   // Only the <button> branch uses it, and only a form needs anything but 'button'.
   type: { type: String, default: 'button' },
@@ -67,6 +69,7 @@ const magneticAttr = computed(() => (props.magnetic ? '' : undefined))
     :href="href"
     :target="external ? '_blank' : undefined"
     :rel="external ? 'noopener' : undefined"
+    :download="download ? '' : undefined"
     class="btn"
     :class="classes"
     :data-magnetic="magneticAttr"
