@@ -253,36 +253,37 @@ copy, because the animation depends on where the word splits, so they are not in
 
 ### LogoStage
 The hero's square stage and the only thing on the page that turns in 3D. It owns the box, the 2D
-fallback mask, the frame that clips the canvas, the shutter that opens it and the pointer gestures —
-a hover tilt and a drag spin that springs back — which it forwards to the scene as `tilt` / `spin` /
-`dragging`. It snaps its own box to the page's 72px grid (a square of whole cells, measured on mount
-and resize; decision 79) and draws the opaque frame over the canvas so the box's edges are covered
-(decision 80). The opening starts closed behind a roller blind of CSS slats — a real button, labelled
-from the locales, lifted once on a click and left up (decision 86) — and the entrance glow inside the
-frame ignites once the reveal is done (decisions 81 and 83); the rotating glow that used to live here
-is gone (decision 71). The scene is lazy (`defineAsyncComponent`), so Three never reaches the initial
-bundle, and `HeroSection` decides not to mount it below 900px (decision 37).
+fallback mask, the frame that clips the canvas, the roller blind that covers and opens it, and the
+pointer gestures — a hover tilt and a drag spin that springs back — which it forwards to the scene as
+`tilt` / `spin` / `dragging`. It snaps its own box to the page's 72px grid (a square of whole cells,
+measured on mount and resize; decision 79) and draws the opaque frame over the canvas so the box's
+edges are covered (decision 80). The opening starts closed behind a roller blind of CSS slats — a real
+button, labelled from the locales, raised on a click and lowered again by a click on the coil it
+leaves at the head (decision 86) — and the entrance glow inside the frame ignites once the reveal is
+done (decisions 81 and 83); the rotating glow that used to live here is gone (decision 71). The scene
+is lazy (`defineAsyncComponent`), so Three never reaches the initial bundle, and `HeroSection` decides
+not to mount it below 900px (decision 37).
 
 ### LogoScene
-The `<TresCanvas>`: the light, the wheel-zoom (clamped, and it only takes the gesture while it can
-still move), the off-screen pause (an IntersectionObserver at 60%) and the fps and DPR caps. It
-builds the mark's geometry — the favicon SVG path extruded, welded and re-normalled — and emits
-`ready` when it is up. The camera and the depth are `SceneRig`'s.
+The `<TresCanvas>`: the lights, the wheel-zoom (clamped, and it only takes the gesture while it can
+still move), the off-screen pause (an IntersectionObserver at 60%) and the fps and DPR caps. It loads
+the mark's GLB and reports the download up as `ready` and `progress`. The camera and the depth are
+`SceneRig`'s.
 
 ### SceneRig
 The rig around the mark: the camera and the depth. A deep open box — four walls converging on a
 distant far wall, built by hand so the grid is world-uniform, sized to the camera's frustum so its
 opening lands on the stage, and divided into the stage's seven cells — carries the grid and is
-faded by a `Fog` read from `--ink`; it scales with the wheel's zoom so the opening stays put. A
-neutral backlight clears the grid behind the mark, and the camera leans a little with the pointer's
-`tilt`, always looking back at the mark. A child of the canvas, because `useLoop` and
-`useTresContext` need the renderer. See decisions 78–82.
+faded by a `Fog` read from `--ink`; it scales with the wheel's zoom so the opening stays put. The
+camera leans a little with the pointer's `tilt`, always looking back at the mark. A child of the
+canvas, because `useLoop` and `useTresContext` need the renderer. See decisions 78–82.
 
 ### LogoModel
-The mesh and everything about how it looks and moves: the polished-metal `MeshStandardMaterial`,
-the generated `RoomEnvironment` (a PMREM), the accent colour read from `--acc-solid`, and the hover
-sway, drag spin and magnetic return. It is a child of the canvas on purpose — `useLoop` and
-`useTresContext` need the renderer the canvas provides. Built once and never rebuilt.
+The mesh and everything about how it looks and moves: the two `MeshStandardMaterial`s (the front in
+the accent, the back a dark neutral), the `RoomEnvironment` the rig generates as a PMREM for them, and
+the hover sway, drag spin and magnetic return. On the halo's ignition it walks its colour from the
+page background up to the accent on the same stepped timing the glow strikes on. It is a child of the
+canvas on purpose — `useLoop` and `useTresContext` need the renderer the canvas provides. Loaded once.
 
 ---
 

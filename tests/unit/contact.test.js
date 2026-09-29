@@ -46,28 +46,39 @@ describe('validateContact', () => {
 })
 
 describe('the contact endpoint', () => {
+  // A fresh client each call, so the endpoint's per-IP rate limit never carries
+  // between tests.
+  let n = 0
+  const req = (body, method = 'POST') => ({
+    method,
+    body,
+    headers: { 'x-forwarded-for': `10.0.0.${++n}` },
+  })
+
   beforeEach(() => {
-    process.env.WEB3FORMS_KEY = 'test-key'
+    process.env.RESEND_API_KEY = 'test-key'
+    process.env.CONTACT_TO = 'owner@example.com'
+    delete process.env.TURNSTILE_SECRET_KEY
     vi.restoreAllMocks()
   })
 
   it('refuses anything but a POST', async () => {
     const res = fakeRes()
-    await handler({ method: 'GET' }, res)
+    await handler(req(GOOD, 'GET'), res)
     expect(res.statusCode).toBe(405)
   })
 
-  it('refuses to send when the key is not configured', async () => {
-    delete process.env.WEB3FORMS_KEY
+  it('refuses to send when it is not configured', async () => {
+    delete process.env.RESEND_API_KEY
     const res = fakeRes()
-    await handler({ method: 'POST', body: GOOD }, res)
+    await handler(req(GOOD), res)
     expect(res.statusCode).toBe(500)
   })
 
   it('rejects a payload the browser would have caught, without calling the service', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
     const res = fakeRes()
-    await handler({ method: 'POST', body: { ...GOOD, email: 'nope' } }, res)
+    await handler(req({ ...GOOD, email: 'nope' }), res)
     expect(res.statusCode).toBe(400)
     expect(fetchSpy).not.toHaveBeenCalled()
   })
@@ -75,34 +86,44 @@ describe('the contact endpoint', () => {
   it('drops a filled honeypot as if it had worked', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
     const res = fakeRes()
-    await handler({ method: 'POST', body: { ...GOOD, trap: 'bot' } }, res)
+    await handler(req({ ...GOOD, trap: 'bot' }), res)
     expect(res.statusCode).toBe(200)
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
-  it('sends the key and the four fields, and nothing else', async () => {
-    const fetchSpy = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue({ ok: true, json: async () => ({ success: true }) })
+  it('sends a rebuilt payload, and nothing else', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true })
 
     const res = fakeRes()
-    await handler({ method: 'POST', body: { ...GOOD, extra: 'ignored' } }, res)
+    await handler(req({ ...GOOD, extra: 'ignored', trap: '' }), res)
 
     expect(res.statusCode).toBe(200)
     expect(res.payload).toEqual({ ok: true })
 
+    expect(fetchSpy.mock.calls[0][1].headers.Authorization).toBe('Bearer test-key')
     const sent = JSON.parse(fetchSpy.mock.calls[0][1].body)
-    expect(sent.access_key).toBe('test-key')
-    expect(sent.name).toBe('Kiko')
-    expect(sent.email).toBe(GOOD.email)
+    expect(sent.to).toEqual(['owner@example.com'])
+    expect(sent.reply_to).toBe(GOOD.email)
+    expect(sent.text).toContain('Kiko')
+    expect(sent.text).toContain(GOOD.message)
     expect(sent).not.toHaveProperty('extra')
     expect(sent).not.toHaveProperty('trap')
   })
 
-  it('reports a failure from the service instead of pretending', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: false, json: async () => ({ success: false }) })
+  it('demands a Turnstile token when its secret is configured', async () => {
+    process.env.TURNSTILE_SECRET_KEY = 'secret'
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
     const res = fakeRes()
-    await handler({ method: 'POST', body: GOOD }, res)
+    await handler(req(GOOD), res)
+    expect(res.statusCode).toBe(400)
+    expect(res.payload.error).toBe('captcha')
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('reports a failure from the service instead of pretending', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: false, text: async () => 'nope' })
+    const res = fakeRes()
+    await handler(req(GOOD), res)
     expect(res.statusCode).toBe(502)
   })
 })

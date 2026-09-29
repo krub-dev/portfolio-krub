@@ -16,7 +16,7 @@
 */
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useLoop, useTresContext } from '@tresjs/core'
-import { Box3, Group, MeshStandardMaterial, Vector3 } from 'three'
+import { Box3, Color, Group, MeshStandardMaterial, Vector3 } from 'three'
 
 const props = defineProps({
   logoGroup: { type: Object, required: true },
@@ -29,6 +29,8 @@ const props = defineProps({
   // `v-if` on the primitive rather than by unmounting, so the material and the
   // generated environment survive the toggle.
   logo: { type: Boolean, default: true },
+  // Whether the halo is lit. Triggers the "pop" animation when it turns on.
+  haloOn: { type: Boolean, default: false },
   // The environment map from SceneRig, so the metal has something to reflect.
   environment: { type: Object, default: null },
 })
@@ -45,8 +47,15 @@ const SWAY_X = 0.1
 const BREATH = 0.7
 
 const accent = ref('#ffc800')
+// The "off" colour: dark grey in dark theme, light grey in light theme.
+// Matches the page background so the logo reads as part of the scene before
+// the halo lights it up.
+const off = ref('#1a1a1a')
 let smoothSpin = 0
 let smoothSpinY = 0
+// Strike progress: 0 = off, 1 = fully lit. Driven by the same timing as
+// glowStrike in LogoStage (flickers at 8%, 44%, 58%, 80%, hold at 100%).
+let strikeProgress = 0
 
 /*
   Two materials: the front face gets the accent colour, the back gets a dark
@@ -126,6 +135,46 @@ watch(
   },
 )
 
+// When the halo lights up, the logo colour follows the same flicker pattern
+// as glowStrike: off → flicker → off → flicker → flicker → off → hold.
+// The colour interpolates between off (dark/light grey) and the accent.
+watch(
+  () => props.haloOn,
+  (on) => {
+    if (!on) {
+      strikeProgress = 0
+      return
+    }
+    // glowStrike is 2.1s with steps at 8, 14, 36, 44, 50, 58, 64, 80, 100%.
+    // We mirror those steps: on at 8-14, 44-50, 58-64, 80-100.
+    const steps = [
+      { at: 0.08, on: true },
+      { at: 0.14, on: false },
+      { at: 0.44, on: true },
+      { at: 0.50, on: false },
+      { at: 0.58, on: true },
+      { at: 0.64, on: false },
+      { at: 0.80, on: true },
+      { at: 1.00, on: true },
+    ]
+    const duration = 2100
+    const start = performance.now()
+
+    const tick = (now) => {
+      const elapsed = now - start
+      const t = Math.min(elapsed / duration, 1)
+      let lit = false
+      for (const step of steps) {
+        if (t >= step.at) lit = step.on
+        else break
+      }
+      strikeProgress = lit ? 1 : 0
+      if (t < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  },
+)
+
 watch(
   () => props.running,
   (run) => (run ? renderer.loop.start() : renderer.loop.stop()),
@@ -136,16 +185,29 @@ onBeforeUnmount(() => renderer.loop.stop())
 // Follow the appearance control: the accent is written on <html>, and the theme
 // changes the same attributes.
 function readAccent() {
-  const value = getComputedStyle(document.documentElement).getPropertyValue('--acc-solid')
-  if (value) accent.value = value.trim()
+  const css = getComputedStyle(document.documentElement)
+  const acc = css.getPropertyValue('--acc-solid').trim()
+  if (acc) accent.value = acc
+  // The off colour matches the page background so the logo blends in before
+  // the halo lights it. Dark theme: near-black. Light theme: near-white.
+  const ink = css.getPropertyValue('--ink').trim()
+  if (ink) off.value = ink
 }
 const appearance = new MutationObserver(readAccent)
 appearance.observe(document.documentElement, { attributes: true })
 onBeforeUnmount(() => appearance.disconnect())
 readAccent()
 
+const offColor = new Color()
+const accentColor = new Color()
+const currentColor = new Color()
+
 onBeforeRender(({ elapsed, delta }) => {
-  frontMaterial.color.set(accent.value)
+  // Interpolate between off colour and accent based on strike progress.
+  offColor.set(off.value)
+  accentColor.set(accent.value)
+  currentColor.lerpColors(offColor, accentColor, strikeProgress)
+  frontMaterial.color.copy(currentColor)
 
   // The drag angle, then the magnetic return: held by the pointer while
   // dragging, easing back to zero the moment it is let go. On both axes.

@@ -49,7 +49,15 @@ function contactEndpoint() {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  if (env.WEB3FORMS_KEY) process.env.WEB3FORMS_KEY = env.WEB3FORMS_KEY
+
+  /*
+    The server-side keys, handed to the process so the dev endpoint can read them
+    the way Vercel does in production. None of these is VITE_-prefixed on purpose:
+    nothing here may reach the bundle.
+  */
+  for (const name of ['RESEND_API_KEY', 'CONTACT_TO', 'CONTACT_FROM', 'TURNSTILE_SECRET_KEY']) {
+    if (env[name]) process.env[name] = env[name]
+  }
 
   return {
     plugins: [vue(), contactEndpoint()],

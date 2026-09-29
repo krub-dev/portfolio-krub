@@ -46,7 +46,6 @@ const props = defineProps({
   // The lab switches these off to show what is behind what. On in the site.
   logo: { type: Boolean, default: true },
   ring: { type: Boolean, default: true },
-  halo: { type: Boolean, default: true },
   // How the tunnel fades out with depth. See SceneRig for the modes and why.
   fog: { type: String, default: 'far' },
   // The lab puts stages side by side and does not want them walking themselves
@@ -115,13 +114,13 @@ let armTimer = 0
 let failTimer = 0
 
 /*
-  The shutter, and whether it has been raised. It opens once and stays open: the
-  stage spends the rest of the visit as it always was, the mark turning under the
-  pointer.
+  The shutter, and whether it is up. A click on the closed blind raises it; a
+  click on the coil it leaves at the head lowers it again. The stage spends the
+  rest of the visit as it always was, the mark turning under the pointer.
 */
 const revealed = ref(false)
 /*
-  A press that became a drag must not also lift the blind. The same surface holds
+  A press that became a drag must not also work the blind. The same surface holds
   the mark that spins, so a click counts as a click only if the pointer barely
   moved between press and release.
 */
@@ -138,7 +137,7 @@ function onShutterClick(event) {
     shutterDownAt = null
     if (moved > DRAG_SLOP) return
   }
-  revealed.value = true
+  revealed.value = !revealed.value
 }
 
 /*
@@ -287,6 +286,9 @@ function onDown(event) {
   // The blind is over the mark: there is nothing to turn yet, and this press
   // belongs to the shutter.
   if (props.shutter && !revealed.value) return
+  // With the blind up the coil is its own control. Capturing the pointer for a
+  // drag would retarget the pointerup and steal the click that lowers it.
+  if (event.target.closest?.('.roll')) return
   // A double press puts the view back: the mark straight and the zoom home. It
   // is read here rather than with `dblclick` because the drag captures the
   // pointer, which can keep the native event from landing.
@@ -367,7 +369,7 @@ defineExpose({ exportModel })
             :dragging="dragging"
             :reset="resetToken"
             :logo="props.logo"
-            :halo="props.halo"
+            :halo-on="armed"
             :fog="props.fog"
             @ready="ready = true"
             @progress="loadProgress = $event"
@@ -475,13 +477,15 @@ defineExpose({ exportModel })
 
 /*
   The shutter: a roller blind of metal slats across the opening, closed until a
-  click lifts it. Built in CSS rather than from an image so it can actually roll —
-  a picture bakes the slats and the pull into place and cannot lift — and so it is
-  drawn in the theme's own greys (`--fg` mixed into `--ink`), the way the frame is.
+  click lifts it and lowered again by a click on the coil it leaves at the head.
+  Built in CSS rather than from an image so it can actually roll — a picture bakes
+  the slats and the pull into place and cannot lift — and so it is drawn in the
+  metal tokens, the way the frame is.
 
-  It lifts as one piece: the whole stack translates up out of the opening and the
-  coil at the top — `.roll` — grows as it goes. Only the stack moves, and the slats
-  keep their spacing, so they stay contiguous the way a sheet of metal does.
+  It moves as one piece: the whole stack translates up out of the opening and the
+  coil at the top — `.roll` — grows as it goes, both ways. Only the stack moves,
+  and the slats keep their spacing, so they stay contiguous the way a sheet of
+  metal does.
 */
 .shutter {
   position: absolute;
@@ -490,17 +494,22 @@ defineExpose({ exportModel })
   padding: 0;
   border: 0;
   overflow: hidden;
-  background: var(--metal-dark);
+  /* Transparent, and it has to be said: a <button> ships the UA's own grey face,
+     which would paint over the scene the moment the slats clear it. The slats are
+     the cover; the button is only the surface the gestures land on. */
+  background: transparent;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
 }
 
-/* Up, so the opening belongs to the stage and its gestures again. Transparent at
-   once, because the reveal is the stack clearing, not a panel fading. */
+/*
+  No panel of its own: the slats are the cover, so whatever is behind shows
+  through the opening the moment they clear it — on the way up and on the way
+  down alike.
+*/
 .shutter.open {
   pointer-events: none;
-  background: transparent;
 }
 
 /*
@@ -596,6 +605,14 @@ defineExpose({ exportModel })
     0 3px 5px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 var(--metal-dark);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* The pull answers the whole blind, not just its own 64px: hovering anywhere on
+   the shutter lifts it, so the invitation reads as "raise this", not "grab the
+   handle". */
+.shutter:not(.open):hover .handle {
+  transform: translateX(-50%) translateY(-3px);
 }
 
 /* The notch: a small accent-coloured rectangle in the middle of the handle, with
@@ -645,8 +662,14 @@ defineExpose({ exportModel })
   transition: height 1.05s cubic-bezier(0.55, 0, 0.35, 1);
 }
 
+/*
+  Once the blind is up its button takes no pointer, so the stage has its surface
+  back. The coil is the exception: it is the one thing left of the blind, and the
+  press that lowers it again belongs to it.
+*/
 .shutter.open .roll {
   height: 34px;
+  pointer-events: auto;
 }
 
 /* Reduced motion keeps the reveal but drops the roll: the blind is simply up. */
@@ -660,11 +683,11 @@ defineExpose({ exportModel })
 /*
   The frame: a slim brushed-metal band over the canvas. Opaque, so it masks the
   box's edges — whatever the camera's small lean does to them — and drawn in the
-  theme's own greys (`--fg` mixed into `--ink`), a sheen in both themes rather
-  than a colour. `border-image` is what lets a border carry the gradient, and the
-  slice is the band's own width so the corners take a real piece of it: sliced at
-  one pixel the corners were each a single colour stretched over 12px, and the
-  brushed streaks stopped dead at the edges.
+  metal tokens, a sheen in both themes rather than a colour. `border-image` is
+  what lets a border carry the gradient, and the slice is the band's own width so
+  the corners take a real piece of it: sliced at one pixel the corners were each
+  a single colour stretched over 12px, and the brushed streaks stopped dead at the
+  edges.
 
   No hairline on its inner edge, and no vignette either: the glow's own hard edge
   is the line there, and a dark rule or a soft inset shadow on top of it read as a
@@ -691,15 +714,15 @@ defineExpose({ exportModel })
 
 /*
   The entrance glow, in CSS: an inset shadow inside the frame, hard just past the
-  inner edge and falling off inward, so it reads as light coming through the
+  inner edge and falling off inward, so it reads as light spilling through the
   opening. No WebGL for this, so it costs nothing. It breathes slowly — opacity
   only, which the compositor handles — and the reduced-motion rule switches it
   off with the rest of the decorative motion.
 
-  The shape is the point: the blur stays tight at the edge, so it reads as a line
-  just past the frame rather than a haze. What is tuned is strength, the two
-  alphas, like dimming the bulb behind it — and the reach inward, the second
-  shadow, is the one that was reading as glare, so it sits far below the edge's.
+  The first shadow is the hard edge line; the second is the soft reach, and it
+  runs as wide as it likes: it is light, not a panel, and the mark reads through
+  it. The seam that crossed the mark used to be the scene's backlight plane, not
+  this — that is gone (decision 80).
 */
 .glow {
   position: absolute;

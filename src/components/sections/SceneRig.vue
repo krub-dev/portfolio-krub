@@ -39,8 +39,6 @@ const props = defineProps({
   tilt: { type: Object, default: () => ({ x: 0, y: 0 }) },
   // Base distance, from the wheel zoom in LogoScene.
   camZ: { type: Number, required: true },
-  // The lab switches the halo off to see the tunnel without it.
-  halo: { type: Boolean, default: true },
   // How the tunnel fades out with depth. See FOG_MODES.
   fog: { type: String, default: 'far' },
 })
@@ -94,18 +92,9 @@ const FOG_MODES = {
 // pull the box's edge out from under it.
 const PEEK_X = 3
 const PEEK_Y = 2
-// A neutral halo behind the mark, in the theme's own background: dark in the
-// dark theme, light in the light one. Nearer than it was, so it projects large
-// and fades over more screen: at -60 it was only just wider than the mark and its
-// falloff read as an edge.
-const BACKLIGHT_Z = -20
-const BACKLIGHT = 170
 
 const room = ref(null)
 const roomGeo = ref(null)
-const backlight = ref(null)
-const backlightMesh = ref(null)
-const backlightColor = ref('#0c0c0d')
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const { camera, scene, renderer } = useTresContext()
@@ -272,46 +261,9 @@ function buildFog() {
 // recoloured.
 watch(() => props.fog, buildFog)
 
-/*
-  The halo is a white radial mask; its colour is the page's own background, set
-  on the material. A mask has to be white.
-
-  The mask reaches zero at the tunnel's own half-width, not at the plane's edge.
-  The plane is wider than the tunnel on purpose, so a mask that faded out at its
-  edge had that outer band hidden by the walls and the halo ended on a hard cut
-  at the wall instead of fading. Ending it where the walls are is what makes it
-  fade out exactly as the tunnel closes.
-*/
-function buildBacklight() {
-  const size = 256
-  const canvas = makeCanvas(size)
-  const ctx = canvas.getContext('2d')
-  const reach = (ROOM_HALF / (BACKLIGHT / 2)) * (size / 2)
-  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, reach)
-  gradient.addColorStop(0, 'rgba(255,255,255,0.72)')
-  gradient.addColorStop(0.4, 'rgba(255,255,255,0.42)')
-  gradient.addColorStop(0.75, 'rgba(255,255,255,0.16)')
-  gradient.addColorStop(1, 'rgba(255,255,255,0)')
-  ctx.fillStyle = gradient
-  ctx.fillRect(0, 0, size, size)
-
-  const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
-  backlight.value?.dispose()
-  backlight.value = texture
-}
-
-function readBacklight() {
-  const css = getComputedStyle(document.documentElement)
-  // The halo is the page's own background: dark in the dark theme, light in the
-  // light one, so it separates the mark without a colour of its own.
-  backlightColor.value = css.getPropertyValue('--ink').trim() || '#0c0c0d'
-}
-
 function repaint() {
   buildRoom()
   buildFog()
-  readBacklight()
 }
 
 onMounted(() => {
@@ -326,14 +278,12 @@ onUnmounted(() => {
   observer?.disconnect()
   room.value?.dispose()
   roomGeo.value?.dispose()
-  backlight.value?.dispose()
   environment?.dispose()
 })
 
 defineExpose({ environment })
 
 buildRoomGeometry()
-buildBacklight()
 repaint()
 
 onBeforeRender(({ delta }) => {
@@ -359,12 +309,6 @@ onBeforeRender(({ delta }) => {
   // Always looking back at the mark, so it stays centred while the room moves.
   cam.position.set(smoothX, -smoothY, props.camZ)
   cam.lookAt(0, 0, 0)
-
-  // The halo sits on the camera's own axis, behind the mark: the point on the
-  // line through the camera and the mark at the halo's depth. Without this it
-  // stays in world space and slides off the mark as the camera leans.
-  const axis = BACKLIGHT_Z / props.camZ
-  backlightMesh.value?.position.set(smoothX * axis, -smoothY * axis, BACKLIGHT_Z)
 })
 </script>
 
@@ -378,27 +322,5 @@ onBeforeRender(({ delta }) => {
     :scale="[k, k, k]"
   >
     <TresMeshBasicMaterial :map="room" :side="DoubleSide" :tone-mapped="false" />
-  </TresMesh>
-
-  <!-- A neutral halo behind the mark, to clear the grid and rim it. It is placed
-       each frame on the camera's own axis (below), so it stays behind the mark
-       however the camera leans instead of sliding off it, and it scales with the
-       zoom so its mask keeps ending at the tunnel's walls rather than being cut
-       by them. -->
-  <TresMesh
-    ref="backlightMesh"
-    v-if="props.halo && backlight"
-    :position="[0, 0, BACKLIGHT_Z]"
-    :scale="[k, k, 1]"
-  >
-    <TresPlaneGeometry :args="[BACKLIGHT, BACKLIGHT]" />
-    <TresMeshBasicMaterial
-      :map="backlight"
-      :color="backlightColor"
-      :transparent="true"
-      :depth-write="false"
-      :tone-mapped="false"
-      :fog="false"
-    />
   </TresMesh>
 </template>

@@ -316,15 +316,24 @@ function onTouchEnd(event) {
     grid-template-columns: 1fr;
   }
 
+  /*
+    The photo takes the full width and the badge goes under its left edge. Beside
+    it, at this size, the label was left hanging in a gap and read as stray.
+  */
   .photo-wrap {
-    flex-direction: row;
-    align-items: flex-end;
-    gap: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .photo {
-    max-width: 210px;
-    aspect-ratio: 4 / 5;
+    max-width: none;
+  }
+
+  .availability {
+    order: 2;
+    align-self: flex-start;
+    transform: none;
   }
 }
 </style>

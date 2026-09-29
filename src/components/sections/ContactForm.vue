@@ -11,7 +11,7 @@
   Every string comes from src/locales/ and the address from src/data/. This
   component paints; the state is in useContactForm.
 */
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../base/BaseButton.vue'
@@ -28,17 +28,69 @@ const labels = () => ({
   shortMessage: t('form.shortMessage'),
 })
 
-const { fields, errors, status, send } = useContactForm(labels)
+const { fields, errors, status, errorCode, token, send } = useContactForm(labels)
 
 const statusText = computed(() => {
   if (status.value === 'sent') return t('form.sent')
-  if (status.value === 'error') return t('form.error', { email })
+  if (status.value === 'error') {
+    return errorCode.value === 'captcha' ? t('form.captcha') : t('form.error', { email })
+  }
   return ''
 })
+
+/*
+  Turnstile, loaded only with the form and only when its site key is set, so no
+  third-party script reaches a visitor who is not going to submit. The token it
+  drops is single-use, so the widget is reset after every attempt.
+*/
+const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
+const turnstileEl = ref(null)
+let widgetId = null
+let loader = null
+
+function loadTurnstile() {
+  if (!loader) {
+    loader = new Promise((resolve) => {
+      const script = document.createElement('script')
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+      script.async = true
+      script.defer = true
+      script.onload = resolve
+      document.head.appendChild(script)
+    })
+  }
+  return loader
+}
+
+onMounted(() => {
+  if (!siteKey) return
+  loadTurnstile().then(() => {
+    widgetId = window.turnstile.render(turnstileEl.value, {
+      sitekey: siteKey,
+      theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
+      callback: (value) => (token.value = value),
+      'expired-callback': () => (token.value = ''),
+      'error-callback': () => (token.value = ''),
+    })
+  })
+})
+
+onBeforeUnmount(() => {
+  if (widgetId !== null && window.turnstile) window.turnstile.remove(widgetId)
+})
+
+async function onSubmit() {
+  await send()
+  // Spent either way: a fresh token is needed for the next attempt.
+  if (widgetId !== null && window.turnstile) {
+    window.turnstile.reset(widgetId)
+    token.value = ''
+  }
+}
 </script>
 
 <template>
-  <form class="form" novalidate @submit.prevent="send">
+  <form class="form" novalidate @submit.prevent="onSubmit">
     <p class="title">{{ t('form.title') }}</p>
 
     <div class="field">
@@ -104,6 +156,9 @@ const statusText = computed(() => {
       autocomplete="off"
       aria-hidden="true"
     />
+
+    <!-- Cloudflare Turnstile, rendered only when its site key is configured. -->
+    <div v-if="siteKey" ref="turnstileEl" class="turnstile" />
 
     <div class="foot">
       <BaseButton variant="solid" size="md" type="submit" :class="{ busy: status === 'sending' }">
@@ -195,6 +250,11 @@ textarea.input {
   width: 1px;
   height: 1px;
   opacity: 0;
+}
+
+/* Turnstile's iframe; room reserved so the panel does not jump when it loads. */
+.turnstile {
+  min-height: 65px;
 }
 
 .foot {

@@ -35,7 +35,8 @@
     "error": "No ha salido. Escríbeme a {email} y te contesto.",
     "required": "Obligatorio",
     "badEmail": "Revisa la dirección",
-    "shortMessage": "Cuéntame un poco más"
+    "shortMessage": "Cuéntame un poco más",
+    "captcha": "La verificación ha caducado. Inténtalo otra vez."
   },
   "stack": {
     "g1": "Languages",

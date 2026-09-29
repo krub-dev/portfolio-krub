@@ -50,6 +50,16 @@ These live in one global stylesheet and are the only source of colour in the pro
 --mark:      #FFC800;              /* logo and footer heart colour */
 --grid:      rgba(255,255,255,.045);/* background grid lines */
 --sec-idx:   .16;                  /* opacity of the giant section number */
+
+/* Element colours — a specific surface rather than a theme colour, so they are
+   the same in both themes where noted. */
+--acc-solid: #FFC800;              /* accent at full saturation — Limonacho and the cursor */
+--specular:  rgba(255,255,255,.16);/* a metal highlight: light, same in both themes */
+--cast:      rgba(0,0,0,.85);      /* a shadow: darkness, same in both themes */
+--metal:     #2A2A2A;              /* the hero's brushed metal, frame and blind */
+--metal-dark:#1A1A1A;
+--fog-end:   #0C0C0D;              /* what the tunnel fades to */
+--stage-bg:  #0C0C0D;              /* the stage's flat background */
 ```
 
 ### Light theme (`[data-theme="light"]` on `<html>`)
@@ -67,9 +77,13 @@ These live in one global stylesheet and are the only source of colour in the pro
 --acc-text:  #8A6A00;   /* accent text darkens: #FFC800 scores 1.40:1 here */
 --acc-text-2:#6B5200;
 --on-acc:    #0C0C0D;
---mark:      #8A6A00;   /* logo, heart and cursor ring follow the accent, denser here */
+--mark:      #8A6A00;   /* logo and footer heart follow the accent, denser here */
 --grid:      rgba(12,12,13,.05);
 --sec-idx:   .62;       /* the section number needs more opacity in light mode */
+--metal:     #A8A8A8;   /* the metal is lighter here, not inverted */
+--metal-dark:#686868;
+--fog-end:   #6A6A6A;   /* the tunnel fades to a mid grey, not the white page */
+--stage-bg:  #B8B8B8;
 ```
 
 `--acc-text`, `--mark` and `--sec-idx` all exist for the same reason: `#FFC800` does not have
@@ -80,7 +94,7 @@ different jobs:
 |---|---|---|
 | `--acc` | **Fills** — a yellow surface with `--on-acc` text on it | stays `#FFC800` |
 | `--acc-text` | **Accent text** sitting on `--ink` or `--surface` | darkens to `#8A6A00` |
-| `--mark` | The logo, footer heart and cursor ring — graphic, not text | takes `--acc-text`'s dense value |
+| `--mark` | The logo and footer heart — graphic, not text | takes `--acc-text`'s dense value |
 
 With an accent palette chosen, both `--acc-text` and `--mark` take that palette's light-theme
 value instead of the yellow's (see Accent palettes below).
@@ -111,8 +125,8 @@ the same stylesheet. A palette swaps the accent tokens and nothing else:
 | `--acc-text` | the accent as text on the page background |
 | `--acc-text-2` | that, on hover |
 | `--on-acc` | the text painted on the fill |
-| `--mark` | the logo, footer heart and cursor ring |
-| `--acc-solid` | the accent at full saturation, the same in both themes — Limonacho |
+| `--mark` | the logo and footer heart |
+| `--acc-solid` | the accent at full saturation, the same in both themes — Limonacho and the cursor |
 
 The four non-default palettes — aqua, rose, mint, violet — swap exactly these tokens. Violet is
 the exception among them: its dark value is the solid `#8B5CF6`, not a pastel, because the pastel
@@ -174,6 +188,7 @@ about, 60ch in the timeline, 22ch in the contact headline) and `text-wrap: prett
 | Lemon entrance | `.55s cubic-bezier(.22,1,.36,1)` |
 | Grid crossfade | `.35s ease` |
 | Cursor ring | opacity `.22s ease`, scale `.28s cubic-bezier(.22,1,.36,1)` |
+| Cursor hint (trailing the ring) | `.32s cubic-bezier(.22,1,.36,1)` |
 
 Required `@keyframes`: `marquee`, `lemonShake`, `dotHalo`, `bubbleIn`.
 
@@ -265,19 +280,17 @@ It is measured and snapped by `LogoStage`, since it depends on the viewport (dec
 frame over the canvas, whose sheen carries round its corners, and inside it a CSS entrance glow — hard
 on the frame's inner edge, fading inward (decision 81). A vignette that faded the grid into the metal
 was tried and dropped (decision 84), and the opening starts closed behind a CSS roller blind that a
-click lifts and leaves up (decision 86).
-The whole stage is magnetic, and only the logo inside it turns. Inside:
+click lifts and a click on the coil lowers again (decision 86).
+Only the logo inside the stage turns. Inside:
 
-- **The logo is a real 3D scene** (WebGL, TresJS): the SVG path extruded into a polished-metal
-  mark that tilts toward the cursor, spins with a drag and springs back to the front. The metal is a
-  matcap, so no light and no environment sit behind it (decision 82). Behind it a
-  deep open box recedes, its grid painted on every face and fading to the background through a fog,
-  and the camera leans a little with the pointer, so the depth shifts while the mark stays centred.
-  **The opening is cut to the stage** and divided into the stage's own seven cells, so its grid
-  lines fall on the page's at the frame; the box scales with the wheel's zoom to keep it so. A
-  neutral backlight — the theme's own background — clears the grid behind the mark. It is lazy,
-  pauses off-screen and never mounts below 900px (decision 37). It eases up into the frame on arrival
-  (decision 85). See decisions 78–85.
+- **The logo is a real 3D scene** (WebGL, TresJS): the Blender GLB rendered as a polished-metal
+  mark that tilts toward the cursor, spins with a drag and springs back to the front. The metal is
+  PBR — a `MeshStandardMaterial` reading the scene's generated environment (decision 82). Behind it
+  a deep open box recedes, its grid painted on every face and fading to the background through a
+  fog, and the camera leans a little with the pointer, so the depth shifts while the mark stays
+  centred. **The opening is cut to the stage** and divided into the stage's own seven cells, so its
+  grid lines fall on the page's at the frame; the box scales with the wheel's zoom to keep it so. It
+  is lazy, pauses off-screen and never mounts below 900px (decision 37). See decisions 78–83 and 87.
 - **The 2D mark is the failure state.** The PNG mask over `var(--mark)` at 58% of the width is
   painted only if WebGL is missing or the scene never reports ready (decisions 77, 85), so a working
   load shows the 3D alone rather than a flash of the flat logo.
@@ -695,17 +708,29 @@ Pointer devices only (`@media (hover:hover)`) and above 900px. The native cursor
 `[root], [root] * { cursor: none !important }` — it has to reach descendants because links and
 buttons bring their own `cursor:pointer`.
 
-Two `position:fixed` elements follow the mouse through `transform: translate3d(x, y, 0)`
+Three `position:fixed` elements follow the mouse through `transform: translate3d(x, y, 0)`
 updated every frame with `requestAnimationFrame`:
 
-1. **Dot** — 10×10px, `margin:-5px 0 0 -5px`, filled `var(--acc)`, radius 50%, `z-index:301`.
+1. **Dot** — 10×10px, `margin:-5px 0 0 -5px`, filled `var(--acc-solid)`, radius 50%, `z-index:301`.
    It never changes size.
-2. **Ring** — 40×40px, `margin:-20px 0 0 -20px`, `border:1.5px solid var(--mark)`, no fill,
-   `z-index:300`. At rest `opacity:0` and `scale(.55)`; over an interactive element it goes to
-   `opacity:1` and `scale(1)`.
+2. **Ring** — 40×40px, `margin:-20px 0 0 -20px`, `border:1.5px solid var(--acc-solid)`, no fill,
+   `z-index:300`. At rest `opacity:0` and `scale(.55)`; over an interactive element, or wherever a
+   hint shows, `opacity:1` and `scale(1)`.
+3. **Hint** — the same box as the ring, holding a glyph or the 360 mark, a beat behind it.
+
+The trailing is the whole trick: each element carries a slightly longer `transform` transition than
+the one before — the dot none, the ring `.28s cubic-bezier(.22,1,.36,1)`, the hint `.32s` — so the
+ring trails the dot and the hint trails the ring. All three are `--acc-solid`, not `--mark`: the
+cursor is not text, and `--mark` darkens in the light theme for legibility, which left the ring
+nearly invisible on the light metal (decision 87).
+
+**Over the hero the cursor becomes the gesture** (decision 87). The dot steps aside and the ring
+carries `↑` over the closed blind, `↓` over the coil once the blind is up, and the `360icon.svg`
+mark — 18px, masked — over the mark itself, where the drag turns it. The turn hint is confined to
+the opening the shutter occupies, so it does not light on the frame's band.
 
 "Interactive element" resolves through `document.elementFromPoint(x, y)` and
-`closest('a,button,[role="button"],input,select,textarea,[data-magnetic]')`.
+`closest('a,button,[role="button"],input,select,textarea,[data-magnetic],[data-interactive]')`.
 
 ### 3.14 Magnetic hover
 

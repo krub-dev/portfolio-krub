@@ -35,7 +35,8 @@
     "error": "That did not go through. Write to me at {email} and I'll answer.",
     "required": "Required",
     "badEmail": "Check the address",
-    "shortMessage": "A little more, please"
+    "shortMessage": "A little more, please",
+    "captcha": "The verification expired. Please try again."
   },
   "stack": {
     "g1": "Languages",
