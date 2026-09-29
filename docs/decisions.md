@@ -585,13 +585,23 @@ The About photo sat still in its column while the timeline ran past it, and the 
 text column instead — so on a wide screen the two halves drifted apart and the button belonged to the
 wrong side.
 
-- **The CV moved under the photo, at the photo's own width.** The column closes with one block now:
-  photo, then button.
+- **The CV moved under the photo, at the photo's own width**, and became the section's one call to
+  action: a solid accent fill, and just "Résumé/CV" / "Currículum/CV" — the "(PDF)" went, because the
+  file being a PDF is what the download arrow already says.
 - **That column is `position: sticky`** at `top: calc(var(--navbar-h, 88px) + 20px)`. It rides down
   while the timeline scrolls past and stops with its foot just above the section's bottom, which is the
   section's own padding — no second value to keep in step with it.
 - **No travel on a phone.** The photo lands at the end of the section there, so there is nothing to
   ride past; the order is photo, badge, CV.
+
+### 96. The modal backdrop is a flat scrim, not a blur
+**Status:** active
+
+The project modal's backdrop was `backdrop-filter: blur(10px)` over an 82% ink. The blur turned
+whatever was behind it into soft shapes that read as smudges of their own, competing with the panel,
+and it made the backdrop a backdrop root — the property decision 48 ran into with the navbar's settings
+panel. It is one flat layer of ink at 90% now: the only job a backdrop has is to push the page back,
+and it does that without drawing the eye.
 
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62

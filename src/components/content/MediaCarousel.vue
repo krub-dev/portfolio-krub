@@ -48,11 +48,12 @@ watch(() => props.slug, () => (index.value = 0))
 const total = computed(() => props.images.length || props.slides)
 
 const carousel = ref(null)
-const dragging = ref(false)
+const dragging = ref(false) // the class: true only once the drag is claimed
 const dragX = ref(0)
 let startX = 0
-let travelled = 0
+let startY = 0
 let pointerId = null
+let claimed = false
 
 const trackStyle = computed(() => {
   const base = `-${index.value * 100}%`
@@ -67,20 +68,35 @@ const trackStyle = computed(() => {
 
 function onPointerDown(event) {
   if (total.value < 2) return
-  dragging.value = true
-  dragX.value = 0
-  travelled = 0
-  startX = event.clientX
   pointerId = event.pointerId
+  startX = event.clientX
+  startY = event.clientY
+  claimed = false
+  dragX.value = 0
 }
 
 function onPointerMove(event) {
   if (pointerId === null || pointerId !== event.pointerId) return
   const delta = event.clientX - startX
-  travelled = Math.max(travelled, Math.abs(delta))
 
-  if (!carousel.value?.hasPointerCapture(event.pointerId)) {
-    if (travelled <= DRAG_SLOP) return
+  if (!claimed) {
+    /*
+      A finger has to prove the gesture is horizontal before it is claimed: until
+      then it belongs to the panel's scroll. Moving the track on any sideways
+      pixel is what made it dance — a diagonal swipe nudged the slide, the browser
+      took the scroll, and the slide snapped back. The rule is the About tabs':
+      past a dead zone, and longer sideways than up or down. A mouse has no
+      gesture of its own, so its own slop is enough.
+    */
+    const touch = event.pointerType === 'touch'
+    const dy = event.clientY - startY
+    const sideways = touch
+      ? Math.abs(delta) > 12 && Math.abs(delta) > Math.abs(dy) * 1.5
+      : Math.abs(delta) > DRAG_SLOP
+    if (!sideways) return
+
+    claimed = true
+    dragging.value = true
     carousel.value?.setPointerCapture(event.pointerId)
   }
 
@@ -90,6 +106,9 @@ function onPointerMove(event) {
 function onPointerUp(event) {
   if (pointerId === null || pointerId !== event.pointerId) return
   pointerId = null
+  // A gesture that never proved itself was a scroll, not a drag.
+  if (!claimed) return
+  claimed = false
   dragging.value = false
 
   if (carousel.value?.hasPointerCapture(event.pointerId)) {
@@ -117,7 +136,13 @@ function onPointerUp(event) {
     >
       <div class="track" :class="{ dragging }" :style="trackStyle">
         <div v-for="n in total" :key="n" class="slide">
-          <img v-if="images.length" class="image" :src="images[n - 1]" :alt="name" />
+          <img
+            v-if="images.length"
+            class="image"
+            :src="images[n - 1]"
+            :alt="name"
+            draggable="false"
+          />
           <span v-else class="shot-label">{{ shotLabel }}</span>
         </div>
       </div>
@@ -167,6 +192,9 @@ function onPointerUp(event) {
   touch-action: pan-y;
   cursor: grab;
   user-select: none;
+  /* No long-press callout on a finger: this is a surface to drag, not a picture
+     to save. */
+  -webkit-touch-callout: none;
 }
 
 .carousel.dragging {

@@ -48,7 +48,7 @@
     "g4": "Tools & AI"
   },
   "actions": {
-    "cv": "Download CV (PDF)",
+    "cv": "Résumé/CV",
     "talk": "Let's talk ↗",
     "readMore": "Read more",
     "readLess": "Read less",

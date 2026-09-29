@@ -339,11 +339,12 @@ current period, `--fg-3` if it is past. Right: title 18px weight 600 + descripti
 `--fg-2` at 60ch. On mobile it collapses to one column with `gap:8px`.
 
 Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`. **No caption.**
-**The "Download CV (PDF)" button sits under it, at the photo's own width**, so the column closes with
-one block, and **on a wide screen that whole column travels with the scroll**: `position:sticky` at
-`top: calc(var(--navbar-h, 88px) + 20px)`, riding down while the timeline runs past and stopping with
-its foot just above the section's bottom (the section's own padding). On mobile there is no travel —
-the photo lands at the end of the section — and the order is photo, badge, CV.
+**The "Résumé/CV" button sits under it, at the photo's own width**, solid in the accent because it is
+the section's one call to action, so the column closes with one block, and **on a wide screen that
+whole column travels with the scroll**: `position:sticky` at `top: calc(var(--navbar-h, 88px) + 20px)`,
+riding down while the timeline runs past and stopping with its foot just above the section's bottom
+(the section's own padding). On mobile there is no travel — the photo lands at the end of the section —
+and the order is photo, badge, CV.
 
 ### 3.6 Projects
 
@@ -426,8 +427,9 @@ on instead, with the same yellow border, and it moves as you scroll the rail.
 
 ### 3.7 Project detail modal
 
-Opens on card click. Backdrop `color-mix(in srgb, var(--ink) 82%, transparent)` with
-`backdrop-filter: blur(10px)`, `z-index:250`, vertical scroll,
+Opens on card click. Backdrop a flat `color-mix(in srgb, var(--ink) 90%, transparent)` — no
+`backdrop-filter`, which turned the page behind into smudges and made the backdrop a backdrop root
+(decision 48) — `z-index:250`, vertical scroll,
 `padding: clamp(12px,4vw,48px)`. Closes on backdrop click (only when the click is on the
 backdrop itself), on the ✕ button, and on the Escape key. While open,
 `body { overflow: hidden }` and focus is trapped inside the panel. The backdrop carries

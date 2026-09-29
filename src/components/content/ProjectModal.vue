@@ -131,8 +131,13 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   position: fixed;
   inset: 0;
   z-index: 250;
-  background: color-mix(in srgb, var(--ink) 82%, transparent);
-  backdrop-filter: blur(10px);
+  /*
+    A flat scrim, no blur. The blur turned the page behind into smudges that read
+    as shapes of their own, and it made this element a backdrop root — the thing
+    decision 48 ran into. One uniform layer of ink does the only job a backdrop
+    has, pushing the page back, without drawing the eye to it.
+  */
+  background: color-mix(in srgb, var(--ink) 90%, transparent);
   display: flex;
   align-items: flex-start;
   justify-content: center;

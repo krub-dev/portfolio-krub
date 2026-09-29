@@ -154,7 +154,7 @@ function onTouchEnd(event) {
 
         <BaseButton
           v-if="config.showCv"
-          variant="outline"
+          variant="solid"
           size="md"
           magnetic
           external
