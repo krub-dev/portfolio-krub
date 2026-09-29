@@ -263,67 +263,18 @@ test('the grid cell follows the hero grid once the page scrolls', async ({ page,
     .toBe('translate(864px, 354px)')
 })
 
-test('the cursor and the grid cell go when the pointer sits still', async ({ page, isMobile }) => {
+test('the cursor stays when the pointer sits still', async ({ page, isMobile }) => {
   test.skip(isMobile, 'there is no cursor below 900px')
 
   await openSite(page)
-  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
-
   const dot = page.locator('.cursor-dot')
-  const cell = page.locator('.grid-cell')
 
-  await page.mouse.move(1000, 400)
+  await page.mouse.move(300, 400)
   await expect(dot).not.toHaveClass(/idle/)
-  await expect(cell).not.toHaveClass(/idle/)
 
-  // The idle timeout is 2s, and it is deliberately not instant.
-  await expect(dot).toHaveClass(/idle/, { timeout: 4000 })
-  await expect(cell).toHaveClass(/idle/, { timeout: 4000 })
-
-  // And back, on the next move.
-  await page.mouse.move(900, 300)
+  // It used to fade out after two seconds of stillness. It does not any more.
+  await page.waitForTimeout(2600)
   await expect(dot).not.toHaveClass(/idle/)
-  await expect(cell).not.toHaveClass(/idle/)
-})
-
-test('a scroll counts as movement, so the cursor does not go while the page moves', async ({ page, isMobile }) => {
-  test.skip(isMobile, 'there is no cursor below 900px')
-
-  await openSite(page)
-  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
-  const cell = page.locator('.grid-cell')
-
-  await page.mouse.move(900, 400)
-
-  /*
-    Scrolled repeatedly rather than once. A single scroll early on is racy under
-    a loaded parallel run: if the page is slow to process it, the idle timer can
-    fire first and this goes red for the wrong reason. The last scroll lands just
-    before the assertion, so the timer is freshly restarted; without counting the
-    scroll at all, the cell is gone by 2s and the assertion sees it idle.
-  */
-  await page.waitForTimeout(1200)
-  for (let i = 0; i < 6; i += 1) {
-    await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), 100 + i * 10)
-    await page.waitForTimeout(200)
-  }
-
-  await expect(cell).not.toHaveClass(/idle/)
-})
-
-test('a scroll brings the cursor back after it has gone', async ({ page, isMobile }) => {
-  test.skip(isMobile, 'there is no cursor below 900px')
-
-  await openSite(page)
-  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
-  const cell = page.locator('.grid-cell')
-
-  await page.mouse.move(900, 400)
-  await expect(cell).toHaveClass(/idle/, { timeout: 4000 })
-
-  // No mousemove: the wheel alone is enough.
-  await page.evaluate(() => window.scrollTo({ top: 100, behavior: 'instant' }))
-  await expect(cell).not.toHaveClass(/idle/)
 })
 
 test('on touch the grid cell lights where you tap, and a scroll clears it', async ({ page, isMobile }) => {

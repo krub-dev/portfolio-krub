@@ -707,8 +707,7 @@ fixed element of its own, not a child of either grid, and it snaps to whichever 
 page coordinates while the absolute hero layer is visible, the viewport once the fixed global layer
 takes over, so a scroll does not take it off the lines. It takes that layer's downward mask over the
 same box the grid covers, so the light never outlives the grid it belongs to. It rides the app's
-single rAF loop, and the cursor and the cell both go after two seconds without a `mousemove`. See
-decision 66.
+single rAF loop. See decision 66.
 
 ### 3.13 Custom cursor
 
@@ -736,7 +735,12 @@ nearly invisible on the light metal (decision 87).
 **Over the hero the cursor becomes the gesture** (decision 87). The dot steps aside and the ring
 carries `↑` over the closed blind, `↓` over the coil once the blind is up, and the `360icon.svg`
 mark — 18px, masked — over the mark itself, where the drag turns it. The turn hint is confined to
-the opening the shutter occupies, so it does not light on the frame's band.
+the opening the shutter occupies, so it does not light on the frame's band, and it waits for the
+blind to finish its travel (`settled`): until then the arrow is what shows over the opening, because
+the slats are still what is there.
+
+The cursor no longer fades while the pointer sits still; it is hidden only until the first move
+(decision 87).
 
 "Interactive element" resolves through `document.elementFromPoint(x, y)` and
 `closest('a,button,[role="button"],input,select,textarea,[data-magnetic],[data-interactive]')`.

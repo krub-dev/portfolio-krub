@@ -380,6 +380,14 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
   12px band is not part of the gesture — so it does not light on the frame.
 - **The ring trails the dot, and the hint trails the ring.** Each element carries a slightly longer
   `transform` transition than the one before it (0.28s, then 0.32s): the same chase, one link further.
+- **And it waits for the blind to settle.** The mark is only offered once the slats have finished their
+  travel (`settled`, reported on the element and read off it): while they are still crossing the opening
+  the arrow is the honest hint, and the 360 used to appear over a half-raised blind.
+- **The two-second idle fade is gone.** The cursor and the grid cell used to disappear after two seconds
+  without a `mousemove`, `active` going false until the next one. It never read as deliberate enough to
+  keep, so it was dropped and the cursor now stays put; `active` survives as "the pointer has been seen
+  at least once", which is what keeps anything from painting at the parked position before the first
+  move.
 - **The colour is `--acc-solid`, not `--mark`.** The cursor is not text, and `--mark` darkens in the
   light theme for legibility, which left the ring nearly invisible on the light metal.
 - **The scene is gated under `navigator.webdriver`** so the e2e suite never holds a WebGL context; the

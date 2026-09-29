@@ -354,7 +354,7 @@ grid scrolls and a cell inside it would drift off the cursor. Subscribes to `use
 with `Math.floor` to whichever layer is visible — page coordinates for the hero layer, the viewport
 for the fixed one — so a scroll keeps it on the lines instead of taking it away. The mask is applied
 over the same box the grid covers (`bottom: var(--footer-h)`), or it fades later than the lines behind
-it. It goes with the cursor after two seconds without a `mousemove`. On touch, where there is no
+it. It hides only until the first move, like the cursor. On touch, where there is no
 cursor, it lights on a tap (told from a scroll by the finger's travel) and stays until a scroll clears
 it; the pointer subscription never happens there.
 
@@ -375,7 +375,7 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener |
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
 | `useMagnetic()` | registers the magnetic hover loop for `[data-magnetic]` |
-| `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) and `active`, which goes false after two seconds without a `mousemove` or a scroll, and comes back on either |
+| `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) and `active`, which is true once the pointer has been seen at least once — it used to go false after two seconds of stillness, and no longer does, so the cursor stays put |
 | `useFooterHeight(el)` | thin wrapper that publishes the footer's `--footer-h` |
 | `useElementHeight(el, prop)` | the mechanism behind it, shared with the navbar's `--navbar-h`. Observes the border box and re-reads on a `visualViewport` resize, because the iOS toolbar changes the footer's padding and a ResizeObserver can miss that |
 | `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it, and it is true from the start on a route with no hero (the 404) |

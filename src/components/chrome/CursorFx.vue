@@ -50,8 +50,9 @@ usePointer((pointer) => {
   if (hintBox.value) hintBox.value.style.transform = move
 
   /*
-    Gone, not frozen, while the pointer is outside the page. Every element hides
-    together through one class, and only when the state actually changes.
+    Hidden until the pointer has been seen at least once, so nothing is painted
+    at its parked position before the first move. Every element hides together
+    through one class, and only when the state actually changes.
   */
   const away = !pointer.active
   if (away !== idle) {
@@ -73,25 +74,29 @@ usePointer((pointer) => {
     Over the blind or the mark the cursor becomes the hint and nothing else: the
     dot steps aside and a glyph stands in — up while the blind is closed, down
     once the coil is left to press, and the turn mark once the blind is up. The
-    turn one is confined to the opening the shutter occupies, so the frame's band
-    around it is not part of the gesture; the coil is checked before the stage
-    because it lives inside it.
+    turn one waits for the blind to settle: while the slats are still crossing the
+    opening they are what is under the cursor, so the arrow is the honest hint
+    until they have finished. Both are confined to the opening the shutter
+    occupies, so the frame's band around it is not part of the gesture; the coil
+    is checked before the stage because it lives inside it.
   */
-  const opening = el?.closest('.stage')?.querySelector('.shutter')?.getBoundingClientRect()
+  const shutter = el?.closest('.stage')?.querySelector('.shutter')
+  const box = shutter?.getBoundingClientRect()
   const overOpening =
-    opening &&
-    pointer.x > opening.left &&
-    pointer.x < opening.right &&
-    pointer.y > opening.top &&
-    pointer.y < opening.bottom
+    box &&
+    pointer.x > box.left &&
+    pointer.x < box.right &&
+    pointer.y > box.top &&
+    pointer.y < box.bottom
 
-  const hint = el?.closest('.shutter:not(.open)')
-    ? 'up'
-    : el?.closest('.shutter.open .roll')
-      ? 'down'
-      : overOpening
-        ? 'rotate'
-        : null
+  let hint = null
+  if (el?.closest('.shutter:not(.open)')) {
+    hint = 'up' // the closed blind
+  } else if (el?.closest('.shutter.open .roll')) {
+    hint = 'down' // the coil, the one part of the open blind still interactive
+  } else if (overOpening) {
+    hint = shutter.classList.contains('settled') ? 'rotate' : 'up'
+  }
 
   /*
     The ring opens over anything clickable, and over the hint too: the mark is a
