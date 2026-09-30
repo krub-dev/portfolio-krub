@@ -2,13 +2,19 @@
 /*
   DEV SCAFFOLDING — not part of the site.
 
-  A live specimen sheet: the design tokens, and every base component in all its
-  variants. Switch theme and language to check both. Compare against
-  Design System.dc.html.
+  The design system on one page: the foundations (colour, type, shape, motion) and
+  the components built on them, live. It is what to open when a token or a base
+  component changes, and where a change is checked in both themes and both
+  languages.
 
-  This is the one file exempt from the "no literal strings in a template" rule,
-  because the strings *are* the subject: it is a spec sheet, not a page. It
-  never ships — the route is dev-only and this file is deleted before launch.
+  Two rules, because it is a specimen sheet and not a page:
+
+  - The strings here are the *subject*, so this is the one file exempt from the
+    "no literals in a template" rule.
+  - Nothing is a copy of a component. Every specimen is the real component with
+    real data, so a specimen cannot look right while the site is broken.
+
+  It never ships: the route is registered under `import.meta.env.DEV`.
 */
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -26,495 +32,482 @@ import MediaCarousel from '../components/content/MediaCarousel.vue'
 import ProjectCard from '../components/content/ProjectCard.vue'
 import SpecList from '../components/content/SpecList.vue'
 import TestimonialCard from '../components/content/TestimonialCard.vue'
+import LemonPet from '../components/chrome/LemonPet.vue'
 import { useLang } from '../composables/useLang'
 import { useTheme } from '../composables/useTheme'
-import { formatPeriod } from '../utils/format'
-import {
-  config,
-  copy,
-  education,
-  email,
-  experience,
-  projects,
-  socials,
-  stack,
-  testimonials,
-} from '../data'
+import { cvPath } from '../data'
 
 const { theme, toggle: toggleTheme } = useTheme()
 const { lang, toggle: toggleLang } = useLang()
 const { t } = useI18n()
 
+// The rail. One entry per section, in page order.
+const SECTIONS = [
+  ['colour', 'Colour'],
+  ['type', 'Type'],
+  ['shape', 'Shape'],
+  ['motion', 'Motion'],
+  ['buttons', 'Buttons'],
+  ['blocks', 'Blocks'],
+  ['cards', 'Cards'],
+  ['bits', 'Small pieces'],
+]
+
 /*
-  This is the pattern every section component will use: pick the half of a data
-  entry that matches the current language. `lang` is a ref, so the computed
-  re-runs on its own when the language toggle is pressed.
+  Colour, grouped by what it is for rather than listed flat: a flat list is how
+  a token nobody uses survives for a year. Every value is read back from the
+  browser, so a label cannot drift from tokens.css.
 */
-const hero = computed(() => copy.hero[lang.value])
-const marquee = computed(() => copy.marquee[lang.value])
-
-const period = (entry) => formatPeriod(entry, t('time.now'))
-
-const collections = computed(() => [
-  { name: 'projects', count: projects.length, sample: projects[0][lang.value].name },
-  { name: 'experience', count: experience.length, sample: experience[0][lang.value].title },
-  { name: 'education', count: education.length, sample: education[0][lang.value].title },
-  { name: 'stack', count: stack.reduce((n, g) => n + g.items.length, 0), sample: `${stack.length} groups` },
-  { name: 'socials', count: socials.length, sample: socials.map((s) => s.name).join(', ') },
+const COLOUR = [
   {
-    name: 'testimonials',
-    count: testimonials.length,
-    sample: `${config.showTestimonials ? 'section on' : 'section off'} · ${testimonials[0][lang.value].quote}`,
+    group: 'Surfaces',
+    tokens: [
+      ['--ink', 'the page'],
+      ['--surface', 'cards, panels'],
+      ['--surface-2', 'tiles, chips'],
+      ['--line', 'every border'],
+    ],
   },
-])
+  {
+    group: 'Text',
+    tokens: [
+      ['--fg', 'primary'],
+      ['--fg-2', 'secondary'],
+      ['--fg-3', 'tertiary, mono labels'],
+    ],
+  },
+  {
+    group: 'Accent',
+    tokens: [
+      ['--acc', 'fills only'],
+      ['--acc-2', 'fill on hover'],
+      ['--acc-text', 'accent as text'],
+      ['--acc-text-2', 'text on hover'],
+      ['--acc-solid', 'full saturation: cursor, Limonacho'],
+      ['--on-acc', 'text on a fill'],
+      ['--mark', 'logo, footer heart'],
+    ],
+  },
+  {
+    group: 'Element-specific',
+    tokens: [
+      ['--specular', 'a highlight on metal'],
+      ['--cast', 'a shadow'],
+      ['--metal', 'frame, shutter'],
+      ['--metal-dark', 'its dark side'],
+      ['--fog-end', 'where the tunnel fades'],
+      ['--stage-bg', 'behind the scene'],
+      ['--grid', 'background grid lines'],
+    ],
+  },
+]
 
-// Live state for the interactive components on this page.
+// The scale, with the real sizes. One sample line for all of them, so the sizes
+// are the only thing that changes down the column.
+const TYPE = [
+  ['Display', 'clamp(38px, 6.4vw, 82px)', 'font: 700 clamp(38px,6.4vw,82px) var(--font-sans); letter-spacing:-.04em; line-height:.98'],
+  ['Lead', 'clamp(18px, 2vw, 24px)', 'font: 400 clamp(18px,2vw,24px) var(--font-sans); line-height:1.5'],
+  ['Body', '17px', 'font: 400 17px var(--font-sans); line-height:1.65'],
+  ['Body, quiet', '17px, --fg-2', 'font: 400 17px var(--font-sans); line-height:1.65; color:var(--fg-2)'],
+  ['Section title', 'mono clamp(22px, 2.6vw, 30px)', 'font: 500 clamp(22px,2.6vw,30px) var(--font-mono)'],
+  ['Label', 'mono 11px, uppercase', 'font: 400 11px var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--fg-3)'],
+]
+
+const RADII = [
+  ['8px', 'chips, labels'],
+  ['10px', 'buttons, tiles, the menu button'],
+  ['14px', 'the speech bubble'],
+  ['16px', 'the navbar capsule'],
+  ['18px', 'cards, images'],
+  ['22px', 'panels, dialogs'],
+]
+
+/*
+  The project uses almost no shadows on purpose: elevation is a 1px `--line`
+  border, not a cast. These are the two that exist, and the second is the lemon's
+  outline, drawn with a box-shadow because it has to follow his odd silhouette.
+*/
+const SHADOWS = [
+  ['Mobile menu', '0 24px 60px rgba(0, 0, 0, 0.45)'],
+  ['Limonacho', '0 0 0 1.2px #2c7a36'],
+]
+
+const MOTION = [
+  ['--ease', 'cubic-bezier(.22, 1, .36, 1)', 'the arrive-and-settle curve: pagers, panels, the capsule'],
+  ['0.16s ease', 'colour only', 'hover: buttons, links, borders'],
+  ['0.4s', 'transform', 'the media track, the dot pill'],
+  ['2.6s', 'dotHalo', 'the availability ring: the core is fixed, the ring pulses'],
+  ['26s linear', 'marquee', 'the band under the hero'],
+]
+
+// Live state for the specimens that need it.
 const tab = ref('exp')
 const tabOptions = computed(() => [
   { value: 'exp', label: t('tab.exp') },
   { value: 'edu', label: t('tab.edu') },
 ])
-const timeline = computed(() => (tab.value === 'exp' ? experience : education))
 
-// Live state for the specimens that need it: the dialog, and the first entry of
-// two collections so the content components have something real to paint.
+/*
+  Placeholders, never the real content. A specimen sheet is about the shape of a
+  component, and the copy, the photos and the quotes all change: pointing these
+  specimens at `src/data` would rot the sheet the first time a sentence was
+  reworded, and would put content in a page whose job is the design.
+*/
+const SAMPLE = {
+  name: 'Proyecto',
+  tag: 'CATEGORÍA',
+  summary: 'Una o dos líneas sobre el proyecto, para ver cómo respira el resumen en la tarjeta.',
+  shotLabel: 'SHOT · PROYECTO',
+  role: 'Rol',
+  year: '2026',
+  stack: ['Tecnología', 'Librería', 'Herramienta'],
+  quote:
+    'Una reseña de ejemplo, lo bastante larga como para que el texto no quepa en las cuatro líneas a las que se recorta la tarjeta, y aparezca el leer más, que es justo lo que se está enseñando aquí. Sigue y sigue, porque el punto es ver cómo se comporta el recorte cuando el texto no cabe.',
+  author: 'Nombre Apellido',
+  authorRole: 'Empresa',
+}
+
 const dialogOpen = ref(false)
-const firstProject = computed(() => ({ ...projects[0], ...projects[0][lang.value] }))
-const firstTestimonial = computed(() => ({ ...testimonials[0], ...testimonials[0][lang.value] }))
+// The quote's read more, live.
+const quoteOpen = ref(false)
 
-// Read back what the browser actually computed for each custom property, so
-// the swatch labels cannot drift from tokens.css.
+// Two links, one per icon the map carries, with names that are not the site's.
+const SAMPLE_SOCIALS = [
+  { name: 'Red', href: '#', icon: 'linkedin' },
+  { name: 'Red', href: '#', icon: 'github' },
+]
+
+// Two timeline rows, so the row and the border between rows are both visible.
+const SAMPLE_TIMELINE = [
+  {
+    period: '2024 - 2026',
+    current: true,
+    title: 'Puesto actual',
+    body: 'Una línea sobre el puesto, para ver cómo respira el texto en la fila.',
+  },
+  {
+    period: '2020 - 2024',
+    current: false,
+    title: 'Puesto anterior',
+    body: 'Otra línea, para ver dos filas seguidas y el borde entre ellas.',
+  },
+]
+
+// Three tiles, one per kind: a plain mark, and one of the dark ones that gets
+// inverted in the dark theme.
+const SAMPLE_STACK = [
+  { name: 'Uno', icon: '/icons/java/java-original.svg', invertOnDark: false },
+  { name: 'Dos', icon: '/icons/c/c-original.svg', invertOnDark: false },
+  { name: 'Tres', icon: '/icons/javascript/javascript-original.svg', invertOnDark: false },
+]
+
+// Every token value, read back from the browser so the labels are the truth.
 const resolved = ref({})
-
-const COLOR_TOKENS = [
-  ['--ink', 'page background'],
-  ['--surface', 'cards and panels'],
-  ['--surface-2', 'icon tiles, chips'],
-  ['--line', 'every border'],
-  ['--fg', 'primary text'],
-  ['--fg-2', 'secondary text'],
-  ['--fg-3', 'tertiary text, mono labels'],
-  ['--acc', 'brand yellow — fills only'],
-  ['--acc-2', 'yellow on hover'],
-  ['--acc-text', 'accent text on --ink'],
-  ['--acc-text-2', 'hover of the above'],
-  ['--acc-solid', 'the accent at full saturation: cursor, Limonacho'],
-  ['--on-acc', 'text on yellow'],
-  ['--mark', 'logo and footer heart'],
-  ['--grid', 'background grid lines'],
-  ['--specular', 'specular highlight on metal (white in both themes)'],
-  ['--cast', 'shadow (dark in both themes)'],
-  ['--metal', 'brushed metal: frame and shutter'],
-  ['--metal-dark', 'its dark side'],
-  ['--fog-end', 'where the tunnel fades to'],
-  ['--stage-bg', 'the hero stage behind the scene'],
-]
-
-// The switches in src/data/config.js, read live so the page cannot drift.
-const CONFIG_FLAGS = Object.entries(config).map(([name, value]) => [
-  name,
-  typeof value === 'boolean' ? (value ? 'on' : 'off') : String(value),
-])
-
-// One entry per composable, and what it exposes. Kept by hand, from
-// docs/components.md.
-const COMPOSABLES = [
-  ['useTheme()', 'theme, toggle(); writes data-theme and persists'],
-  ['useLang()', 'lang, toggle(); persists in localStorage'],
-  ['useAccent()', 'accent, set(id); writes data-accent and persists'],
-  ['useScrollSpy(ids)', 'reactive activeId'],
-  ['useScroll()', 'y, progress, atEnd — one listener for the whole app'],
-  ['useFocusTrap(el, active)', 'keeps focus inside an open dialog'],
-  ['useMagnetic()', 'the magnetic hover loop for [data-magnetic]'],
-  ['usePointer()', 'shared pointer position, one rAF for everything that follows it'],
-  ['useBodyScrollLock(active)', 'holds the page still under a dialog; isScrollLocked()'],
-  ['useContactForm(labels)', 'the contact form: fields, errors, canSend, send()'],
-  ['useCv()', 'warmCv(href): fetches pdf.js and the PDF on intent'],
-  ['useLemonVoice()', 'say(text) / hush() for whatever Limonacho says'],
-  ['usePastHero()', 'true once the hero is behind you'],
-  ['useFooterHeight(el)', 'publishes --footer-h'],
-]
-
-const TYPE_SCALE = [
-  ['Hero headline', 'clamp(38px, 6.4vw, 82px)', 'font: 700 clamp(38px,6.4vw,82px) var(--font-sans); letter-spacing:-.04em; line-height:.98'],
-  ['Contact headline', 'clamp(26px, 4vw, 52px)', 'font: 700 clamp(26px,4vw,52px) var(--font-sans); letter-spacing:-.03em; line-height:1.06'],
-  ['Section title', 'mono clamp(22px, 2.6vw, 30px)', 'font: 500 clamp(22px,2.6vw,30px) var(--font-mono)'],
-  ['Section number', 'mono clamp(48px, 6vw, 74px)', 'font: 700 clamp(48px,6vw,74px) var(--font-mono); letter-spacing:-.05em; color:var(--acc); opacity:var(--sec-idx)'],
-  ['Lead paragraph', 'clamp(18px, 2vw, 24px)', 'font: 400 clamp(18px,2vw,24px) var(--font-sans); line-height:1.5'],
-  ['Body paragraph', '17px / --fg-2', 'font: 400 17px var(--font-sans); line-height:1.65; color:var(--fg-2)'],
-  ['Card title', '19px / 600', 'font: 600 19px var(--font-sans)'],
-  ['Card body', '15px', 'font: 400 15px var(--font-sans); line-height:1.55'],
-  ['Small mono label', '10-11px uppercase', 'font: 400 11px var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--fg-3)'],
-]
-
-const RADII = [
-  ['8px', 'chips, labels'],
-  ['10px', 'icon tiles, square buttons'],
-  ['14px', 'lemon bubble'],
-  ['18px', 'cards, images'],
-  ['22px', 'panels, modal'],
-  ['999px', 'pill buttons'],
-]
-
-// Interface strings only — the prose now lives in src/data/copy.js.
-const SAMPLE_KEYS = [
-  'nav.projects',
-  'tab.exp',
-  'actions.cv',
-  'time.now',
-  'footer.place',
-  'modal.role',
-  'a11y.toggleTheme',
-]
-
-const SHADOWS = [
-  ['Compact navbar', '0 14px 40px rgba(0,0,0,.28)'],
-  ['Lemon bubble', '0 14px 34px rgba(0,0,0,.32)'],
-  ['Mobile menu', '0 24px 60px rgba(0,0,0,.45)'],
-]
+const TOKENS = COLOUR.flatMap((g) => g.tokens.map(([token]) => token))
 
 function readTokens() {
   const styles = getComputedStyle(document.documentElement)
   const next = {}
-  for (const [token] of COLOR_TOKENS) next[token] = styles.getPropertyValue(token).trim()
-  next['--sec-idx'] = styles.getPropertyValue('--sec-idx').trim()
+  for (const token of TOKENS) next[token] = styles.getPropertyValue(token).trim()
   resolved.value = next
 }
 
-// The swatch labels show the computed values, so they have to be re-read after
-// the attribute on <html> changes. nextTick waits for the DOM write to land.
+// The values change with the theme, so they are re-read after the attribute on
+// <html> lands.
 watch(theme, () => nextTick(readTokens))
-
 onMounted(readTokens)
 </script>
 
 <template>
-  <main class="preview">
-    <header class="head">
-      <div>
-        <p class="eyebrow">Design system · the site's own sheet</p>
-        <h1 class="title">krub.dev / design system</h1>
-      </div>
-      <div class="controls">
+  <main class="sheet">
+    <nav class="rail" aria-label="Sections of the sheet">
+      <p class="rail-label">Design system</p>
+      <a v-for="[id, label] in SECTIONS" :key="id" class="rail-link" :href="`#${id}`">{{ label }}</a>
+
+      <div class="rail-controls">
         <button class="toggle" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
-          {{ theme === 'dark' ? 'Switch to light' : 'Switch to dark' }}
+          {{ theme === 'dark' ? 'Light' : 'Dark' }}
         </button>
         <button class="toggle" type="button" :aria-label="t('a11y.toggleLang')" @click="toggleLang">
-          {{ lang.toUpperCase() }} / {{ lang === 'en' ? 'ES' : 'EN' }}
+          {{ lang === 'en' ? 'ES' : 'EN' }}
         </button>
       </div>
-    </header>
+    </nav>
 
-    <p class="note">
-      Dev-only: this route is registered under <code>import.meta.env.DEV</code> and never ships. The
-      chrome around it (navbar, footer, cursor, Limonacho) is the real one — this is a route like any
-      other — so the appearance control in the bar switches the accent here too.
-    </p>
+    <div class="content">
+      <header class="intro">
+        <p class="eyebrow">krub.dev · dev only</p>
+        <h1 class="title">Design system</h1>
+        <p class="lead">
+          One token file drives two themes and six accents, and no component keeps a colour or a
+          string of its own. Everything below is the real thing: switch the theme and the language
+          and watch it follow.
+        </p>
+      </header>
 
-    <section class="block">
-      <h2 class="h2">Base components</h2>
-
-      <p class="note"><code>BaseButton</code> — variant × shape × size, plus mono.</p>
-      <div class="specimens">
-        <BaseButton variant="solid" size="lg">{{ t('actions.talk') }}</BaseButton>
-        <BaseButton variant="outline" size="md" mono>{{ t('actions.projects') }}</BaseButton>
-        <BaseButton variant="outline" size="md">{{ t('actions.cv') }}</BaseButton>
-        <BaseButton variant="solid" shape="square" size="sm">{{ t('actions.talk') }}</BaseButton>
-        <BaseButton variant="outline" shape="square" size="sm" mono>{{ t('tab.edu') }}</BaseButton>
-        <BaseButton variant="solid" size="lg" :href="`mailto:${email}`">{{ t('actions.talk') }}</BaseButton>
-      </div>
-      <p class="note">
-        The last one has <code>href</code>, so it rendered as an
-        <code>&lt;a&gt;</code> — hover it and check the status bar. The rest are
-        <code>&lt;button&gt;</code>.
-      </p>
-
-      <p class="note"><code>SectionHeading</code> — with index, with count, and bare.</p>
-      <div class="specimens headings">
-        <SectionHeading index="00" :title="t('section.me')" />
-        <SectionHeading index="01" :title="t('section.projects')" :count="projects.length" />
-        <SectionHeading :title="t('section.contact')" />
-      </div>
-
-      <p class="note"><code>TabSwitch</code> + <code>TimelineItem</code> — live, click the tabs.</p>
-      <TabSwitch v-model="tab" :options="tabOptions" panel-id="preview-tabs" />
-      <div class="timeline">
-        <TimelineItem
-          v-for="(entry, i) in timeline"
-          :key="entry.from + entry[lang].title"
-          :period="period(entry)"
-          :current="entry.current"
-          :title="entry[lang].title"
-          :body="entry[lang].body"
-          :is-last="i === timeline.length - 1"
-        />
-      </div>
-
-      <p class="note"><code>StackGroup</code> → <code>TechIcon</code> — the invert-on-dark ones are in Backend, Frontend and Tools, and GSAP is the wordmark.</p>
-      <div class="stack-grid">
-        <StackGroup
-          v-for="(g, i) in stack"
-          :key="g.labelKey"
-          :label="t(g.labelKey)"
-          :items="g.items"
-          :index="i"
-          :total="stack.length"
-        />
-      </div>
-
-      <p class="note"><code>SocialLink</code>, <code>AvailabilityBadge</code>, <code>SpeechBubble</code>.</p>
-      <div class="specimens">
-        <SocialLink v-for="s in socials" :key="s.name" v-bind="s" />
-      </div>
-      <div class="specimens">
-        <AvailabilityBadge :label="copy.hero[lang].badge" />
-      </div>
-      <div class="specimens">
-        <SpeechBubble :text="lang === 'en' ? `Welcome! I'm Limonacho` : '¡Bienvenido! Soy Limonacho'" />
-      </div>
-
-      <p class="note">
-        <code>BaseModal</code> — the shell every dialog uses: backdrop, panel, scroll lock, focus trap,
-        Escape, a sticky header and the close. Open it and tab through; the content is the caller's.
-      </p>
-      <div class="specimens">
-        <BaseButton variant="solid" size="md" @click="dialogOpen = true">Open a dialog</BaseButton>
-      </div>
-    </section>
-
-    <section class="block">
-      <h2 class="h2">Content components · src/components/content</h2>
-
-      <p class="note">
-        <code>ProjectCard</code> — the whole card is the click target while the button stays around the
-        title alone, so the accessible name is the project's name.
-      </p>
-      <div class="card-demo">
-        <ProjectCard
-          :name="firstProject.name"
-          :tag="firstProject.tag"
-          :summary="firstProject.summary"
-          :shot-label="firstProject.shotLabel"
-          :image="firstProject.image"
-          :stack="firstProject.stack"
-          @open="dialogOpen = true"
-        />
-      </div>
-
-      <p class="note">
-        <code>MediaCarousel</code> — the modal's media: a horizontal track of slides, paged by the dots
-        (the rail's indicator) and by a drag.
-      </p>
-      <div class="media-demo">
-        <MediaCarousel
-          :images="firstProject.images ?? []"
-          :slides="firstProject.slides"
-          :slug="firstProject.slug"
-          :name="firstProject.name"
-          :shot-label="firstProject.shotLabel"
-        />
-      </div>
-
-      <p class="note"><code>SpecList</code> — the modal's right column: Role, Year and the stack chips.</p>
-      <div class="spec-demo">
-        <SpecList
-          :role="firstProject.role"
-          :year="firstProject.year"
-          :stack="firstProject.stack"
-        />
-      </div>
-
-      <p class="note">
-        <code>TestimonialCard</code> — one quote, clamped to four lines with a read more; the pager owns
-        the open state and sizes the pane.
-      </p>
-      <div class="quote-demo">
-        <TestimonialCard
-          :quote="firstTestimonial.quote"
-          :name="firstTestimonial.name"
-          :role="firstTestimonial.role"
-          :avatar="firstTestimonial.avatar"
-          :open="false"
-          @toggle="() => {}"
-        />
-      </div>
-    </section>
-
-    <section class="block">
-      <h2 class="h2">Content · src/data/</h2>
-      <p class="note">
-        Every sentence on the site comes from here, both languages in one file. Toggle the
-        language and watch it follow — nothing below is written in a component.
-      </p>
-
-      <div class="rows">
-        <div v-for="c in collections" :key="c.name" class="row">
-          <div class="row-meta">
-            <span class="row-name">{{ c.name }}.js</span>
-            <code class="row-spec">{{ c.count }} entries</code>
-          </div>
-          <div class="row-demo dict">{{ c.sample }}</div>
-        </div>
-        <div class="row">
-          <div class="row-meta">
-            <span class="row-name">socials.js</span>
-            <code class="row-spec">email + cvPath</code>
-          </div>
-          <div class="row-demo dict">{{ email }}</div>
-        </div>
-      </div>
-
-      <p class="note">Hero headline, straight from <code>copy.hero.{{ lang }}</code>:</p>
-      <p class="headline-demo">
-        {{ hero.line1 }}<br />
-        {{ hero.line2 }}<br />
-        {{ hero.line3pre }}<span class="accent">{{ hero.accent }}</span>{{ hero.line3post }}
-      </p>
-
-      <p class="note">Timeline periods, computed from <code>from</code> / <code>to</code>:</p>
-      <div class="rows">
-        <div v-for="(e, i) in [...experience, ...education]" :key="i" class="row">
-          <div class="row-meta">
-            <code class="row-spec" :class="{ current: e.current }">{{ period(e) }}</code>
-          </div>
-          <div class="row-demo dict">{{ e[lang].title }}</div>
-        </div>
-      </div>
-
-      <p class="note">Marquee phrases: {{ marquee.join('  //  ') }}</p>
-    </section>
-
-    <section class="block">
-      <h2 class="h2">Interface · src/locales/</h2>
-      <p class="note">
-        Labels the UI needs, from <code>src/locales/{{ lang }}.json</code>. Both toggles persist
-        in <code>localStorage</code> and survive a reload;
-        <code>&lt;html lang&gt;</code> is now <strong>{{ lang }}</strong>.
-      </p>
-      <div class="rows">
-        <div v-for="key in SAMPLE_KEYS" :key="key" class="row">
-          <div class="row-meta">
-            <code class="row-spec">{{ key }}</code>
-          </div>
-          <div class="row-demo dict">{{ t(key) }}</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block">
-      <h2 class="h2">Config and composables</h2>
-      <p class="note">The switches in <code>src/data/config.js</code>, read live so this page cannot drift:</p>
-      <div class="rows">
-        <div v-for="[name, value] in CONFIG_FLAGS" :key="name" class="row">
-          <div class="row-meta">
-            <code class="row-spec">{{ name }}</code>
-          </div>
-          <div class="row-demo dict wrap">{{ value }}</div>
-        </div>
-      </div>
-
-      <p class="note">The shared logic, from <code>src/composables/</code> — one owner per concern:</p>
-      <div class="rows">
-        <div v-for="[name, what] in COMPOSABLES" :key="name" class="row">
-          <div class="row-meta">
-            <code class="row-spec">{{ name }}</code>
-          </div>
-          <div class="row-demo dict wrap">{{ what }}</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block">
-      <h2 class="h2">Colour</h2>
-      <div class="swatches">
-        <div v-for="[token, use] in COLOR_TOKENS" :key="token" class="swatch">
-          <div class="chip" :style="{ background: `var(${token})` }" />
-          <code class="token">{{ token }}</code>
-          <span class="value">{{ resolved[token] }}</span>
-          <span class="use">{{ use }}</span>
-        </div>
-      </div>
-      <p class="note">
-        <code>--acc</code> is identical in both themes. <code>--mark</code> is what flips,
-        because the yellow has no contrast on light. <code>--sec-idx</code> is
-        <strong>{{ resolved['--sec-idx'] }}</strong> here.
-      </p>
-    </section>
-
-    <section class="block">
-      <h2 class="h2">Type scale</h2>
-      <div class="rows">
-        <div v-for="[name, spec, css] in TYPE_SCALE" :key="name" class="row">
-          <div class="row-meta">
-            <span class="row-name">{{ name }}</span>
-            <code class="row-spec">{{ spec }}</code>
-          </div>
-          <div class="row-demo" :style="css">Desarrollo cosas que aguantan</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block">
-      <h2 class="h2">Radii, borders, shadows</h2>
-      <div class="tiles">
-        <div v-for="[r, use] in RADII" :key="r" class="tile" :style="{ borderRadius: r }">
-          <span class="tile-r">{{ r }}</span>
-          <span class="tile-use">{{ use }}</span>
-        </div>
-      </div>
-      <div class="shadow-row">
-        <div v-for="[name, value] in SHADOWS" :key="name" class="shadow" :style="{ boxShadow: value }">
-          <span class="tile-r">{{ name }}</span>
-          <code class="tile-use">{{ value }}</code>
-        </div>
-      </div>
-    </section>
-
-    <section class="block">
-      <h2 class="h2">Keyframes</h2>
-      <div class="anim-grid">
-        <div class="anim">
-          <div class="anim-stage marquee-stage">
-            <div class="marquee-track">
-              <span>FULLSTACK DEVELOPER → BACKEND // MURCIA · BARCELONA · REMOTE · SPAIN //&nbsp;</span>
-              <span>FULLSTACK DEVELOPER → BACKEND // MURCIA · BARCELONA · REMOTE · SPAIN //&nbsp;</span>
+      <section id="colour" class="block">
+        <h2 class="h2">Colour</h2>
+        <div v-for="group in COLOUR" :key="group.group" class="group">
+          <p class="group-label">{{ group.group }}</p>
+          <div class="swatches">
+            <div v-for="[token, use] in group.tokens" :key="token" class="swatch">
+              <div class="chip" :style="{ background: `var(${token})` }" />
+              <code class="token">{{ token }}</code>
+              <span class="value">{{ resolved[token] }}</span>
+              <span class="use">{{ use }}</span>
             </div>
           </div>
-          <code class="anim-name">marquee 26s linear infinite</code>
         </div>
+        <p class="note">
+          <code>--acc</code> is the same in both themes; what changes is what is painted with it.
+          The element-specific ones are not theme colours — a highlight stays white and a shadow
+          stays dark, because the opposite would be a bug, not a feature.
+        </p>
+      </section>
 
-        <div class="anim">
-          <div class="anim-stage center">
-            <span class="dot-wrap">
-              <span class="dot-ring" />
-              <span class="dot-core" />
-            </span>
-            <span class="dot-label">Available for work</span>
+      <section id="type" class="block">
+        <h2 class="h2">Type</h2>
+        <p class="note">
+          Two variable faces, self-hosted: <strong>Space Grotesk</strong> for prose and
+          <strong>JetBrains Mono</strong> for anything that behaves like a label.
+        </p>
+        <div class="rows">
+          <div v-for="[name, spec, css] in TYPE" :key="name" class="row">
+            <div class="row-meta">
+              <span class="row-name">{{ name }}</span>
+              <code class="row-spec">{{ spec }}</code>
+            </div>
+            <div class="row-demo" :style="css">Desarrollo cosas que aguantan</div>
           </div>
-          <code class="anim-name">dotHalo 2.6s · core is static, ring pulses</code>
         </div>
+      </section>
 
-        <div class="anim">
-          <div class="anim-stage center">
-            <span class="bubble">Welcome! I'm Limonacho</span>
+      <section id="shape" class="block">
+        <h2 class="h2">Shape</h2>
+        <p class="note">Every border in the project is <code>1px solid var(--line)</code>.</p>
+        <div class="tiles">
+          <div v-for="[r, use] in RADII" :key="r" class="tile" :style="{ borderRadius: r }">
+            <span class="tile-r">{{ r }}</span>
+            <span class="tile-use">{{ use }}</span>
           </div>
-          <code class="anim-name">bubbleIn .28s</code>
         </div>
-
-        <div class="anim">
-          <div class="anim-stage center">
-            <span class="lemon" />
+        <div class="shadow-row">
+          <div v-for="[name, value] in SHADOWS" :key="name" class="shadow" :style="{ boxShadow: value }">
+            <span class="tile-r">{{ name }}</span>
+            <code class="tile-use">{{ value }}</code>
           </div>
-          <code class="anim-name">lemonShake .5s ease</code>
         </div>
-      </div>
-    </section>
+        <p class="note">
+          These two are the only shadows in the project. Elevation is a <code>1px --line</code>
+          border, not a cast, and there are no coloured shadows anywhere.
+        </p>
+      </section>
 
-    <section class="block">
-      <h2 class="h2">Background grid</h2>
-      <div class="grid-demo" />
-      <p class="note">72&times;72px pattern, 1px lines in <code>--grid</code>.</p>
-    </section>
+      <section id="motion" class="block">
+        <h2 class="h2">Motion</h2>
+        <p class="note">
+          One curve carries almost everything, and every piece of it switches off under
+          <code>prefers-reduced-motion</code>.
+        </p>
+        <div class="rows">
+          <div v-for="[name, value, note] in MOTION" :key="name" class="row">
+            <div class="row-meta">
+              <span class="row-name">{{ name }}</span>
+              <code class="row-spec">{{ value }}</code>
+            </div>
+            <div class="row-demo dict wrap">{{ note }}</div>
+          </div>
+        </div>
+
+        <div class="anim-grid">
+          <div class="anim">
+            <div class="anim-stage marquee-stage">
+              <div class="marquee-track">
+                <span>FULLSTACK DEVELOPER → BACKEND // MURCIA · BARCELONA · REMOTE //&nbsp;</span>
+                <span>FULLSTACK DEVELOPER → BACKEND // MURCIA · BARCELONA · REMOTE //&nbsp;</span>
+              </div>
+            </div>
+            <code class="anim-name">marquee 26s linear infinite</code>
+          </div>
+
+          <div class="anim">
+            <div class="anim-stage center">
+              <span class="dot-wrap">
+                <span class="dot-ring" />
+                <span class="dot-core" />
+              </span>
+              <span class="dot-label">Disponible</span>
+            </div>
+            <code class="anim-name">dotHalo 2.6s · core fixed, ring pulses</code>
+          </div>
+
+          <div class="anim">
+            <div class="anim-stage center">
+              <span class="lemon" />
+            </div>
+            <code class="anim-name">lemonShake .5s ease</code>
+          </div>
+        </div>
+      </section>
+
+      <section id="buttons" class="block">
+        <h2 class="h2">Buttons</h2>
+        <p class="note">
+          <code>BaseButton</code> renders a <code>&lt;button&gt;</code>, an <code>&lt;a&gt;</code>
+          when given <code>href</code>, or a <code>RouterLink</code> when given <code>to</code>.
+        </p>
+        <div class="specimens">
+          <BaseButton variant="solid" size="lg">{{ t('actions.talk') }}</BaseButton>
+          <BaseButton variant="solid" size="md">{{ t('actions.talk') }}</BaseButton>
+          <BaseButton variant="outline" size="md">{{ t('actions.cv') }}</BaseButton>
+          <BaseButton variant="outline" size="sm" mono>{{ t('tab.edu') }}</BaseButton>
+          <BaseButton variant="solid" size="md" disabled>{{ t('form.send') }}</BaseButton>
+          <BaseButton variant="solid" size="sm" :href="cvPath[theme][lang]" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="icon">
+              <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
+            </svg>
+          </BaseButton>
+        </div>
+        <p class="note">
+          The dimmed one is the send button with the form not ready; the last is the CV's download,
+          an icon with the words on the <code>aria-label</code>.
+        </p>
+      </section>
+
+      <section id="blocks" class="block">
+        <h2 class="h2">Blocks</h2>
+
+        <p class="group-label">Section heading</p>
+        <div class="specimens headings">
+          <SectionHeading index="00" :title="t('section.me')" />
+          <SectionHeading index="01" :title="t('section.projects')" :count="3" />
+          <SectionHeading :title="t('section.contact')" />
+        </div>
+        <p class="note">
+          The giant number sits behind the title on purpose. <code>count</code> is the yellow
+          superscript the projects section carries.
+        </p>
+
+        <p class="group-label">Tabs and timeline</p>
+        <TabSwitch v-model="tab" :options="tabOptions" panel-id="preview-tabs" />
+        <div class="timeline">
+          <TimelineItem
+            v-for="(entry, i) in SAMPLE_TIMELINE"
+            :key="entry.period"
+            :period="entry.period"
+            :current="entry.current"
+            :title="entry.title"
+            :body="entry.body"
+            :is-last="i === SAMPLE_TIMELINE.length - 1"
+          />
+        </div>
+
+        <p class="group-label">Stack</p>
+        <p class="note">
+          Each tile draws the logo twice (a grey copy under a colour one) and the pointer fades the
+          colour in, so the light is a radius rather than a winner.
+        </p>
+        <div class="stack-grid">
+          <StackGroup :label="t('stack.g1')" :items="SAMPLE_STACK" :index="0" :total="1" />
+        </div>
+      </section>
+
+      <section id="cards" class="block">
+        <h2 class="h2">Cards</h2>
+
+        <p class="group-label">Project card</p>
+        <p class="note">
+          The whole card is the click target while the button stays around the title alone, so the
+          accessible name is the project's name and the summary stays ordinary text.
+        </p>
+        <div class="card-demo">
+          <ProjectCard
+            :name="SAMPLE.name"
+            :tag="SAMPLE.tag"
+            :summary="SAMPLE.summary"
+            :shot-label="SAMPLE.shotLabel"
+            :image="null"
+            :stack="SAMPLE.stack"
+            @open="dialogOpen = true"
+          />
+        </div>
+
+        <p class="group-label">The modal's media</p>
+        <p class="note">
+          A horizontal track of slides, paged by the dots — the rail's indicator on its side — and by
+          a drag.
+        </p>
+        <div class="media-demo">
+          <MediaCarousel
+            :images="[]"
+            :slides="4"
+            slug="proyecto"
+            :name="SAMPLE.name"
+            :shot-label="SAMPLE.shotLabel"
+          />
+        </div>
+
+        <p class="group-label">Quote</p>
+        <p class="note">
+          The quote has no box of its own: on the site the pager's card is the frame, with the accent
+          header and the dots down the side. Here it sits in a plain frame, with the read more live.
+        </p>
+        <div class="quote-demo">
+          <TestimonialCard
+            :quote="SAMPLE.quote"
+            :name="SAMPLE.author"
+            :role="SAMPLE.authorRole"
+            :open="quoteOpen"
+            @toggle="quoteOpen = !quoteOpen"
+          />
+        </div>
+
+        <p class="group-label">Dialog</p>
+        <p class="note">
+          The shell every dialog uses: backdrop, panel, scroll lock, focus trap, Escape, a sticky
+          header and the close. Open it and tab through; the header stays while the body scrolls.
+        </p>
+        <div class="specimens">
+          <BaseButton variant="solid" size="md" @click="dialogOpen = true">Open a dialog</BaseButton>
+        </div>
+      </section>
+
+      <section id="bits" class="block">
+        <h2 class="h2">Small pieces</h2>
+        <p class="group-label">Availability</p>
+        <div class="specimens">
+          <AvailabilityBadge label="Disponible" />
+        </div>
+        <p class="group-label">A speech bubble</p>
+        <div class="specimens">
+          <SpeechBubble text="Un mensaje de ejemplo" />
+        </div>
+        <p class="group-label">Social links</p>
+        <div class="specimens">
+          <SocialLink v-for="s in SAMPLE_SOCIALS" :key="s.icon" v-bind="s" />
+        </div>
+        <p class="group-label">The project's spec list</p>
+        <div class="spec-demo">
+          <SpecList :role="SAMPLE.role" :year="SAMPLE.year" :stack="SAMPLE.stack" />
+        </div>
+
+        <p class="group-label">Limonacho</p>
+        <p class="note">
+          He is chrome, not a piece of a section: he lives in the bottom-right corner of the viewport,
+          so he is over this sheet rather than in it. Poke him.
+        </p>
+        <LemonPet />
+      </section>
+
+      <footer class="outro">
+        <p class="note">
+          The repository is written in English (identifiers, comments, commits); what a visitor reads
+          is the prose in <code>src/data/</code>, both languages side by side, and the interface
+          strings in <code>src/locales/</code>. This sheet is the one file exempt from "no literals in
+          a template", because its strings are the subject, not content.
+        </p>
+      </footer>
+    </div>
 
     <BaseModal
       :open="dialogOpen"
@@ -528,8 +521,9 @@ onMounted(readTokens)
 
       <div class="dialog-body">
         <p class="note">
-          The panel and its behaviour are the shell's; what is inside is the caller's. This header is
-          sticky — scroll and it stays; the backdrop is one soft blur over a flat scrim.
+          The panel and its behaviour are the shell's; what is inside is the caller's. The backdrop
+          is one soft blur over a flat scrim — one blur across everything behind, not one per
+          element.
         </p>
         <p v-for="n in 12" :key="n" class="note">Scroll line {{ n }}.</p>
       </div>
@@ -538,122 +532,144 @@ onMounted(readTokens)
 </template>
 
 <style scoped>
-.preview {
+/*
+  Two columns: the rail, and the sheet. The rail sticks under the bar, which is
+  the real one — this is a route like any other.
+*/
+.sheet {
   max-width: 1180px;
   margin: 0 auto;
-  padding: clamp(24px, 5vw, 56px) clamp(20px, 5vw, 64px) 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 56px;
+  padding: calc(var(--navbar-h, 88px) + clamp(20px, 4vw, 44px)) var(--gutter-r)
+    calc(var(--footer-h, 52px) + clamp(48px, 8vw, 96px)) var(--gutter-l);
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: start;
 }
 
-.head {
+.rail {
+  position: sticky;
+  top: calc(var(--navbar-h, 88px) + 24px);
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rail-label {
+  margin: 0 0 10px;
+  font: 500 11px var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.rail-link {
+  padding: 5px 0;
+  font-size: 15px;
+  color: var(--fg-2);
+  transition: color 0.16s ease;
+}
+
+.rail-link:hover {
+  color: var(--acc-text);
+}
+
+.rail-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.toggle {
+  font: 500 12px var(--font-mono);
+  color: var(--fg-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  /* 10px, the project's button radius. There are no capsule pills here: the only
+     999px in the site is the pager's dot. */
+  border-radius: 10px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition:
+    color 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.toggle:hover {
+  color: var(--acc-text);
+  border-color: var(--acc-text);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(48px, 7vw, 88px);
+  min-width: 0;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .eyebrow {
-  margin: 0 0 6px;
-  font: 400 11px var(--font-mono);
-  letter-spacing: 0.12em;
+  margin: 0;
+  font: 500 11px var(--font-mono);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--fg-3);
 }
 
 .title {
   margin: 0;
-  font: 700 clamp(28px, 4vw, 44px) var(--font-mono);
-  letter-spacing: -0.04em;
+  font: 700 clamp(32px, 5vw, 56px) var(--font-sans);
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
-.controls {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.specimens {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-}
-
-/* The giant section number overflows its box on purpose, so these need room
-   between them or the numbers collide with the row above. */
-.headings {
-  gap: 44px;
-  padding: 18px 0 8px;
-}
-
-.timeline {
-  display: flex;
-  flex-direction: column;
-}
-
-.stack-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 32px;
-}
-
-.dict {
-  font: 400 15px var(--font-sans);
-  color: var(--fg-2);
-}
-
-.headline-demo {
+.lead {
   margin: 0;
-  font: 700 clamp(28px, 4vw, 48px) var(--font-sans);
-  letter-spacing: -0.04em;
-  line-height: 0.98;
-}
-
-/* .row-spec is declared later in this file and would win on source order,
-   since both are single-class selectors. Two classes beats one. */
-.row-spec.current {
-  color: var(--acc-text);
-}
-
-.accent {
-  color: var(--acc-text);
-}
-
-.toggle {
-  font: 500 13px var(--font-mono);
+  max-width: 58ch;
+  font-size: clamp(17px, 1.8vw, 20px);
+  line-height: 1.55;
   color: var(--fg-2);
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 10px 20px;
-  cursor: pointer;
-  transition: color 0.16s ease, border-color 0.16s ease;
-}
-
-.toggle:hover {
-  color: var(--acc);
-  border-color: var(--acc);
 }
 
 .block {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  /* Anchors land below the fixed bar. */
+  scroll-margin-top: calc(var(--navbar-h, 88px) + 24px);
 }
 
 .h2 {
   margin: 0;
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
-  font: 500 clamp(18px, 2.4vw, 24px) var(--font-mono);
+  font: 500 clamp(20px, 2.4vw, 26px) var(--font-mono);
+  letter-spacing: -0.02em;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.group-label {
+  margin: 0;
+  font: 500 11px var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-3);
 }
 
 .note {
   margin: 0;
-  font: 400 14px var(--font-sans);
+  max-width: 68ch;
+  font-size: 15px;
   line-height: 1.6;
   color: var(--fg-2);
 }
@@ -669,21 +685,21 @@ onMounted(readTokens)
 /* Colour ------------------------------------------------------------------ */
 .swatches {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
 }
 
 .swatch {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .chip {
-  height: 56px;
+  height: 60px;
+  margin-bottom: 8px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  margin-bottom: 6px;
 }
 
 .token {
@@ -697,11 +713,11 @@ onMounted(readTokens)
 }
 
 .use {
-  font: 400 12px var(--font-sans);
+  font-size: 13px;
   color: var(--fg-2);
 }
 
-/* Type -------------------------------------------------------------------- */
+/* Rows: a meta column and a demo ------------------------------------------ */
 .rows {
   display: flex;
   flex-direction: column;
@@ -709,10 +725,10 @@ onMounted(readTokens)
 
 .row {
   display: grid;
-  grid-template-columns: minmax(150px, 220px) 1fr;
+  grid-template-columns: minmax(140px, 200px) 1fr;
   gap: clamp(14px, 3vw, 32px);
   align-items: baseline;
-  padding: 20px 0;
+  padding: 18px 0;
   border-top: 1px solid var(--line);
 }
 
@@ -742,7 +758,14 @@ onMounted(readTokens)
   white-space: nowrap;
 }
 
-/* Radii, shadows ---------------------------------------------------------- */
+.row-demo.wrap,
+.dict {
+  white-space: normal;
+  font-size: 15px;
+  color: var(--fg-2);
+}
+
+/* Shape ------------------------------------------------------------------- */
 .tiles {
   display: flex;
   flex-wrap: wrap;
@@ -752,15 +775,15 @@ onMounted(readTokens)
 .tile {
   width: 128px;
   height: 88px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  text-align: center;
   padding: 0 8px;
+  text-align: center;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .tile-r {
@@ -776,24 +799,23 @@ onMounted(readTokens)
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  padding: 8px 0 16px;
 }
 
 .shadow {
   flex: 1 1 240px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
 }
 
-/* Keyframes --------------------------------------------------------------- */
+/* Motion ------------------------------------------------------------------ */
 .anim-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
 }
 
@@ -805,9 +827,9 @@ onMounted(readTokens)
 
 .anim-stage {
   height: 120px;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 18px;
-  overflow: hidden;
   background: var(--surface);
 }
 
@@ -844,7 +866,6 @@ onMounted(readTokens)
   width: 5px;
   height: 5px;
   flex: 0 0 auto;
-  display: inline-block;
 }
 
 .dot-ring {
@@ -870,38 +891,42 @@ onMounted(readTokens)
   color: var(--fg-3);
 }
 
-.bubble {
-  max-width: 230px;
-  border-radius: 14px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
-  padding: 10px 14px;
-  font: 400 13px var(--font-sans);
-  animation: bubbleIn 0.28s ease both;
-  animation-iteration-count: infinite;
-  animation-duration: 2s;
-}
-
 .lemon {
   width: 58px;
   height: 48px;
-  background: var(--acc);
   border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%;
+  background: var(--acc);
   animation: lemonShake 0.5s ease infinite;
 }
 
-/* Grid -------------------------------------------------------------------- */
-.grid-demo {
-  height: 200px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background-image: linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 72px 72px;
+/* Components -------------------------------------------------------------- */
+.specimens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
 }
 
-/* Content specimens ------------------------------------------------------- */
+/* The giant section number overflows its box on purpose, so these are stacked
+   with room between them rather than left to wrap into each other. */
+.headings {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 48px;
+  padding: 28px 0 8px;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+}
+
 .card-demo {
   max-width: 380px;
 }
@@ -910,12 +935,24 @@ onMounted(readTokens)
   max-width: 640px;
 }
 
-.spec-demo {
-  max-width: 320px;
-}
-
+/* The quote has no box of its own: on the site the pager's card is the frame.
+   Here it gets a plain one. */
 .quote-demo {
   max-width: 560px;
+  padding: 22px clamp(18px, 2.6vw, 26px);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.spec-demo {
+  max-width: 340px;
+}
+
+.icon {
+  width: 15px;
+  height: 15px;
+  display: block;
 }
 
 /* The dialog specimen ----------------------------------------------------- */
@@ -934,12 +971,34 @@ onMounted(readTokens)
   padding: 24px;
 }
 
-/* Long values wrap instead of being cut off. */
-.row-demo.wrap {
-  white-space: normal;
+.outro {
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
 }
 
 @media (max-width: 900px) {
+  .sheet {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .rail {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 14px;
+  }
+
+  .rail-label {
+    flex-basis: 100%;
+    margin-bottom: 4px;
+  }
+
+  .rail-controls {
+    margin-top: 0;
+  }
+
   .row {
     grid-template-columns: 1fr;
     gap: 8px;
