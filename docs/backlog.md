@@ -17,32 +17,33 @@ not tasks and have no checkbox.
 This merges the pending list of 2026-09-16 with what used to live in the roadmap's "Later"
 section, folded together where they overlapped.
 
-## Where things stand — 2026-09-29
+## Where things stand — 2026-09-30
 
 A short snapshot so resuming work does not mean reading the whole file. The checklist below is
 the source of truth; this is the index into it.
 
-`main` is what `krub.dev` serves and `dev` is where the work happens. The hero's 3D stage, the cursor
-hints, the roller blind, the glow and the contact form's move to Resend were released to `main`
-together, so the two are level but for that release's merge commit. Since launch the site also gained
-the accent palettes and the appearance control, the reworked Stack and Contact, the testimonials
-pager, the 404, the self-hosted fonts, the interactive grid cell and the CV pipeline. `git log
-main..dev` lists whatever is on `dev` and not yet published.
+`main` is what `krub.dev` serves and `dev` is where the work happens. The two dialogs (the project
+modal's media and the CV, which renders its own PDF), the design-system sheet, the GitHub card that
+ends the rail and the project images were released together, so the two are level but for that
+release's merge commit. Since launch the site also gained the accent palettes and the appearance
+control, the reworked Stack and Contact, the testimonials pager, the 404, the self-hosted fonts, the
+interactive grid cell and the CV pipeline. `git log main..dev` lists whatever is on `dev` and not yet
+published.
 
 **Before the next release:**
 
 1. The pre-publication documentation review.
 2. Re-measure Lighthouse against the deployment, now that it is the current build.
-3. Real screenshots for the projects and the Open Graph artwork.
+3. The Open Graph artwork.
 
 The contact form works end to end now — it sends by Resend, with Turnstile and a rate limit — and it
 carries its privacy notice and a required consent box, both linking to `/privacy`. The domain carries
 a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, sending as through
 Resend's SMTP), and the site points at it everywhere.
 
-**The substantial work still open:** the project screenshots and Open Graph artwork, the LinkedIn
-update, the GitHub profile README, the prose reread, Bing Webmaster Tools, and making the repository
-public.
+**The substantial work still open:** the Open Graph artwork, sharper screenshots for krub.dev, the
+LinkedIn update, the GitHub profile README, the prose reread, Bing Webmaster Tools, raising the DMARC
+policy, and making the repository public.
 
 ---
 
@@ -89,6 +90,10 @@ the privacy notice and the consent the law asks for.
   until it is deployed again, sideForge shows its logo, since it is backend-only for now, and krub.dev
   has screenshots of itself. All 1280×800 JPEG, under `public/assets/img/<slug>/`. Better ones when
   there is something better to shoot. **(owner)**
+- [ ] **Sharper screenshots for krub.dev.** The four are 1280×800 viewport captures at 1×, and they
+  read soft in the modal, which shows them at up to ~1000 CSS px wide — 2000 device px on a retina
+  screen. Capture again at `deviceScaleFactor: 2` and keep them at 2560×1600, or shoot a wider
+  viewport and downscale. The card is fine either way; the modal is what shows the difference.
 - [ ] **A final banner for LinkedIn and the GitHub profile README.** Same artwork as the Open Graph
   refresh below, so it comes with it.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
