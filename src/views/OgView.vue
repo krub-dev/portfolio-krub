@@ -79,20 +79,33 @@ watch(showMark, (on) => {
 
 /*
   Where the mark's slot sits, in grid cells rather than pixels: the grid is 72px,
-  and a slot that does not land on it reads as a mistake next to the lines. 5x5 at
+  and a slot that does not land on it reads as a mistake next to the lines. 6x6 at
   x8/y1 leaves the bottom-right corner clear for the mascot.
 
   Numbers rather than dragging: the scene takes the pointer for its own spin, so a
   drag over the slot turns the mark instead of moving the box.
 */
 const CELL = 72
-const slot = ref({ x: 8, y: 1, size: 5 })
+const slot = ref({ x: 8, y: 1, size: 6 })
 
 const markStyle = computed(() => ({
   left: `${slot.value.x * CELL}px`,
   top: `${slot.value.y * CELL}px`,
   width: `${slot.value.size * CELL}px`,
   height: `${slot.value.size * CELL}px`,
+}))
+
+/*
+  The mark does not fill its slot: the scene frames it with room around it, so it
+  comes out wider than the box and sitting below its centre. These are the dials
+  for that — scale and nudge — until the mark's own edges can be put on the lines
+  by eye, which the slot's numbers cannot do on their own because the mark's
+  bounding box is not a rectangle the grid knows about.
+*/
+const markFit = ref({ scale: 0.9, dx: 0, dy: 0 })
+
+const markInnerStyle = computed(() => ({
+  transform: `translate(${markFit.value.dx}px, ${markFit.value.dy}px) scale(${markFit.value.scale})`,
 }))
 
 /*
@@ -137,6 +150,20 @@ const gridStyle = computed(() => {
           >size<input v-model.number="slot.size" type="number" min="2" max="8"
         /></label>
       </div>
+
+      <div class="slot-controls">
+        <span class="size">mark</span>
+        <label class="field"
+          >scale<input
+            v-model.number="markFit.scale"
+            type="number"
+            min="0.3"
+            max="2"
+            step="0.05"
+        /></label>
+        <label class="field">dx<input v-model.number="markFit.dx" type="number" step="4" /></label>
+        <label class="field">dy<input v-model.number="markFit.dy" type="number" step="4" /></label>
+      </div>
     </header>
 
     <div class="banner">
@@ -152,7 +179,7 @@ const gridStyle = computed(() => {
 
         <h1 class="headline">FULL STACK<br /><span class="accent">DEVELOPER</span></h1>
 
-        <p class="line skills">Frontend · Backend · Applied AI</p>
+        <p class="line skills">Frontend · Backend · 3D · Applied AI</p>
 
         <span class="rule" aria-hidden="true" />
 
@@ -167,10 +194,12 @@ const gridStyle = computed(() => {
         bound to `.mark` below, so its edges can sit on the lines.
       -->
       <div v-if="showMark" class="mark" :style="markStyle" aria-hidden="true">
-        <div v-if="flat" class="flat-mark" />
-        <Suspense v-else>
-          <LogoScene :halo-on="armed" :room="showRoom" @ready="onReady" />
-        </Suspense>
+        <div class="mark-inner" :style="markInnerStyle">
+          <div v-if="flat" class="flat-mark" />
+          <Suspense v-else>
+            <LogoScene :halo-on="armed" :room="showRoom" @ready="onReady" />
+          </Suspense>
+        </div>
       </div>
 
       <div v-if="showLemon" class="pet">
@@ -283,10 +312,10 @@ const gridStyle = computed(() => {
 
 .left {
   position: relative;
-  max-width: 540px;
+  max-width: 480px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
 .brand {
@@ -298,7 +327,7 @@ const gridStyle = computed(() => {
 
 .brand-dev {
   font-family: var(--font-mono);
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--fg-2);
@@ -308,7 +337,7 @@ const gridStyle = computed(() => {
   margin: 0;
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 28px;
+  font-size: 34px;
   letter-spacing: 0.18em;
   line-height: 1.1;
 }
@@ -319,7 +348,7 @@ const gridStyle = computed(() => {
 
 .headline {
   margin: 0;
-  font-size: 62px;
+  font-size: 70px;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -344,7 +373,7 @@ const gridStyle = computed(() => {
 .line {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 17px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--fg-2);
@@ -371,6 +400,13 @@ const gridStyle = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* The dials from the header act on this, not on the slot: the slot stays on the
+   grid and the mark inside it is what gets nudged. */
+.mark-inner {
+  width: 100%;
+  height: 100%;
 }
 
 /* The site's own fallback mark: the same mask the hero paints when the scene
