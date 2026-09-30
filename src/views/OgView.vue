@@ -63,17 +63,13 @@ const showLemon = ref(true)
 const showGrid = ref(true)
 
 /*
-  The two depth techniques, each its own switch so they can be judged apart:
-
-  - `gradient`: a soft darkening from the opening to the back, painted into the
-    room's vertex colours. The grid multiplies it, so the walls and their lines
-    sink together — depth with no light and no hard facets. `depth` is how dark
-    the far wall goes.
-  - `shadow`: a soft contact shadow behind the mark, so it has weight.
+  The room's darkening: painted into its vertex colours, so the walls and their
+  grid sink together toward the back. `opacity` is how dark it goes — 0 is the
+  site's flat box, and the recess always reaches the room's own edge. `shadow` is
+  the soft contact shadow behind the mark, off by default.
 */
-const gradient = ref(true)
-const depth = ref(0.55)
-const shadow = ref(true)
+const opacity = ref(0.6)
+const shadow = ref(false)
 
 // Switching the mark back on has to re-arm: the halo follows the prop going from
 // false to true, so a mark that comes back with `armed` already true comes back
@@ -101,17 +97,11 @@ const markStyle = computed(() => ({
 }))
 
 /*
-  The mark does not fill its slot: the scene frames it with room around it, so it
-  comes out wider than the box and sitting below its centre. These are the dials
-  for that — scale and nudge — until the mark's own edges can be put on the lines
-  by eye, which the slot's numbers cannot do on their own because the mark's
-  bounding box is not a rectangle the grid knows about.
+  The mark does not fill its slot, so its size is a dial: a multiplier on the
+  fit-to-stage scale inside the scene. It is not a CSS transform on the slot, which
+  would shrink the room with the mark and pull the room off the slot's edge.
 */
-const markFit = ref({ scale: 0.9, dx: 0, dy: 0 })
-
-const markInnerStyle = computed(() => ({
-  transform: `translate(${markFit.value.dx}px, ${markFit.value.dy}px) scale(${markFit.value.scale})`,
-}))
+const markScale = ref(0.9)
 
 /*
   The background grid follows the room. The room's opening is cut into the same
@@ -142,7 +132,6 @@ const gridStyle = computed(() => {
       <div class="controls">
         <label class="toggle"><input v-model="showMark" type="checkbox" />Mark</label>
         <label class="toggle"><input v-model="showRoom" type="checkbox" />Room</label>
-        <label class="toggle"><input v-model="gradient" type="checkbox" />Gradient</label>
         <label class="toggle"><input v-model="shadow" type="checkbox" />Shadow</label>
         <label class="toggle"><input v-model="showLemon" type="checkbox" />Lemon</label>
         <label class="toggle"><input v-model="showGrid" type="checkbox" />Grid</label>
@@ -158,10 +147,10 @@ const gridStyle = computed(() => {
       </div>
 
       <div class="slot-controls">
-        <span class="size">depth</span>
+        <span class="size">opacity</span>
         <label class="field"
           ><input
-            v-model.number="depth"
+            v-model.number="opacity"
             type="number"
             min="0"
             max="1"
@@ -173,14 +162,12 @@ const gridStyle = computed(() => {
         <span class="size">mark</span>
         <label class="field"
           >scale<input
-            v-model.number="markFit.scale"
+            v-model.number="markScale"
             type="number"
             min="0.3"
             max="2"
             step="0.05"
         /></label>
-        <label class="field">dx<input v-model.number="markFit.dx" type="number" step="4" /></label>
-        <label class="field">dy<input v-model.number="markFit.dy" type="number" step="4" /></label>
       </div>
     </header>
 
@@ -212,14 +199,14 @@ const gridStyle = computed(() => {
         bound to `.mark` below, so its edges can sit on the lines.
       -->
       <div v-if="showMark" class="mark" :style="markStyle" aria-hidden="true">
-        <div class="mark-inner" :style="markInnerStyle">
+        <div class="mark-inner">
           <Suspense>
             <LogoScene
               :halo-on="armed"
               :room="showRoom"
-              :gradient="gradient"
-              :depth="depth"
+              :opacity="opacity"
               :shadow="shadow"
+              :mark-scale="markScale"
               @ready="onReady"
             />
           </Suspense>
@@ -430,8 +417,9 @@ const gridStyle = computed(() => {
   justify-content: center;
 }
 
-/* The dials from the header act on this, not on the slot: the slot stays on the
-   grid and the mark inside it is what gets nudged. */
+/* The canvas fills the slot, so the room's opening reaches its edge and its grid
+   lands on the page's. The mark's size is a dial inside the scene, not a CSS
+   transform here — scaling the canvas would shrink the room with the mark. */
 .mark-inner {
   width: 100%;
   height: 100%;

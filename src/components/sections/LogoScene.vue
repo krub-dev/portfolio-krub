@@ -53,11 +53,13 @@ const props = defineProps({
     never does, so the default is the stage's.
   */
   room: { type: Boolean, default: true },
-  // A depth gradient painted into the room's vertex colours. See SceneRig.
-  gradient: { type: Boolean, default: false },
-  depth: { type: Number, default: 0.55 },
+  // How dark the room goes toward the back, reaching its own edge. See SceneRig.
+  opacity: { type: Number, default: 0 },
   // A soft contact shadow behind the mark. See SceneRig.
   shadow: { type: Boolean, default: false },
+  // A multiplier on the mark's fit-to-stage size, so it can be sized by hand
+  // without shrinking the room. See LogoModel.
+  markScale: { type: Number, default: 1 },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -153,8 +155,7 @@ defineExpose({ logoGroup })
         :cam-z="camZ"
         :fog="props.fog"
         :room="props.room"
-        :gradient="props.gradient"
-        :depth="props.depth"
+        :opacity="props.opacity"
         :shadow="props.shadow"
       />
 
@@ -169,6 +170,7 @@ defineExpose({ logoGroup })
         :logo="props.logo"
         :halo-on="props.haloOn"
         :environment="rig?.environment"
+        :mark-scale="props.markScale"
       />
     </TresCanvas>
   </div>

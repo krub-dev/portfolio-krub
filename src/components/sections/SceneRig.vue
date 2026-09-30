@@ -48,14 +48,13 @@ const props = defineProps({
   */
   room: { type: Boolean, default: true },
   /*
-    A depth gradient painted into the geometry's vertex colours: white at the
-    opening, `depth` at the far wall. The grid texture multiplies it, so the
-    walls *and* their lines sink together as they go back — depth without a light
-    and without darkening the mouth, so the room still meets the page at the
-    frame. `depth` is how dark the far wall goes (1 = none).
+    How dark the room goes. It is painted into the geometry's vertex colours and
+    the grid texture multiplies it, so the walls and their lines sink together —
+    depth without a light. `opacity` is the darkening at the far wall; the opening
+    takes half of it, so the recess reaches the room's own edge instead of fading
+    to the page before it. 0 is the site's flat `--ink`.
   */
-  gradient: { type: Boolean, default: false },
-  depth: { type: Number, default: 0.55 },
+  opacity: { type: Number, default: 0 },
   /*
     A soft dark blob just behind the mark, on the wall. A plane with a radial
     gradient in `--cast`, transparent, that gives the floating mark something to
@@ -194,10 +193,11 @@ function buildRoomGeometry() {
     for (const corner of corners) {
       positions.push(corner[0], corner[1], corner[2])
       uvs.push(project(corner)[0], project(corner)[1])
-      // The depth gradient, per vertex: 1 at the opening, `depth` at the back.
-      // Pushed always, read only when the material asks for vertex colours.
+      // The darkening, per vertex: half of `opacity` at the opening, all of it at
+      // the back. Pushed always, read only when the material asks for vertex
+      // colours.
       const t = (zn - corner[2]) / (zn - zf)
-      const c = 1 - (1 - props.depth) * t
+      const c = 1 - props.opacity * (0.5 + 0.5 * t)
       colors.push(c, c, c)
     }
     indices.push(base, base + 1, base + 2, base, base + 2, base + 3)
@@ -363,8 +363,8 @@ function applyFogScale() {
 // recoloured. The zoom only re-scales it.
 watch(() => props.fog, buildFog)
 watch(k, applyFogScale)
-// The gradient lives in the geometry's vertex colours, so the dial rebuilds it.
-watch(() => props.depth, buildRoomGeometry)
+// The darkening lives in the geometry's vertex colours, so the dial rebuilds it.
+watch(() => props.opacity, buildRoomGeometry)
 
 function repaint() {
   buildRoom()
@@ -430,13 +430,13 @@ onBeforeRender(({ delta }) => {
   >
     <!--
       Unlit: the walls are exactly `--ink`, so the grid is the page's carried into
-      depth. With `gradient`, the vertex colours darken the wall toward the back,
+      depth. With `opacity`, the vertex colours darken the wall toward the back,
       and the grid lines ride down with it.
     -->
     <TresMeshBasicMaterial
       :map="room"
       :side="DoubleSide"
-      :vertex-colors="props.gradient"
+      :vertex-colors="props.opacity > 0"
       :tone-mapped="false"
     />
   </TresMesh>

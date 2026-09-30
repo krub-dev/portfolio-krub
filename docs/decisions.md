@@ -401,21 +401,25 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
 Ways to make the open box read as a recess, all gated so the site keeps the box it was built with —
 the Open Graph card is where they are weighed.
 
-- **A depth gradient, and it is the one that works.** The geometry carries a vertex colour per corner:
-  white at the opening, `depth` (default 0.55) at the far wall. The grid texture multiplies it, so the
-  walls *and their lines* sink together as they go back, and the mouth stays exactly `--ink` — the room
-  still meets the page at the frame (202863b) while the inside darkens. Measured on the card: the
-  ceiling runs 12/255 at the mouth to 3.6 at the far end. No light and no hard facet, and it gets what
-  the Blender reference was after without the facets.
+- **A darkening in the vertex colours, and the opening takes half of it.** The geometry carries a
+  vertex colour per corner: the far wall is `opacity` dark and the opening is half that, so the recess
+  reaches the room's own edge instead of fading back to `--ink` before it. The grid texture multiplies
+  the same colour, so the walls *and their lines* sink together. `opacity` is the one dial; 0 is the
+  site's flat box. Measured on the card at 0.6: the opening sits at 8/255 against the page's 12, and the
+  walls darken from there toward the back. No light and no hard facet.
 - **A contact shadow.** A plane just behind the mark with a radial gradient in `--cast`, transparent,
   `depthWrite: false`, following the room's scale. It gives the floating mark something to cast onto.
   The gradient runs over five stops, most of its alpha gone by two thirds of the radius, so it reads as
   a blur rather than as a disc; the first two-stop version had a hard rim and was too strong.
+- **The mark's size is a dial in the scene, not a CSS transform.** Scaling the canvas to fit the mark
+  took the room with it and left the room at 90% of the slot, a band short of its edge. `markScale` on
+  LogoModel multiplies the fit-to-stage scale, so the mark can be sized by hand while the room fills the
+  slot and its grid lands on the page's.
 - **Face lighting was tried and taken out.** A `MeshLambertMaterial` on the walls, so each face caught
   the scene's lights by its normal, differentiated but darkened the near walls (the ceiling to 4.5/255)
   and the hard tone per face read as facets, not as depth. The prop and the geometry's
   `computeVertexNormals` went with it.
-- **Exponential fog was tried and taken out.** `FogExp2` fights the gradient — both darken the back,
+- **Exponential fog was tried and taken out.** `FogExp2` fights the darkening — both go for the back,
   and the fog pulls it back to `--ink` — so it was removed rather than left as a second way to do the
   same thing badly.
 
