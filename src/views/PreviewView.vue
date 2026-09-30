@@ -40,12 +40,14 @@ import MediaCarousel from '../components/content/MediaCarousel.vue'
 import ProjectCard from '../components/content/ProjectCard.vue'
 import SpecList from '../components/content/SpecList.vue'
 import Testimonials from '../components/content/Testimonials.vue'
+import { useAccent } from '../composables/useAccent'
 import { useLang } from '../composables/useLang'
 import { useTheme } from '../composables/useTheme'
 import { cvPath } from '../data'
 
 const { theme, toggle: toggleTheme } = useTheme()
 const { lang, toggle: toggleLang } = useLang()
+const { accent, cycle: cycleAccent } = useAccent()
 const { t } = useI18n()
 
 const SECTIONS = [
@@ -247,6 +249,12 @@ onMounted(readTokens)
             {{ lang === 'en' ? 'ES' : 'EN' }}
           </button>
           <span class="rail-caption">Language</span>
+        </div>
+        <div class="rail-control">
+          <button class="toggle" type="button" :aria-label="t('accent.label')" @click="cycleAccent">
+            {{ t(`accent.${accent}`) }}
+          </button>
+          <span class="rail-caption">Colour</span>
         </div>
       </div>
     </nav>
@@ -670,6 +678,7 @@ onMounted(readTokens)
 
 .rail-controls {
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   margin-top: 18px;
 }
@@ -1073,7 +1082,18 @@ onMounted(readTokens)
 }
 
 .lemon-frame {
-  height: 200px;
+  height: 180px;
+}
+
+/*
+  On the site he rests in the bottom-right corner; here he is mirrored to the
+  left, so the section reads the way the sheet is laid out. Scoped to this page on
+  purpose: nothing about him changes on the site.
+*/
+.lemon-frame :deep(.pet) {
+  right: auto;
+  left: 24px;
+  bottom: 24px;
 }
 
 .icon {
