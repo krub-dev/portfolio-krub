@@ -71,8 +71,9 @@ export const projects = [
   {
     slug: 'sideforge',
     shotLabel: 'SHOT · SIDEFORGE',
-    image: null,
-    slides: 3,
+    image: '/assets/img/sideforge/logo.jpg',
+    images: ['/assets/img/sideforge/logo.jpg'],
+    slides: 1,
     repo: 'https://github.com/krub-dev/sideForge',
     live: 'https://github.com/krub-dev/sideForge#readme',
     stack: [
@@ -116,8 +117,14 @@ export const projects = [
   {
     slug: 'krub-dev',
     shotLabel: 'SHOT · KRUB.DEV',
-    image: null,
-    slides: 3,
+    image: '/assets/img/krub-dev/hero.jpg',
+    images: [
+      '/assets/img/krub-dev/hero.jpg',
+      '/assets/img/krub-dev/projects.jpg',
+      '/assets/img/krub-dev/about.jpg',
+      '/assets/img/krub-dev/contact.jpg',
+    ],
+    slides: 4,
     repo: 'https://github.com/krub-dev/portfolio-krub',
     live: 'https://krub.dev',
     stack: ['Vue 3', 'Vite', 'vue-i18n', 'Vitest', 'Playwright', 'Vercel'],
@@ -153,8 +160,9 @@ export const projects = [
   {
     slug: 'showroom',
     shotLabel: 'SHOT · SHOWROOM',
-    image: null,
-    slides: 4,
+    image: '/assets/img/showroom/desktop.jpg',
+    images: ['/assets/img/showroom/desktop.jpg', '/assets/img/showroom/responsive.jpg'],
+    slides: 2,
     repo: 'https://github.com/krub-dev/SHOWROOM-FULLSTACK-M3',
     live: 'https://showroom-fullstack-m3-production.up.railway.app/',
     stack: ['Vue 3', 'Express', 'PostgreSQL', 'Prisma', 'Jest', 'Railway'],

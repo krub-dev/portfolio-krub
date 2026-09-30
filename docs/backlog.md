@@ -84,9 +84,11 @@ the privacy notice and the consent the law asks for.
 - [x] **A new photo for /me.** Done: the current one is the 42 portrait, in colour — the grayscale
   filter was dropped with it (decision 70). `photoPath` in `src/data/socials.js` points at
   `public/assets/img/krub-pfp.jpeg` (540×540 JPEG, ~110 KB).
-- [ ] **Real screenshots for the projects.** CreandoMientras, Showroom, sideForge (backend only, so
-  its logo will do) and krub.dev, dropped into the `image` and `slides` fields the model already
-  has. **(owner)**
+- [x] **Images for the projects.** Done 2026-09-30, all four: CreandoMientras has real screenshots,
+  Showroom carries its own two covers (`desktop.jpg` / `responsive.jpg`, taken from its repository)
+  until it is deployed again, sideForge shows its logo, since it is backend-only for now, and krub.dev
+  has screenshots of itself. All 1280×800 JPEG, under `public/assets/img/<slug>/`. Better ones when
+  there is something better to shoot. **(owner)**
 - [ ] **A final banner for LinkedIn and the GitHub profile README.** Same artwork as the Open Graph
   refresh below, so it comes with it.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
