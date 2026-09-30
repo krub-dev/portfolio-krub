@@ -268,6 +268,14 @@ onMounted(readTokens)
           string of its own. Everything below is the real thing, fed placeholders: the copy, the
           photos and the quotes all change, the shape does not.
         </p>
+
+        <p class="disclaimer">
+          <span class="disclaimer-label">Note</span>
+          English throughout, because the repository is written in English and this page belongs to
+          it, not to the site: only the components' own labels follow the language toggle. The prose
+          a visitor reads lives in <code>src/data/</code>, and the interface strings in
+          <code>src/locales/</code>.
+        </p>
       </header>
 
       <section id="colour" class="block">
@@ -600,10 +608,8 @@ onMounted(readTokens)
 
       <footer class="outro">
         <p class="note">
-          English throughout, because the repository is written in English and this page belongs to
-          it, not to the site: only the components' own labels follow the language toggle. The prose a
-          visitor reads lives in <code>src/data/</code> and the interface strings in
-          <code>src/locales/</code>.
+          Still dev-only: the route is registered under <code>import.meta.env.DEV</code>, so none of
+          this ships.
         </p>
       </footer>
     </div>
@@ -678,8 +684,9 @@ onMounted(readTokens)
 
 .rail-controls {
   display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
   margin-top: 18px;
 }
 
@@ -752,6 +759,33 @@ onMounted(readTokens)
   color: var(--fg-2);
 }
 
+/*
+  The one thing to know before reading the specimens: what language this page is
+  in and why. Boxed and labelled, so it reads as a notice and not as the rest of
+  the introduction.
+*/
+.disclaimer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0 0;
+  max-width: 68ch;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--fg-2);
+}
+
+.disclaimer-label {
+  font: 500 10px var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
 .block {
   display: flex;
   flex-direction: column;
@@ -791,6 +825,7 @@ onMounted(readTokens)
 }
 
 .note code,
+.disclaimer code,
 .token,
 .row-spec,
 .anim-name,
@@ -1083,17 +1118,31 @@ onMounted(readTokens)
 
 .lemon-frame {
   height: 180px;
+  /*
+    No box of its own: the transform below is only here to give the fixed lemon a
+    containing block, so the frame itself stays invisible.
+  */
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 /*
-  On the site he rests in the bottom-right corner; here he is mirrored to the
-  left, so the section reads the way the sheet is laid out. Scoped to this page on
-  purpose: nothing about him changes on the site.
+  On the site he rests in the bottom-right corner and the bubble grows to his
+  left without moving him. Here he is mirrored to the left, so the alignment and
+  the bubble's offset are mirrored with him: without that, the bubble pushes him
+  sideways the moment it appears. Scoped to this page on purpose.
 */
 .lemon-frame :deep(.pet) {
   right: auto;
   left: 24px;
   bottom: 24px;
+  align-items: flex-start;
+}
+
+.lemon-frame :deep(.bubble) {
+  margin-right: 0;
+  margin-left: var(--lemon-w);
 }
 
 .icon {
@@ -1187,6 +1236,7 @@ onMounted(readTokens)
   }
 
   .rail-controls {
+    flex-direction: row;
     margin-top: 0;
   }
 
