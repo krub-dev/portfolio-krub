@@ -1,15 +1,11 @@
-<script setup>
+﻿<script setup>
 /*
   The projects rail's last card, and not a project: it is the way out to GitHub
   for whatever did not fit in four cards.
 
   It borrows the project card's rhythm — a media slot on top, then the body and a
   foot with a hairline — so it reads as one of them, and the dashed border is what
-  says it is not. That slot is also what makes the two the same height.
-
-  The border is an SVG `rect` rather than `border-style: dashed`, because a
-  browser's dashes cannot be made longer or thicker: they are a fixed multiple of
-  the border's width, so the only way to change them is to draw them.
+  says it is not. That shared slot is also what makes the two the same height.
 
   The copy comes from src/data/ and the link's label from src/locales/, like
   everything else. The GitHub mark and its address are read from the socials, so
@@ -31,11 +27,48 @@ const { lang } = useLang()
 
 const text = computed(() => copy.projectsCta[lang.value])
 const github = computed(() => socials.find((social) => social.icon === 'github'))
+
+/*
+  The mosaic behind the mark: a grid of rounded squares in the accent, at varying
+  opacities, so the media slot is not an empty panel. Drawn as an SVG rather than
+  in CSS because a gradient cannot round its own tiles, and the pattern is fixed
+  rather than random so it is the same on every render.
+
+  The colour is `--acc-solid`, the accent at full saturation: the same value in
+  both themes, so what changes with the theme is the panel behind it, and what
+  changes with the palette is the accent itself.
+*/
+const COLUMNS = 8
+const ROWS = 5
+
+const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
+  const x = i % COLUMNS
+  const y = Math.floor(i / COLUMNS)
+  return {
+    key: `${x}-${y}`,
+    x: x + 0.07,
+    y: y + 0.07,
+    opacity: (0.07 + (((x * 3 + y * 5) % 7) / 7) * 0.45).toFixed(2),
+  }
+})
 </script>
 
 <template>
   <article class="cta" :class="{ current }" data-magnetic>
     <div class="mark-box">
+      <svg class="mosaic" viewBox="0 0 8 5" preserveAspectRatio="none" aria-hidden="true">
+        <rect
+          v-for="tile in MOSAIC"
+          :key="tile.key"
+          :x="tile.x"
+          :y="tile.y"
+          width="0.86"
+          height="0.86"
+          rx="0.22"
+          :opacity="tile.opacity"
+        />
+      </svg>
+
       <svg class="mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path :d="socialIcons.github" />
       </svg>
@@ -51,41 +84,37 @@ const github = computed(() => socials.find((social) => social.icon === 'github')
           overlay: the same pattern the project cards use, so the whole card is the
           target while the accessible name stays the label alone.
         -->
-        <a class="link" :href="github.href" target="_blank" rel="noopener">
+        <a class="link" :href="github.href" target="_blank" rel="noopener" draggable="false">
           {{ t('actions.github') }}
         </a>
         <span class="arrow" aria-hidden="true">↗</span>
       </div>
     </div>
-
-    <!--
-      The dashes. Inset by the card's own (transparent) border and allowed to
-      overflow, so the 2px stroke lands on the card's edge.
-    -->
-    <svg class="dashes" aria-hidden="true">
-      <rect x="0" y="0" width="100%" height="100%" rx="17" ry="17" />
-    </svg>
   </article>
 </template>
 
 <style scoped>
 .cta {
   position: relative;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   /*
-    Transparent, so the box is exactly the size of the cards beside it: the dashes
-    are drawn over it by the SVG below, not by a border of their own.
+    Dashed, and two pixels rather than one: the border is what says "a slot in the
+    rail, not a fifth project", and the browser draws its dashes longer the thicker
+    it is. border-box so the box stays the size of the cards beside it.
   */
-  border: 1px solid transparent;
+  border: 2px dashed var(--line);
   border-radius: 18px;
   background: var(--surface);
   overflow: hidden;
+  transition: border-color 0.16s ease;
 }
 
 /* The media slot, in the cards' own 16/10, which is what equalises the heights. */
 .mark-box {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,7 +122,16 @@ const github = computed(() => socials.find((social) => social.icon === 'github')
   background: var(--surface-2);
 }
 
+.mosaic {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: var(--acc-solid);
+}
+
 .mark {
+  position: relative;
   width: 64px;
   height: 64px;
   color: var(--fg-2);
@@ -139,6 +177,13 @@ const github = computed(() => socials.find((social) => social.icon === 'github')
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--acc-text);
+  /*
+    An <a> is draggable by default, and a drag that starts on it becomes a drag of
+    the link rather than of the rail — the cards next to it are buttons, so they do
+    not have this. `draggable="false"` in the markup is the real fix; this is the
+    same thing for engines that only honour the property.
+  */
+  -webkit-user-drag: none;
 }
 
 /* The whole card is the target: this stretches the link over it. */
@@ -171,32 +216,14 @@ const github = computed(() => socials.find((social) => social.icon === 'github')
     color 0.16s ease;
 }
 
-/* The dashed border. */
-.dashes {
-  position: absolute;
-  inset: 1px;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.dashes rect {
-  fill: none;
-  stroke: var(--line);
-  /* A hair thicker than the cards' 1px, and dashes about four times as long as
-     the browser's own for that width. */
-  stroke-width: 2;
-  stroke-dasharray: 14 9;
-  transition: stroke 0.16s ease;
-}
-
 /* The same "this is the one" treatment the cards use. */
 @media (hover: hover) {
-  .cta:hover .dashes rect {
-    stroke: var(--acc-text);
+  .cta:hover {
+    border-color: var(--acc-text);
   }
 
   .cta:hover .mark {
-    color: var(--fg);
+    color: var(--acc-text);
   }
 
   .cta:hover .arrow {
@@ -207,8 +234,8 @@ const github = computed(() => socials.find((social) => social.icon === 'github')
 }
 
 @media (hover: none) {
-  .cta.current .dashes rect {
-    stroke: var(--acc-text);
+  .cta.current {
+    border-color: var(--acc-text);
   }
 
   .cta.current .arrow {

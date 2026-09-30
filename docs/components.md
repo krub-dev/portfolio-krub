@@ -182,12 +182,12 @@ Emits `open`.
 
 ### ProjectsCta
 Prop: `current` (boolean — the rail's parked marker, for a touch screen). The rail's last slot: not a
-project but a way out to GitHub. It mirrors `ProjectCard`'s structure — a `16/10` media slot with the
-mark at 64px, then the body, then a foot with the label and the arrow — which is what makes the two the
-same size, and its border is an SVG `rect` dashed over a transparent 1px border, so the dashes can be
-longer than the browser's fixed pattern. Its copy is `copy.projectsCta`, its link label
-`actions.github`, and the mark and the address come from `socials`/`socialIcons`, so they cannot drift
-from Contact. See decisions.md 101.
+project but a way out to GitHub. It mirrors `ProjectCard`'s structure — a `16/10` media slot carrying
+the mark at 64px over a mosaic of rounded accent squares, then the body, then a foot with the label and
+the arrow — which is what makes the two the same size, and its border is `2px dashed` with
+`box-sizing: border-box`. Its copy is `copy.projectsCta`, its link label `actions.github`, and the mark
+and the address come from `socials`/`socialIcons`, so they cannot drift from Contact. See decisions.md
+101.
 
 ### ProjectModal
 | Prop | Type |

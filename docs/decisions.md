@@ -677,10 +677,18 @@ Four projects fit the rail, and whatever else there is lives on GitHub — which
 said. The rail's last slot is a card that does: the GitHub mark, a question, a line, and a mono link
 in the accent.
 
-- **Dashed, not solid, and the dashes are drawn by hand.** The border is what says "a slot in the rail,
-  not a fifth project". `border-style: dashed` could not be made longer or thicker — a browser's dashes
-  are a fixed multiple of the border's width — so it is an SVG `rect` over a transparent 1px border,
-  with the stroke and the dash pattern set explicitly.
+- **Dashed, and two pixels rather than one.** The border is what says "a slot in the rail, not a fifth
+  project", and a browser draws its dashes longer the thicker the border is, so two pixels buys both the
+  weight and the length. `box-sizing: border-box` keeps the box the size of the cards beside it.
+- **A `rect` SVG for the dashes was tried and dropped.** It allowed a longer, hand-set dash pattern, but
+  it is more machinery than a dashed border needs, and it brought two traps of its own: an `svg` without
+  an explicit size falls back to the replaced-element default of 300×150, and `overflow: hidden` clips at
+  the padding box — 1px inside — so the dashes sat inside the card rather than on its edge. The plain
+  border at 2px reads the same.
+- **A mosaic of rounded accent squares behind the mark.** The media slot is otherwise an empty panel, and
+  the card should not look unfinished next to four screenshots. It is an SVG grid (a gradient cannot
+  round its own tiles) filled with `--acc-solid`, so it follows the palette, over the theme's
+  `--surface-2`, so it follows the theme too.
 - **It mirrors the card's structure.** A `16/10` media slot with the mark at 64px, then the body and a
   foot with a hairline, the mono label and the arrow circle — the same radius, surface, hover and parked
   treatment. That shared structure is what makes the two exactly the same size.

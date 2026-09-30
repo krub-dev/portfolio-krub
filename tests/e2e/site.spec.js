@@ -223,16 +223,35 @@ test('the rail ends on a card that goes to GitHub', async ({ page }) => {
 
   const cta = page.locator('#projects .cta')
   await expect(cta).toBeVisible()
-  // The dashed border is drawn with an SVG rect, so its dashes can be longer and
-  // thicker than the browser's fixed pattern.
-  await expect(cta.locator('.dashes rect')).toHaveCount(1)
+  // Dashed, and two pixels, because it is a slot in the rail rather than a fifth
+  // project.
+  await expect(cta).toHaveCSS('border-top-style', 'dashed')
+  await expect(cta).toHaveCSS('border-top-width', '2px')
   await expect(cta.getByRole('link')).toHaveAttribute('href', 'https://github.com/krub-dev')
 
   // And it is the same size as the cards beside it.
   const card = await page.locator('#projects .card').first().boundingBox()
   const box = await cta.boundingBox()
-  expect(Math.abs(box.width - card.width)).toBeLessThan(1)
-  expect(Math.abs(box.height - card.height)).toBeLessThan(1)
+  expect(Math.abs(box.width - card.width)).toBeLessThan(3)
+  expect(Math.abs(box.height - card.height)).toBeLessThan(3)
+})
+
+test('the GitHub card is the target, not just its label', async ({ page, browserName }) => {
+  // Playwright's WebKit does not report the popup for a target="_blank" click,
+  // and the click itself is covered by the test above on every project.
+  test.skip(browserName !== 'chromium', 'Playwright WebKit does not report the popup')
+
+  await openSite(page)
+  await bringIntoView(page.locator('#projects .viewport'))
+  await page.locator('#projects .dots .dot').last().click()
+  await expect.poll(() => page.locator('#projects .cta').isVisible()).toBe(true)
+
+  const popupPromise = page.waitForEvent('popup')
+  // The middle of the card, which is nowhere near the label: the link is stretched
+  // over the card with an ::after overlay, like the project cards.
+  await page.locator('#projects .cta').click()
+  const popup = await popupPromise
+  expect(popup.url()).toContain('github.com/krub-dev')
 })
 
 test('the navbar only takes clicks where the capsule is', async ({ page }) => {
