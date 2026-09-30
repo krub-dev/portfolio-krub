@@ -409,16 +409,15 @@ the Open Graph card is where they are weighed.
   the Blender reference was after without the facets.
 - **A contact shadow.** A plane just behind the mark with a radial gradient in `--cast`, transparent,
   `depthWrite: false`, following the room's scale. It gives the floating mark something to cast onto.
-  Measured under the mark: 1/255 with it on against 7/255 with it off, so it lands hard; the material
-  runs at 0.6 opacity.
-- **Face lighting was tried and is off.** `shaded` puts a `MeshLambertMaterial` on the walls so each
-  face catches the scene's lights by its normal. It differentiates, but it darkens the near walls (the
-  ceiling to 4.5/255) and the hard tone per face reads as facets, not as depth. It stays behind the
-  prop to compare.
-- **Exponential fog is an option, off.** `FogExp2` fights the gradient — both darken the back, and the
-  fog pulls it back to `--ink` — so it is there to try, not the default.
-- **`computeVertexNormals`.** No vertex is shared between the quads, so each face gets a flat normal,
-  which is what makes a lit wall one tone. The unlit material ignores it.
+  The gradient runs over five stops, most of its alpha gone by two thirds of the radius, so it reads as
+  a blur rather than as a disc; the first two-stop version had a hard rim and was too strong.
+- **Face lighting was tried and taken out.** A `MeshLambertMaterial` on the walls, so each face caught
+  the scene's lights by its normal, differentiated but darkened the near walls (the ceiling to 4.5/255)
+  and the hard tone per face read as facets, not as depth. The prop and the geometry's
+  `computeVertexNormals` went with it.
+- **Exponential fog was tried and taken out.** `FogExp2` fights the gradient — both darken the back,
+  and the fog pulls it back to `--ink` — so it was removed rather than left as a second way to do the
+  same thing badly.
 
 ---
 

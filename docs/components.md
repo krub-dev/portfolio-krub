@@ -309,10 +309,9 @@ The `<TresCanvas>`: the lights, the wheel-zoom (clamped, and it only takes the g
 still move), the off-screen pause (an IntersectionObserver at 60%) and the fps and DPR caps. It loads
 the mark's GLB and reports the download up as `ready` and `progress`. The camera and the depth are
 `SceneRig`'s. Prop: `room` (boolean, default true) — off, the room is not drawn and the mark stands
-alone, which is what the Open Graph card asks for and what the stage never does. Props: `shaded`
-(boolean, default false) — the room's faces take the scene's own lights instead of being unlit; and
-the depth techniques the Open Graph card tries, `gradient` (boolean, default false), `depth` (number,
-default 0.55) and `shadow` (boolean, default false). The stage uses none of them.
+alone, which is what the Open Graph card asks for and what the stage never does. Props: the depth
+techniques the Open Graph card tries — `gradient` (boolean, default false), `depth` (number, default
+0.55) and `shadow` (boolean, default false). The stage uses none of them.
 
 ### SceneRig
 The rig around the mark: the camera and the depth. A deep open box — four walls converging on a
@@ -321,12 +320,11 @@ opening lands on the stage, and divided into the stage's seven cells — carries
 faded by a `Fog` read from `--ink`; it scales with the wheel's zoom so the opening stays put. The
 camera leans a little with the pointer's `tilt`, always looking back at the mark. A child of the
 canvas, because `useLoop` and `useTresContext` need the renderer. Prop: `room` (boolean, default true)
-— the box is the whole of this component, so off is the rig without it. Props: `shaded` (boolean,
-default false) — off, the walls are unlit `--ink` with the grid; on, a `MeshLambertMaterial` lights
-each face by its normal; `gradient` (boolean, default false) and `depth` (number, default 0.55) — a
-depth gradient in the geometry's vertex colours, white at the opening and `depth` at the far wall, so
-the walls and their grid sink together as they go back; `shadow` (boolean, default false) — a soft
-contact shadow behind the mark. See decisions 78–82 and 102.
+— the box is the whole of this component, so off is the rig without it. Props: `gradient` (boolean,
+default false) and `depth` (number, default 0.55) — a depth gradient in the geometry's vertex colours,
+white at the opening and `depth` at the far wall, so the walls and their grid sink together as they go
+back; `shadow` (boolean, default false) — a soft contact shadow behind the mark. See decisions 78–82
+and 102.
 
 ### LogoModel
 The mesh and everything about how it looks and moves: the two `MeshStandardMaterial`s (the front in

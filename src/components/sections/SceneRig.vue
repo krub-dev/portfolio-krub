@@ -27,7 +27,6 @@ import {
   DoubleSide,
   Float32BufferAttribute,
   Fog,
-  FogExp2,
   MeshBasicMaterial,
   PMREMGenerator,
   RepeatWrapping,
@@ -48,15 +47,6 @@ const props = defineProps({
     never does, so the default is the stage's.
   */
   room: { type: Boolean, default: true },
-  /*
-    Whether the room's faces are shaded by the scene's own lights. Off — the
-    site's default — the room is unlit: every wall is exactly `--ink` with the
-    grid on top, and depth comes from the grid converging and the fog. On, the
-    room takes a Lambert material, so each wall catches the lights by its normal
-    and the box reads as depth by tone, the way a lit room does. The Open Graph
-    card wants that; the stage was built without it, so the default is off.
-  */
-  shaded: { type: Boolean, default: false },
   /*
     A depth gradient painted into the geometry's vertex colours: white at the
     opening, `depth` at the far wall. The grid texture multiplies it, so the
@@ -122,10 +112,6 @@ const FOG_MODES = {
   off: null,
   near: { near: 240, far: 560 },
   far: { near: 430, far: 900 },
-  // Exponential fog: density-based, so it eats the far end whatever the room's
-  // depth. Kept beside the linear modes as an experiment (the Open Graph card
-  // toggles it); it fights the vertex gradient, because both darken the back.
-  exp: { density: 0.012 },
 }
 // The lean, sized to the frame: the opening is the stage, so a bigger one would
 // pull its edge out from under the frame's band.
@@ -246,12 +232,6 @@ function buildRoomGeometry() {
   geo.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
   geo.setAttribute('color', new Float32BufferAttribute(colors, 3))
   geo.setIndex(indices)
-  /*
-    No vertex is shared between quads, so each face gets its own flat normal
-    rather than an average across a corner. The unlit material ignores them; the
-    shaded one needs them, and flat is what makes each wall one tone.
-  */
-  geo.computeVertexNormals()
   geo.computeBoundingSphere()
   roomGeo.value?.dispose()
   roomGeo.value = geo
@@ -309,9 +289,24 @@ function buildRoom() {
 }
 
 /*
-  The mark's contact shadow: a radial gradient in `--cast`, opaque at the centre
-  and gone at the rim, painted on a plane just behind the mark. No light and no
-  shadow map — it is a sprite the wall shows through where it is transparent.
+  `--cast` at a given alpha. The token is an `rgba(...)`, and a canvas gradient
+  needs the alpha per stop, so the channels are kept and only the alpha swapped.
+*/
+function fade(color, alpha) {
+  const m = color.match(/rgba?\(([^)]+)\)/)
+  if (!m) return color
+  const [r, g, b] = m[1].split(',').map((s) => s.trim())
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+/*
+  The mark's contact shadow: a radial gradient in `--cast`, painted on a plane
+  just behind the mark. No light and no shadow map — it is a sprite the wall
+  shows through where it is transparent.
+
+  Five stops, not two: most of the alpha is gone by two thirds of the radius, so
+  the blob reads as a blur rather than as a disc with a hard rim. The centre
+  alpha is the 0.5 that the material's old 0.6 opacity gave over the token.
 */
 function buildShadow() {
   const { cast } = tokens()
@@ -319,10 +314,10 @@ function buildShadow() {
   const canvas = makeCanvas(size)
   const ctx = canvas.getContext('2d')
   const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  // One colour, two stops: the alpha ramps from the token's to nothing, which is
-  // all a soft blob needs. `transparent` is the absence of colour, not one.
-  g.addColorStop(0, cast)
-  g.addColorStop(0.55, cast)
+  g.addColorStop(0, fade(cast, 0.5))
+  g.addColorStop(0.3, fade(cast, 0.36))
+  g.addColorStop(0.55, fade(cast, 0.2))
+  g.addColorStop(0.8, fade(cast, 0.07))
   g.addColorStop(1, 'transparent')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, size, size)
@@ -340,12 +335,8 @@ function buildFog() {
     scene.value.fog = null
     return
   }
-  // The fog type is fixed per mode, so only rebuild when it changes; otherwise
-  // recolour, which is what a theme flip needs.
-  const wantsExp = mode.density != null
-  const hasExp = scene.value.fog?.isFogExp2 === true
-  if (!scene.value.fog || wantsExp !== hasExp) {
-    scene.value.fog = wantsExp ? new FogExp2(fogEnd, mode.density) : new Fog(fogEnd, mode.near, mode.far)
+  if (!scene.value.fog) {
+    scene.value.fog = new Fog(fogEnd, mode.near, mode.far)
   } else {
     scene.value.fog.color.set(fogEnd)
   }
@@ -364,12 +355,6 @@ function applyFogScale() {
   const fog = scene.value?.fog
   const mode = FOG_MODES[props.fog] ?? FOG_MODES.far
   if (!fog || !mode) return
-  if (mode.density != null) {
-    // Density is per world unit, and the room scales with the zoom, so it has to
-    // scale the other way to keep the same fade.
-    fog.density = mode.density / k.value
-    return
-  }
   fog.near = mode.near * k.value
   fog.far = mode.far * k.value
 }
@@ -444,19 +429,11 @@ onBeforeRender(({ delta }) => {
     :scale="[k, k, k]"
   >
     <!--
-      Unlit by default: the walls are exactly `--ink`, so the grid is the page's
-      carried into depth. `shaded` swaps in a Lambert material, which lights each
-      face by its normal — the same box, reading as depth by tone instead.
+      Unlit: the walls are exactly `--ink`, so the grid is the page's carried into
+      depth. With `gradient`, the vertex colours darken the wall toward the back,
+      and the grid lines ride down with it.
     -->
-    <TresMeshLambertMaterial
-      v-if="props.shaded"
-      :map="room"
-      :side="DoubleSide"
-      :vertex-colors="props.gradient"
-      :tone-mapped="false"
-    />
     <TresMeshBasicMaterial
-      v-else
       :map="room"
       :side="DoubleSide"
       :vertex-colors="props.gradient"
@@ -473,7 +450,6 @@ onBeforeRender(({ delta }) => {
     <TresMeshBasicMaterial
       :map="shadow"
       :transparent="true"
-      :opacity="0.6"
       :depth-write="false"
       :tone-mapped="false"
       :fog="false"

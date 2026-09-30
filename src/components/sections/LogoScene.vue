@@ -53,12 +53,6 @@ const props = defineProps({
     never does, so the default is the stage's.
   */
   room: { type: Boolean, default: true },
-  /*
-    Whether the room's faces are shaded by the scene's lights, so depth reads by
-    tone rather than by the grid alone. Off in the site; the Open Graph card
-    turns it on. See SceneRig.
-  */
-  shaded: { type: Boolean, default: false },
   // A depth gradient painted into the room's vertex colours. See SceneRig.
   gradient: { type: Boolean, default: false },
   depth: { type: Number, default: 0.55 },
@@ -159,7 +153,6 @@ defineExpose({ logoGroup })
         :cam-z="camZ"
         :fog="props.fog"
         :room="props.room"
-        :shaded="props.shaded"
         :gradient="props.gradient"
         :depth="props.depth"
         :shadow="props.shadow"

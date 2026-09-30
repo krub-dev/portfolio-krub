@@ -12,9 +12,9 @@
   this page and nothing else.
 
   Everything the card is made of is a grid multiple. The page grid is 72px, so
-  the mark's slot is 504 (7 cells) with its edges on lines at 648/1152 and 72/576,
-  and the padding is 72 rather than 80 for the same reason. A box that does not
-  land on the grid reads as a mistake next to the lines.
+  the mark's slot is a whole number of cells — six by default, 432px — and the
+  padding is 72 rather than 80 for the same reason. A box that does not land on
+  the grid reads as a mistake next to the lines.
 
   The headline is written here rather than read from the hero while it is being
   decided; when it settles it moves to src/data/copy.js and the hero follows.
@@ -61,49 +61,23 @@ const showMark = ref(true)
 const showRoom = ref(true)
 const showLemon = ref(true)
 const showGrid = ref(true)
+
 /*
-  The techniques for depth, each its own switch so they can be judged apart:
+  The two depth techniques, each its own switch so they can be judged apart:
 
   - `gradient`: a soft darkening from the opening to the back, painted into the
     room's vertex colours. The grid multiplies it, so the walls and their lines
-    sink together — depth with no light and no hard facets.
-  - `depth`: how dark the far wall goes.
+    sink together — depth with no light and no hard facets. `depth` is how dark
+    the far wall goes.
   - `shadow`: a soft contact shadow behind the mark, so it has weight.
-  - `fogExp`: exponential fog, as an alternative to the room's linear fade.
-  - `shaded`: the Blender idea taken literally — the walls lit by the scene's
-    lights, one tone per face. Kept to compare; it darkens the near walls.
 */
 const gradient = ref(true)
 const depth = ref(0.55)
 const shadow = ref(true)
-const fogExp = ref(false)
-const shaded = ref(false)
 
-/*
-  What happens where the room's grid meets the page's. The room's lines converge
-  and the page's run parallel, so the change of direction happens on a boundary
-  that is not drawn — which is what reads as the grid arriving out of nowhere.
-
-  - `sink`: a soft dark inset inside the opening, so the mouth reads as a recess
-    going down into the page rather than as a grid that went wrong.
-  - `none`: nothing.
-
-  A `glow` (a light rim) was tried and read badly in white, and a `feather` (the
-  page's background drawn back over the room's edge) was worse; both are gone.
-*/
-const edge = ref('none')
-
-/*
-  Two ways to show the mark. The scene is the site's own — the polished 3D mark
-  standing in its room — and the room comes with it: it is built inside SceneRig,
-  which exposes no switch for it, so "the logo on its own" is the site's other
-  mark, the flat accent mask the hero falls back to when the scene cannot start.
-
-  Switching back has to re-arm: the halo follows the prop going from false to
-  true, so a mark that comes back with `armed` already true comes back dark.
-*/
-const flat = ref(false)
-
+// Switching the mark back on has to re-arm: the halo follows the prop going from
+// false to true, so a mark that comes back with `armed` already true comes back
+// dark.
 watch(showMark, (on) => {
   if (on) armed.value = false
 })
@@ -167,12 +141,9 @@ const gridStyle = computed(() => {
 
       <div class="controls">
         <label class="toggle"><input v-model="showMark" type="checkbox" />Mark</label>
-        <label class="toggle"><input v-model="flat" type="checkbox" />Flat</label>
         <label class="toggle"><input v-model="showRoom" type="checkbox" />Room</label>
         <label class="toggle"><input v-model="gradient" type="checkbox" />Gradient</label>
         <label class="toggle"><input v-model="shadow" type="checkbox" />Shadow</label>
-        <label class="toggle"><input v-model="fogExp" type="checkbox" />FogExp</label>
-        <label class="toggle"><input v-model="shaded" type="checkbox" />Lit</label>
         <label class="toggle"><input v-model="showLemon" type="checkbox" />Lemon</label>
         <label class="toggle"><input v-model="showGrid" type="checkbox" />Grid</label>
       </div>
@@ -184,16 +155,6 @@ const gridStyle = computed(() => {
         <label class="field"
           >size<input v-model.number="slot.size" type="number" min="2" max="8"
         /></label>
-      </div>
-
-      <div class="slot-controls">
-        <span class="size">edge</span>
-        <label class="field"
-          ><select v-model="edge">
-            <option value="sink">sink</option>
-            <option value="none">none</option>
-          </select></label
-        >
       </div>
 
       <div class="slot-controls">
@@ -252,22 +213,17 @@ const gridStyle = computed(() => {
       -->
       <div v-if="showMark" class="mark" :style="markStyle" aria-hidden="true">
         <div class="mark-inner" :style="markInnerStyle">
-          <div v-if="flat" class="flat-mark" />
-          <Suspense v-else>
+          <Suspense>
             <LogoScene
               :halo-on="armed"
               :room="showRoom"
               :gradient="gradient"
               :depth="depth"
               :shadow="shadow"
-              :shaded="shaded"
-              :fog="fogExp ? 'exp' : 'far'"
               @ready="onReady"
             />
           </Suspense>
         </div>
-
-        <div v-if="edge !== 'none'" class="edge" :class="`edge-${edge}`" />
       </div>
 
       <div v-if="showLemon" class="pet">
@@ -479,33 +435,6 @@ const gridStyle = computed(() => {
 .mark-inner {
   width: 100%;
   height: 100%;
-}
-
-/*
-  Where the room meets the page. Both are overlays, so neither touches the scene:
-  the rim is light added inside the opening, the feather is the page's own
-  background drawn back over the room's edge.
-*/
-.edge {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-/* A soft dark inset, from the shadow token, so the mouth reads as a recess
-   going down into the page. The old light rim read as a glow in white. */
-.edge-sink {
-  box-shadow: inset 0 0 44px 8px color-mix(in srgb, var(--cast) 42%, transparent);
-}
-
-/* The site's own fallback mark: the same mask the hero paints when the scene
-   cannot start, at the same 58% of the slot. */
-.flat-mark {
-  width: 58%;
-  aspect-ratio: 1.682;
-  background: var(--mark);
-  -webkit-mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
-  mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
 }
 
 /*
