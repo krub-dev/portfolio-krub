@@ -256,12 +256,14 @@ the privacy notice and the consent the law asks for.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
 - [x] **Finish the design-system page.** Rewritten on 2026-09-30 as a proper sheet rather than a patched
-  one: a sticky rail over the eight sections, then foundations (21 colour tokens grouped by use, the
-  type scale, shape with the only two shadows the project has, motion with the live keyframes) and the
-  components (buttons, blocks, cards, the dialog, the small pieces, Limonacho himself). Every specimen
-  is the real component, fed **placeholders** rather than `src/data`, so the sheet cannot rot when the
-  copy, the photos or the quotes change; and every token value is read back from the browser. Still
-  dev-only (`import.meta.env.DEV`), so it never ships; whether it should is a separate call.
+  one: a sticky rail over eleven sections, then foundations (21 colour tokens grouped by use, the type
+  scale, shape with the one shadow the project actually has, motion with the live keyframes), the
+  components (buttons, blocks, cards, small pieces) and the pieces that belong to no section (the
+  cursor, the hero's stage in a five-cell box, the chrome: navbar, footer, menu, Limonacho). **English
+  throughout** — it belongs to the repository, not to the site, so only the components' own labels
+  follow the language toggle — and every specimen is the real component fed **placeholders** rather than
+  `src/data`, so it cannot rot when the copy, the photos or the quotes change. Still dev-only
+  (`import.meta.env.DEV`); whether it should ship is a separate call.
 
 ## Mobile and responsive
 

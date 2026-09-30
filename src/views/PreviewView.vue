@@ -2,17 +2,21 @@
 /*
   DEV SCAFFOLDING — not part of the site.
 
-  The design system on one page: the foundations (colour, type, shape, motion) and
-  the components built on them, live. It is what to open when a token or a base
-  component changes, and where a change is checked in both themes and both
-  languages.
+  The design system on one page: the foundations (colour, type, shape, motion),
+  the components built on them, the cursor, the hero's stage and the chrome.
 
-  Two rules, because it is a specimen sheet and not a page:
+  Three rules, because it is a specimen sheet and not a page:
 
-  - The strings here are the *subject*, so this is the one file exempt from the
-    "no literals in a template" rule.
-  - Nothing is a copy of a component. Every specimen is the real component with
-    real data, so a specimen cannot look right while the site is broken.
+  - **English throughout.** The repository is written in English, and this page is
+    part of the repository, not of the site: the prose and the placeholders here
+    are English. Only the components' own labels follow the language toggle,
+    because those are theirs.
+  - **Placeholders, never the real content.** A specimen is about the shape of a
+    component, and the copy, the photos and the quotes all change: pointing these
+    at `src/data` would rot the sheet the first time a sentence was reworded.
+  - **Nothing is a copy.** Every specimen is the real component. The cursor is the
+    one exception, and it has to be: its parts follow the pointer, so they cannot
+    be shown standing still except as a drawing.
 
   It never ships: the route is registered under `import.meta.env.DEV`.
 */
@@ -28,11 +32,12 @@ import SpeechBubble from '../components/base/SpeechBubble.vue'
 import StackGroup from '../components/base/StackGroup.vue'
 import TabSwitch from '../components/base/TabSwitch.vue'
 import TimelineItem from '../components/base/TimelineItem.vue'
+import LemonPet from '../components/chrome/LemonPet.vue'
+import LogoStage from '../components/sections/LogoStage.vue'
 import MediaCarousel from '../components/content/MediaCarousel.vue'
 import ProjectCard from '../components/content/ProjectCard.vue'
 import SpecList from '../components/content/SpecList.vue'
-import TestimonialCard from '../components/content/TestimonialCard.vue'
-import LemonPet from '../components/chrome/LemonPet.vue'
+import Testimonials from '../components/content/Testimonials.vue'
 import { useLang } from '../composables/useLang'
 import { useTheme } from '../composables/useTheme'
 import { cvPath } from '../data'
@@ -41,7 +46,6 @@ const { theme, toggle: toggleTheme } = useTheme()
 const { lang, toggle: toggleLang } = useLang()
 const { t } = useI18n()
 
-// The rail. One entry per section, in page order.
 const SECTIONS = [
   ['colour', 'Colour'],
   ['type', 'Type'],
@@ -51,11 +55,14 @@ const SECTIONS = [
   ['blocks', 'Blocks'],
   ['cards', 'Cards'],
   ['bits', 'Small pieces'],
+  ['cursor', 'Cursor'],
+  ['stage', 'The stage'],
+  ['chrome', 'Chrome'],
 ]
 
 /*
-  Colour, grouped by what it is for rather than listed flat: a flat list is how
-  a token nobody uses survives for a year. Every value is read back from the
+  Colour, grouped by what it is for rather than listed flat: a flat list is how a
+  token nobody uses survives for a year. Every value is read back from the
   browser, so a label cannot drift from tokens.css.
 */
 const COLOUR = [
@@ -102,8 +109,8 @@ const COLOUR = [
   },
 ]
 
-// The scale, with the real sizes. One sample line for all of them, so the sizes
-// are the only thing that changes down the column.
+// The scale, with the real sizes. One sample line for all of them, so the size is
+// the only thing that changes down the column.
 const TYPE = [
   ['Display', 'clamp(38px, 6.4vw, 82px)', 'font: 700 clamp(38px,6.4vw,82px) var(--font-sans); letter-spacing:-.04em; line-height:.98'],
   ['Lead', 'clamp(18px, 2vw, 24px)', 'font: 400 clamp(18px,2vw,24px) var(--font-sans); line-height:1.5'],
@@ -122,15 +129,10 @@ const RADII = [
   ['22px', 'panels, dialogs'],
 ]
 
-/*
-  The project uses almost no shadows on purpose: elevation is a 1px `--line`
-  border, not a cast. These are the two that exist, and the second is the lemon's
-  outline, drawn with a box-shadow because it has to follow his odd silhouette.
-*/
-const SHADOWS = [
-  ['Mobile menu', '0 24px 60px rgba(0, 0, 0, 0.45)'],
-  ['Limonacho', '0 0 0 1.2px #2c7a36'],
-]
+// The only cast in the project. Elevation is a 1px --line border, not a shadow,
+// and there are no coloured shadows anywhere. (Limonacho's outline is a
+// box-shadow too, but it is an outline: it has its own specimen below.)
+const SHADOWS = [['Mobile menu', '0 24px 60px rgba(0, 0, 0, 0.45)']]
 
 const MOTION = [
   ['--ease', 'cubic-bezier(.22, 1, .36, 1)', 'the arrive-and-settle curve: pagers, panels, the capsule'],
@@ -140,6 +142,83 @@ const MOTION = [
   ['26s linear', 'marquee', 'the band under the hero'],
 ]
 
+/*
+  Placeholders, never the real content: the copy, the photos and the quotes all
+  change, and a specimen is about the shape.
+*/
+const SAMPLE = {
+  name: 'Project',
+  tag: 'CATEGORY',
+  summary: 'A line or two about the project, to see how the summary breathes inside the card.',
+  shotLabel: 'SHOT · PROJECT',
+  role: 'Role',
+  year: '2026',
+  stack: ['Technology', 'Library', 'Tool'],
+}
+
+const SAMPLE_TESTIMONIALS = [
+  {
+    quote:
+      'A sample quote, long enough that it does not fit the four lines the card clamps to, so the read more shows, which is the thing being shown here. It keeps going, because the point is to see how the clamp behaves when the text does not fit.',
+    name: 'First Last',
+    role: 'Company',
+    avatar: null,
+  },
+  {
+    quote: 'A second, shorter quote, so the pager has something to page to and the dots are not a single dot.',
+    name: 'Another Name',
+    role: 'Another company',
+    avatar: null,
+  },
+]
+
+const SAMPLE_TIMELINE = [
+  {
+    period: '2024 - 2026',
+    current: true,
+    title: 'Current position',
+    body: 'One line about the position, to see how the text breathes in the row.',
+  },
+  {
+    period: '2020 - 2024',
+    current: false,
+    title: 'Previous position',
+    body: 'Another line, to see two rows together and the border between them.',
+  },
+]
+
+// Three tiles: two plain marks and one of the dark ones that gets inverted.
+const SAMPLE_STACK = [
+  { name: 'One', icon: '/icons/java/java-original.svg', invertOnDark: false },
+  { name: 'Two', icon: '/icons/c/c-original.svg', invertOnDark: false },
+  { name: 'Three', icon: '/icons/javascript/javascript-original.svg', invertOnDark: false },
+]
+
+const SAMPLE_SOCIALS = [
+  { name: 'Network', href: '#', icon: 'linkedin' },
+  { name: 'Network', href: '#', icon: 'github' },
+]
+
+// The chrome: the pieces that sit over every route and belong to no section.
+const CHROME = [
+  [
+    'Navbar',
+    'Fixed at the top. Full width and transparent over the hero; past 60px of scroll it goes compact: smaller padding and logo, a translucent blurred capsule, and it shrinks to hug its own contents. That width is measured, because `width: auto` cannot be animated.',
+  ],
+  [
+    'Footer',
+    'Fixed at the bottom, slid out of sight until the hero is behind you, and it shares that moment with Limonacho. It measures itself and publishes `--footer-h`, so the page reserves exactly its height.',
+  ],
+  [
+    'Mobile menu',
+    'The panel behind the menu button, and the one place in the project with a cast shadow.',
+  ],
+  [
+    'Scroll indicator',
+    'The word "Scroll" set vertically with a line filled by the accent in proportion to the scroll. Only on a route with a hero, and it fades out at 98%.',
+  ],
+]
+
 // Live state for the specimens that need it.
 const tab = ref('exp')
 const tabOptions = computed(() => [
@@ -147,59 +226,7 @@ const tabOptions = computed(() => [
   { value: 'edu', label: t('tab.edu') },
 ])
 
-/*
-  Placeholders, never the real content. A specimen sheet is about the shape of a
-  component, and the copy, the photos and the quotes all change: pointing these
-  specimens at `src/data` would rot the sheet the first time a sentence was
-  reworded, and would put content in a page whose job is the design.
-*/
-const SAMPLE = {
-  name: 'Proyecto',
-  tag: 'CATEGORÍA',
-  summary: 'Una o dos líneas sobre el proyecto, para ver cómo respira el resumen en la tarjeta.',
-  shotLabel: 'SHOT · PROYECTO',
-  role: 'Rol',
-  year: '2026',
-  stack: ['Tecnología', 'Librería', 'Herramienta'],
-  quote:
-    'Una reseña de ejemplo, lo bastante larga como para que el texto no quepa en las cuatro líneas a las que se recorta la tarjeta, y aparezca el leer más, que es justo lo que se está enseñando aquí. Sigue y sigue, porque el punto es ver cómo se comporta el recorte cuando el texto no cabe.',
-  author: 'Nombre Apellido',
-  authorRole: 'Empresa',
-}
-
 const dialogOpen = ref(false)
-// The quote's read more, live.
-const quoteOpen = ref(false)
-
-// Two links, one per icon the map carries, with names that are not the site's.
-const SAMPLE_SOCIALS = [
-  { name: 'Red', href: '#', icon: 'linkedin' },
-  { name: 'Red', href: '#', icon: 'github' },
-]
-
-// Two timeline rows, so the row and the border between rows are both visible.
-const SAMPLE_TIMELINE = [
-  {
-    period: '2024 - 2026',
-    current: true,
-    title: 'Puesto actual',
-    body: 'Una línea sobre el puesto, para ver cómo respira el texto en la fila.',
-  },
-  {
-    period: '2020 - 2024',
-    current: false,
-    title: 'Puesto anterior',
-    body: 'Otra línea, para ver dos filas seguidas y el borde entre ellas.',
-  },
-]
-
-// Three tiles, one per kind: a plain mark, and one of the dark ones that gets
-// inverted in the dark theme.
-const SAMPLE_STACK = [
-  { name: 'Uno', icon: '/icons/java/java-original.svg', invertOnDark: false },
-  { name: 'Dos', icon: '/icons/c/c-original.svg', invertOnDark: false },
-  { name: 'Tres', icon: '/icons/javascript/javascript-original.svg', invertOnDark: false },
-]
 
 // Every token value, read back from the browser so the labels are the truth.
 const resolved = ref({})
@@ -225,12 +252,18 @@ onMounted(readTokens)
       <a v-for="[id, label] in SECTIONS" :key="id" class="rail-link" :href="`#${id}`">{{ label }}</a>
 
       <div class="rail-controls">
-        <button class="toggle" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
-          {{ theme === 'dark' ? 'Light' : 'Dark' }}
-        </button>
-        <button class="toggle" type="button" :aria-label="t('a11y.toggleLang')" @click="toggleLang">
-          {{ lang === 'en' ? 'ES' : 'EN' }}
-        </button>
+        <div class="rail-control">
+          <button class="toggle" type="button" :aria-label="t('a11y.toggleTheme')" @click="toggleTheme">
+            {{ theme === 'dark' ? 'Light' : 'Dark' }}
+          </button>
+          <span class="rail-caption">Theme</span>
+        </div>
+        <div class="rail-control">
+          <button class="toggle" type="button" :aria-label="t('a11y.toggleLang')" @click="toggleLang">
+            {{ lang === 'en' ? 'ES' : 'EN' }}
+          </button>
+          <span class="rail-caption">Language</span>
+        </div>
       </div>
     </nav>
 
@@ -240,8 +273,8 @@ onMounted(readTokens)
         <h1 class="title">Design system</h1>
         <p class="lead">
           One token file drives two themes and six accents, and no component keeps a colour or a
-          string of its own. Everything below is the real thing: switch the theme and the language
-          and watch it follow.
+          string of its own. Everything below is the real thing, fed placeholders: the copy, the
+          photos and the quotes all change, the shape does not.
         </p>
       </header>
 
@@ -259,9 +292,9 @@ onMounted(readTokens)
           </div>
         </div>
         <p class="note">
-          <code>--acc</code> is the same in both themes; what changes is what is painted with it.
-          The element-specific ones are not theme colours — a highlight stays white and a shadow
-          stays dark, because the opposite would be a bug, not a feature.
+          <code>--acc</code> is the same in both themes; what changes is what is painted with it. The
+          element-specific ones are not theme colours: a highlight stays white and a shadow stays
+          dark, because the opposite would be a bug, not a feature.
         </p>
       </section>
 
@@ -277,7 +310,7 @@ onMounted(readTokens)
               <span class="row-name">{{ name }}</span>
               <code class="row-spec">{{ spec }}</code>
             </div>
-            <div class="row-demo" :style="css">Desarrollo cosas que aguantan</div>
+            <div class="row-demo" :style="css">I build things that hold up</div>
           </div>
         </div>
       </section>
@@ -298,8 +331,8 @@ onMounted(readTokens)
           </div>
         </div>
         <p class="note">
-          These two are the only shadows in the project. Elevation is a <code>1px --line</code>
-          border, not a cast, and there are no coloured shadows anywhere.
+          That is the only cast in the project. Elevation is a <code>1px --line</code> border, not a
+          shadow, and there are no coloured shadows anywhere.
         </p>
       </section>
 
@@ -336,7 +369,7 @@ onMounted(readTokens)
                 <span class="dot-ring" />
                 <span class="dot-core" />
               </span>
-              <span class="dot-label">Disponible</span>
+              <span class="dot-label">Available</span>
             </div>
             <code class="anim-name">dotHalo 2.6s · core fixed, ring pulses</code>
           </div>
@@ -369,8 +402,9 @@ onMounted(readTokens)
           </BaseButton>
         </div>
         <p class="note">
-          The dimmed one is the send button with the form not ready; the last is the CV's download,
-          an icon with the words on the <code>aria-label</code>.
+          The dimmed one is the send button with the form not ready; the last is the CV's download, an
+          icon with the words on the <code>aria-label</code>. There are no capsule pills: the radius
+          is 10px, and the only 999px in the project is the pager's dot.
         </p>
       </section>
 
@@ -434,33 +468,26 @@ onMounted(readTokens)
 
         <p class="group-label">The modal's media</p>
         <p class="note">
-          A horizontal track of slides, paged by the dots — the rail's indicator on its side — and by
-          a drag.
+          A horizontal track of slides, paged by the dots (the rail's indicator on its side) and by a
+          drag. With no screenshots each slide is the striped frame.
         </p>
         <div class="media-demo">
           <MediaCarousel
             :images="[]"
             :slides="4"
-            slug="proyecto"
+            slug="project"
             :name="SAMPLE.name"
             :shot-label="SAMPLE.shotLabel"
           />
         </div>
 
-        <p class="group-label">Quote</p>
+        <p class="group-label">Testimonials</p>
         <p class="note">
-          The quote has no box of its own: on the site the pager's card is the frame, with the accent
-          header and the dots down the side. Here it sits in a plain frame, with the read more live.
+          One quote in the DOM at a time, in its own card: a filled accent header with the label and
+          the position, the quote mark behind, the attribution, the clamp and the read more, and the
+          dots down the side. Fed placeholders here.
         </p>
-        <div class="quote-demo">
-          <TestimonialCard
-            :quote="SAMPLE.quote"
-            :name="SAMPLE.author"
-            :role="SAMPLE.authorRole"
-            :open="quoteOpen"
-            @toggle="quoteOpen = !quoteOpen"
-          />
-        </div>
+        <Testimonials :entries="SAMPLE_TESTIMONIALS" />
 
         <p class="group-label">Dialog</p>
         <p class="note">
@@ -476,11 +503,11 @@ onMounted(readTokens)
         <h2 class="h2">Small pieces</h2>
         <p class="group-label">Availability</p>
         <div class="specimens">
-          <AvailabilityBadge label="Disponible" />
+          <AvailabilityBadge label="Available" />
         </div>
         <p class="group-label">A speech bubble</p>
         <div class="specimens">
-          <SpeechBubble text="Un mensaje de ejemplo" />
+          <SpeechBubble text="A sample message" />
         </div>
         <p class="group-label">Social links</p>
         <div class="specimens">
@@ -490,21 +517,72 @@ onMounted(readTokens)
         <div class="spec-demo">
           <SpecList :role="SAMPLE.role" :year="SAMPLE.year" :stack="SAMPLE.stack" />
         </div>
+      </section>
+
+      <section id="cursor" class="block">
+        <h2 class="h2">Cursor</h2>
+        <p class="note">
+          The native cursor is hidden and replaced by three elements that follow the pointer: a dot
+          that arrives at once, a ring that trails it, and a hint a beat further back. The ring opens
+          over anything interactive. There is no cursor at all on touch.
+        </p>
+        <div class="specimens cursor-specimens">
+          <span class="c-dot" />
+          <span class="c-ring" />
+          <span class="c-hint">↑</span>
+          <span class="c-hint">↓</span>
+          <span class="c-hint c-360" />
+        </div>
+        <p class="note">
+          Dot 10px, ring 40px, hint 18px, all in <code>--acc-solid</code> (the same in both themes).
+          Over the hero the hint becomes the gesture: ↑ over the closed blind, ↓ over the coil, and
+          the 360 mark over the mark itself, once the blind has finished moving. These are drawn,
+          because the real ones follow the pointer and cannot stand still.
+        </p>
+      </section>
+
+      <section id="stage" class="block">
+        <h2 class="h2">The stage</h2>
+        <p class="note">
+          The hero's square slot for the 3D scene: a box of whole 72px cells (five here), a slim
+          brushed-metal frame, a roller blind that lifts on a click, and the mark turning inside.
+          The scene is not mounted below 900px, so this is the only place to see it small. Click the
+          blind.
+        </p>
+        <div class="stage-demo">
+          <LogoStage :snap="false" />
+        </div>
+      </section>
+
+      <section id="chrome" class="block">
+        <h2 class="h2">Chrome</h2>
+        <p class="note">
+          The pieces that sit over every route and belong to no section. They are live on this page:
+          the bar above, the footer below, the cursor, and Limonacho.
+        </p>
+        <div class="rows">
+          <div v-for="[name, what] in CHROME" :key="name" class="row">
+            <div class="row-meta">
+              <span class="row-name">{{ name }}</span>
+            </div>
+            <div class="row-demo dict wrap">{{ what }}</div>
+          </div>
+        </div>
 
         <p class="group-label">Limonacho</p>
         <p class="note">
-          He is chrome, not a piece of a section: he lives in the bottom-right corner of the viewport,
-          so he is over this sheet rather than in it. Poke him.
+          He is chrome too: bottom-right, pure CSS, flat accent fill and no gradient. He rides in
+          from the right with the footer. Poke him.
         </p>
         <LemonPet />
       </section>
 
       <footer class="outro">
         <p class="note">
-          The repository is written in English (identifiers, comments, commits); what a visitor reads
-          is the prose in <code>src/data/</code>, both languages side by side, and the interface
-          strings in <code>src/locales/</code>. This sheet is the one file exempt from "no literals in
-          a template", because its strings are the subject, not content.
+          English throughout, because the repository is written in English and this page belongs to
+          it, not to the site: only the components' own labels follow the language toggle. The prose a
+          visitor reads lives in <code>src/data/</code> and the interface strings in
+          <code>src/locales/</code>.
         </p>
       </footer>
     </div>
@@ -522,8 +600,8 @@ onMounted(readTokens)
       <div class="dialog-body">
         <p class="note">
           The panel and its behaviour are the shell's; what is inside is the caller's. The backdrop
-          is one soft blur over a flat scrim — one blur across everything behind, not one per
-          element.
+          is one soft blur over a flat scrim (one blur across everything behind, not one per
+          element).
         </p>
         <p v-for="n in 12" :key="n" class="note">Scroll line {{ n }}.</p>
       </div>
@@ -576,8 +654,22 @@ onMounted(readTokens)
 
 .rail-controls {
   display: flex;
-  gap: 8px;
-  margin-top: 16px;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.rail-control {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.rail-caption {
+  font: 400 10px var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-3);
 }
 
 .toggle {
@@ -585,8 +677,7 @@ onMounted(readTokens)
   color: var(--fg-2);
   background: transparent;
   border: 1px solid var(--line);
-  /* 10px, the project's button radius. There are no capsule pills here: the only
-     999px in the site is the pager's dot. */
+  /* 10px, the project's button radius: there are no capsule pills here. */
   border-radius: 10px;
   padding: 7px 14px;
   cursor: pointer;
@@ -935,16 +1026,6 @@ onMounted(readTokens)
   max-width: 640px;
 }
 
-/* The quote has no box of its own: on the site the pager's card is the frame.
-   Here it gets a plain one. */
-.quote-demo {
-  max-width: 560px;
-  padding: 22px clamp(18px, 2.6vw, 26px);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--surface);
-}
-
 .spec-demo {
   max-width: 340px;
 }
@@ -953,6 +1034,50 @@ onMounted(readTokens)
   width: 15px;
   height: 15px;
   display: block;
+}
+
+/* Cursor ------------------------------------------------------------------ */
+/* Drawn, because the real elements follow the pointer. Same sizes and colours. */
+.cursor-specimens {
+  gap: 26px;
+  padding: 24px 0;
+}
+
+.c-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--acc-solid);
+}
+
+.c-ring {
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--acc-solid);
+  border-radius: 50%;
+}
+
+.c-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font: 700 18px var(--font-mono);
+  line-height: 1;
+  color: var(--acc-solid);
+}
+
+.c-360 {
+  background: var(--acc-solid);
+  -webkit-mask: url('/assets/img/360icon.svg') center / contain no-repeat;
+  mask: url('/assets/img/360icon.svg') center / contain no-repeat;
+}
+
+/* The stage --------------------------------------------------------------- */
+.stage-demo {
+  width: 360px;
+  max-width: 100%;
 }
 
 /* The dialog specimen ----------------------------------------------------- */
