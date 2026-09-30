@@ -53,10 +53,9 @@ const props = defineProps({
     never does, so the default is the stage's.
   */
   room: { type: Boolean, default: true },
-  // How dark the room goes toward the back, reaching its own edge. See SceneRig.
+  // How dark the room goes, and how much of that the opening shares. See SceneRig.
   opacity: { type: Number, default: 0 },
-  // A soft contact shadow behind the mark. See SceneRig.
-  shadow: { type: Boolean, default: false },
+  diffuse: { type: Number, default: 0.65 },
   // A multiplier on the mark's fit-to-stage size, so it can be sized by hand
   // without shrinking the room. See LogoModel.
   markScale: { type: Number, default: 1 },
@@ -156,7 +155,7 @@ defineExpose({ logoGroup })
         :fog="props.fog"
         :room="props.room"
         :opacity="props.opacity"
-        :shadow="props.shadow"
+        :diffuse="props.diffuse"
       />
 
       <LogoModel

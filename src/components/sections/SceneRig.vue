@@ -50,17 +50,17 @@ const props = defineProps({
   /*
     How dark the room goes. It is painted into the geometry's vertex colours and
     the grid texture multiplies it, so the walls and their lines sink together —
-    depth without a light. `opacity` is the darkening at the far wall; the opening
-    takes half of it, so the recess reaches the room's own edge instead of fading
-    to the page before it. 0 is the site's flat `--ink`.
+    depth without a light. `opacity` is the darkening at the far wall. 0 is the
+    site's flat `--ink`.
   */
   opacity: { type: Number, default: 0 },
   /*
-    A soft dark blob just behind the mark, on the wall. A plane with a radial
-    gradient in `--cast`, transparent, that gives the floating mark something to
-    cast onto — the cheap contact shadow, no light and no shadow map.
+    How that darkening is spread. 0 is one flat tone across the whole room, so it
+    reaches the opening as dark as the back; 1 leaves the opening at `--ink` and
+    puts all of it at the back. `opacity` is the far wall either way; this is how
+    much of it the opening shares.
   */
-  shadow: { type: Boolean, default: false },
+  diffuse: { type: Number, default: 0.65 },
 })
 
 // The box's opening is cut to land exactly on the stage: at its distance the
@@ -85,12 +85,6 @@ const ROOM_DEPTH = 400
 // sit so its opening still lands on OPENING_Z.
 const k = computed(() => (props.camZ - OPENING_Z) / (BASE_CAM_Z - OPENING_Z))
 const roomZ = computed(() => OPENING_Z - (k.value * ROOM_DEPTH) / 2)
-// The contact shadow, in the room's own coordinates so it scales and travels
-// with the box. Local z 120 is a little over halfway back, just behind the mark.
-const SHADOW_LOCAL_Z = 120
-const SHADOW_LOCAL_Y = -18
-const shadowZ = computed(() => roomZ.value + k.value * SHADOW_LOCAL_Z)
-const shadowY = computed(() => k.value * SHADOW_LOCAL_Y)
 /*
   How the tunnel fades out with depth. All of them fade to `--ink`, the page's own
   background, because that is what the tunnel should disappear into.
@@ -121,7 +115,6 @@ const PEEK_Y = 2
 
 const room = ref(null)
 const roomGeo = ref(null)
-const shadow = ref(null)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const { camera, scene, renderer } = useTresContext()
@@ -152,9 +145,6 @@ function tokens() {
       Open Graph card does — two grids in two colours read as a mistake.
     */
     grid: read('--grid', 'rgba(255,255,255,.045)'),
-    // The contact shadow is a shadow, so it takes the shadow token and stays
-    // dark in both themes.
-    cast: read('--cast', 'rgba(0,0,0,.85)'),
   }
 }
 
@@ -193,11 +183,11 @@ function buildRoomGeometry() {
     for (const corner of corners) {
       positions.push(corner[0], corner[1], corner[2])
       uvs.push(project(corner)[0], project(corner)[1])
-      // The darkening, per vertex: half of `opacity` at the opening, all of it at
-      // the back. Pushed always, read only when the material asks for vertex
-      // colours.
+      // The darkening, per vertex: `diffuse` of the way to the far wall's tone at
+      // the opening, all of it at the back. Pushed always, read only when the
+      // material asks for vertex colours.
       const t = (zn - corner[2]) / (zn - zf)
-      const c = 1 - props.opacity * (0.5 + 0.5 * t)
+      const c = 1 - props.opacity * (1 - props.diffuse * (1 - t))
       colors.push(c, c, c)
     }
     indices.push(base, base + 1, base + 2, base, base + 2, base + 3)
@@ -288,46 +278,6 @@ function buildRoom() {
   room.value = texture
 }
 
-/*
-  `--cast` at a given alpha. The token is an `rgba(...)`, and a canvas gradient
-  needs the alpha per stop, so the channels are kept and only the alpha swapped.
-*/
-function fade(color, alpha) {
-  const m = color.match(/rgba?\(([^)]+)\)/)
-  if (!m) return color
-  const [r, g, b] = m[1].split(',').map((s) => s.trim())
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
-/*
-  The mark's contact shadow: a radial gradient in `--cast`, painted on a plane
-  just behind the mark. No light and no shadow map — it is a sprite the wall
-  shows through where it is transparent.
-
-  Five stops, not two: most of the alpha is gone by two thirds of the radius, so
-  the blob reads as a blur rather than as a disc with a hard rim. The centre
-  alpha is the 0.5 that the material's old 0.6 opacity gave over the token.
-*/
-function buildShadow() {
-  const { cast } = tokens()
-  const size = 256
-  const canvas = makeCanvas(size)
-  const ctx = canvas.getContext('2d')
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  g.addColorStop(0, fade(cast, 0.5))
-  g.addColorStop(0.3, fade(cast, 0.36))
-  g.addColorStop(0.55, fade(cast, 0.2))
-  g.addColorStop(0.8, fade(cast, 0.07))
-  g.addColorStop(1, 'transparent')
-  ctx.fillStyle = g
-  ctx.fillRect(0, 0, size, size)
-
-  const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
-  shadow.value?.dispose()
-  shadow.value = texture
-}
-
 function buildFog() {
   const { fogEnd } = tokens()
   const mode = FOG_MODES[props.fog] ?? FOG_MODES.far
@@ -363,12 +313,11 @@ function applyFogScale() {
 // recoloured. The zoom only re-scales it.
 watch(() => props.fog, buildFog)
 watch(k, applyFogScale)
-// The darkening lives in the geometry's vertex colours, so the dial rebuilds it.
-watch(() => props.opacity, buildRoomGeometry)
+// The darkening lives in the geometry's vertex colours, so the dials rebuild it.
+watch([() => props.opacity, () => props.diffuse], buildRoomGeometry)
 
 function repaint() {
   buildRoom()
-  buildShadow()
   buildFog()
 }
 
@@ -383,7 +332,6 @@ onMounted(() => {
 onUnmounted(() => {
   observer?.disconnect()
   room.value?.dispose()
-  shadow.value?.dispose()
   roomGeo.value?.dispose()
   environment?.dispose()
 })
@@ -441,19 +389,4 @@ onBeforeRender(({ delta }) => {
     />
   </TresMesh>
 
-  <!-- The mark's contact shadow: a soft blob on the wall behind it. -->
-  <TresMesh
-    v-if="props.room && props.shadow && shadow"
-    :position="[0, shadowY, shadowZ]"
-    :scale="[k, k, k]"
-  >
-    <TresMeshBasicMaterial
-      :map="shadow"
-      :transparent="true"
-      :depth-write="false"
-      :tone-mapped="false"
-      :fog="false"
-    />
-    <TresPlaneGeometry :args="[170, 170]" />
-  </TresMesh>
 </template>

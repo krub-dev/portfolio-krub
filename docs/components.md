@@ -310,7 +310,7 @@ still move), the off-screen pause (an IntersectionObserver at 60%) and the fps a
 the mark's GLB and reports the download up as `ready` and `progress`. The camera and the depth are
 `SceneRig`'s. Prop: `room` (boolean, default true) — off, the room is not drawn and the mark stands
 alone, which is what the Open Graph card asks for and what the stage never does. Props: the pieces the
-Open Graph card tries — `opacity` (number, default 0), `shadow` (boolean, default false) and
+Open Graph card tries — `opacity` (number, default 0), `diffuse` (number, default 0.65) and
 `markScale` (number, default 1). The stage uses none of them.
 
 ### SceneRig
@@ -320,11 +320,10 @@ opening lands on the stage, and divided into the stage's seven cells — carries
 faded by a `Fog` read from `--ink`; it scales with the wheel's zoom so the opening stays put. The
 camera leans a little with the pointer's `tilt`, always looking back at the mark. A child of the
 canvas, because `useLoop` and `useTresContext` need the renderer. Prop: `room` (boolean, default true)
-— the box is the whole of this component, so off is the rig without it. Prop: `opacity` (number,
+— the box is the whole of this component, so off is the rig without it. Props: `opacity` (number,
 default 0) — how dark the room goes toward the back, painted into the geometry's vertex colours so the
-walls and their grid sink together; the opening takes half of it, so the recess reaches the room's own
-edge. Prop: `shadow` (boolean, default false) — a soft contact shadow behind the mark. See decisions
-78–82 and 102.
+walls and their grid sink together; and `diffuse` (number, default 0.65) — how much of that darkening
+the opening shares, from one flat tone at 0 to all of it at the back at 1. See decisions 78–82 and 102.
 
 ### LogoModel
 The mesh and everything about how it looks and moves: the two `MeshStandardMaterial`s (the front in

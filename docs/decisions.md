@@ -401,16 +401,15 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
 Ways to make the open box read as a recess, all gated so the site keeps the box it was built with —
 the Open Graph card is where they are weighed.
 
-- **A darkening in the vertex colours, and the opening takes half of it.** The geometry carries a
-  vertex colour per corner: the far wall is `opacity` dark and the opening is half that, so the recess
-  reaches the room's own edge instead of fading back to `--ink` before it. The grid texture multiplies
-  the same colour, so the walls *and their lines* sink together. `opacity` is the one dial; 0 is the
-  site's flat box. Measured on the card at 0.6: the opening sits at 8/255 against the page's 12, and the
-  walls darken from there toward the back. No light and no hard facet.
-- **A contact shadow.** A plane just behind the mark with a radial gradient in `--cast`, transparent,
-  `depthWrite: false`, following the room's scale. It gives the floating mark something to cast onto.
-  The gradient runs over five stops, most of its alpha gone by two thirds of the radius, so it reads as
-  a blur rather than as a disc; the first two-stop version had a hard rim and was too strong.
+- **A darkening in the vertex colours, with two dials.** The geometry carries a vertex colour per
+  corner: the far wall is `opacity` dark and the opening takes `diffuse` of the way there, so the recess
+  can reach the room's own edge (0) or fade back to `--ink` before it (1). The grid texture multiplies
+  the same colour, so the walls *and their lines* sink together. `opacity` 0 is the site's flat box.
+  Measured on the card at opacity 0.6, diffuse 0.65: the opening sits at 10/255 against the page's 12
+  and the walls darken to 8 by the middle. No light and no hard facet.
+- **A contact shadow was tried and taken out.** A plane behind the mark with a radial gradient in
+  `--cast`, over five stops so it read as a blur rather than a disc. On a room this dark it was a black
+  blob on black, and the owner never had it on, so it and its token read went.
 - **The mark's size is a dial in the scene, not a CSS transform.** Scaling the canvas to fit the mark
   took the room with it and left the room at 90% of the slot, a band short of its edge. `markScale` on
   LogoModel multiplies the fit-to-stage scale, so the mark can be sized by hand while the room fills the

@@ -64,12 +64,13 @@ const showGrid = ref(true)
 
 /*
   The room's darkening: painted into its vertex colours, so the walls and their
-  grid sink together toward the back. `opacity` is how dark it goes — 0 is the
-  site's flat box, and the recess always reaches the room's own edge. `shadow` is
-  the soft contact shadow behind the mark, off by default.
+  grid sink together toward the back. `opacity` is how dark the far wall goes; 0
+  is the site's flat box. `diffuse` is how much of that darkening the opening
+  shares — 0 is one flat tone edge to back, 1 leaves the opening at the page tone
+  and keeps it all for the back.
 */
 const opacity = ref(0.6)
-const shadow = ref(false)
+const diffuse = ref(0.65)
 
 // Switching the mark back on has to re-arm: the halo follows the prop going from
 // false to true, so a mark that comes back with `armed` already true comes back
@@ -132,7 +133,6 @@ const gridStyle = computed(() => {
       <div class="controls">
         <label class="toggle"><input v-model="showMark" type="checkbox" />Mark</label>
         <label class="toggle"><input v-model="showRoom" type="checkbox" />Room</label>
-        <label class="toggle"><input v-model="shadow" type="checkbox" />Shadow</label>
         <label class="toggle"><input v-model="showLemon" type="checkbox" />Lemon</label>
         <label class="toggle"><input v-model="showGrid" type="checkbox" />Grid</label>
       </div>
@@ -151,6 +151,18 @@ const gridStyle = computed(() => {
         <label class="field"
           ><input
             v-model.number="opacity"
+            type="number"
+            min="0"
+            max="1"
+            step="0.05"
+        /></label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">diffuse</span>
+        <label class="field"
+          ><input
+            v-model.number="diffuse"
             type="number"
             min="0"
             max="1"
@@ -205,7 +217,7 @@ const gridStyle = computed(() => {
               :halo-on="armed"
               :room="showRoom"
               :opacity="opacity"
-              :shadow="shadow"
+              :diffuse="diffuse"
               :mark-scale="markScale"
               @ready="onReady"
             />
