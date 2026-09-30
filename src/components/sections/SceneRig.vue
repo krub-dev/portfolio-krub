@@ -122,10 +122,15 @@ function tokens() {
   const css = getComputedStyle(document.documentElement)
   const read = (name, fallback) => css.getPropertyValue(name).trim() || fallback
   return {
-    surface: read('--surface', '#141416'),
     ink: read('--ink', '#0c0c0d'),
     fogEnd: read('--fog-end', '#0c0c0d'),
-    grid: read('--line', 'rgba(255,255,255,.11)'),
+    /*
+      The page's own grid colour, not `--line`. The room's lines are meant to be
+      the page's lines carried into depth: with the ring lit, the difference is
+      invisible, but the moment the room is shown without it — which is what the
+      Open Graph card does — two grids in two colours read as a mistake.
+    */
+    grid: read('--grid', 'rgba(255,255,255,.045)'),
   }
 }
 
@@ -201,11 +206,15 @@ function buildRoomGeometry() {
 }
 
 /*
-  The room's grid, painted from the theme's tokens. The face texture is `--line`,
-  so the grid reads as the walls' own texture rather than a faint wash.
+  The room's grid, painted from the theme's tokens. Both halves take the page's
+  own colours — the walls the page background, the lines the page grid — so the
+  room's grid *is* the page's grid carried into depth: same colour, same cells at
+  the opening. With the ring lit the wall tone was hidden behind the light, but
+  the moment the room is shown without it, which is what the Open Graph card does,
+  a lighter box with brighter lines reads as a second, mismatched grid.
 */
 function buildRoom() {
-  const { surface, grid } = tokens()
+  const { ink, grid } = tokens()
   /*
     A whole number of cells across the tile, so it is exactly one repeat and
     wraps without a seam. At 512 the tile was not a multiple of seven, and
@@ -216,7 +225,7 @@ function buildRoom() {
   const size = cellPx * CELLS
   const canvas = makeCanvas(size)
   const ctx = canvas.getContext('2d')
-  ctx.fillStyle = surface
+  ctx.fillStyle = ink
   ctx.fillRect(0, 0, size, size)
 
   ctx.strokeStyle = grid

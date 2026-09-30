@@ -96,13 +96,15 @@ the privacy notice and the consent the law asks for.
   viewport and downscale. The card is fine either way; the modal is what shows the difference.
 - [ ] **The Open Graph image.** Being designed on a dev-only page, `/og`
   (`src/views/OgView.vue`), which draws the card at its real 1200×630 out of the site's own pieces —
-  the 3D mark, lit, and Limonacho — instead of screenshots of them. Iterate there; once it is settled,
-  `build-og.mjs` in the cv tool screenshots that page into `public/assets/img/og-banner.png`. Two
-  earlier attempts are worth remembering: a hand-drawn copy of the hero, which drifts and cannot draw
-  the 3D at all, and a capture of the built site, which dragged the cursor into the middle of the mark
-  and clipped the mascot's leaf off. The structured data beside it is done (2026-09-23): `workLocation`
-  is Murcia, and the X handle stays in `sameAs` and in the `twitter:` tags on purpose — it ties the
-  domain to the profile even though X is no longer a link on the site.
+  the 3D mark, lit, and Limonacho — instead of screenshots of them. **The page is scaffolding.** When
+  the design settles, the PNG is taken from it by hand and the page, its route and the cv tool's
+  `build-og.mjs` come out before the repository goes public: a Playwright pipeline for one image is
+  more machinery than the image is worth. Two earlier attempts are worth remembering: a hand-drawn copy
+  of the hero, which drifts and cannot draw the 3D at all, and a capture of the built site, which
+  dragged the cursor into the middle of the mark and clipped the mascot's leaf off. The structured data
+  beside it is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in `sameAs` and in
+  the `twitter:` tags on purpose — it ties the domain to the profile even though X is no longer a link
+  on the site.
 - [ ] **A final banner for LinkedIn and the GitHub profile README.** Same artwork as the Open Graph
   card, so it comes with it.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
