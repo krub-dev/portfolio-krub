@@ -208,7 +208,9 @@ pager's pane is the box. Whether it is open belongs to the pager, which is the o
 the card emits `toggle` and reads the state back as a prop. See decisions.md 56 and 72.
 
 ### Testimonials
-The block between the Stack and Contact: a filled accent header carrying the label and a `n / total`,
+Prop: `entries` (array | null — null reads them from `src/data`; the design-system sheet feeds
+placeholders). The block between the Stack and Contact: a filled accent header carrying the label and
+a `n / total`,
 and a vertical pager, one quote at a time. **One entry is in the DOM at all** — the current one — and
 changing swaps it, so the block never grows with the number of quotes; the pane's height is animated to
 the card on show. Navigation is the vertical dot column and a click on the card (which wraps); the pager
@@ -318,7 +320,10 @@ canvas on purpose — `useLoop` and `useTresContext` need the renderer the canva
 ## Chrome components (these carry behaviour)
 
 ### TheNavbar
-Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
+Props: `activeId` (string), `menuOpen` (boolean), `state` (`'wide' | 'compact' | null` — null follows
+the scroll, which is the real behaviour; the design-system sheet pins it to show both). Publishes its
+own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`.
+Emits `toggle-menu`; theme and language are
 handled directly through their composables, and the `AppearanceControl` and `LangButton` sit beside
 it. The measurement is taken with the compact layout applied for one frame, so the hand-over is
 accounted for: once the capsule compacts those two give way to a `SettingsMenu`, and below 900px
@@ -367,7 +372,9 @@ cleanup goes with the unmount. His pupils follow the cursor, and on touch they g
 because with no tail centred over him it reads as sitting on his leaf.
 
 ### BackgroundGrid
-Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the crossfade).
+Props: `variant` (`'hero' | 'global' | 'page'`), `size` (72), `visible` (boolean, for the crossfade).
+`page` is the whole document, absolute and with no fade: the design-system sheet wears it, where there
+is no hero to leave behind and so no second layer to crossfade into.
 
 ### GridCell
 Prop: `masked` (boolean — which layer is showing: false while the absolute hero grid is visible, true

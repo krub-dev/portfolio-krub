@@ -31,6 +31,10 @@ if (import.meta.env.DEV) {
     path: '/preview',
     name: 'preview',
     component: () => import('../views/PreviewView.vue'),
+    // The sheet documents the chrome, so it does not wear it: no bar, no footer,
+    // no lemon over the page, and a single grid that scrolls instead of the
+    // hero/global pair.
+    meta: { bare: true },
   })
   routes.push({
     path: '/logo-lab',

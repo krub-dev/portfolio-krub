@@ -108,13 +108,29 @@ onBeforeUnmount(() => landTimers.forEach(clearTimeout))
 
 <template>
   <div class="app" data-hide-cursor>
-    <BackgroundGrid variant="hero" :visible="!pastHero" />
-    <BackgroundGrid variant="global" :visible="pastHero" />
+    <!--
+      A bare route (the design-system sheet) documents the chrome instead of
+      wearing it, and wants one grid that scrolls the whole page rather than the
+      hero/global pair.
+    -->
+    <template v-if="route.meta.bare">
+      <BackgroundGrid variant="page" />
+    </template>
+    <template v-else>
+      <BackgroundGrid variant="hero" :visible="!pastHero" />
+      <BackgroundGrid variant="global" :visible="pastHero" />
+    </template>
     <GridCell v-if="config.showGridCell" :masked="pastHero" />
 
-    <TheNavbar :active-id="activeId" :menu-open="menuOpen" @toggle-menu="menuOpen = !menuOpen" />
+    <TheNavbar
+      v-if="!route.meta.bare"
+      :active-id="activeId"
+      :menu-open="menuOpen"
+      @toggle-menu="menuOpen = !menuOpen"
+    />
 
     <TheMobileMenu
+      v-if="!route.meta.bare"
       :open="menuOpen"
       :active-id="activeId"
       @close="menuOpen = false"
@@ -137,7 +153,7 @@ onBeforeUnmount(() => landTimers.forEach(clearTimeout))
       stays, and usePastHero brings it in from the first frame there.
     -->
     <LemonPet v-if="config.showLemon && route.meta.hero" />
-    <TheFooter @go-top="goTop" />
+    <TheFooter v-if="!route.meta.bare" @go-top="goTop" />
   </div>
 </template>
 

@@ -33,6 +33,8 @@ import StackGroup from '../components/base/StackGroup.vue'
 import TabSwitch from '../components/base/TabSwitch.vue'
 import TimelineItem from '../components/base/TimelineItem.vue'
 import LemonPet from '../components/chrome/LemonPet.vue'
+import TheFooter from '../components/chrome/TheFooter.vue'
+import TheNavbar from '../components/chrome/TheNavbar.vue'
 import LogoStage from '../components/sections/LogoStage.vue'
 import MediaCarousel from '../components/content/MediaCarousel.vue'
 import ProjectCard from '../components/content/ProjectCard.vue'
@@ -57,7 +59,9 @@ const SECTIONS = [
   ['bits', 'Small pieces'],
   ['cursor', 'Cursor'],
   ['stage', 'The stage'],
-  ['chrome', 'Chrome'],
+  ['navbar', 'Navbar'],
+  ['footer', 'Footer'],
+  ['lemon', 'Limonacho'],
 ]
 
 /*
@@ -197,26 +201,6 @@ const SAMPLE_STACK = [
 const SAMPLE_SOCIALS = [
   { name: 'Network', href: '#', icon: 'linkedin' },
   { name: 'Network', href: '#', icon: 'github' },
-]
-
-// The chrome: the pieces that sit over every route and belong to no section.
-const CHROME = [
-  [
-    'Navbar',
-    'Fixed at the top. Full width and transparent over the hero; past 60px of scroll it goes compact: smaller padding and logo, a translucent blurred capsule, and it shrinks to hug its own contents. That width is measured, because `width: auto` cannot be animated.',
-  ],
-  [
-    'Footer',
-    'Fixed at the bottom, slid out of sight until the hero is behind you, and it shares that moment with Limonacho. It measures itself and publishes `--footer-h`, so the page reserves exactly its height.',
-  ],
-  [
-    'Mobile menu',
-    'The panel behind the menu button, and the one place in the project with a cast shadow.',
-  ],
-  [
-    'Scroll indicator',
-    'The word "Scroll" set vertically with a line filled by the accent in proportion to the scroll. Only on a route with a hero, and it fades out at 98%.',
-  ],
 ]
 
 // Live state for the specimens that need it.
@@ -554,27 +538,56 @@ onMounted(readTokens)
         </div>
       </section>
 
-      <section id="chrome" class="block">
-        <h2 class="h2">Chrome</h2>
+      <section id="navbar" class="block">
+        <h2 class="h2">Navbar</h2>
         <p class="note">
-          The pieces that sit over every route and belong to no section. They are live on this page:
-          the bar above, the footer below, the cursor, and Limonacho.
+          Fixed at the top. Over the hero it is full width and has no background: it floats. Past 60px
+          of scroll it goes compact — smaller padding and logo, a translucent blurred capsule, and it
+          shrinks to hug its own contents. That width is measured with the labels in it, because
+          `width: auto` cannot be animated, and it is re-measured on a resize and on a language
+          change, since Spanish is wider than English. Compact, the links become the menu button and
+          the controls become the settings panel.
         </p>
-        <div class="rows">
-          <div v-for="[name, what] in CHROME" :key="name" class="row">
-            <div class="row-meta">
-              <span class="row-name">{{ name }}</span>
-            </div>
-            <div class="row-demo dict wrap">{{ what }}</div>
-          </div>
+        <div class="specimen-frame bar-frame">
+          <TheNavbar state="wide" />
         </div>
-
-        <p class="group-label">Limonacho</p>
+        <div class="specimen-frame bar-frame compact">
+          <TheNavbar state="compact" />
+        </div>
         <p class="note">
-          He is chrome too: bottom-right, pure CSS, flat accent fill and no gradient. He rides in
-          from the right with the footer. Poke him.
+          The panel behind the menu button is the one place in the project with a cast shadow. The
+          scroll indicator — the word "Scroll" on a line filled by the accent — is fixed on the right,
+          and only exists on a route with a hero.
         </p>
-        <LemonPet />
+      </section>
+
+      <section id="footer" class="block">
+        <h2 class="h2">Footer</h2>
+        <p class="note">
+          Fixed at the bottom and slid out of sight until the hero is behind you, the same moment
+          Limonacho arrives. It measures itself and publishes `--footer-h`, so the page reserves
+          exactly its height and the fixed pieces above it sit clear of it. On a phone it becomes a
+          centred column: side by side, the credit and the place squeeze it until it breaks
+          mid-phrase.
+        </p>
+        <div class="specimen-frame foot-frame">
+          <TheFooter />
+        </div>
+      </section>
+
+      <section id="lemon" class="block">
+        <h2 class="h2">Limonacho</h2>
+        <div class="specimen-frame lemon-frame">
+          <LemonPet />
+        </div>
+        <p class="note">
+          The mascot: drawn entirely in CSS — one div with a four-value elliptical radius for the
+          lopsided silhouette, a flat accent fill and no gradient, and no tilt on entry. He rides in
+          from the right with the footer and sits on top of it, and his pupils follow the pointer. He
+          speaks through a bubble: the greeting on the first poke of a visit, the name of a stack tile
+          as the pointer sweeps the grid, and a line over the CV button and over the send button while
+          the form cannot go.
+        </p>
       </section>
 
       <footer class="outro">
@@ -617,8 +630,11 @@ onMounted(readTokens)
 .sheet {
   max-width: 1180px;
   margin: 0 auto;
-  padding: calc(var(--navbar-h, 88px) + clamp(20px, 4vw, 44px)) var(--gutter-r)
-    calc(var(--footer-h, 52px) + clamp(48px, 8vw, 96px)) var(--gutter-l);
+  /*
+    No fixed bar or footer on this route — the sheet documents them instead of
+    wearing them — so the padding is its own and there is nothing to clear.
+  */
+  padding: clamp(40px, 7vw, 88px) var(--gutter-r) clamp(56px, 9vw, 120px) var(--gutter-l);
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr);
   gap: clamp(28px, 5vw, 72px);
@@ -627,7 +643,7 @@ onMounted(readTokens)
 
 .rail {
   position: sticky;
-  top: calc(var(--navbar-h, 88px) + 24px);
+  top: 24px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -731,8 +747,8 @@ onMounted(readTokens)
   display: flex;
   flex-direction: column;
   gap: 20px;
-  /* Anchors land below the fixed bar. */
-  scroll-margin-top: calc(var(--navbar-h, 88px) + 24px);
+  /* Anchors land with a little air above them. */
+  scroll-margin-top: 24px;
 }
 
 .h2 {
@@ -1028,6 +1044,36 @@ onMounted(readTokens)
 
 .spec-demo {
   max-width: 340px;
+}
+
+/*
+  Fixed pieces, framed. The bar, the footer and Limonacho are `position: fixed`;
+  a transform on the frame makes it their containing block, which is what puts
+  them inside it instead of over the viewport.
+*/
+.specimen-frame {
+  position: relative;
+  transform: translateZ(0);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--ink);
+}
+
+.bar-frame {
+  height: 124px;
+}
+
+.bar-frame.compact {
+  height: 100px;
+}
+
+.foot-frame {
+  height: 84px;
+}
+
+.lemon-frame {
+  height: 200px;
 }
 
 .icon {

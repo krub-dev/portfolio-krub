@@ -16,7 +16,7 @@
   and nothing should be able to click or read them.
 */
 defineProps({
-  variant: { type: String, default: 'global' }, // 'hero' | 'global'
+  variant: { type: String, default: 'global' }, // 'hero' | 'global' | 'page'
   size: { type: Number, default: 72 },
   visible: { type: Boolean, default: true },
 })
@@ -52,6 +52,16 @@ defineProps({
 
 .hero {
   height: 100svh;
+}
+
+/*
+  The whole document, absolute and with no fade: one grid that scrolls with the
+  content, top to bottom. It is what the design-system sheet wears — there is no
+  hero to leave behind there, so there is nothing to crossfade into and no reason
+  for a second layer.
+*/
+.page {
+  height: 100%;
 }
 
 /*
