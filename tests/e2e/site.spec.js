@@ -225,14 +225,20 @@ test('the rail ends on a card that goes to GitHub', async ({ page }) => {
   await expect(cta).toBeVisible()
   /*
     Dashed, because it is a slot in the rail rather than a fifth project. The
-    dashes are four repeating gradients rather than `border-style: dashed`, which
-    cannot be made longer or further apart; the transparent border under them is
-    only what keeps the box the size of the cards.
+    dashes are four repeating gradients on the card's ::before — a layer above the
+    contents, since the media slot's opaque background would hide them — rather
+    than `border-style: dashed`, which cannot be made longer or further apart. The
+    transparent border under them is only what keeps the box the size of the cards.
   */
-  await expect(cta).toHaveCSS('background-image', /repeating-linear-gradient/)
-  await expect(cta).toHaveCSS('background-image', /18px/)
+  const dashes = await cta.evaluate((el) => getComputedStyle(el, '::before').backgroundImage)
+  expect(dashes).toContain('repeating-linear-gradient')
+  expect(dashes).toContain('18px')
   await expect(cta).toHaveCSS('border-top-color', 'rgba(0, 0, 0, 0)')
   await expect(cta.getByRole('link')).toHaveAttribute('href', 'https://github.com/krub-dev')
+
+  // The mosaic is texture, not the subject: dim by default so the mark reads, and
+  // full only on hover (decisions.md 101).
+  await expect(cta.locator('.mosaic')).toHaveCSS('opacity', '0.4')
 
   // And it is the same size as the cards beside it.
   const card = await page.locator('#projects .card').first().boundingBox()

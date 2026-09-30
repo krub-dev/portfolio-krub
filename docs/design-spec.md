@@ -425,11 +425,12 @@ borrows the project card's own rhythm so the two come out the same size: a media
 arrow circle — the whole card the target, the link stretched over it with an `::after` overlay. The
 border is **dashed**, which is what says "a slot in the rail, not a fifth project": four 2px
 `repeating-linear-gradient` strips, one per edge, with the dash length and the gap set by hand (18px and
-12px) — `border-style: dashed` cannot be tuned, its pattern is fixed against the border's width. A 1px
-transparent border sits under them, only to keep the box the size of the cards beside it. Same radius,
-surface and `inert`/`current` treatment as the cards. The copy lives in `src/data/copy.js` and the link
-label in `src/locales/`; the GitHub mark and address are read from the socials, so they cannot drift from
-Contact. See decision 101.
+12px) — `border-style: dashed` cannot be tuned, its pattern is fixed against the border's width. They are
+drawn on the card's `::before`, a layer above the contents, because the media slot's opaque panel would
+hide them as a background; the 1px transparent border under them is only to keep the box the size of the
+cards beside it. Same radius, surface and `inert`/`current` treatment as the cards. The copy lives in
+`src/data/copy.js` and the link label in `src/locales/`; the GitHub mark and address are read from the
+socials, so they cannot drift from Contact. See decision 101.
 
 1. Screenshot frame: `aspect-ratio:16/10`, diagonal stripe background
    `repeating-linear-gradient(135deg, var(--surface-2) 0 12px, var(--ink) 12px 24px)`, with a

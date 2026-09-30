@@ -100,24 +100,43 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
   flex-direction: column;
   cursor: pointer;
   /*
-    Dashed, and two pixels thick, because the border is what says "a slot in the
-    rail, not a fifth project".
-
-    It is not `border-style: dashed`: a browser's own dashes are a fixed multiple
-    of the border's width, so they cannot be made longer or further apart. Four
-    repeating gradients, one strip per edge, give the length and the gap as
-    numbers. The strips are painted from the border box and clipped by the radius,
-    so they still follow the rounded corners.
-
-    The transparent border is only there to keep the box the same size as the
-    cards beside it, which carry a real 1px border.
+    The border is what says "a slot in the rail, not a fifth project". It is 1px
+    and transparent: it is not what is drawn, it is what keeps the box the same
+    size as the cards beside it, which carry a real 1px border.
   */
   --dash: var(--line);
   --dash-length: 18px;
   --dash-gap: 12px;
   border: 1px solid transparent;
   border-radius: 18px;
-  background-color: var(--surface);
+  background: var(--surface);
+  /*
+    No transition on the dash colour: it lives inside a gradient, and a gradient
+    cannot be interpolated the way a border colour can. It swaps in one frame,
+    which is what the border did too — only the arrow and the mark ease.
+  */
+}
+
+/*
+  The dashes are drawn on a layer of their own, above the card's contents. They
+  cannot be a background on the card: the media slot below has an opaque
+  background of its own and would hide the top and sides of the frame. So this is
+  the frame, `inset: -1px` because an absolutely positioned box is placed against
+  the padding box and it has to reach the border box, and `border-radius: inherit`
+  so its corners sit on the card's. It takes no pointer events, so the link
+  stretched over the card still gets the click.
+
+  It is not `border-style: dashed`: a browser's own dashes are a fixed multiple of
+  the border's width, so they cannot be made longer or further apart. Four
+  repeating gradients, one strip per edge, give the length and the gap as numbers.
+*/
+.github-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
   background-image:
     repeating-linear-gradient(
       90deg,
@@ -141,14 +160,7 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
     );
   background-size: 100% 2px, 100% 2px, 2px 100%, 2px 100%;
   background-position: 0 0, 0 100%, 0 0, 100% 0;
-  background-origin: border-box;
   background-repeat: no-repeat;
-  overflow: hidden;
-  /*
-    No transition on the dash colour: it lives inside a gradient, and a gradient
-    cannot be interpolated the way a border colour can. It swaps in one frame,
-    which is what the border did too — only the arrow and the mark ease.
-  */
 }
 
 /* The media slot, in the cards' own 16/10, which is what equalises the heights. */
@@ -159,6 +171,14 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
   justify-content: center;
   aspect-ratio: 16 / 10;
   background: var(--surface-2);
+  /*
+    The card no longer carries `overflow: hidden` (it would clip the frame above),
+    so the slot rounds its own top corners to sit inside the card's. 17px is the
+    card's 18px minus its 1px border, which is what puts the two curves on the
+    same centre.
+  */
+  overflow: hidden;
+  border-radius: 17px 17px 0 0;
 }
 
 .mosaic {
@@ -167,6 +187,13 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
   width: 100%;
   height: 100%;
   fill: var(--acc-solid);
+  /*
+    Dim by default, so the mark reads against it instead of competing with it, and
+    back to full on hover: the pattern is texture, not the subject. One number, so
+    it is easy to tune.
+  */
+  opacity: 0.4;
+  transition: opacity 0.16s ease;
 }
 
 .mark {
@@ -263,6 +290,10 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
 
   .github-card:hover .mark {
     color: var(--acc-text);
+  }
+
+  .github-card:hover .mosaic {
+    opacity: 1;
   }
 
   .github-card:hover .arrow {

@@ -681,9 +681,14 @@ in the accent.
   not a fifth project". `border-style: dashed` could not be tuned: a browser draws its own dashes at a
   fixed multiple of the border's width, and the owner wanted them longer and further apart. So the dashes
   are four `repeating-linear-gradient`s, one 2px strip per edge, with the length and the gap as numbers
-  (`--dash-length` 18px, `--dash-gap` 12px). They are painted from the border box and clipped by the
-  radius, so they follow the rounded corners. The 1px transparent border under them is only what keeps
-  the box the same size as the cards beside it.
+  (`--dash-length` 18px, `--dash-gap` 12px).
+- **The dashes are a layer above the card, not a background on it.** As a background they were hidden
+  behind the media slot, which has an opaque panel of its own. So they live on the card's `::before`,
+  `inset: -1px` to reach the border box (an absolutely positioned box is placed against the padding box)
+  and `border-radius: inherit` so the corners sit on the card's. It takes no pointer events, so the link
+  stretched over the card still gets the click. The card gave up its `overflow: hidden` for this, so the
+  media slot rounds its own top corners — 17px, the card's 18px less its 1px border, which is what puts
+  the two curves on the same centre.
 - **A `rect` SVG for the dashes was tried, and dropped.** It followed the corners exactly, but it is more
   machinery than the job needs — and the owner asked for CSS where CSS will do. It also brought two traps:
   an `svg` without an explicit size falls back to the replaced-element default of 300×150, and
@@ -695,7 +700,8 @@ in the accent.
 - **A mosaic of rounded accent squares behind the mark.** The media slot is otherwise an empty panel, and
   the card should not look unfinished next to four screenshots. It is an SVG grid (a gradient cannot
   round its own tiles) filled with `--acc-solid`, so it follows the palette, over the theme's
-  `--surface-2`, so it follows the theme too.
+  `--surface-2`, so it follows the theme too. It sits dimmed (0.4) and comes up to full on hover, so the
+  mark reads against it by default instead of competing with it.
 - **It mirrors the card's structure.** A `16/10` media slot with the mark at 64px, then the body and a
   foot with a hairline, the mono label and the arrow circle — the same radius, surface, hover and parked
   treatment. That shared structure is what makes the two exactly the same size.

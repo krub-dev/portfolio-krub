@@ -185,9 +185,9 @@ Prop: `current` (boolean — the rail's parked marker, for a touch screen). The 
 project but a way out to GitHub. It mirrors `ProjectCard`'s structure — a `16/10` media slot carrying
 the mark at 64px over a mosaic of rounded accent squares, then the body, then a foot with the label and
 the arrow — which is what makes the two the same size, and its dashed border is four
-`repeating-linear-gradient` strips with the dash length and gap set by hand, over a 1px transparent
-border that only keeps the box the same size as the cards. Its copy is `copy.githubCard`, its link label
-`actions.github`, and the mark and the address come from `socials`/`socialIcons`, so they cannot drift
+`repeating-linear-gradient` strips with the dash length and gap set by hand, drawn on the card's
+`::before` so the media slot cannot cover them, over a 1px transparent border that only keeps the box
+the same size as the cards. Its copy is `copy.githubCard`, its link label `actions.github`, and the mark and the address come from `socials`/`socialIcons`, so they cannot drift
 from Contact. See decisions.md 101.
 
 ### ProjectModal
