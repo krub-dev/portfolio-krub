@@ -27,6 +27,7 @@ import {
   DoubleSide,
   Float32BufferAttribute,
   Fog,
+  FogExp2,
   MeshBasicMaterial,
   PMREMGenerator,
   RepeatWrapping,
@@ -56,6 +57,21 @@ const props = defineProps({
     card wants that; the stage was built without it, so the default is off.
   */
   shaded: { type: Boolean, default: false },
+  /*
+    A depth gradient painted into the geometry's vertex colours: white at the
+    opening, `depth` at the far wall. The grid texture multiplies it, so the
+    walls *and* their lines sink together as they go back — depth without a light
+    and without darkening the mouth, so the room still meets the page at the
+    frame. `depth` is how dark the far wall goes (1 = none).
+  */
+  gradient: { type: Boolean, default: false },
+  depth: { type: Number, default: 0.55 },
+  /*
+    A soft dark blob just behind the mark, on the wall. A plane with a radial
+    gradient in `--cast`, transparent, that gives the floating mark something to
+    cast onto — the cheap contact shadow, no light and no shadow map.
+  */
+  shadow: { type: Boolean, default: false },
 })
 
 // The box's opening is cut to land exactly on the stage: at its distance the
@@ -80,6 +96,12 @@ const ROOM_DEPTH = 400
 // sit so its opening still lands on OPENING_Z.
 const k = computed(() => (props.camZ - OPENING_Z) / (BASE_CAM_Z - OPENING_Z))
 const roomZ = computed(() => OPENING_Z - (k.value * ROOM_DEPTH) / 2)
+// The contact shadow, in the room's own coordinates so it scales and travels
+// with the box. Local z 120 is a little over halfway back, just behind the mark.
+const SHADOW_LOCAL_Z = 120
+const SHADOW_LOCAL_Y = -18
+const shadowZ = computed(() => roomZ.value + k.value * SHADOW_LOCAL_Z)
+const shadowY = computed(() => k.value * SHADOW_LOCAL_Y)
 /*
   How the tunnel fades out with depth. All of them fade to `--ink`, the page's own
   background, because that is what the tunnel should disappear into.
@@ -100,6 +122,10 @@ const FOG_MODES = {
   off: null,
   near: { near: 240, far: 560 },
   far: { near: 430, far: 900 },
+  // Exponential fog: density-based, so it eats the far end whatever the room's
+  // depth. Kept beside the linear modes as an experiment (the Open Graph card
+  // toggles it); it fights the vertex gradient, because both darken the back.
+  exp: { density: 0.012 },
 }
 // The lean, sized to the frame: the opening is the stage, so a bigger one would
 // pull its edge out from under the frame's band.
@@ -110,6 +136,7 @@ const PEEK_Y = 2
 
 const room = ref(null)
 const roomGeo = ref(null)
+const shadow = ref(null)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const { camera, scene, renderer } = useTresContext()
@@ -140,6 +167,9 @@ function tokens() {
       Open Graph card does — two grids in two colours read as a mistake.
     */
     grid: read('--grid', 'rgba(255,255,255,.045)'),
+    // The contact shadow is a shadow, so it takes the shadow token and stays
+    // dark in both themes.
+    cast: read('--cast', 'rgba(0,0,0,.85)'),
   }
 }
 
@@ -170,6 +200,7 @@ function buildRoomGeometry() {
 
   const positions = []
   const uvs = []
+  const colors = []
   const indices = []
 
   const addQuad = (corners, project) => {
@@ -177,6 +208,11 @@ function buildRoomGeometry() {
     for (const corner of corners) {
       positions.push(corner[0], corner[1], corner[2])
       uvs.push(project(corner)[0], project(corner)[1])
+      // The depth gradient, per vertex: 1 at the opening, `depth` at the back.
+      // Pushed always, read only when the material asks for vertex colours.
+      const t = (zn - corner[2]) / (zn - zf)
+      const c = 1 - (1 - props.depth) * t
+      colors.push(c, c, c)
     }
     indices.push(base, base + 1, base + 2, base, base + 2, base + 3)
   }
@@ -208,6 +244,7 @@ function buildRoomGeometry() {
   const geo = new BufferGeometry()
   geo.setAttribute('position', new Float32BufferAttribute(positions, 3))
   geo.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
+  geo.setAttribute('color', new Float32BufferAttribute(colors, 3))
   geo.setIndex(indices)
   /*
     No vertex is shared between quads, so each face gets its own flat normal
@@ -271,6 +308,31 @@ function buildRoom() {
   room.value = texture
 }
 
+/*
+  The mark's contact shadow: a radial gradient in `--cast`, opaque at the centre
+  and gone at the rim, painted on a plane just behind the mark. No light and no
+  shadow map — it is a sprite the wall shows through where it is transparent.
+*/
+function buildShadow() {
+  const { cast } = tokens()
+  const size = 256
+  const canvas = makeCanvas(size)
+  const ctx = canvas.getContext('2d')
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
+  // One colour, two stops: the alpha ramps from the token's to nothing, which is
+  // all a soft blob needs. `transparent` is the absence of colour, not one.
+  g.addColorStop(0, cast)
+  g.addColorStop(0.55, cast)
+  g.addColorStop(1, 'transparent')
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, size, size)
+
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  shadow.value?.dispose()
+  shadow.value = texture
+}
+
 function buildFog() {
   const { fogEnd } = tokens()
   const mode = FOG_MODES[props.fog] ?? FOG_MODES.far
@@ -278,8 +340,12 @@ function buildFog() {
     scene.value.fog = null
     return
   }
-  if (!scene.value.fog) {
-    scene.value.fog = new Fog(fogEnd, mode.near, mode.far)
+  // The fog type is fixed per mode, so only rebuild when it changes; otherwise
+  // recolour, which is what a theme flip needs.
+  const wantsExp = mode.density != null
+  const hasExp = scene.value.fog?.isFogExp2 === true
+  if (!scene.value.fog || wantsExp !== hasExp) {
+    scene.value.fog = wantsExp ? new FogExp2(fogEnd, mode.density) : new Fog(fogEnd, mode.near, mode.far)
   } else {
     scene.value.fog.color.set(fogEnd)
   }
@@ -298,6 +364,12 @@ function applyFogScale() {
   const fog = scene.value?.fog
   const mode = FOG_MODES[props.fog] ?? FOG_MODES.far
   if (!fog || !mode) return
+  if (mode.density != null) {
+    // Density is per world unit, and the room scales with the zoom, so it has to
+    // scale the other way to keep the same fade.
+    fog.density = mode.density / k.value
+    return
+  }
   fog.near = mode.near * k.value
   fog.far = mode.far * k.value
 }
@@ -306,9 +378,12 @@ function applyFogScale() {
 // recoloured. The zoom only re-scales it.
 watch(() => props.fog, buildFog)
 watch(k, applyFogScale)
+// The gradient lives in the geometry's vertex colours, so the dial rebuilds it.
+watch(() => props.depth, buildRoomGeometry)
 
 function repaint() {
   buildRoom()
+  buildShadow()
   buildFog()
 }
 
@@ -323,6 +398,7 @@ onMounted(() => {
 onUnmounted(() => {
   observer?.disconnect()
   room.value?.dispose()
+  shadow.value?.dispose()
   roomGeo.value?.dispose()
   environment?.dispose()
 })
@@ -376,8 +452,32 @@ onBeforeRender(({ delta }) => {
       v-if="props.shaded"
       :map="room"
       :side="DoubleSide"
+      :vertex-colors="props.gradient"
       :tone-mapped="false"
     />
-    <TresMeshBasicMaterial v-else :map="room" :side="DoubleSide" :tone-mapped="false" />
+    <TresMeshBasicMaterial
+      v-else
+      :map="room"
+      :side="DoubleSide"
+      :vertex-colors="props.gradient"
+      :tone-mapped="false"
+    />
+  </TresMesh>
+
+  <!-- The mark's contact shadow: a soft blob on the wall behind it. -->
+  <TresMesh
+    v-if="props.room && props.shadow && shadow"
+    :position="[0, shadowY, shadowZ]"
+    :scale="[k, k, k]"
+  >
+    <TresMeshBasicMaterial
+      :map="shadow"
+      :transparent="true"
+      :opacity="0.6"
+      :depth-write="false"
+      :tone-mapped="false"
+      :fog="false"
+    />
+    <TresPlaneGeometry :args="[170, 170]" />
   </TresMesh>
 </template>

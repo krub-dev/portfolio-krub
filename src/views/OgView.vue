@@ -61,21 +61,35 @@ const showMark = ref(true)
 const showRoom = ref(true)
 const showLemon = ref(true)
 const showGrid = ref(true)
-// The room's faces lit by the scene's lights, so the box reads as depth by tone
-// rather than by the grid alone — what the Blender reference showed. Off, the
-// room is the site's flat, unlit box. See SceneRig.
-const shaded = ref(true)
+/*
+  The techniques for depth, each its own switch so they can be judged apart:
+
+  - `gradient`: a soft darkening from the opening to the back, painted into the
+    room's vertex colours. The grid multiplies it, so the walls and their lines
+    sink together — depth with no light and no hard facets.
+  - `depth`: how dark the far wall goes.
+  - `shadow`: a soft contact shadow behind the mark, so it has weight.
+  - `fogExp`: exponential fog, as an alternative to the room's linear fade.
+  - `shaded`: the Blender idea taken literally — the walls lit by the scene's
+    lights, one tone per face. Kept to compare; it darkens the near walls.
+*/
+const gradient = ref(true)
+const depth = ref(0.55)
+const shadow = ref(true)
+const fogExp = ref(false)
+const shaded = ref(false)
 
 /*
   What happens where the room's grid meets the page's. The room's lines converge
   and the page's run parallel, so the change of direction happens on a boundary
   that is not drawn — which is what reads as the grid arriving out of nowhere.
 
-  - `glow`: a faint neutral rim inside the opening. It does not hide the bend, it
-    explains it: this is the mouth of a room, not a grid that went wrong.
-  - `feather`: the room's grid fades into the page before the edge, so there is no
-    bend to see. It costs a little of the page's own grid where the band falls.
-  - `none`: neither.
+  - `sink`: a soft dark inset inside the opening, so the mouth reads as a recess
+    going down into the page rather than as a grid that went wrong.
+  - `none`: nothing.
+
+  A `glow` (a light rim) was tried and read badly in white, and a `feather` (the
+  page's background drawn back over the room's edge) was worse; both are gone.
 */
 const edge = ref('none')
 
@@ -155,6 +169,9 @@ const gridStyle = computed(() => {
         <label class="toggle"><input v-model="showMark" type="checkbox" />Mark</label>
         <label class="toggle"><input v-model="flat" type="checkbox" />Flat</label>
         <label class="toggle"><input v-model="showRoom" type="checkbox" />Room</label>
+        <label class="toggle"><input v-model="gradient" type="checkbox" />Gradient</label>
+        <label class="toggle"><input v-model="shadow" type="checkbox" />Shadow</label>
+        <label class="toggle"><input v-model="fogExp" type="checkbox" />FogExp</label>
         <label class="toggle"><input v-model="shaded" type="checkbox" />Lit</label>
         <label class="toggle"><input v-model="showLemon" type="checkbox" />Lemon</label>
         <label class="toggle"><input v-model="showGrid" type="checkbox" />Grid</label>
@@ -173,11 +190,22 @@ const gridStyle = computed(() => {
         <span class="size">edge</span>
         <label class="field"
           ><select v-model="edge">
-            <option value="glow">glow</option>
-            <option value="feather">feather</option>
+            <option value="sink">sink</option>
             <option value="none">none</option>
           </select></label
         >
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">depth</span>
+        <label class="field"
+          ><input
+            v-model.number="depth"
+            type="number"
+            min="0"
+            max="1"
+            step="0.05"
+        /></label>
       </div>
 
       <div class="slot-controls">
@@ -226,7 +254,16 @@ const gridStyle = computed(() => {
         <div class="mark-inner" :style="markInnerStyle">
           <div v-if="flat" class="flat-mark" />
           <Suspense v-else>
-            <LogoScene :halo-on="armed" :room="showRoom" :shaded="shaded" @ready="onReady" />
+            <LogoScene
+              :halo-on="armed"
+              :room="showRoom"
+              :gradient="gradient"
+              :depth="depth"
+              :shadow="shadow"
+              :shaded="shaded"
+              :fog="fogExp ? 'exp' : 'far'"
+              @ready="onReady"
+            />
           </Suspense>
         </div>
 
@@ -455,18 +492,10 @@ const gridStyle = computed(() => {
   pointer-events: none;
 }
 
-.edge-glow {
-  box-shadow:
-    inset 0 0 10px 1px color-mix(in srgb, var(--fg) 16%, transparent),
-    inset 0 0 70px 16px color-mix(in srgb, var(--fg) 6%, transparent);
-}
-
-.edge-feather {
-  background:
-    linear-gradient(to right, var(--ink), transparent 18%),
-    linear-gradient(to left, var(--ink), transparent 18%),
-    linear-gradient(to bottom, var(--ink), transparent 18%),
-    linear-gradient(to top, var(--ink), transparent 18%);
+/* A soft dark inset, from the shadow token, so the mouth reads as a recess
+   going down into the page. The old light rim read as a glow in white. */
+.edge-sink {
+  box-shadow: inset 0 0 44px 8px color-mix(in srgb, var(--cast) 42%, transparent);
 }
 
 /* The site's own fallback mark: the same mask the hero paints when the scene

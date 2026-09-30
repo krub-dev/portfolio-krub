@@ -395,25 +395,30 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
 - **The scene is gated under `navigator.webdriver`** so the e2e suite never holds a WebGL context; the
   2D mark stands in there instead (decision 77).
 
-### 102. The room can be lit face by face, and the site does not light it
+### 102. Depth on the room is opt-in, and the site does not use it
 **Status:** active · **Archive:** — (new, after the split)
 
-- **Depth by tone instead of by grid.** The room was one unlit box: every wall exactly `--ink` with
-  the page's grid on top, so depth came from the grid converging and the fog. A Blender test of the
-  same box, one face removed, showed the other way it can read: a flat face under a directional light
-  is one tone, each normal catches a different amount, and the box becomes a recess by tone alone. So
-  the walls can take a `MeshLambertMaterial` and the scene's own lights do it.
-- **`shaded` gates it, default off.** `SceneRig` takes it and `LogoScene` passes it through. The site
-  stays unlit because it was built that way and the hero's depth already reads; the Open Graph card
-  turns it on to weigh the alternative.
-- **The geometry gained `computeVertexNormals`.** No vertex is shared between the quads, so each face
-  gets a flat normal rather than one averaged across a corner, which is what makes a wall one tone.
-  The unlit material ignores it.
-- **The dark base caps the effect.** `--ink` is near black, so a lit wall can only go darker than the
-  page (or the far wall, brighter). Measured on the card: unlit, all four walls sit at 12/255, the
-  page's own value; lit, they spread from 4.5 (ceiling) to 11.8 (floor), with the far wall over the
-  mark at 29.5. To spread them as far as the Blender reference the walls would have to stop being the
-  page background, which is the room's whole reason for matching the page grid (202863b).
+Ways to make the open box read as a recess, all gated so the site keeps the box it was built with —
+the Open Graph card is where they are weighed.
+
+- **A depth gradient, and it is the one that works.** The geometry carries a vertex colour per corner:
+  white at the opening, `depth` (default 0.55) at the far wall. The grid texture multiplies it, so the
+  walls *and their lines* sink together as they go back, and the mouth stays exactly `--ink` — the room
+  still meets the page at the frame (202863b) while the inside darkens. Measured on the card: the
+  ceiling runs 12/255 at the mouth to 3.6 at the far end. No light and no hard facet, and it gets what
+  the Blender reference was after without the facets.
+- **A contact shadow.** A plane just behind the mark with a radial gradient in `--cast`, transparent,
+  `depthWrite: false`, following the room's scale. It gives the floating mark something to cast onto.
+  Measured under the mark: 1/255 with it on against 7/255 with it off, so it lands hard; the material
+  runs at 0.6 opacity.
+- **Face lighting was tried and is off.** `shaded` puts a `MeshLambertMaterial` on the walls so each
+  face catches the scene's lights by its normal. It differentiates, but it darkens the near walls (the
+  ceiling to 4.5/255) and the hard tone per face reads as facets, not as depth. It stays behind the
+  prop to compare.
+- **Exponential fog is an option, off.** `FogExp2` fights the gradient — both darken the back, and the
+  fog pulls it back to `--ink` — so it is there to try, not the default.
+- **`computeVertexNormals`.** No vertex is shared between the quads, so each face gets a flat normal,
+  which is what makes a lit wall one tone. The unlit material ignores it.
 
 ---
 

@@ -59,6 +59,11 @@ const props = defineProps({
     turns it on. See SceneRig.
   */
   shaded: { type: Boolean, default: false },
+  // A depth gradient painted into the room's vertex colours. See SceneRig.
+  gradient: { type: Boolean, default: false },
+  depth: { type: Number, default: 0.55 },
+  // A soft contact shadow behind the mark. See SceneRig.
+  shadow: { type: Boolean, default: false },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -155,6 +160,9 @@ defineExpose({ logoGroup })
         :fog="props.fog"
         :room="props.room"
         :shaded="props.shaded"
+        :gradient="props.gradient"
+        :depth="props.depth"
+        :shadow="props.shadow"
       />
 
       <LogoModel
