@@ -30,7 +30,7 @@ import { useI18n } from 'vue-i18n'
 
 import SectionHeading from '../base/SectionHeading.vue'
 import ProjectCard from '../content/ProjectCard.vue'
-import ProjectsCta from '../content/ProjectsCta.vue'
+import GithubCard from '../content/GithubCard.vue'
 import { useLang } from '../../composables/useLang'
 import { projects } from '../../data'
 
@@ -266,13 +266,19 @@ function onPointerUp(event) {
   }
 
   /*
-    Settle on a card. A drag that moved far enough takes the next one in the
-    direction it was going; anything shorter falls back to the nearest. The
+    Settle on a card. A drag that travelled more than a step lands where it was
+    dragged, so going from the end back to the start is one gesture rather than
+    four. A shorter drag is read as a flick and takes the next one in the direction
+    it went, which is what lets a short, deliberate swipe page on a phone; anything
+    shorter still falls back to the nearest, which is the card it started on. The
     offset is left where the finger dropped it, so the loop travels from there.
   */
   const moved = offset - startOffset
+  const travelled = Math.abs(moved)
   index =
-    Math.abs(moved) > step * FLICK ? index + Math.sign(moved) : Math.round(offset / step)
+    travelled > step || travelled <= step * FLICK
+      ? Math.round(offset / step)
+      : index + Math.sign(moved)
   sync(false)
   settle()
 }
@@ -333,7 +339,7 @@ onUnmounted(() => {
           />
 
           <!-- The rail's last slot: not a project, the way out to GitHub. -->
-          <ProjectsCta
+          <GithubCard
             :inert="parked[items.length] || undefined"
             :current="items.length === current"
           />

@@ -677,14 +677,21 @@ Four projects fit the rail, and whatever else there is lives on GitHub — which
 said. The rail's last slot is a card that does: the GitHub mark, a question, a line, and a mono link
 in the accent.
 
-- **Dashed, and two pixels rather than one.** The border is what says "a slot in the rail, not a fifth
-  project", and a browser draws its dashes longer the thicker the border is, so two pixels buys both the
-  weight and the length. `box-sizing: border-box` keeps the box the size of the cards beside it.
-- **A `rect` SVG for the dashes was tried and dropped.** It allowed a longer, hand-set dash pattern, but
-  it is more machinery than a dashed border needs, and it brought two traps of its own: an `svg` without
-  an explicit size falls back to the replaced-element default of 300×150, and `overflow: hidden` clips at
-  the padding box — 1px inside — so the dashes sat inside the card rather than on its edge. The plain
-  border at 2px reads the same.
+- **Dashed, and the dash pattern is set by hand — in CSS.** The border is what says "a slot in the rail,
+  not a fifth project". `border-style: dashed` could not be tuned: a browser draws its own dashes at a
+  fixed multiple of the border's width, and the owner wanted them longer and further apart. So the dashes
+  are four `repeating-linear-gradient`s, one 2px strip per edge, with the length and the gap as numbers
+  (`--dash-length` 18px, `--dash-gap` 12px). They are painted from the border box and clipped by the
+  radius, so they follow the rounded corners. The 1px transparent border under them is only what keeps
+  the box the same size as the cards beside it.
+- **A `rect` SVG for the dashes was tried, and dropped.** It followed the corners exactly, but it is more
+  machinery than the job needs — and the owner asked for CSS where CSS will do. It also brought two traps:
+  an `svg` without an explicit size falls back to the replaced-element default of 300×150, and
+  `overflow: hidden` clips at the padding box, 1px inside, so the dashes sat inside the card rather than
+  on its edge.
+- **The component is `GithubCard`.** It began as `ProjectsCta`; "CTA" is the general term for the link
+  that asks for the action, and the spec already uses it for the hero's and Contact's buttons, so the card
+  is named for what it is instead.
 - **A mosaic of rounded accent squares behind the mark.** The media slot is otherwise an empty panel, and
   the card should not look unfinished next to four screenshots. It is an SVG grid (a gradient cannot
   round its own tiles) filled with `--acc-solid`, so it follows the palette, over the theme's

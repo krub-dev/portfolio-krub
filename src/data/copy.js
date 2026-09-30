@@ -73,7 +73,7 @@ export const copy = {
 
   // The last card in the projects rail. Not a project: a way out to GitHub, for
   // whatever did not fit in four cards. The link's own label is in src/locales/.
-  projectsCta: {
+  githubCard: {
     en: {
       title: 'Want to see more?',
       body: 'Take a look at my GitHub, I share projects and experiments there.',

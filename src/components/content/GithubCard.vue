@@ -25,7 +25,7 @@ defineProps({
 const { t } = useI18n()
 const { lang } = useLang()
 
-const text = computed(() => copy.projectsCta[lang.value])
+const text = computed(() => copy.githubCard[lang.value])
 const github = computed(() => socials.find((social) => social.icon === 'github'))
 
 /*
@@ -54,7 +54,7 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
 </script>
 
 <template>
-  <article class="cta" :class="{ current }" data-magnetic>
+  <article class="github-card" :class="{ current }" data-magnetic>
     <div class="mark-box">
       <svg class="mosaic" viewBox="0 0 8 5" preserveAspectRatio="none" aria-hidden="true">
         <rect
@@ -94,22 +94,61 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
 </template>
 
 <style scoped>
-.cta {
+.github-card {
   position: relative;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   /*
-    Dashed, and two pixels rather than one: the border is what says "a slot in the
-    rail, not a fifth project", and the browser draws its dashes longer the thicker
-    it is. border-box so the box stays the size of the cards beside it.
+    Dashed, and two pixels thick, because the border is what says "a slot in the
+    rail, not a fifth project".
+
+    It is not `border-style: dashed`: a browser's own dashes are a fixed multiple
+    of the border's width, so they cannot be made longer or further apart. Four
+    repeating gradients, one strip per edge, give the length and the gap as
+    numbers. The strips are painted from the border box and clipped by the radius,
+    so they still follow the rounded corners.
+
+    The transparent border is only there to keep the box the same size as the
+    cards beside it, which carry a real 1px border.
   */
-  border: 2px dashed var(--line);
+  --dash: var(--line);
+  --dash-length: 18px;
+  --dash-gap: 12px;
+  border: 1px solid transparent;
   border-radius: 18px;
-  background: var(--surface);
+  background-color: var(--surface);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      var(--dash) 0 var(--dash-length),
+      transparent var(--dash-length) calc(var(--dash-length) + var(--dash-gap))
+    ),
+    repeating-linear-gradient(
+      90deg,
+      var(--dash) 0 var(--dash-length),
+      transparent var(--dash-length) calc(var(--dash-length) + var(--dash-gap))
+    ),
+    repeating-linear-gradient(
+      180deg,
+      var(--dash) 0 var(--dash-length),
+      transparent var(--dash-length) calc(var(--dash-length) + var(--dash-gap))
+    ),
+    repeating-linear-gradient(
+      180deg,
+      var(--dash) 0 var(--dash-length),
+      transparent var(--dash-length) calc(var(--dash-length) + var(--dash-gap))
+    );
+  background-size: 100% 2px, 100% 2px, 2px 100%, 2px 100%;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  background-origin: border-box;
+  background-repeat: no-repeat;
   overflow: hidden;
-  transition: border-color 0.16s ease;
+  /*
+    No transition on the dash colour: it lives inside a gradient, and a gradient
+    cannot be interpolated the way a border colour can. It swaps in one frame,
+    which is what the border did too — only the arrow and the mark ease.
+  */
 }
 
 /* The media slot, in the cards' own 16/10, which is what equalises the heights. */
@@ -218,15 +257,15 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
 
 /* The same "this is the one" treatment the cards use. */
 @media (hover: hover) {
-  .cta:hover {
-    border-color: var(--acc-text);
+  .github-card:hover {
+    --dash: var(--acc-text);
   }
 
-  .cta:hover .mark {
+  .github-card:hover .mark {
     color: var(--acc-text);
   }
 
-  .cta:hover .arrow {
+  .github-card:hover .arrow {
     background: var(--acc);
     border-color: var(--acc);
     color: var(--on-acc);
@@ -234,11 +273,11 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
 }
 
 @media (hover: none) {
-  .cta.current {
-    border-color: var(--acc-text);
+  .github-card.current {
+    --dash: var(--acc-text);
   }
 
-  .cta.current .arrow {
+  .github-card.current .arrow {
     background: var(--acc);
     border-color: var(--acc);
     color: var(--on-acc);

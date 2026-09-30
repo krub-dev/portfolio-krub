@@ -201,13 +201,13 @@ test('the project rail pages to the end with its dots', async ({ page }) => {
 
   /*
     At the far end it is the other way round: nothing hangs off the right, so
-    that side is not faded. (With the CTA card the rail can end exactly on the
+    that side is not faded. (With the GitHub card the rail can end exactly on the
     edge, and then there is no fade at all.)
   */
   await expect(viewport).not.toHaveClass(/fade-right/)
 
   // And the card it was hiding ended up inside the rail.
-  const last = await page.locator('#projects .cta').boundingBox()
+  const last = await page.locator('#projects .github-card').boundingBox()
   const rail = await page.locator('#projects .viewport').boundingBox()
   expect(last.x + last.width).toBeLessThanOrEqual(rail.x + rail.width + 1)
 
@@ -221,12 +221,17 @@ test('the rail ends on a card that goes to GitHub', async ({ page }) => {
   await openSite(page)
   await bringIntoView(page.locator('#projects .viewport'))
 
-  const cta = page.locator('#projects .cta')
+  const cta = page.locator('#projects .github-card')
   await expect(cta).toBeVisible()
-  // Dashed, and two pixels, because it is a slot in the rail rather than a fifth
-  // project.
-  await expect(cta).toHaveCSS('border-top-style', 'dashed')
-  await expect(cta).toHaveCSS('border-top-width', '2px')
+  /*
+    Dashed, because it is a slot in the rail rather than a fifth project. The
+    dashes are four repeating gradients rather than `border-style: dashed`, which
+    cannot be made longer or further apart; the transparent border under them is
+    only what keeps the box the size of the cards.
+  */
+  await expect(cta).toHaveCSS('background-image', /repeating-linear-gradient/)
+  await expect(cta).toHaveCSS('background-image', /18px/)
+  await expect(cta).toHaveCSS('border-top-color', 'rgba(0, 0, 0, 0)')
   await expect(cta.getByRole('link')).toHaveAttribute('href', 'https://github.com/krub-dev')
 
   // And it is the same size as the cards beside it.
@@ -244,12 +249,12 @@ test('the GitHub card is the target, not just its label', async ({ page, browser
   await openSite(page)
   await bringIntoView(page.locator('#projects .viewport'))
   await page.locator('#projects .dots .dot').last().click()
-  await expect.poll(() => page.locator('#projects .cta').isVisible()).toBe(true)
+  await expect.poll(() => page.locator('#projects .github-card').isVisible()).toBe(true)
 
   const popupPromise = page.waitForEvent('popup')
   // The middle of the card, which is nowhere near the label: the link is stretched
   // over the card with an ::after overlay, like the project cards.
-  await page.locator('#projects .cta').click()
+  await page.locator('#projects .github-card').click()
   const popup = await popupPromise
   expect(popup.url()).toContain('github.com/krub-dev')
 })
