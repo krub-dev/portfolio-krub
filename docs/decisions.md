@@ -677,9 +677,13 @@ Four projects fit the rail, and whatever else there is lives on GitHub — which
 said. The rail's last slot is a card that does: the GitHub mark, a question, a line, and a mono link
 in the accent.
 
-- **Dashed, not solid.** The border is what says "this is a slot in the rail, not a fifth project" —
-  with the same radius, surface, hover and parked treatment as the cards beside it, so it belongs
-  without pretending to be one.
+- **Dashed, not solid, and the dashes are drawn by hand.** The border is what says "a slot in the rail,
+  not a fifth project". `border-style: dashed` could not be made longer or thicker — a browser's dashes
+  are a fixed multiple of the border's width — so it is an SVG `rect` over a transparent 1px border,
+  with the stroke and the dash pattern set explicitly.
+- **It mirrors the card's structure.** A `16/10` media slot with the mark at 64px, then the body and a
+  foot with a hairline, the mono label and the arrow circle — the same radius, surface, hover and parked
+  treatment. That shared structure is what makes the two exactly the same size.
 - **One source for the link.** The mark and the address come from `socials`/`socialIcons` (the paths
   moved out of `SocialLink` into the data for this), the copy from `src/data/copy.js` and the label
   from `src/locales/`. Nothing here can drift from Contact.

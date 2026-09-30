@@ -223,9 +223,16 @@ test('the rail ends on a card that goes to GitHub', async ({ page }) => {
 
   const cta = page.locator('#projects .cta')
   await expect(cta).toBeVisible()
-  // Dashed, because it is a slot in the rail rather than a fifth project.
-  await expect(cta).toHaveCSS('border-top-style', 'dashed')
+  // The dashed border is drawn with an SVG rect, so its dashes can be longer and
+  // thicker than the browser's fixed pattern.
+  await expect(cta.locator('.dashes rect')).toHaveCount(1)
   await expect(cta.getByRole('link')).toHaveAttribute('href', 'https://github.com/krub-dev')
+
+  // And it is the same size as the cards beside it.
+  const card = await page.locator('#projects .card').first().boundingBox()
+  const box = await cta.boundingBox()
+  expect(Math.abs(box.width - card.width)).toBeLessThan(1)
+  expect(Math.abs(box.height - card.height)).toBeLessThan(1)
 })
 
 test('the navbar only takes clicks where the capsule is', async ({ page }) => {

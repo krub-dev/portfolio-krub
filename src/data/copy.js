@@ -76,11 +76,11 @@ export const copy = {
   projectsCta: {
     en: {
       title: 'Want to see more?',
-      body: 'Have a look at my GitHub, I put all sorts there.',
+      body: 'Take a look at my GitHub, I share projects and experiments there.',
     },
     es: {
       title: '¿Quieres ver más?',
-      body: 'Cotillea mi GitHub, ahí subo de todo un poco.',
+      body: 'Pásate por mi GitHub, ahí comparto proyectos y experimentos.',
     },
   },
 

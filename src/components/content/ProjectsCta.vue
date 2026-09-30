@@ -1,8 +1,15 @@
 <script setup>
 /*
   The projects rail's last card, and not a project: it is the way out to GitHub
-  for whatever did not fit in four cards. It takes the rail's card size, and the
-  dashed border is what marks it as the exception — a slot rather than a card.
+  for whatever did not fit in four cards.
+
+  It borrows the project card's rhythm — a media slot on top, then the body and a
+  foot with a hairline — so it reads as one of them, and the dashed border is what
+  says it is not. That slot is also what makes the two the same height.
+
+  The border is an SVG `rect` rather than `border-style: dashed`, because a
+  browser's dashes cannot be made longer or thicker: they are a fixed multiple of
+  the border's width, so the only way to change them is to draw them.
 
   The copy comes from src/data/ and the link's label from src/locales/, like
   everything else. The GitHub mark and its address are read from the socials, so
@@ -28,53 +35,77 @@ const github = computed(() => socials.find((social) => social.icon === 'github')
 
 <template>
   <article class="cta" :class="{ current }" data-magnetic>
-    <svg class="mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path :d="socialIcons.github" />
+    <div class="mark-box">
+      <svg class="mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path :d="socialIcons.github" />
+      </svg>
+    </div>
+
+    <div class="body">
+      <p class="title">{{ text.title }}</p>
+      <p class="text">{{ text.body }}</p>
+
+      <div class="foot">
+        <!--
+          The link is around the label, stretched over the card with an ::after
+          overlay: the same pattern the project cards use, so the whole card is the
+          target while the accessible name stays the label alone.
+        -->
+        <a class="link" :href="github.href" target="_blank" rel="noopener">
+          {{ t('actions.github') }}
+        </a>
+        <span class="arrow" aria-hidden="true">↗</span>
+      </div>
+    </div>
+
+    <!--
+      The dashes. Inset by the card's own (transparent) border and allowed to
+      overflow, so the 2px stroke lands on the card's edge.
+    -->
+    <svg class="dashes" aria-hidden="true">
+      <rect x="0" y="0" width="100%" height="100%" rx="17" ry="17" />
     </svg>
-
-    <p class="title">{{ text.title }}</p>
-    <p class="body">{{ text.body }}</p>
-
-    <a class="link" :href="github.href" target="_blank" rel="noopener">
-      {{ t('actions.github') }}
-      <span class="arrow" aria-hidden="true">↗</span>
-    </a>
   </article>
 </template>
 
 <style scoped>
 .cta {
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 32px 24px;
-  text-align: center;
-  /* Dashed: it is a slot in the rail, not a fifth project. */
-  border: 1px dashed var(--line);
+  cursor: pointer;
+  /*
+    Transparent, so the box is exactly the size of the cards beside it: the dashes
+    are drawn over it by the SVG below, not by a border of their own.
+  */
+  border: 1px solid transparent;
   border-radius: 18px;
   background: var(--surface);
-  transition: border-color 0.16s ease;
+  overflow: hidden;
 }
 
-@media (hover: hover) {
-  .cta:hover {
-    border-color: var(--acc-text);
-  }
-}
-
-/* And where there is no hover, the same border marks where the rail is parked. */
-@media (hover: none) {
-  .cta.current {
-    border-color: var(--acc-text);
-  }
+/* The media slot, in the cards' own 16/10, which is what equalises the heights. */
+.mark-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 10;
+  background: var(--surface-2);
 }
 
 .mark {
-  width: 34px;
-  height: 34px;
+  width: 64px;
+  height: 64px;
   color: var(--fg-2);
+  transition: color 0.16s ease;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  flex: 1;
+  padding: 24px;
 }
 
 .title {
@@ -84,37 +115,106 @@ const github = computed(() => socials.find((social) => social.icon === 'github')
   color: var(--fg);
 }
 
-.body {
+.text {
   margin: 0;
-  max-width: 26ch;
   font-size: 15px;
   line-height: 1.55;
   color: var(--fg-2);
 }
 
-/* The link, in the mono the site uses for anything that behaves like a label. */
-.link {
-  display: inline-flex;
+/* The same foot the project cards carry: a hairline, the label and the arrow. */
+.foot {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.link {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--acc-text);
-  transition: color 0.16s ease;
 }
 
-.link:hover {
-  color: var(--acc-text-2);
+/* The whole card is the target: this stretches the link over it. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Without this the focus ring would trace the invisible overlay, not the label. */
+.link:focus-visible::after {
+  display: none;
 }
 
 .arrow {
-  transition: transform 0.16s ease;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 13px;
+  color: var(--fg-2);
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
 }
 
-.link:hover .arrow {
-  transform: translate(3px, -3px);
+/* The dashed border. */
+.dashes {
+  position: absolute;
+  inset: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.dashes rect {
+  fill: none;
+  stroke: var(--line);
+  /* A hair thicker than the cards' 1px, and dashes about four times as long as
+     the browser's own for that width. */
+  stroke-width: 2;
+  stroke-dasharray: 14 9;
+  transition: stroke 0.16s ease;
+}
+
+/* The same "this is the one" treatment the cards use. */
+@media (hover: hover) {
+  .cta:hover .dashes rect {
+    stroke: var(--acc-text);
+  }
+
+  .cta:hover .mark {
+    color: var(--fg);
+  }
+
+  .cta:hover .arrow {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: var(--on-acc);
+  }
+}
+
+@media (hover: none) {
+  .cta.current .dashes rect {
+    stroke: var(--acc-text);
+  }
+
+  .cta.current .arrow {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: var(--on-acc);
+  }
 }
 </style>
