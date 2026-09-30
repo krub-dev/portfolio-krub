@@ -71,6 +71,19 @@ export const copy = {
     },
   },
 
+  // The last card in the projects rail. Not a project: a way out to GitHub, for
+  // whatever did not fit in four cards. The link's own label is in src/locales/.
+  projectsCta: {
+    en: {
+      title: 'Want to see more?',
+      body: 'Have a look at my GitHub, I put all sorts there.',
+    },
+    es: {
+      title: '¿Quieres ver más?',
+      body: 'Cotillea mi GitHub, ahí subo de todo un poco.',
+    },
+  },
+
   /*
     What Limonacho says the first time you poke him in a visit — the bubble and
     the "acho" are one greeting. It hides itself after a few seconds; turn the

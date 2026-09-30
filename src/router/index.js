@@ -28,9 +28,9 @@ const routes = [
 // build, so it never reaches the deployed site.
 if (import.meta.env.DEV) {
   routes.push({
-    path: '/preview',
-    name: 'preview',
-    component: () => import('../views/PreviewView.vue'),
+    path: '/design-system',
+    name: 'design-system',
+    component: () => import('../views/DesignSystemView.vue'),
     // The sheet documents the chrome, so it does not wear it: no bar, no footer,
     // no lemon over the page, and a single grid that scrolls instead of the
     // hero/global pair.

@@ -255,6 +255,9 @@ the privacy notice and the consent the law asks for.
   different idea for those edges.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
+- [x] **The projects rail ends on a card that leads to GitHub.** Done on 2026-09-30: a dashed slot at
+  the end of the rail with the GitHub mark, a question, a line and a mono link in the accent. The mark
+  and the address come from the socials, so it cannot drift from Contact. See decision 101.
 - [x] **Finish the design-system page.** Rewritten on 2026-09-30 as a proper sheet rather than a patched
   one: a sticky rail over thirteen sections, then foundations (21 colour tokens grouped by use, the type
   scale, shape with the one shadow the project actually has, motion with the live keyframes), the

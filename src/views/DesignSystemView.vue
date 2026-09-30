@@ -423,7 +423,7 @@ onMounted(readTokens)
         </p>
 
         <p class="group-label">Tabs and timeline</p>
-        <TabSwitch v-model="tab" :options="tabOptions" panel-id="preview-tabs" />
+        <TabSwitch v-model="tab" :options="tabOptions" panel-id="sheet-tabs" />
         <div class="timeline">
           <TimelineItem
             v-for="(entry, i) in SAMPLE_TIMELINE"
@@ -616,12 +616,12 @@ onMounted(readTokens)
 
     <BaseModal
       :open="dialogOpen"
-      labelledby="preview-dialog-title"
+      labelledby="sheet-dialog-title"
       close-label="Close the dialog"
       @close="dialogOpen = false"
     >
       <template #head>
-        <span id="preview-dialog-title" class="dialog-title">A dialog</span>
+        <span id="sheet-dialog-title" class="dialog-title">A dialog</span>
       </template>
 
       <div class="dialog-body">

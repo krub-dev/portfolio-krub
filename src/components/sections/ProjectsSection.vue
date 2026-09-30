@@ -30,6 +30,7 @@ import { useI18n } from 'vue-i18n'
 
 import SectionHeading from '../base/SectionHeading.vue'
 import ProjectCard from '../content/ProjectCard.vue'
+import ProjectsCta from '../content/ProjectsCta.vue'
 import { useLang } from '../../composables/useLang'
 import { projects } from '../../data'
 
@@ -132,7 +133,8 @@ function paint() {
     half second the rail took to arrive.
   */
   if (step > 0) current.value = Math.round(offset / step)
-  parked.value = items.value.map((_, i) => {
+  // One entry per child of the track: the projects, then the CTA card.
+  parked.value = Array.from({ length: items.value.length + 1 }, (_, i) => {
     const left = i * step - offset
     return left + cardWidth <= 0 || left >= visibleWidth
   })
@@ -328,6 +330,12 @@ onUnmounted(() => {
             :inert="parked[i] || undefined"
             :current="i === current"
             @open="$emit('open', i)"
+          />
+
+          <!-- The rail's last slot: not a project, the way out to GitHub. -->
+          <ProjectsCta
+            :inert="parked[items.length] || undefined"
+            :current="items.length === current"
           />
         </div>
       </div>

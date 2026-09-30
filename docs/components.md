@@ -62,6 +62,7 @@ App
 │   ├─ ProjectsSection
 │   │   ├─ SectionHeading
 │   │   ├─ ProjectCard ×n
+│   │   ├─ ProjectsCta        (the rail's last slot: a dashed card to GitHub)
 │   │   └─ Testimonials         (optional, from config)
 │   └─ ContactSection
 │       ├─ SectionHeading
@@ -178,6 +179,12 @@ becoming a cross; the move is a CSS transform so it transitions. Reduced motion 
 | `stack` | array of strings (the first three are shown, joined by `·`) |
 
 Emits `open`.
+
+### ProjectsCta
+Prop: `current` (boolean — the rail's parked marker, for a touch screen). The rail's last slot: not a
+project but a way out to GitHub, in a dashed card. Its copy is `copy.projectsCta`, its link label
+`actions.github`, and the mark and the address come from `socials`/`socialIcons`, so they cannot drift
+from Contact. See decisions.md 101.
 
 ### ProjectModal
 | Prop | Type |
@@ -434,7 +441,7 @@ src/
 │   ├─ experience.js
 │   ├─ education.js
 │   ├─ stack.js
-│   ├─ socials.js        + email, cvPath, photoPath
+│   ├─ socials.js        + email, socialIcons, cvPath, photoPath
 │   ├─ privacy.js        the /privacy notice, the form's other half
 │   ├─ sound.js          the one audio clip: the "acho" Limonacho says once a visit
 │   ├─ sections.js       the scrollable sections: id, label key, index

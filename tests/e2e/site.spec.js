@@ -199,11 +199,15 @@ test('the project rail pages to the end with its dots', async ({ page }) => {
   await expect(dots.last()).toHaveClass(/active/)
   await expect(dots.first()).not.toHaveClass(/active/)
 
-  // At the far end it is the other way round: the last card sits on the right.
-  await expect(viewport).toHaveClass(/fade-left/)
+  /*
+    At the far end it is the other way round: nothing hangs off the right, so
+    that side is not faded. (With the CTA card the rail can end exactly on the
+    edge, and then there is no fade at all.)
+  */
+  await expect(viewport).not.toHaveClass(/fade-right/)
 
   // And the card it was hiding ended up inside the rail.
-  const last = await page.locator('#projects .card').last().boundingBox()
+  const last = await page.locator('#projects .cta').boundingBox()
   const rail = await page.locator('#projects .viewport').boundingBox()
   expect(last.x + last.width).toBeLessThanOrEqual(rail.x + rail.width + 1)
 
@@ -211,6 +215,17 @@ test('the project rail pages to the end with its dots', async ({ page }) => {
   await dots.first().click()
   await expect.poll(shift).toBe(0)
   await expect(dots.first()).toHaveClass(/active/)
+})
+
+test('the rail ends on a card that goes to GitHub', async ({ page }) => {
+  await openSite(page)
+  await bringIntoView(page.locator('#projects .viewport'))
+
+  const cta = page.locator('#projects .cta')
+  await expect(cta).toBeVisible()
+  // Dashed, because it is a slot in the rail rather than a fifth project.
+  await expect(cta).toHaveCSS('border-top-style', 'dashed')
+  await expect(cta.getByRole('link')).toHaveAttribute('href', 'https://github.com/krub-dev')
 })
 
 test('the navbar only takes clicks where the capsule is', async ({ page }) => {

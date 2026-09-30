@@ -49,6 +49,7 @@
   },
   "actions": {
     "cv": "Résumé/CV",
+    "github": "See GitHub",
     "talk": "Let's talk ↗",
     "readMore": "Read more",
     "readLess": "Read less",

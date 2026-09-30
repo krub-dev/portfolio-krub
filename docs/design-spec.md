@@ -418,6 +418,14 @@ has no hover: a tap leaves `:hover` stuck on whatever was touched, so the marker
 depending on where the last finger went. Where there is no hover the rail marks the card it is parked
 on instead, with the same yellow border, and it moves as you scroll the rail.
 
+**The last slot is not a project.** It is a dashed card that leads to GitHub — the mark, a question, a
+line and a mono link in the accent — for whatever did not fit in four cards. Dashed because it is a
+slot in the rail rather than a fifth project; the same radius, surface and `inert`/`current` treatment
+as the cards beside it, and centred content (the cards' heights are equalised by the track, so the slot
+is as tall as the tallest). Its copy lives in `src/data/copy.js` and its link label in `src/locales/`;
+the GitHub mark and address are read from the socials, so they cannot drift from the ones in Contact.
+See decision 101.
+
 1. Screenshot frame: `aspect-ratio:16/10`, diagonal stripe background
    `repeating-linear-gradient(135deg, var(--surface-2) 0 12px, var(--ink) 12px 24px)`, with a
    centred 10px mono label. It is a placeholder: swap it for the real image once there is one.

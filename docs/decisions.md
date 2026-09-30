@@ -399,11 +399,13 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
 
 ## Enrutado SPA y endpoints
 
-### 7. `/preview` is a dev-only route
+### 7. The design system is a dev-only route
 **Status:** active · **Archive:** 7
 
-A visual sheet for the token layer lives at `/preview`, registered only under `import.meta.env.DEV`
-and lazily imported, so it is absent from the production bundle.
+The design-system sheet — the tokens, the components and the patterns, running live, with a theme and
+accent switch — lives at `/design-system`, registered only under `import.meta.env.DEV` and lazily
+imported, so it is absent from the production bundle. (It was `/preview` until 2026-09-30, which said
+nothing about what it was.)
 
 ### 45. The 404 is a route, and a soft one
 **Status:** active · **Archive:** 45
@@ -667,6 +669,22 @@ Two things an iPad showed once the CV dialog was there.
   because a disabled control takes no mouse events: the button steps out of the way
   (`pointer-events: none`) and the wrapper takes the pointer, so the reason is heard at the moment it
   is needed.
+
+### 101. The projects rail ends on a dashed card to GitHub
+**Status:** active
+
+Four projects fit the rail, and whatever else there is lives on GitHub — which nothing on the page
+said. The rail's last slot is a card that does: the GitHub mark, a question, a line, and a mono link
+in the accent.
+
+- **Dashed, not solid.** The border is what says "this is a slot in the rail, not a fifth project" —
+  with the same radius, surface, hover and parked treatment as the cards beside it, so it belongs
+  without pretending to be one.
+- **One source for the link.** The mark and the address come from `socials`/`socialIcons` (the paths
+  moved out of `SocialLink` into the data for this), the copy from `src/data/copy.js` and the label
+  from `src/locales/`. Nothing here can drift from Contact.
+- **It is part of the rail.** The dots count it, it goes `inert` when it is out of view, and on a touch
+  screen it takes the parked border, like the cards.
 
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62
