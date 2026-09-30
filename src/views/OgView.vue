@@ -11,8 +11,13 @@
   box here and writes public/assets/img/og-banner.png from it, so what ships is
   this page and nothing else.
 
-  The headline and the name come from the hero, so the two cannot drift; the
-  details block is composed here until the design settles.
+  Everything the card is made of is a grid multiple. The page grid is 72px, so
+  the mark's slot is 504 (7 cells) with its edges on lines at 648/1152 and 72/576,
+  and the padding is 72 rather than 80 for the same reason. A box that does not
+  land on the grid reads as a mistake next to the lines.
+
+  The headline is written here rather than read from the hero while it is being
+  decided; when it settles it moves to src/data/copy.js and the hero follows.
 
   The banner is dark by design — a social card does not follow a theme — so if the
   site is in the light theme, the colours below are not the shipped ones.
@@ -21,8 +26,10 @@
   strings in a template" rule: the banner's own composition is the subject. It
   never ships — the route is dev-only.
 */
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
+import BrandLogo from '../components/base/BrandLogo.vue'
+import AppearanceControl from '../components/chrome/AppearanceControl.vue'
 import LemonPet from '../components/chrome/LemonPet.vue'
 import LogoScene from '../components/sections/LogoScene.vue'
 import { useLang } from '../composables/useLang'
@@ -30,7 +37,6 @@ import { copy, email } from '../data'
 
 const { lang } = useLang()
 
-const hero = computed(() => copy.hero[lang.value])
 const marquee = computed(() => copy.marquee[lang.value])
 
 /*
@@ -54,6 +60,39 @@ onBeforeUnmount(() => clearTimeout(armTimer))
 const showMark = ref(true)
 const showLemon = ref(true)
 const showGrid = ref(true)
+
+/*
+  Two ways to show the mark. The scene is the site's own — the polished 3D mark
+  standing in its room — and the room comes with it: it is built inside SceneRig,
+  which exposes no switch for it, so "the logo on its own" is the site's other
+  mark, the flat accent mask the hero falls back to when the scene cannot start.
+
+  Switching back has to re-arm: the halo follows the prop going from false to
+  true, so a mark that comes back with `armed` already true comes back dark.
+*/
+const flat = ref(false)
+
+watch(showMark, (on) => {
+  if (on) armed.value = false
+})
+
+/*
+  Where the mark's slot sits, in grid cells rather than pixels: the grid is 72px,
+  and a slot that does not land on it reads as a mistake next to the lines. 5x5 at
+  x8/y1 leaves the bottom-right corner clear for the mascot.
+
+  Numbers rather than dragging: the scene takes the pointer for its own spin, so a
+  drag over the slot turns the mark instead of moving the box.
+*/
+const CELL = 72
+const slot = ref({ x: 8, y: 1, size: 5 })
+
+const markStyle = computed(() => ({
+  left: `${slot.value.x * CELL}px`,
+  top: `${slot.value.y * CELL}px`,
+  width: `${slot.value.size * CELL}px`,
+  height: `${slot.value.size * CELL}px`,
+}))
 </script>
 
 <template>
@@ -61,10 +100,23 @@ const showGrid = ref(true)
     <header class="bar">
       <p class="eyebrow">dev only · open graph</p>
       <p class="size">1200 × 630</p>
+
+      <AppearanceControl />
+
       <div class="controls">
         <label class="toggle"><input v-model="showMark" type="checkbox" />Mark</label>
+        <label class="toggle"><input v-model="flat" type="checkbox" />Flat</label>
         <label class="toggle"><input v-model="showLemon" type="checkbox" />Lemon</label>
         <label class="toggle"><input v-model="showGrid" type="checkbox" />Grid</label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">slot · cells</span>
+        <label class="field">x<input v-model.number="slot.x" type="number" min="0" max="16" /></label>
+        <label class="field">y<input v-model.number="slot.y" type="number" min="0" max="8" /></label>
+        <label class="field"
+          >size<input v-model.number="slot.size" type="number" min="2" max="8"
+        /></label>
       </div>
     </header>
 
@@ -72,26 +124,32 @@ const showGrid = ref(true)
       <div v-if="showGrid" class="grid" aria-hidden="true" />
 
       <div class="left">
+        <p class="brand">
+          <BrandLogo :height="20" />
+          <span class="brand-dev">.dev</span>
+        </p>
+
         <p class="name"><span class="acc">K</span>IKO<br /><span class="acc">RUB</span>IO</p>
 
-        <h1 class="headline">
-          {{ hero.line1 }}<br />
-          {{ hero.line2 }}<br />
-          {{ hero.line3pre }}<span class="accent">{{ hero.accent }}</span>{{ hero.line3post }}
-        </h1>
+        <h1 class="headline">FULL STACK<br /><span class="accent">DEVELOPER</span></h1>
+
+        <p class="line skills">Frontend · Backend · Applied AI</p>
 
         <span class="rule" aria-hidden="true" />
 
         <div class="details">
-          <p class="role">Full Stack Developer</p>
-          <p class="line skills">Frontend · Backend · Applied AI</p>
           <p class="line">{{ marquee[1] }}</p>
           <p class="line mail">{{ email }}</p>
         </div>
       </div>
 
-      <div v-if="showMark" class="mark" aria-hidden="true">
-        <Suspense>
+      <!--
+        The slot the mark stands in, placed in grid cells from the header and
+        bound to `.mark` below, so its edges can sit on the lines.
+      -->
+      <div v-if="showMark" class="mark" :style="markStyle" aria-hidden="true">
+        <div v-if="flat" class="flat-mark" />
+        <Suspense v-else>
           <LogoScene :halo-on="armed" @ready="onReady" />
         </Suspense>
       </div>
@@ -133,6 +191,30 @@ const showGrid = ref(true)
   gap: 14px;
 }
 
+.slot-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 12px var(--font-mono);
+  color: var(--fg-2);
+}
+
+.field input {
+  width: 46px;
+  padding: 4px 6px;
+  font: 500 12px var(--font-mono);
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
 .toggle {
   display: inline-flex;
   align-items: center;
@@ -164,11 +246,10 @@ const showGrid = ref(true)
   background: var(--ink);
   color: var(--fg);
   font-family: var(--font-sans);
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 40px;
+  display: flex;
   align-items: center;
-  padding: 56px 80px;
+  /* 72, not 80: the grid's own cell, so the text starts on a line. */
+  padding: 72px;
 }
 
 .grid {
@@ -182,9 +263,25 @@ const showGrid = ref(true)
 
 .left {
   position: relative;
+  max-width: 540px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin: 0 0 6px;
+}
+
+.brand-dev {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--fg-2);
 }
 
 .name {
@@ -202,10 +299,10 @@ const showGrid = ref(true)
 
 .headline {
   margin: 0;
-  font-size: 60px;
+  font-size: 62px;
   font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 0.98;
+  letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 .accent {
@@ -221,20 +318,15 @@ const showGrid = ref(true)
 .details {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.role {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 600;
+  gap: 7px;
 }
 
 .line {
   margin: 0;
   font-family: var(--font-mono);
   font-size: 14px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--fg-2);
 }
 
@@ -244,25 +336,36 @@ const showGrid = ref(true)
 
 /*
   The mark, drawn by the site's own scene: no frame, no rim, no blind — what the
-  banner wants is the mark, and the room it stands in comes with it. The box is
-  what the scene measures itself against.
+  banner wants is the mark, and the room it stands in comes with it. The slot is
+  placed against the banner, not against the text, so its edges can sit on the
+  grid; its position and size come from the header controls.
 */
 .mark {
-  position: relative;
-  justify-self: end;
-  width: 470px;
-  height: 470px;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The site's own fallback mark: the same mask the hero paints when the scene
+   cannot start, at the same 58% of the slot. */
+.flat-mark {
+  width: 58%;
+  aspect-ratio: 1.682;
+  background: var(--mark);
+  -webkit-mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
+  mask: url('/assets/img/krub-mark.png') center / contain no-repeat;
 }
 
 /*
-  The mascot, out of his fixed position and parked in the corner. He is scaled
-  rather than resized: his leaf, his pores and his eyes are all absolute pixels
-  inside him, so a wider box would pull him apart.
+  The mascot, out of his fixed position and parked on the last grid cell. He is
+  scaled rather than resized: his leaf, his pores and his eyes are all absolute
+  pixels inside him, so a wider box would pull him apart.
 */
 .pet {
   position: absolute;
-  right: 44px;
-  bottom: 40px;
+  right: 48px;
+  bottom: 54px;
 }
 
 .pet :deep(.pet) {
