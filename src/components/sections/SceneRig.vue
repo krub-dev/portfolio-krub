@@ -47,6 +47,15 @@ const props = defineProps({
     never does, so the default is the stage's.
   */
   room: { type: Boolean, default: true },
+  /*
+    Whether the room's faces are shaded by the scene's own lights. Off — the
+    site's default — the room is unlit: every wall is exactly `--ink` with the
+    grid on top, and depth comes from the grid converging and the fog. On, the
+    room takes a Lambert material, so each wall catches the lights by its normal
+    and the box reads as depth by tone, the way a lit room does. The Open Graph
+    card wants that; the stage was built without it, so the default is off.
+  */
+  shaded: { type: Boolean, default: false },
 })
 
 // The box's opening is cut to land exactly on the stage: at its distance the
@@ -200,6 +209,12 @@ function buildRoomGeometry() {
   geo.setAttribute('position', new Float32BufferAttribute(positions, 3))
   geo.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
   geo.setIndex(indices)
+  /*
+    No vertex is shared between quads, so each face gets its own flat normal
+    rather than an average across a corner. The unlit material ignores them; the
+    shaded one needs them, and flat is what makes each wall one tone.
+  */
+  geo.computeVertexNormals()
   geo.computeBoundingSphere()
   roomGeo.value?.dispose()
   roomGeo.value = geo
@@ -352,6 +367,17 @@ onBeforeRender(({ delta }) => {
     :position="[0, 0, roomZ]"
     :scale="[k, k, k]"
   >
-    <TresMeshBasicMaterial :map="room" :side="DoubleSide" :tone-mapped="false" />
+    <!--
+      Unlit by default: the walls are exactly `--ink`, so the grid is the page's
+      carried into depth. `shaded` swaps in a Lambert material, which lights each
+      face by its normal — the same box, reading as depth by tone instead.
+    -->
+    <TresMeshLambertMaterial
+      v-if="props.shaded"
+      :map="room"
+      :side="DoubleSide"
+      :tone-mapped="false"
+    />
+    <TresMeshBasicMaterial v-else :map="room" :side="DoubleSide" :tone-mapped="false" />
   </TresMesh>
 </template>

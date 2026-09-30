@@ -395,6 +395,26 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
 - **The scene is gated under `navigator.webdriver`** so the e2e suite never holds a WebGL context; the
   2D mark stands in there instead (decision 77).
 
+### 102. The room can be lit face by face, and the site does not light it
+**Status:** active · **Archive:** — (new, after the split)
+
+- **Depth by tone instead of by grid.** The room was one unlit box: every wall exactly `--ink` with
+  the page's grid on top, so depth came from the grid converging and the fog. A Blender test of the
+  same box, one face removed, showed the other way it can read: a flat face under a directional light
+  is one tone, each normal catches a different amount, and the box becomes a recess by tone alone. So
+  the walls can take a `MeshLambertMaterial` and the scene's own lights do it.
+- **`shaded` gates it, default off.** `SceneRig` takes it and `LogoScene` passes it through. The site
+  stays unlit because it was built that way and the hero's depth already reads; the Open Graph card
+  turns it on to weigh the alternative.
+- **The geometry gained `computeVertexNormals`.** No vertex is shared between the quads, so each face
+  gets a flat normal rather than one averaged across a corner, which is what makes a wall one tone.
+  The unlit material ignores it.
+- **The dark base caps the effect.** `--ink` is near black, so a lit wall can only go darker than the
+  page (or the far wall, brighter). Measured on the card: unlit, all four walls sit at 12/255, the
+  page's own value; lit, they spread from 4.5 (ceiling) to 11.8 (floor), with the far wall over the
+  mark at 29.5. To spread them as far as the Blender reference the walls would have to stop being the
+  page background, which is the room's whole reason for matching the page grid (202863b).
+
 ---
 
 ## Enrutado SPA y endpoints

@@ -53,6 +53,12 @@ const props = defineProps({
     never does, so the default is the stage's.
   */
   room: { type: Boolean, default: true },
+  /*
+    Whether the room's faces are shaded by the scene's lights, so depth reads by
+    tone rather than by the grid alone. Off in the site; the Open Graph card
+    turns it on. See SceneRig.
+  */
+  shaded: { type: Boolean, default: false },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -142,7 +148,14 @@ defineExpose({ logoGroup })
       <TresDirectionalLight :position="[0, 0, 10]" :intensity="1.5" />
       <TresDirectionalLight :position="[5, 5, 5]" :intensity="0.6" />
 
-      <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :fog="props.fog" :room="props.room" />
+      <SceneRig
+        ref="rig"
+        :tilt="props.tilt"
+        :cam-z="camZ"
+        :fog="props.fog"
+        :room="props.room"
+        :shaded="props.shaded"
+      />
 
       <LogoModel
         v-if="logoGroup"

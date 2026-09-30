@@ -61,6 +61,23 @@ const showMark = ref(true)
 const showRoom = ref(true)
 const showLemon = ref(true)
 const showGrid = ref(true)
+// The room's faces lit by the scene's lights, so the box reads as depth by tone
+// rather than by the grid alone — what the Blender reference showed. Off, the
+// room is the site's flat, unlit box. See SceneRig.
+const shaded = ref(true)
+
+/*
+  What happens where the room's grid meets the page's. The room's lines converge
+  and the page's run parallel, so the change of direction happens on a boundary
+  that is not drawn — which is what reads as the grid arriving out of nowhere.
+
+  - `glow`: a faint neutral rim inside the opening. It does not hide the bend, it
+    explains it: this is the mouth of a room, not a grid that went wrong.
+  - `feather`: the room's grid fades into the page before the edge, so there is no
+    bend to see. It costs a little of the page's own grid where the band falls.
+  - `none`: neither.
+*/
+const edge = ref('none')
 
 /*
   Two ways to show the mark. The scene is the site's own — the polished 3D mark
@@ -138,6 +155,7 @@ const gridStyle = computed(() => {
         <label class="toggle"><input v-model="showMark" type="checkbox" />Mark</label>
         <label class="toggle"><input v-model="flat" type="checkbox" />Flat</label>
         <label class="toggle"><input v-model="showRoom" type="checkbox" />Room</label>
+        <label class="toggle"><input v-model="shaded" type="checkbox" />Lit</label>
         <label class="toggle"><input v-model="showLemon" type="checkbox" />Lemon</label>
         <label class="toggle"><input v-model="showGrid" type="checkbox" />Grid</label>
       </div>
@@ -149,6 +167,17 @@ const gridStyle = computed(() => {
         <label class="field"
           >size<input v-model.number="slot.size" type="number" min="2" max="8"
         /></label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">edge</span>
+        <label class="field"
+          ><select v-model="edge">
+            <option value="glow">glow</option>
+            <option value="feather">feather</option>
+            <option value="none">none</option>
+          </select></label
+        >
       </div>
 
       <div class="slot-controls">
@@ -197,9 +226,11 @@ const gridStyle = computed(() => {
         <div class="mark-inner" :style="markInnerStyle">
           <div v-if="flat" class="flat-mark" />
           <Suspense v-else>
-            <LogoScene :halo-on="armed" :room="showRoom" @ready="onReady" />
+            <LogoScene :halo-on="armed" :room="showRoom" :shaded="shaded" @ready="onReady" />
           </Suspense>
         </div>
+
+        <div v-if="edge !== 'none'" class="edge" :class="`edge-${edge}`" />
       </div>
 
       <div v-if="showLemon" class="pet">
@@ -253,14 +284,18 @@ const gridStyle = computed(() => {
   color: var(--fg-2);
 }
 
-.field input {
-  width: 46px;
+.field input,
+.field select {
   padding: 4px 6px;
   font: 500 12px var(--font-mono);
   color: var(--fg);
   background: transparent;
   border: 1px solid var(--line);
   border-radius: 6px;
+}
+
+.field input {
+  width: 46px;
 }
 
 .toggle {
@@ -407,6 +442,31 @@ const gridStyle = computed(() => {
 .mark-inner {
   width: 100%;
   height: 100%;
+}
+
+/*
+  Where the room meets the page. Both are overlays, so neither touches the scene:
+  the rim is light added inside the opening, the feather is the page's own
+  background drawn back over the room's edge.
+*/
+.edge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.edge-glow {
+  box-shadow:
+    inset 0 0 10px 1px color-mix(in srgb, var(--fg) 16%, transparent),
+    inset 0 0 70px 16px color-mix(in srgb, var(--fg) 6%, transparent);
+}
+
+.edge-feather {
+  background:
+    linear-gradient(to right, var(--ink), transparent 18%),
+    linear-gradient(to left, var(--ink), transparent 18%),
+    linear-gradient(to bottom, var(--ink), transparent 18%),
+    linear-gradient(to top, var(--ink), transparent 18%);
 }
 
 /* The site's own fallback mark: the same mask the hero paints when the scene
