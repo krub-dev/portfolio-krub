@@ -423,14 +423,13 @@ borrows the project card's own rhythm so the two come out the same size: a media
 `--surface-2`, carrying the GitHub mark at 64px over a mosaic of rounded accent squares), then the body
 (the question and the line) and a foot with a hairline carrying the mono label in the accent and the
 arrow circle — the whole card the target, the link stretched over it with an `::after` overlay. The
-border is **dashed**, which is what says "a slot in the rail, not a fifth project": four 2px
-`repeating-linear-gradient` strips, one per edge, with the dash length and the gap set by hand (18px and
-12px) — `border-style: dashed` cannot be tuned, its pattern is fixed against the border's width. They are
-drawn on the card's `::before`, a layer above the contents, because the media slot's opaque panel would
-hide them as a background; the 1px transparent border under them is only to keep the box the size of the
-cards beside it. Same radius, surface and `inert`/`current` treatment as the cards. The copy lives in
-`src/data/copy.js` and the link label in `src/locales/`; the GitHub mark and address are read from the
-socials, so they cannot drift from Contact. See decision 101.
+border is **dashed**, which is what says "a slot in the rail, not a fifth project": an SVG `rect` with the
+dash length and the gap set by hand (18px and 12px), because a CSS border follows the card's rounded
+corner but cannot be tuned, and a gradient can be tuned but is straight. It is drawn on a layer above the
+contents, so the media slot's opaque panel cannot hide it; the 1px transparent border under it is only to
+keep the box the size of the cards beside it. Same radius, surface and `inert`/`current` treatment as the
+cards. The copy lives in `src/data/copy.js` and the link label in `src/locales/`; the GitHub mark and
+address are read from the socials, so they cannot drift from Contact. See decision 101.
 
 1. Screenshot frame: `aspect-ratio:16/10`, diagonal stripe background
    `repeating-linear-gradient(135deg, var(--surface-2) 0 12px, var(--ink) 12px 24px)`, with a

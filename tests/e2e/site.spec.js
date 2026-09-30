@@ -225,14 +225,15 @@ test('the rail ends on a card that goes to GitHub', async ({ page }) => {
   await expect(cta).toBeVisible()
   /*
     Dashed, because it is a slot in the rail rather than a fifth project. The
-    dashes are four repeating gradients on the card's ::before — a layer above the
-    contents, since the media slot's opaque background would hide them — rather
-    than `border-style: dashed`, which cannot be made longer or further apart. The
-    transparent border under them is only what keeps the box the size of the cards.
+    dashes are an SVG `rect` on a layer above the contents — a border follows the
+    card's rounded corner but cannot be tuned, and a gradient can be tuned but is
+    straight — so the pattern is the one we set, not the browser's. The transparent
+    border under it is only what keeps the box the size of the cards.
   */
-  const dashes = await cta.evaluate((el) => getComputedStyle(el, '::before').backgroundImage)
-  expect(dashes).toContain('repeating-linear-gradient')
-  expect(dashes).toContain('18px')
+  const dash = await cta
+    .locator('.frame rect')
+    .evaluate((el) => getComputedStyle(el).strokeDasharray)
+  expect(dash).toBe('18px, 12px')
   await expect(cta).toHaveCSS('border-top-color', 'rgba(0, 0, 0, 0)')
   await expect(cta.getByRole('link')).toHaveAttribute('href', 'https://github.com/krub-dev')
 

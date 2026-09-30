@@ -90,6 +90,16 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
         <span class="arrow" aria-hidden="true">↗</span>
       </div>
     </div>
+
+    <!--
+      The dashed frame. It is an SVG because the dashes have to follow the card's
+      rounded corner: a CSS border follows the radius but its pattern is fixed
+      against the border's width, and a gradient can be tuned but is straight. A
+      `rect` does both.
+    -->
+    <svg class="frame" aria-hidden="true">
+      <rect x="0" y="0" width="100%" height="100%" rx="17" ry="17" />
+    </svg>
   </article>
 </template>
 
@@ -110,57 +120,31 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
   border: 1px solid transparent;
   border-radius: 18px;
   background: var(--surface);
-  /*
-    No transition on the dash colour: it lives inside a gradient, and a gradient
-    cannot be interpolated the way a border colour can. It swaps in one frame,
-    which is what the border did too — only the arrow and the mark ease.
-  */
 }
 
 /*
-  The dashes are drawn on a layer of their own, above the card's contents. They
-  cannot be a background on the card: the media slot below has an opaque
-  background of its own and would hide the top and sides of the frame. So this is
-  the frame, `inset: -1px` because an absolutely positioned box is placed against
-  the padding box and it has to reach the border box, and `border-radius: inherit`
-  so its corners sit on the card's. It takes no pointer events, so the link
-  stretched over the card still gets the click.
-
-  It is not `border-style: dashed`: a browser's own dashes are a fixed multiple of
-  the border's width, so they cannot be made longer or further apart. Four
-  repeating gradients, one strip per edge, give the length and the gap as numbers.
+  The frame. The rect sits on the padding box, one pixel in, so a 2px stroke
+  centred on it lands exactly on the card's edge — and its radius is 17, one less
+  than the card's 18, which is what puts the two curves on the same centre.
+  `overflow: visible` is what lets the outer half of the stroke out, and the layer
+  is above the contents because the media slot's opaque panel would hide it.
 */
-.github-card::before {
-  content: '';
+.frame {
   position: absolute;
-  inset: -1px;
-  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
   pointer-events: none;
-  border-radius: inherit;
-  background-image:
-    repeating-linear-gradient(
-      90deg,
-      var(--dash) 0 var(--dash-length),
-      transparent var(--dash-length) calc(var(--dash-length) + var(--dash-gap))
-    ),
-    repeating-linear-gradient(
-      90deg,
-      var(--dash) 0 var(--dash-length),
-      transparent var(--dash-length) calc(var(--dash-length) + var(--dash-gap))
-    ),
-    repeating-linear-gradient(
-      180deg,
-      var(--dash) 0 var(--dash-length),
-      transparent var(--dash-length) calc(var(--dash-length) + var(--dash-gap))
-    ),
-    repeating-linear-gradient(
-      180deg,
-      var(--dash) 0 var(--dash-length),
-      transparent var(--dash-length) calc(var(--dash-length) + var(--dash-gap))
-    );
-  background-size: 100% 2px, 100% 2px, 2px 100%, 2px 100%;
-  background-position: 0 0, 0 100%, 0 0, 100% 0;
-  background-repeat: no-repeat;
+  z-index: 2;
+}
+
+.frame rect {
+  fill: none;
+  stroke: var(--dash);
+  stroke-width: 2;
+  stroke-dasharray: var(--dash-length) var(--dash-gap);
+  transition: stroke 0.16s ease;
 }
 
 /* The media slot, in the cards' own 16/10, which is what equalises the heights. */
@@ -304,8 +288,21 @@ const MOSAIC = Array.from({ length: COLUMNS * ROWS }, (_, i) => {
 }
 
 @media (hover: none) {
+  /*
+    On a touch screen there is no hover, so the card the rail is parked on takes
+    the whole hover treatment: the frame, the mark and the mosaic, or the frame
+    would light up on its own and the card would look half-highlighted.
+  */
   .github-card.current {
     --dash: var(--acc-text);
+  }
+
+  .github-card.current .mark {
+    color: var(--acc-text);
+  }
+
+  .github-card.current .mosaic {
+    opacity: 1;
   }
 
   .github-card.current .arrow {

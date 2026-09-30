@@ -677,18 +677,17 @@ Four projects fit the rail, and whatever else there is lives on GitHub — which
 said. The rail's last slot is a card that does: the GitHub mark, a question, a line, and a mono link
 in the accent.
 
-- **Dashed, and the dash pattern is set by hand — in CSS.** The border is what says "a slot in the rail,
-  not a fifth project". `border-style: dashed` could not be tuned: a browser draws its own dashes at a
-  fixed multiple of the border's width, and the owner wanted them longer and further apart. So the dashes
-  are four `repeating-linear-gradient`s, one 2px strip per edge, with the length and the gap as numbers
-  (`--dash-length` 18px, `--dash-gap` 12px).
-- **The dashes are a layer above the card, not a background on it.** As a background they were hidden
-  behind the media slot, which has an opaque panel of its own. So they live on the card's `::before`,
-  `inset: -1px` to reach the border box (an absolutely positioned box is placed against the padding box)
-  and `border-radius: inherit` so the corners sit on the card's. It takes no pointer events, so the link
-  stretched over the card still gets the click. The card gave up its `overflow: hidden` for this, so the
-  media slot rounds its own top corners — 17px, the card's 18px less its 1px border, which is what puts
-  the two curves on the same centre.
+- **Dashed, and the dash pattern is set by hand.** The border is what says "a slot in the rail, not a
+  fifth project", and the owner wanted the dashes longer and further apart than the browser's own. A CSS
+  `border-style: dashed` follows the card's rounded corner but its pattern is fixed against the border's
+  width; a `repeating-linear-gradient` can be tuned but is straight, and it left the corners bare. So the
+  frame is an SVG `rect` with `stroke-dasharray` (18px dashes, 12px gaps), which does both at once. This
+  is not an SVG where CSS would have done: CSS can do one or the other, not both.
+- **It sits on the padding box, one pixel in.** A 2px stroke centred on it lands exactly on the card's
+  edge, and the rect's radius is 17, one less than the card's 18, which is what puts the two curves on
+  the same centre. `overflow: visible` is what lets the outer half of the stroke out. It is a layer above
+  the contents (`z-index: 2`, `pointer-events: none`) because the media slot's opaque panel would hide it
+  as a background, and the link stretched over the card still gets the click.
 - **A `rect` SVG for the dashes was tried, and dropped.** It followed the corners exactly, but it is more
   machinery than the job needs — and the owner asked for CSS where CSS will do. It also brought two traps:
   an `svg` without an explicit size falls back to the replaced-element default of 300×150, and
