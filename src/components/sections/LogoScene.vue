@@ -47,6 +47,12 @@ const props = defineProps({
   haloOn: { type: Boolean, default: false },
   // How the tunnel fades out with depth.
   fog: { type: String, default: 'far' },
+  /*
+    Whether the room is drawn at all. Off leaves the mark alone in the scene,
+    with nothing behind it: what the Open Graph card wants, and what the stage
+    never does, so the default is the stage's.
+  */
+  room: { type: Boolean, default: true },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -136,7 +142,7 @@ defineExpose({ logoGroup })
       <TresDirectionalLight :position="[0, 0, 10]" :intensity="1.5" />
       <TresDirectionalLight :position="[5, 5, 5]" :intensity="0.6" />
 
-      <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :fog="props.fog" />
+      <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :fog="props.fog" :room="props.room" />
 
       <LogoModel
         v-if="logoGroup"

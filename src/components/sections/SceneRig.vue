@@ -41,6 +41,12 @@ const props = defineProps({
   camZ: { type: Number, required: true },
   // How the tunnel fades out with depth. See FOG_MODES.
   fog: { type: String, default: 'far' },
+  /*
+    Whether the room is drawn at all. Off leaves the mark alone in the scene,
+    with nothing behind it — what the Open Graph card wants, and what the stage
+    never does, so the default is the stage's.
+  */
+  room: { type: Boolean, default: true },
 })
 
 // The box's opening is cut to land exactly on the stage: at its distance the
@@ -332,7 +338,7 @@ onBeforeRender(({ delta }) => {
   <!-- The room: a deep box open toward the camera. It scales and moves with the
        zoom so its opening stays on the stage. -->
   <TresMesh
-    v-if="roomGeo"
+    v-if="props.room && roomGeo"
     :geometry="roomGeo"
     :position="[0, 0, roomZ]"
     :scale="[k, k, k]"

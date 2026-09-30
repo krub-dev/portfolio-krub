@@ -308,7 +308,8 @@ not to mount it below 900px (decision 37).
 The `<TresCanvas>`: the lights, the wheel-zoom (clamped, and it only takes the gesture while it can
 still move), the off-screen pause (an IntersectionObserver at 60%) and the fps and DPR caps. It loads
 the mark's GLB and reports the download up as `ready` and `progress`. The camera and the depth are
-`SceneRig`'s.
+`SceneRig`'s. Prop: `room` (boolean, default true) — off, the room is not drawn and the mark stands
+alone, which is what the Open Graph card asks for and what the stage never does.
 
 ### SceneRig
 The rig around the mark: the camera and the depth. A deep open box — four walls converging on a
@@ -316,7 +317,8 @@ distant far wall, built by hand so the grid is world-uniform, sized to the camer
 opening lands on the stage, and divided into the stage's seven cells — carries the grid and is
 faded by a `Fog` read from `--ink`; it scales with the wheel's zoom so the opening stays put. The
 camera leans a little with the pointer's `tilt`, always looking back at the mark. A child of the
-canvas, because `useLoop` and `useTresContext` need the renderer. See decisions 78–82.
+canvas, because `useLoop` and `useTresContext` need the renderer. Prop: `room` (boolean, default true)
+— the box is the whole of this component, so off is the rig without it. See decisions 78–82.
 
 ### LogoModel
 The mesh and everything about how it looks and moves: the two `MeshStandardMaterial`s (the front in

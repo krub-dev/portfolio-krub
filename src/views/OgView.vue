@@ -58,6 +58,7 @@ onBeforeUnmount(() => clearTimeout(armTimer))
 // Live switches, so a piece can be taken out of the picture while the rest is
 // judged on its own.
 const showMark = ref(true)
+const showRoom = ref(true)
 const showLemon = ref(true)
 const showGrid = ref(true)
 
@@ -93,6 +94,23 @@ const markStyle = computed(() => ({
   width: `${slot.value.size * CELL}px`,
   height: `${slot.value.size * CELL}px`,
 }))
+
+/*
+  The background grid follows the room. The room's opening is cut into the same
+  seven cells the stage is, so its lines only land on the page's when the slot is
+  7 cells across; at any other size the background has to be scaled to the room's
+  own cell and moved to start at the slot's corner, or the two grids cross. With
+  the room off there is nothing to line up with, and the page's own 72px grid is
+  the one to draw.
+*/
+const gridStyle = computed(() => {
+  if (!showRoom.value) return { backgroundSize: '72px 72px', backgroundPosition: '0 0' }
+  const cell = (slot.value.size * CELL) / 7
+  return {
+    backgroundSize: `${cell}px ${cell}px`,
+    backgroundPosition: `${slot.value.x * CELL}px ${slot.value.y * CELL}px`,
+  }
+})
 </script>
 
 <template>
@@ -106,6 +124,7 @@ const markStyle = computed(() => ({
       <div class="controls">
         <label class="toggle"><input v-model="showMark" type="checkbox" />Mark</label>
         <label class="toggle"><input v-model="flat" type="checkbox" />Flat</label>
+        <label class="toggle"><input v-model="showRoom" type="checkbox" />Room</label>
         <label class="toggle"><input v-model="showLemon" type="checkbox" />Lemon</label>
         <label class="toggle"><input v-model="showGrid" type="checkbox" />Grid</label>
       </div>
@@ -121,7 +140,7 @@ const markStyle = computed(() => ({
     </header>
 
     <div class="banner">
-      <div v-if="showGrid" class="grid" aria-hidden="true" />
+      <div v-if="showGrid" class="grid" :style="gridStyle" aria-hidden="true" />
 
       <div class="left">
         <p class="brand">
@@ -138,7 +157,7 @@ const markStyle = computed(() => ({
         <span class="rule" aria-hidden="true" />
 
         <div class="details">
-          <p class="line">{{ marquee[1] }}</p>
+          <p class="line place">{{ marquee[1] }}</p>
           <p class="line mail">{{ email }}</p>
         </div>
       </div>
@@ -150,7 +169,7 @@ const markStyle = computed(() => ({
       <div v-if="showMark" class="mark" :style="markStyle" aria-hidden="true">
         <div v-if="flat" class="flat-mark" />
         <Suspense v-else>
-          <LogoScene :halo-on="armed" @ready="onReady" />
+          <LogoScene :halo-on="armed" :room="showRoom" @ready="onReady" />
         </Suspense>
       </div>
 
@@ -252,13 +271,14 @@ const markStyle = computed(() => ({
   padding: 72px;
 }
 
+/* The size and the offset come from the header: they follow the room, so the two
+   grids land on each other whatever the slot measures. */
 .grid {
   position: absolute;
   inset: 0;
   background-image:
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 72px 72px;
 }
 
 .left {
@@ -328,6 +348,12 @@ const markStyle = computed(() => ({
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--fg-2);
+}
+
+/* Where he is reads as a fact rather than a caption, so it is the foreground
+   colour and not the muted one the lines around it use. */
+.place {
+  color: var(--fg);
 }
 
 .mail {
