@@ -34,7 +34,7 @@ published.
 
 1. The pre-publication documentation review.
 2. Re-measure Lighthouse against the deployment, now that it is the current build.
-3. The Open Graph artwork.
+3. The Open Graph artwork, being designed at `/og`.
 
 The contact form works end to end now — it sends by Resend, with Turnstile and a rate limit — and it
 carries its privacy notice and a required consent box, both linking to `/privacy`. The domain carries
@@ -42,8 +42,8 @@ a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, s
 Resend's SMTP), and the site points at it everywhere.
 
 **The substantial work still open:** the Open Graph artwork, sharper screenshots for krub.dev, the
-LinkedIn update, the GitHub profile README, the prose reread, Bing Webmaster Tools, raising the DMARC
-policy, and making the repository public.
+LinkedIn banner and profile update, the GitHub profile README, the prose reread, Bing Webmaster Tools,
+raising the DMARC policy, and making the repository public.
 
 ---
 
@@ -94,19 +94,23 @@ the privacy notice and the consent the law asks for.
   read soft in the modal, which shows them at up to ~1000 CSS px wide — 2000 device px on a retina
   screen. Capture again at `deviceScaleFactor: 2` and keep them at 2560×1600, or shoot a wider
   viewport and downscale. The card is fine either way; the modal is what shows the difference.
+- [ ] **The Open Graph image.** Being designed on a dev-only page, `/og`
+  (`src/views/OgView.vue`), which draws the card at its real 1200×630 out of the site's own pieces —
+  the 3D mark, lit, and Limonacho — instead of screenshots of them. Iterate there; once it is settled,
+  `build-og.mjs` in the cv tool screenshots that page into `public/assets/img/og-banner.png`. Two
+  earlier attempts are worth remembering: a hand-drawn copy of the hero, which drifts and cannot draw
+  the 3D at all, and a capture of the built site, which dragged the cursor into the middle of the mark
+  and clipped the mascot's leaf off. The structured data beside it is done (2026-09-23): `workLocation`
+  is Murcia, and the X handle stays in `sameAs` and in the `twitter:` tags on purpose — it ties the
+  domain to the profile even though X is no longer a link on the site.
 - [ ] **A final banner for LinkedIn and the GitHub profile README.** Same artwork as the Open Graph
-  refresh below, so it comes with it.
+  card, so it comes with it.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
   in it. **(owner)**
 - [x] **Finish the testimonials.** Done: the first real quote is in — Lourdes Campuzano of
   CreandoMientras, with her own mark in the avatar circle — and the pager now carries only that
   one, prepared for more to arrive. The vertical arrows went, replaced by scrollable dots. Long
   quotes are clamped to four lines with a "read more". Part of the same rework.
-- [ ] **Refresh the Open Graph image.** `og-banner.png` is from the first build and predates the
-  sections that exist now, so it is the owner's artwork to regenerate. The structured data beside it
-  is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in `sameAs` and in the
-  `twitter:` tags on purpose — it ties the domain to the profile even though X is no longer a link
-  on the site. **(owner)**
 - [ ] **Update LinkedIn to match the CV and the site.** The headline, the location (it says
   Barcelona, the owner is in Murcia) and the dates should agree with the CV and the site. Also the
   new banner. **(owner)**
