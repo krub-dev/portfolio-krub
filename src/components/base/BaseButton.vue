@@ -27,9 +27,12 @@ const props = defineProps({
   href: { type: String, default: null },
   to: { type: String, default: null }, // internal route, navigated without a reload
   external: { type: Boolean, default: false },
+  // The <a> branch: save the linked file instead of opening it.
+  download: { type: Boolean, default: false },
   magnetic: { type: Boolean, default: false },
   // Only the <button> branch uses it, and only a form needs anything but 'button'.
   type: { type: String, default: 'button' },
+  disabled: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['click'])
@@ -66,6 +69,7 @@ const magneticAttr = computed(() => (props.magnetic ? '' : undefined))
     :href="href"
     :target="external ? '_blank' : undefined"
     :rel="external ? 'noopener' : undefined"
+    :download="download ? '' : undefined"
     class="btn"
     :class="classes"
     :data-magnetic="magneticAttr"
@@ -80,6 +84,7 @@ const magneticAttr = computed(() => (props.magnetic ? '' : undefined))
     class="btn"
     :class="classes"
     :data-magnetic="magneticAttr"
+    :disabled="disabled"
     @click="emit('click', $event)"
   >
     <slot />
@@ -146,7 +151,11 @@ const magneticAttr = computed(() => (props.magnetic ? '' : undefined))
   border-color: var(--acc);
 }
 
-.v-solid:hover {
+/*
+  Hover is for a button that can be pressed: without the :not(:disabled), the fill
+  still lit up under the pointer on a disabled one.
+*/
+.v-solid:hover:not(:disabled) {
   background: var(--acc-2);
   border-color: var(--acc-2);
 }
@@ -157,8 +166,13 @@ const magneticAttr = computed(() => (props.magnetic ? '' : undefined))
   border-color: var(--line);
 }
 
-.v-outline:hover {
+.v-outline:hover:not(:disabled) {
   color: var(--acc-text);
   border-color: var(--acc-text);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

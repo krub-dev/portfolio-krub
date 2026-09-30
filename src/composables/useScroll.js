@@ -1,5 +1,7 @@
 import { onMounted, onUnmounted, readonly, ref } from 'vue'
 
+import { isScrollLocked } from './useBodyScrollLock'
+
 /*
   ONE scroll listener for the whole app.
 
@@ -33,6 +35,14 @@ const atEnd = ref(false) // past 98% — the scroll indicator fades out here
 let listeners = 0
 
 function update() {
+  /*
+    A dialog takes the body out of flow, and a fixed body reports the scroll as
+    zero. The chrome has to keep believing the last real position: without this
+    the navbar expands to its full width the moment a dialog opens, as if the
+    page had jumped back to the top.
+  */
+  if (isScrollLocked()) return
+
   // How far the page can actually scroll. Zero on a page shorter than the
   // window, which would otherwise divide by zero.
   const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)

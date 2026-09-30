@@ -17,6 +17,11 @@ import { onMounted, onUnmounted } from 'vue'
   directly through their own element refs instead. Reactivity is for state the
   user sees; this is animation.
 
+  `active` is only "the pointer has been seen at least once", so the cursor is
+  not painted at 0,0 before the first move. It is not a liveness flag any more:
+  the cursor used to fade out after two seconds of stillness and it never read as
+  deliberate enough to keep.
+
   Nothing mounts on touch devices or below 900px: there is no cursor to follow,
   and the design switches all of this off there anyway.
 */
@@ -24,27 +29,8 @@ import { onMounted, onUnmounted } from 'vue'
 const pointer = { x: -200, y: -200, active: false } // offscreen until the mouse first moves
 const subscribers = new Set()
 
-// How long the pointer can sit still before the cursor and the grid cell go.
-// Not immediate — a cursor that vanishes the instant you stop reading is
-// confusing — and not tied to entering or leaving the window, which never fired
-// reliably and left the cursor parked wherever it had last been inside.
-const IDLE_MS = 2000
-
 let frame = null
 let listening = false
-let idleTimer = null
-
-export function isPointerDevice() {
-  return window.matchMedia('(hover: hover)').matches && window.innerWidth > 900
-}
-
-function restartIdle() {
-  if (idleTimer) clearTimeout(idleTimer)
-  idleTimer = setTimeout(() => {
-    pointer.active = false
-    publish()
-  }, IDLE_MS)
-}
 
 function onMove(event) {
   pointer.x = event.clientX
@@ -54,22 +40,6 @@ function onMove(event) {
     pointer.active = true
     publish()
   }
-
-  restartIdle()
-}
-
-/*
-  Scrolling is activity too, and it wakes the pointer as well as keeping it
-  awake. Without the first part the cursor stayed gone while the page moved under
-  it, because only a `mousemove` brought it back and a wheel fires none; without
-  the second it went while the page was still moving.
-*/
-function onScroll() {
-  if (!pointer.active) {
-    pointer.active = true
-    publish()
-  }
-  restartIdle()
 }
 
 function publish() {
@@ -84,7 +54,6 @@ function loop() {
 function start() {
   if (!listening) {
     window.addEventListener('mousemove', onMove, { passive: true })
-    window.addEventListener('scroll', onScroll, { passive: true })
     listening = true
   }
   if (frame === null) frame = requestAnimationFrame(loop)
@@ -92,12 +61,13 @@ function start() {
 
 function stop() {
   window.removeEventListener('mousemove', onMove)
-  window.removeEventListener('scroll', onScroll)
-  if (idleTimer) clearTimeout(idleTimer)
-  idleTimer = null
   listening = false
   if (frame !== null) cancelAnimationFrame(frame)
   frame = null
+}
+
+export function isPointerDevice() {
+  return window.matchMedia('(hover: hover)').matches && window.innerWidth > 900
 }
 
 /**

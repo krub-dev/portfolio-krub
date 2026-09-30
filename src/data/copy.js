@@ -71,12 +71,38 @@ export const copy = {
     },
   },
 
-  // What Limonacho says the first time you poke him in a visit — the bubble and
-  // the "acho" are one greeting. It hides itself after a few seconds; turn the
-  // whole mascot off in config.js.
+  // The last card in the projects rail. Not a project: a way out to GitHub, for
+  // whatever did not fit in four cards. The link's own label is in src/locales/.
+  githubCard: {
+    en: {
+      title: 'Want to see more?',
+      body: 'Take a look at my GitHub, I share projects and experiments there.',
+    },
+    es: {
+      title: '¿Quieres ver más?',
+      body: 'Pásate por mi GitHub, ahí comparto proyectos y experimentos.',
+    },
+  },
+
+  /*
+    What Limonacho says the first time you poke him in a visit — the bubble and
+    the "acho" are one greeting. It hides itself after a few seconds; turn the
+    whole mascot off in config.js.
+
+    `cv` and `form` are the two hover hints: over the CV button, and over the
+    send button while the form is not ready to go.
+  */
   lemon: {
-    en: { bubble: "Welcome! I'm Limonacho" },
-    es: { bubble: '¡Bienvenido! Soy Limonacho' },
+    en: {
+      bubble: "Welcome! I'm Limonacho",
+      cv: 'Have a look',
+      form: 'Fill the fields in first',
+    },
+    es: {
+      bubble: '¡Bienvenido! Soy Limonacho',
+      cv: 'Échale un ojo',
+      form: 'Rellena antes los campos',
+    },
   },
 }
 

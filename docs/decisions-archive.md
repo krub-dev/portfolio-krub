@@ -2296,3 +2296,19 @@ otherwise clip the box below a whole number of cells.
   the stage has its surface back.
 - **The glow waits for the reveal.** With the blind the reveal *is* the entrance: the tube strikes
   after the blind lifts rather than after a fade that played where nobody could see it.
+
+### 100. The blur bands - tried, and dropped
+
+**Date:** 2026-09-30 · **Status:** reversed
+
+- **A strip of `backdrop-filter` under the bar and another above the footer**, each masked so it faded at
+  its inner edge, so the content softened as it passed under the fixed chrome instead of being cut off
+  by it. Built on request, and it read badly: a band of blur has an edge somewhere, and on a page of text
+  and hairline rules the softened strip reads as a smudge lying over the page rather than as the page
+  going under something.
+- **It is gone**, and the chrome cuts the content off again. The chrome still blurs where it has a
+  surface of its own (the compact capsule, the settings panel, the dialog backdrop), which is where the
+  eye expects a blur, because there is something in front of the page.
+- **What building it turned up stays.** The navbar expanded whenever a dialog opened: taking the body
+  out of flow reports the scroll as zero, and the bar read that as back at the top. `useScroll` keeps the
+  last real position while a dialog holds the page still. See decision 98.

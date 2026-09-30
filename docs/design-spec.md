@@ -24,7 +24,7 @@ vertical order:
 
 Floating above all of the above: the fixed navigation bar, the custom cursor, the vertical
 scroll indicator, the "Limonacho" mascot (a lemon with eyes) and the mobile menu. The mascot and
-the scroll indicator only appear where the route has a hero — not on the 404.
+the scroll indicator only appear where the route has a hero — not on the 404 or `/privacy`.
 
 ---
 
@@ -322,9 +322,8 @@ weight 700, yellow, `vertical-align:super`).
 Grid `1.3fr .7fr` (one column on mobile). Left: lead paragraph + two secondary paragraphs +
 **tabs** `/experience`, `/education` and `/certifications` — a row of folder labels (mono 13px,
 12px on a phone) on a hairline track, the active one in `--acc-text` with a 3px `--acc` rule
-under it; no pills + the matching timeline + a "Download CV (PDF)" button (outlined pill). It is
-a real ARIA tablist: roving `tabindex`, `aria-controls`, a `role="tabpanel"` on the panel, and
-the arrows move the selection and the focus.
+under it; no pills + the matching timeline. It is a real ARIA tablist: roving `tabindex`,
+`aria-controls`, a `role="tabpanel"` on the panel, and the arrows move the selection and the focus.
 
 Under the photo sits **the availability indicator**: a mono row of 10px uppercase,
 `letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two layers inside
@@ -340,7 +339,15 @@ current period, `--fg-3` if it is past. Right: title 18px weight 600 + descripti
 `--fg-2` at 60ch. On mobile it collapses to one column with `gap:8px`.
 
 Right: photo `aspect-ratio:1/1`, `object-fit:cover`, radius 18, border `--line`. **No caption.**
-On mobile it is capped at 210px wide with `aspect-ratio:4/5`.
+**The "Résumé/CV" button sits under it, at the photo's own width**, solid in the accent because it is
+the section's one call to action, so the column closes with one block. It opens **the CV dialog**
+(decision 97): the same pages as the PDF, rendered with pdf.js inside the dialog shell of §3.7, with an
+icon-only download in that dialog's header. **On a wide screen that whole column travels with the
+scroll**:
+`position:sticky` at `top: calc(var(--navbar-h, 88px) + 20px)`, riding down while the timeline runs
+past and stopping with its foot just above the section's bottom (the section's own padding). On mobile
+there is no travel — the photo lands at the end of the section — and the badge stays above the photo's
+right corner, as on a wide screen, with the CV closing the column.
 
 ### 3.6 Projects
 
@@ -411,6 +418,19 @@ has no hover: a tap leaves `:hover` stuck on whatever was touched, so the marker
 depending on where the last finger went. Where there is no hover the rail marks the card it is parked
 on instead, with the same yellow border, and it moves as you scroll the rail.
 
+**The last slot is not a project.** It leads to GitHub for whatever did not fit in four cards, and it
+borrows the project card's own rhythm so the two come out the same size: a media slot on top (`16/10`,
+`--surface-2`, carrying the GitHub mark at 64px over a mosaic of rounded accent squares), then the body
+(the question and the line) and a foot with a hairline carrying the mono label in the accent and the
+arrow circle — the whole card the target, the link stretched over it with an `::after` overlay. The
+border is **dashed**, which is what says "a slot in the rail, not a fifth project": an SVG `rect` with the
+dash length and the gap set by hand (18px and 12px), because a CSS border follows the card's rounded
+corner but cannot be tuned, and a gradient can be tuned but is straight. It is drawn on a layer above the
+contents, so the media slot's opaque panel cannot hide it; the 1px transparent border under it is only to
+keep the box the size of the cards beside it. Same radius, surface and `inert`/`current` treatment as the
+cards. The copy lives in `src/data/copy.js` and the link label in `src/locales/`; the GitHub mark and
+address are read from the socials, so they cannot drift from Contact. See decision 101.
+
 1. Screenshot frame: `aspect-ratio:16/10`, diagonal stripe background
    `repeating-linear-gradient(135deg, var(--surface-2) 0 12px, var(--ink) 12px 24px)`, with a
    centred 10px mono label. It is a placeholder: swap it for the real image once there is one.
@@ -423,8 +443,13 @@ on instead, with the same yellow border, and it moves as you scroll the rail.
 
 ### 3.7 Project detail modal
 
+The dialog shell — backdrop, panel, scroll lock, focus trap, Escape and the ✕ — is `BaseModal`, shared
+with the CV dialog (§3.5). Its header is sticky and opaque (the title on the left, an optional action
+and the ✕ on the right), so it stays reachable however far the body scrolls.
+
 Opens on card click. Backdrop `color-mix(in srgb, var(--ink) 82%, transparent)` with
-`backdrop-filter: blur(10px)`, `z-index:250`, vertical scroll,
+`backdrop-filter: blur(4px)` — one soft blur across everything behind, not one per element (decision
+96) — `z-index:250`, vertical scroll,
 `padding: clamp(12px,4vw,48px)`. Closes on backdrop click (only when the click is on the
 backdrop itself), on the ✕ button, and on the Escape key. While open,
 `body { overflow: hidden }` and focus is trapped inside the panel. The backdrop carries
@@ -437,12 +462,15 @@ radius 22, background `--surface`, border `--line`.
 
 - Header (`padding:18px 22px`, bottom border): the `[0N]` index in yellow mono 11px, the path
   `/projects/<slug>` in mono 13px `--fg-2`, and a 38×38 radius-10 ✕ button.
-- Carousel: `width:100%` **and** `aspect-ratio:16/9` with `max-height:40svh` — the width is explicit
-  because with only an aspect-ratio and a max-height the width is derived *from* the height, which
-  left the right of the row empty. The same diagonal stripes, label
-  "IMAGE n / total · SLUG"; ← → arrows at 44×44 radius 12 with background
-  `color-mix(in srgb, var(--ink) 70%, transparent)`; 7px dots centred at the bottom (active
-  yellow, the rest `--line`). Indices wrap around (modulo).
+- Carousel: `width:100%` **and** `aspect-ratio:16/10` with `max-height:56svh` — the card's own frame;
+  it was 16/9 × 40svh and read as a letterbox. The width is explicit because with only an aspect-ratio
+  and a max-height the width is derived *from* the height, which left the right of the row empty. The
+  slides are a horizontal track moved by `transform` (0.4s, the pagers' curve), each at 100% of the
+  box; while there are no screenshots each is the striped frame carrying the project's `shotLabel`.
+  Paging is the dots, the rail's indicator on its side: a 24px target with an 8px mark inside, the
+  current one a longer pill in `--acc`, under the media on the panel rather than over the shot, and
+  only shown when there is more than one slide. The ← → arrows and the `IMAGE n / total · SLUG` label
+  are gone (decision 94).
 - Body: grid `1.4fr .6fr` (one column on mobile), `padding: clamp(22px,4vw,40px)`. Left: name
   `clamp(26px,3.4vw,40px)` weight 700, lead 18px, two 16px `--fg-2` paragraphs, and two
   buttons (repository outlined, demo in yellow). Right: a mono definition list with Role, Year
@@ -619,7 +647,7 @@ inner columns carry the gutter and the 1180px cap the other sections use, one ab
 heading) and one below (the rows and the form).
 
 **The rows**, separated by `--line`: the label in mono 10px uppercase `--fg-3`, the address below it
-(`kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev` — a network's address is
+(`contact@krub.dev`, `linkedin.com/in/krub`, `github.com/krub-dev` — a network's address is
 derived from its href), `clamp(22px,3.2vw,40px)` weight 700, and `↗` on the right spanning both
 lines. Hover turns the address and the arrow `--acc-text` and moves the arrow 3px up and right. The
 email row is the mailto — there is no separate button; one address, one way in.
@@ -634,21 +662,30 @@ fields are **a line, not a box**: `border-bottom:1px solid var(--line)`, transpa
 not copied. The footer holds the "Send ↗" button (solid, `size="md"`, `type="submit"`) and the mono
 note "Or write direct to …" with the address.
 
+Below the fields, the **consent**: a native checkbox tinted with `--acc-text` and, in 13px sans
+`--fg-2`, "I have read and accept the privacy policy", the link underlined and turning `--acc-text` on
+hover. It links to `/privacy`, which holds the whole policy. The box is **required**: it is validated
+like an empty field, and the endpoint refuses a payload without it.
+
 Four states, and one live region (`role="status"`, `aria-live="polite"`) that is empty and hidden
 while idle: sending (the button says so and is dimmed), sent (a thank-you, and the fields are
-emptied), error (write to me at …). Validation: name ≥2, a plausible email, message ≥10, each error
-tied to its field with `aria-invalid` and `aria-describedby`. A hidden honeypot field is filled by
-bots and dropped by the endpoint.
+emptied), error (write to me at …). **Validation is live but late**: a field shows its error only once
+it has been left, and updates as it is typed from then on, so a mistake clears the moment it is fixed,
+and the **Send button stays disabled** (`opacity:.5`) until the four rules pass. They are: name ≥2, a
+plausible email, message ≥10, the consent box ticked. Each error is tied to its field with
+`aria-invalid` and `aria-describedby`. A hidden honeypot field is filled by bots and dropped by the
+endpoint.
 
-The form posts to `config.contactEndpoint` — our own `/api/contact`, never Web3Forms directly: the
-key is `WEB3FORMS_KEY` on the server (`api/contact.js` on Vercel, the same file mounted by
-`vite.config.js` in development), so it is not in the bundle. The endpoint validates everything again
-and rebuilds the payload field by field before forwarding it.
+The form posts to `config.contactEndpoint` — our own `/api/contact`, never the provider directly: the
+key is `RESEND_API_KEY` on the server and `VITE_TURNSTILE_SITE_KEY` in the bundle (`api/contact.js` on
+Vercel, the same file mounted by `vite.config.js` in development), so the secret is not in the bundle.
+The endpoint validates everything again, checks the Turnstile token and rebuilds the payload field by
+field before sending it with Resend.
 
 On mobile the inner column takes `padding-bottom:34px` so the last row and the form do not collide
 with the fixed footer.
 
-Links: `mailto:kikorubioillan@gmail.com`, `linkedin.com/in/krub`, `github.com/krub-dev`.
+Links: `mailto:contact@krub.dev`, `linkedin.com/in/krub`, `github.com/krub-dev`.
 
 ### 3.11 Footer (fixed)
 
@@ -698,8 +735,7 @@ fixed element of its own, not a child of either grid, and it snaps to whichever 
 page coordinates while the absolute hero layer is visible, the viewport once the fixed global layer
 takes over, so a scroll does not take it off the lines. It takes that layer's downward mask over the
 same box the grid covers, so the light never outlives the grid it belongs to. It rides the app's
-single rAF loop, and the cursor and the cell both go after two seconds without a `mousemove`. See
-decision 66.
+single rAF loop. See decision 66.
 
 ### 3.13 Custom cursor
 
@@ -725,9 +761,15 @@ cursor is not text, and `--mark` darkens in the light theme for legibility, whic
 nearly invisible on the light metal (decision 87).
 
 **Over the hero the cursor becomes the gesture** (decision 87). The dot steps aside and the ring
-carries `↑` over the closed blind, `↓` over the coil once the blind is up, and the `360icon.svg`
-mark — 18px, masked — over the mark itself, where the drag turns it. The turn hint is confined to
-the opening the shutter occupies, so it does not light on the frame's band.
+carries `↑` over the blind, `↓` over the coil once the blind is up, and the `360icon.svg` mark —
+18px, masked — over the mark itself, where the drag turns it. The hint is confined to the opening the
+shutter occupies, so it does not light on the frame's band. The turn mark follows the blind's edge: it
+shows on the strip below the slats' lower edge while the arrow holds over the slats, so it arrives with
+the blind's first move and grows as the opening clears, up or down alike. The arrow and the mark
+crossfade (0.2s) rather than swapping in a frame.
+
+The cursor no longer fades while the pointer sits still; it is hidden only until the first move
+(decision 87).
 
 "Interactive element" resolves through `document.elementFromPoint(x, y)` and
 `closest('a,button,[role="button"],input,select,textarea,[data-magnetic],[data-interactive]')`.
@@ -875,7 +917,10 @@ None of this belongs inside a template, and there are two homes for it (decision
   `en` / `es` object with `title` and `body`.
 - **Stack** (`stack.js`): four groups with a name and a list of technologies; each technology
   with a name, an icon file and whether it needs inverting in dark theme.
-- **Socials** (`socials.js`): name, URL and icon, plus `email`, `cvPath` and `photoPath`.
+- **Socials** (`socials.js`): name, URL and icon, plus `email`, `cvPath` and `photoPath`. The email is
+  the domain's own address, `contact@krub.dev`.
+- **Privacy** (`privacy.js`): the form's notice, a `date`, an `intro` and `sections` (each a `heading`
+  and a `body`), both languages. `/privacy` renders it and the form links to it.
 - **Testimonials** (`testimonials.js`): quote, name, role, avatar. One real quote and two
   placeholders; the section is on.
 
@@ -907,7 +952,7 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
   decorative animations too (dot halo, marquee, lemon).
 - Every decorative element carries `aria-hidden="true"`: grids, cursor, dot, marquee, lemon
   texture dots, separators.
-- Text-free buttons (theme, language, menu, close, carousel arrows) carry an `aria-label`.
+- Text-free buttons (theme, language, menu, close, carousel dots) carry an `aria-label`.
 - Touch targets: 44px or more on mobile (carousel arrows 44px, social icons 46px, navbar
   buttons 36px with spacing), and the pagers' dots are 24px — the WCAG 2.2 minimum — with an 8px
   mark drawn inside, so the target can grow without the dot growing.

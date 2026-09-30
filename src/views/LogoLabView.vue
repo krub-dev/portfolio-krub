@@ -10,7 +10,7 @@
   context with its own generated environment, so two at once is twice the cost of
   the very thing being compared.
 
-  Like PreviewView, this is exempt from the "no literal strings in a template"
+  Like DesignSystemView, this is exempt from the "no literal strings in a template"
   rule: the labels are the subject. It never ships — the route is dev-only and
   this file is deleted before launch.
 */

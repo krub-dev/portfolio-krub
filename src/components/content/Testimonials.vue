@@ -25,7 +25,18 @@ import { testimonials } from '../../data'
 const { lang } = useLang()
 const { t } = useI18n()
 
-const items = computed(() => testimonials.map((entry) => ({ ...entry, ...entry[lang.value] })))
+/*
+  The entries to page through. Left unset the block reads them from src/data;
+  the design-system sheet feeds it placeholders, so a specimen can show the
+  block's shape without depending on copy that changes.
+*/
+const props = defineProps({
+  entries: { type: Array, default: null },
+})
+
+const items = computed(
+  () => props.entries ?? testimonials.map((entry) => ({ ...entry, ...entry[lang.value] })),
+)
 
 const index = ref(0)
 const open = ref(false)

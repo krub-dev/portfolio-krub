@@ -286,6 +286,36 @@ run it off the screen.
 - **The entrance glow is CSS, not WebGL.** It is an `inset` shadow on a wrapper inside the frame now:
   hard on the frame's inner edge, fading inward, for nothing.
 
+### 92. The frame is a masked background, and the stage takes touch
+**Status:** active
+
+Two things an iPad (iOS 17.4) showed that no desktop browser did.
+
+- **The frame did not paint.** It was a `border-image` over a transparent border, and on iOS that
+  gradient — with `color-mix` and `var()` in it — did not render at all, so the transparent border
+  showed through as nothing. The shutter's slats use the very same kind of gradient as a `background`
+  and render fine there, so the ring is a background now, cut to the border band with a mask
+  (`mask-composite: exclude`, and the legacy `-webkit-mask-composite: xor`), keeping the same brushed
+  gradient and dropping `border-image`.
+- **The mark did not spin under a finger**, for two reasons at once. `usePointer` — the one loop
+  behind the tilt and the drag — listens to `mousemove` and switches itself off unless the device
+  reports `(hover: hover)`, which an iPad does not, so the loop never ran there. And the stage had no
+  `touch-action`, so the browser claimed a horizontal swipe as a scroll. The drag is now its own
+  pointer-event handler on the stage, covering mouse, pen and touch alike and independent of the
+  cursor loop, and the stage takes `touch-action: pan-y` so the page keeps the vertical swipe. The
+  tilt stays mouse-only, which is right: there is no hover on a finger.
+
+### 93. The stage snaps to `100vh`, not to `window.innerHeight`
+**Status:** active
+
+The stage's box is a whole number of 72px cells, and its vertical limit came from `window.innerHeight
+- 200`. On iOS `innerHeight` shrinks with the browser toolbar, so the same page snapped to six cells
+when the toolbar was out at load and seven when it was not: refreshing made the frame change size while
+the rest of the page stayed put. The limit is measured from `100vh` now — the large viewport, the same
+unit the stylesheet uses and stable against the toolbar — so the box is the same at first paint and
+after a reload. There is no JS property for the large viewport, so it is read from a throwaway
+`height:100vh` element.
+
 ### 82. The mark's motion and light
 **Status:** active · **Archive:** 82
 
@@ -350,6 +380,16 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
   12px band is not part of the gesture — so it does not light on the frame.
 - **The ring trails the dot, and the hint trails the ring.** Each element carries a slightly longer
   `transform` transition than the one before it (0.28s, then 0.32s): the same chase, one link further.
+- **The turn mark follows the blind's own edge.** It is offered on the strip of the opening below the
+  slats' lower edge, read from their live rect, not from an "is it open" flag: it becomes available the
+  moment the blind starts moving and grows with that strip, going up or coming down alike, and the
+  arrow holds over the slats themselves. The two faces crossfade (0.2s), because swapping the glyph for
+  the mask in a single frame read as a jump.
+- **The two-second idle fade is gone.** The cursor and the grid cell used to disappear after two seconds
+  without a `mousemove`, `active` going false until the next one. It never read as deliberate enough to
+  keep, so it was dropped and the cursor now stays put; `active` survives as "the pointer has been seen
+  at least once", which is what keeps anything from painting at the parked position before the first
+  move.
 - **The colour is `--acc-solid`, not `--mark`.** The cursor is not text, and `--mark` darkens in the
   light theme for legibility, which left the ring nearly invisible on the light metal.
 - **The scene is gated under `navigator.webdriver`** so the e2e suite never holds a WebGL context; the
@@ -359,11 +399,13 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
 
 ## Enrutado SPA y endpoints
 
-### 7. `/preview` is a dev-only route
+### 7. The design system is a dev-only route
 **Status:** active · **Archive:** 7
 
-A visual sheet for the token layer lives at `/preview`, registered only under `import.meta.env.DEV`
-and lazily imported, so it is absent from the production bundle.
+The design-system sheet — the tokens, the components and the patterns, running live, with a theme and
+accent switch — lives at `/design-system`, registered only under `import.meta.env.DEV` and lazily
+imported, so it is absent from the production bundle. (It was `/preview` until 2026-09-30, which said
+nothing about what it was.)
 
 ### 45. The 404 is a route, and a soft one
 **Status:** active · **Archive:** 45
@@ -391,6 +433,63 @@ own docs say the API "is expected to run on client side", must not be proxied, a
 use needs the server's IP whitelisted **and a paid plan** — so the proxy is impossible on the free
 tier. Resend is a plain server API with a secret key: exactly the provider swap this endpoint was
 shaped for, one file.
+
+### 89. The form carries a privacy notice and a required consent box
+**Status:** active
+
+The form sends personal data, so the notice and the consent are part of the form, not an extra page
+somewhere. The whole point of decision 57's endpoint is that the rules live where a caller cannot skip
+them; the consent is one of those rules.
+
+- **The consent is required.** `validateContact` blocks the send while the box is empty, and the
+  endpoint refuses any payload whose `consent` is not `true` — a direct post has to tick it too.
+- **One line and a page.** The consent label itself carries the link, so the form mentions privacy
+  once; `/privacy` behind it renders the whole policy from `src/data/privacy.js` in both languages.
+  The page is an ordinary route: the chrome is shared with the rest of the site, the text is content,
+  and only the labels (`/privacy`, "Last updated") live in `src/locales/`.
+- **The box is the browser's own,** tinted with `--acc-text`. A hand-drawn control would add states to
+  get right for no gain, and the native one is announced correctly for free.
+- **The endpoint records the consent.** The email carries the time the box was ticked, which is the
+  accountability the notice promises. Keeping the message for longer than it takes to answer would
+  contradict the retention the page states, so it is not stored anywhere else.
+
+### 90. A route change is scrolled to the top more than once
+**Status:** active
+
+`html { scroll-behavior: smooth }` is global, which is right for the section anchors but wrong for a
+route change: returning `{ top: 0 }` made the new page first appear at the old offset — on a phone,
+opening `/privacy` from the form showed its bottom, then glided up.
+
+- **The router jumps once, with `{ top: 0, behavior: 'instant' }`,** and that is the whole story on a
+  desktop.
+- **On iOS that is not enough.** The page can be put back at its old offset while the browser settles
+  its own viewport, so the new view opens at the bottom of the page it just navigated to. `App.vue`
+  watches the route and repeats the jump across a few frames (`0, 60, 140, 240, 360ms`), with the CSS
+  smooth behaviour off for the length of the passes. It is the same "wait until it holds" idea as the
+  footer's TOP button.
+- **It only jumps when the scroll is not already at the top,** so it does not fight a scroll someone
+  starts right after navigating, and it does not run on the first load, where the router's one jump is
+  what is wanted.
+- **A rejected attempt, for the record:** doing the jump inside `scrollBehavior` with the inline
+  `scroll-behavior: auto` needed a layout read (`void root.offsetHeight`) or Chromium still glided.
+  That worked, but a single jump is the wrong shape for the iOS case, so it was replaced by the repeat
+  in `App.vue` and the router went back to returning a position.
+
+### 91. The browser suite runs WebKit too, and the focus trap owns the Tab
+**Status:** active
+
+The suite was Chromium only, a desktop and a Pixel 7. It now runs WebKit on an iPhone as well
+(`playwright.config.js`), because the bugs that matter here keep being the ones only WebKit shows.
+
+**The first bug it caught.** The project modal's focus trap let Tab escape. `useFocusTrap` only wrapped
+at the ends — Tab from the last element back to the first — which assumes the browser can reach the
+last element. WebKit leaves links out of the tab order by default, so Tab went from the last button
+straight to the page behind without ever touching the last link, and the wrap never fired. The trap now
+moves focus itself on every Tab, so the engine's own order never enters into it, with a `focusin` net
+for escapes that are not a Tab.
+
+The finger drag is dispatched over CDP, which only Chromium speaks, so that one test is skipped on
+WebKit.
 
 ---
 
@@ -462,6 +561,155 @@ stacked cards made the section **2319px against an 839px viewport**.
 - **The drag needed a click guard.** The whole card is a click target behind an overlay, so a drag
   that ends over one would open it.
 
+### 94. The modal's media slides, and pages with the rail's own dots
+**Status:** active
+
+The carousel at the top of the project modal carried ← → arrows and an `IMAGE n / total · SLUG` label
+over the shot, at `16/9` with a `40svh` ceiling, and it swapped the image in a single frame.
+
+- **The slides are a horizontal track moved by `transform`,** the way the projects rail moves: every
+  screenshot sits side by side at 100% of the box and the index picks the framed one, so a change
+  slides. `16/10` with a `56svh` ceiling, matching the card's own frame.
+- **The dots are the rail's and the testimonials' indicator,** laid on its side rather than a second
+  system invented for the modal: a 24px target with an 8px mark inside (WCAG 2.2), the current one a
+  longer pill in `--acc`. They sit under the media on the panel, not over the shot, so the marks read
+  against the panel and not against whatever the screenshot shows. The arrows, the label and the
+  `prevImage` / `nextImage` / `modal.image` strings went with them.
+- **The drag is the rail's too.** A pointer takes the track over, the pixels it travels are added to
+  the slide's position, and a drag past a fifth of the box takes the next slide while a shorter one
+  falls back to where it was. `DRAG_SLOP` and `FLICK` are the rail's own numbers, and capture is taken
+  in the move rather than on the press, so a plain click is not swallowed.
+
+### 95. The photo's column travels with the scroll
+**Status:** active
+
+The About photo sat still in its column while the timeline ran past it, and the CV button closed the
+text column instead — so on a wide screen the two halves drifted apart and the button belonged to the
+wrong side.
+
+- **The CV moved under the photo, at the photo's own width**, and became the section's one call to
+  action: a solid accent fill, and just "Résumé/CV" / "Currículum/CV" — the "(PDF)" went, because the
+  file being a PDF is what the download arrow already says.
+- **That column is `position: sticky`** at `top: calc(var(--navbar-h, 88px) + 20px)`. It rides down
+  while the timeline scrolls past and stops with its foot just above the section's bottom, which is the
+  section's own padding — no second value to keep in step with it.
+- **No travel on a phone.** The photo lands at the end of the section there, so there is nothing to
+  ride past; the order is photo, badge, CV.
+
+### 96. The modal backdrop is a uniform scrim with a gentle blur
+**Status:** active
+
+The project modal's backdrop was `backdrop-filter: blur(10px)` over an 82% ink, and the page behind
+turned into soft shapes that read as smudges of their own, competing with the panel. It was flattened to
+a plain sheet with no blur — and that read as a blackout instead: the page was not softened, it was just
+dark. It is one soft blur (4px) over the same flat scrim now.
+
+**One blur across everything behind, not one per element.** That is the part that matters: a filter per
+element gives every element its own edge, which is what "blurring specific spots" was.
+
+### 97. The CV opens in a dialog, rendered from the PDF with pdf.js
+**Status:** active
+
+The CV button downloaded a PDF and that was it: to read it you left the site for the browser's viewer.
+It opens a dialog now, with the same pages inside it, and the download moved to the foot of that
+dialog.
+
+- **The document is the one the site already offers,** picked from the theme and language exactly as
+  the old button did (`cvPath`). Nothing new to keep in step, and the dialog and the download cannot
+  disagree about which file it is.
+- **pdf.js, the legacy build — not an `<iframe>` and not page images.** An iframe hands over to the
+  browser's viewer, which on iOS Safari is unreliable and brings its own chrome; page images would need
+  a rasteriser in the cv tool, and there is none on this machine — a new binary for a portfolio. pdf.js
+  renders the real pages into canvases, in the site's own shell. It is the **legacy** build: the modern
+  core leans on APIs a slightly older iOS does not have (`Promise.withResolvers` and friends), and that
+  failure is silent — the dialog only says it could not be shown.
+- **Lazy, and only on open.** pdf.js and its worker are their own chunks (about 430 KB and 1.2 MB)
+  imported when the dialog first opens, so a visitor who never looks at the CV downloads neither. Each
+  page is painted at the device pixel ratio, because a PDF scaled to a CSS width and left at 1:1 is
+  soft on a retina screen.
+- **Warmed on intent, not on load.** The three downloads together are about 610 KB gzipped — more than
+  the 3D scene — so they are not fetched with the page: hovering or focusing the CV button, or the
+  photo column reaching the viewport (for a phone, where there is no hover before the tap), starts them
+  in the background (`useCv`, once per visit). Whoever never looks at the CV never pays, and by the
+  time the button is pressed it is usually ready. `vercel.json` also gives `/uploads/` a day of caching,
+  so the document is not revalidated on every open.
+- **The dialog shell is shared.** The backdrop, panel, scroll lock, focus trap, Escape and close button
+  were lifted out of the project modal into `BaseModal`, so there is one set of dialog rules rather
+  than two that drift — the same reason the pagers were merged.
+
+### 98. The page is held still under a dialog
+**Status:** active
+
+Two things an iPad showed once the CV dialog was there.
+
+- **The scroll lock takes the body out of flow.** `overflow: hidden` on the body is enough on a
+  desktop, but iOS ignores it: the document still scrolls, which is how a finger could drag the page
+  around behind an open dialog. The lock sets `position: fixed` with the scroll offset in `top`, and
+  puts the page back — at once, with the global smooth behaviour turned off for the jump — on unlock.
+- **The magnetic hover stands down.** `useBodyScrollLock` keeps a module counter and exports
+  `isScrollLocked()`; `useMagnetic` releases every element home and stops while a dialog is over the
+  page. Elements leaning behind a backdrop read as the page wobbling under it, which is the opposite of
+  what a dialog is for.
+- **And the chrome stops believing the zero.** A body taken out of flow reports the scroll as zero, so
+  `useScroll` keeps the last real position while a dialog holds the page still. Without it the navbar
+  read "zero" as "back at the top" and expanded to its full width the moment any dialog opened, on
+  desktop and on a phone.
+
+### 99. The dialog header sticks, and Limonacho explains what will not go
+**Status:** active
+
+- **The header sticks.** `position: sticky; top: 0` with an opaque background on the panel's header,
+  because a dialog with a document in it scrolls a long way and the title, the close and the action
+  have to stay reachable. The shell gained an `actions` slot for that action, beside the close.
+- **The CV's download moved into that header**, from the foot of the document: it is the one thing you
+  want on whatever page you are reading. It is an icon only — an arrow into a tray — with the words on
+  the `aria-label`; no "PDF", which the arrow already says.
+- **Limonacho explains the two buttons that will not go.** He says a line over the CV button, and over
+  the send button while the form is not ready. The send one is heard on a wrapper around the button,
+  because a disabled control takes no mouse events: the button steps out of the way
+  (`pointer-events: none`) and the wrapper takes the pointer, so the reason is heard at the moment it
+  is needed.
+
+### 101. The projects rail ends on a dashed card to GitHub
+**Status:** active
+
+Four projects fit the rail, and whatever else there is lives on GitHub — which nothing on the page
+said. The rail's last slot is a card that does: the GitHub mark, a question, a line, and a mono link
+in the accent.
+
+- **Dashed, and the dash pattern is set by hand.** The border is what says "a slot in the rail, not a
+  fifth project", and the owner wanted the dashes longer and further apart than the browser's own. A CSS
+  `border-style: dashed` follows the card's rounded corner but its pattern is fixed against the border's
+  width; a `repeating-linear-gradient` can be tuned but is straight, and it left the corners bare. So the
+  frame is an SVG `rect` with `stroke-dasharray` (18px dashes, 12px gaps), which does both at once. This
+  is not an SVG where CSS would have done: CSS can do one or the other, not both.
+- **It sits on the padding box, one pixel in.** A 2px stroke centred on it lands exactly on the card's
+  edge, and the rect's radius is 17, one less than the card's 18, which is what puts the two curves on
+  the same centre. `overflow: visible` is what lets the outer half of the stroke out. It is a layer above
+  the contents (`z-index: 2`, `pointer-events: none`) because the media slot's opaque panel would hide it
+  as a background, and the link stretched over the card still gets the click.
+- **A `rect` SVG for the dashes was tried, and dropped.** It followed the corners exactly, but it is more
+  machinery than the job needs — and the owner asked for CSS where CSS will do. It also brought two traps:
+  an `svg` without an explicit size falls back to the replaced-element default of 300×150, and
+  `overflow: hidden` clips at the padding box, 1px inside, so the dashes sat inside the card rather than
+  on its edge.
+- **The component is `GithubCard`.** It began as `ProjectsCta`; "CTA" is the general term for the link
+  that asks for the action, and the spec already uses it for the hero's and Contact's buttons, so the card
+  is named for what it is instead.
+- **A mosaic of rounded accent squares behind the mark.** The media slot is otherwise an empty panel, and
+  the card should not look unfinished next to four screenshots. It is an SVG grid (a gradient cannot
+  round its own tiles) filled with `--acc-solid`, so it follows the palette, over the theme's
+  `--surface-2`, so it follows the theme too. It sits dimmed (0.4) and comes up to full on hover, so the
+  mark reads against it by default instead of competing with it.
+- **It mirrors the card's structure.** A `16/10` media slot with the mark at 64px, then the body and a
+  foot with a hairline, the mono label and the arrow circle — the same radius, surface, hover and parked
+  treatment. That shared structure is what makes the two exactly the same size.
+- **One source for the link.** The mark and the address come from `socials`/`socialIcons` (the paths
+  moved out of `SocialLink` into the data for this), the copy from `src/data/copy.js` and the label
+  from `src/locales/`. Nothing here can drift from Contact.
+- **It is part of the rail.** The dots count it, it goes `inert` when it is out of view, and on a touch
+  screen it takes the parked border, like the cards.
+
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62
 
@@ -493,3 +741,19 @@ and the dark pair to match the site on screen.
 - **One quote in the DOM.** The current one, swapped on change. Nothing is stacked, so there is no
   scroll to fight, no window to keep a fixed height and no entry sliding past the one on show.
 - **The pager never claims the page's scroll.** The wheel and a swipe belong to the page.
+
+### 88. The site's address is `contact@krub.dev`, a mailbox on the domain
+**Status:** active
+
+The portfolio carried a personal Gmail: in the contact rows, in the form's fallback and in the
+structured data. It now has its own address on the domain, and the whole path to it is the domain's,
+so the address a visitor copies is the one the site is about.
+
+- **Receiving is Cloudflare Email Routing.** An MX record and a DKIM record forward anything sent to
+  `contact@krub.dev` to the owner's real inbox, well before any of the rest.
+- **Sending as it is "Send mail as" over Resend's SMTP,** not Gmail's: a reply goes out signed for
+  `krub.dev`, carries no "via gmail.com", and passes `DMARC` because both `SPF` and the `DKIM` domain
+  align. A `_dmarc` record already sits at `p=none`.
+- **One address, in one place.** `src/data/socials.js` holds it; the contact rows, the form's fallback
+  and the JSON-LD head read from it and are kept in step by hand (the static `<head>` cannot import a
+  module).

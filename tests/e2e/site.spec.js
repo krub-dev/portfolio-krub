@@ -112,6 +112,30 @@ test('the project modal traps focus, closes on Escape and gives focus back', asy
     expect(await dialog.evaluate((el) => el.contains(document.activeElement))).toBe(true)
   }
 
+  // The media slides and pages by its dots: the track moves, and the dot you are
+  // on is the longer pill. Last before closing, because WebKit does not focus a
+  // button on click and an earlier click would leave the focus checks above with
+  // nothing focused.
+  const dots = dialog.locator('.dots .dot')
+  await expect(dots).toHaveCount(4)
+  const track = dialog.locator('.carousel .track')
+  await dots.nth(2).click()
+  await expect(dots.nth(2)).toHaveClass(/active/)
+  await expect(dots.nth(0)).not.toHaveClass(/active/)
+  await expect.poll(() => trackShift(track)).toBeLessThan(-100)
+
+  // And a drag takes the next slide, the way the rail does. The media is brought
+  // back into view first: the tab loop above leaves the panel scrolled to whatever
+  // it focused, and a drag measured off a half-hidden strip lands on nothing.
+  await bringIntoView(dialog.locator('.carousel'))
+  const box = await dialog.locator('.carousel').boundingBox()
+  const midY = box.y + box.height / 2
+  await page.mouse.move(box.x + box.width * 0.75, midY)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.15, midY, { steps: 6 })
+  await page.mouse.up()
+  await expect(dots.nth(3)).toHaveClass(/active/)
+
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
@@ -175,11 +199,15 @@ test('the project rail pages to the end with its dots', async ({ page }) => {
   await expect(dots.last()).toHaveClass(/active/)
   await expect(dots.first()).not.toHaveClass(/active/)
 
-  // At the far end it is the other way round: the last card sits on the right.
-  await expect(viewport).toHaveClass(/fade-left/)
+  /*
+    At the far end it is the other way round: nothing hangs off the right, so
+    that side is not faded. (With the GitHub card the rail can end exactly on the
+    edge, and then there is no fade at all.)
+  */
+  await expect(viewport).not.toHaveClass(/fade-right/)
 
   // And the card it was hiding ended up inside the rail.
-  const last = await page.locator('#projects .card').last().boundingBox()
+  const last = await page.locator('#projects .github-card').boundingBox()
   const rail = await page.locator('#projects .viewport').boundingBox()
   expect(last.x + last.width).toBeLessThanOrEqual(rail.x + rail.width + 1)
 
@@ -187,6 +215,55 @@ test('the project rail pages to the end with its dots', async ({ page }) => {
   await dots.first().click()
   await expect.poll(shift).toBe(0)
   await expect(dots.first()).toHaveClass(/active/)
+})
+
+test('the rail ends on a card that goes to GitHub', async ({ page }) => {
+  await openSite(page)
+  await bringIntoView(page.locator('#projects .viewport'))
+
+  const cta = page.locator('#projects .github-card')
+  await expect(cta).toBeVisible()
+  /*
+    Dashed, because it is a slot in the rail rather than a fifth project. The
+    dashes are an SVG `rect` on a layer above the contents — a border follows the
+    card's rounded corner but cannot be tuned, and a gradient can be tuned but is
+    straight — so the pattern is the one we set, not the browser's. The transparent
+    border under it is only what keeps the box the size of the cards.
+  */
+  const dash = await cta
+    .locator('.frame rect')
+    .evaluate((el) => getComputedStyle(el).strokeDasharray)
+  expect(dash).toBe('18px, 12px')
+  await expect(cta).toHaveCSS('border-top-color', 'rgba(0, 0, 0, 0)')
+  await expect(cta.getByRole('link')).toHaveAttribute('href', 'https://github.com/krub-dev')
+
+  // The mosaic is texture, not the subject: dim by default so the mark reads, and
+  // full only on hover (decisions.md 101).
+  await expect(cta.locator('.mosaic')).toHaveCSS('opacity', '0.4')
+
+  // And it is the same size as the cards beside it.
+  const card = await page.locator('#projects .card').first().boundingBox()
+  const box = await cta.boundingBox()
+  expect(Math.abs(box.width - card.width)).toBeLessThan(3)
+  expect(Math.abs(box.height - card.height)).toBeLessThan(3)
+})
+
+test('the GitHub card is the target, not just its label', async ({ page, browserName }) => {
+  // Playwright's WebKit does not report the popup for a target="_blank" click,
+  // and the click itself is covered by the test above on every project.
+  test.skip(browserName !== 'chromium', 'Playwright WebKit does not report the popup')
+
+  await openSite(page)
+  await bringIntoView(page.locator('#projects .viewport'))
+  await page.locator('#projects .dots .dot').last().click()
+  await expect.poll(() => page.locator('#projects .github-card').isVisible()).toBe(true)
+
+  const popupPromise = page.waitForEvent('popup')
+  // The middle of the card, which is nowhere near the label: the link is stretched
+  // over the card with an ::after overlay, like the project cards.
+  await page.locator('#projects .github-card').click()
+  const popup = await popupPromise
+  expect(popup.url()).toContain('github.com/krub-dev')
 })
 
 test('the navbar only takes clicks where the capsule is', async ({ page }) => {
@@ -263,67 +340,18 @@ test('the grid cell follows the hero grid once the page scrolls', async ({ page,
     .toBe('translate(864px, 354px)')
 })
 
-test('the cursor and the grid cell go when the pointer sits still', async ({ page, isMobile }) => {
+test('the cursor stays when the pointer sits still', async ({ page, isMobile }) => {
   test.skip(isMobile, 'there is no cursor below 900px')
 
   await openSite(page)
-  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
-
   const dot = page.locator('.cursor-dot')
-  const cell = page.locator('.grid-cell')
 
-  await page.mouse.move(1000, 400)
+  await page.mouse.move(300, 400)
   await expect(dot).not.toHaveClass(/idle/)
-  await expect(cell).not.toHaveClass(/idle/)
 
-  // The idle timeout is 2s, and it is deliberately not instant.
-  await expect(dot).toHaveClass(/idle/, { timeout: 4000 })
-  await expect(cell).toHaveClass(/idle/, { timeout: 4000 })
-
-  // And back, on the next move.
-  await page.mouse.move(900, 300)
+  // It used to fade out after two seconds of stillness. It does not any more.
+  await page.waitForTimeout(2600)
   await expect(dot).not.toHaveClass(/idle/)
-  await expect(cell).not.toHaveClass(/idle/)
-})
-
-test('a scroll counts as movement, so the cursor does not go while the page moves', async ({ page, isMobile }) => {
-  test.skip(isMobile, 'there is no cursor below 900px')
-
-  await openSite(page)
-  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
-  const cell = page.locator('.grid-cell')
-
-  await page.mouse.move(900, 400)
-
-  /*
-    Scrolled repeatedly rather than once. A single scroll early on is racy under
-    a loaded parallel run: if the page is slow to process it, the idle timer can
-    fire first and this goes red for the wrong reason. The last scroll lands just
-    before the assertion, so the timer is freshly restarted; without counting the
-    scroll at all, the cell is gone by 2s and the assertion sees it idle.
-  */
-  await page.waitForTimeout(1200)
-  for (let i = 0; i < 6; i += 1) {
-    await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), 100 + i * 10)
-    await page.waitForTimeout(200)
-  }
-
-  await expect(cell).not.toHaveClass(/idle/)
-})
-
-test('a scroll brings the cursor back after it has gone', async ({ page, isMobile }) => {
-  test.skip(isMobile, 'there is no cursor below 900px')
-
-  await openSite(page)
-  test.skip((await page.locator('.grid-cell').count()) === 0, 'grid cell off (config.showGridCell)')
-  const cell = page.locator('.grid-cell')
-
-  await page.mouse.move(900, 400)
-  await expect(cell).toHaveClass(/idle/, { timeout: 4000 })
-
-  // No mousemove: the wheel alone is enough.
-  await page.evaluate(() => window.scrollTo({ top: 100, behavior: 'instant' }))
-  await expect(cell).not.toHaveClass(/idle/)
 })
 
 test('on touch the grid cell lights where you tap, and a scroll clears it', async ({ page, isMobile }) => {
@@ -530,8 +558,10 @@ test('opening a quote reveals the rest, and closing hides it again', async ({ pa
   await expect.poll(height).toBe(clamped)
 })
 
-test('the project rail drags with a finger too', async ({ page, isMobile }) => {
+test('the project rail drags with a finger too', async ({ page, isMobile, browserName }) => {
   test.skip(!isMobile, 'there is no finger on a desktop')
+  // The drag is dispatched over CDP, which only Chromium speaks.
+  test.skip(browserName !== 'chromium', 'the finger drag uses CDP')
 
   await openSite(page, { reduced: true })
 
@@ -831,22 +861,101 @@ test('the contact form asks for what is missing, then sends', async ({ page }) =
 
   const send = page.locator('.form button[type="submit"]')
 
-  // Empty: it asks for the three fields and posts nothing.
-  await send.click()
-  await expect(page.locator('.form .error')).toHaveCount(3)
-  expect(posted).toBeNull()
+  // Nothing filled: the button is off, and no field has been scolded yet.
+  await expect(send).toBeDisabled()
+  await expect(page.locator('.form .error')).toHaveCount(0)
 
+  // Leaving a field shows its error, and it clears the moment it is fixed.
+  await page.locator('#contact-name').focus()
+  await page.locator('#contact-name').blur()
+  await expect(page.locator('#contact-name-error')).toBeVisible()
   await page.locator('#contact-name').fill('Kiko')
+  await expect(page.locator('#contact-name-error')).toHaveCount(0)
+
   await page.locator('#contact-email').fill('kikorubioillan@gmail.com')
   await page.locator('#contact-message').fill('Hola, te escribo por lo del backend.')
+
+  // The three fields are right, but the consent is still missing.
+  await expect(send).toBeDisabled()
+
+  // Ticking the box is what arms the button.
+  await page.locator('.form .box').check()
+  await expect(send).toBeEnabled()
+
   await send.click()
 
   await expect(page.locator('.form .status')).toHaveText(/Thanks/)
   expect(posted.name).toBe('Kiko')
   expect(posted.message).toContain('backend')
+  expect(posted.consent).toBe(true)
 
-  // Emptied on success, so the same message cannot go twice by accident.
+  // Emptied on success, so the same message cannot go twice by accident, and the
+  // button goes back to off.
   await expect(page.locator('#contact-name')).toHaveValue('')
+  await expect(send).toBeDisabled()
+})
+
+test('the privacy link opens the notice on its own route', async ({ page }) => {
+  await openSite(page)
+  await scrollToTopOf(page, '.form', 150)
+  // The form sits near the end of the home page, so the route has to leave the
+  // old offset behind: the new page opens at its top, at once.
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(1000)
+
+  await page.locator('.form .policy').first().click()
+
+  await expect(page).toHaveURL(/\/privacy$/)
+  await expect(page.locator('main h1')).toBeVisible()
+  expect(await page.evaluate(() => window.scrollY)).toBe(0)
+})
+
+test('the CV opens in a dialog, rendered page by page', async ({ page }) => {
+  await openSite(page)
+
+  /*
+    Intent warms it: reaching the button (and hovering it) starts the download in
+    the background, so the dialog is usually ready by the time it is opened. The
+    document is asked for first, which is what this checks.
+  */
+  await bringIntoView(page.locator('.cv'))
+  await page.locator('.cv').hover()
+  await expect(page.locator('link[rel="prefetch"][href$="cv-en-dark.pdf"]')).toBeAttached()
+
+  await page.locator('.cv').click()
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+
+  // The pages are painted from the PDF the site already offers for this theme
+  // and language, so the dialog and the download cannot disagree about the file.
+  await expect(dialog.locator('canvas.page').first()).toBeVisible()
+  expect(await dialog.locator('canvas.page').count()).toBeGreaterThan(0)
+  await expect(dialog.locator('a[download]')).toHaveAttribute('href', /cv-en-dark\.pdf$/)
+
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+})
+
+test('the navbar stays compact while a dialog is open', async ({ page }) => {
+  await openSite(page)
+  await scrollTo(page, 800)
+
+  const capsule = page.locator('.capsule')
+  await expect(capsule).toHaveClass(/compact/)
+
+  await page.locator('.card .open').first().click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+
+  /*
+    The scroll lock takes the body out of flow, and a fixed body reports the
+    scroll as zero — the bar used to believe it and expand to its full width the
+    moment a dialog opened.
+  */
+  await expect(capsule).toHaveClass(/compact/)
+
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await expect(capsule).toHaveClass(/compact/)
 })
 
 test.describe('3D logo', () => {

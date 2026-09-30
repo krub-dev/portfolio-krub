@@ -3,25 +3,41 @@
   The image strip at the top of the project modal.
 
   It owns its own index — the modal does not care which slide is showing, only
-  which project is open. The index wraps in both directions with a modulo, so
-  the arrows never dead-end; `(i + n) % n` rather than plain `%` because
-  JavaScript's modulo keeps the sign and -1 % 4 is -1, not 3.
+  which project is open.
 
-  With `images` it shows the real screenshots; without them it falls back to the
-  striped frame and a `slides` count, which is still what the projects without
-  screenshots use.
+  The slides are a horizontal track moved by `transform`, the way the projects
+  rail moves: every screenshot sits side by side at 100% of the box and the index
+  picks which one is framed, so a change slides rather than swapping in a frame.
+  With no `images` each slide is the striped frame and a `slides` count stands in
+  for the screenshots that are coming.
+
+  The drag is the rail's too: the pointer takes the track over, the pixels it has
+  travelled are added to the current slide, and on release a drag past a fifth of
+  the box takes the next slide while a shorter one falls back to where it was.
+  `DRAG_SLOP` is the line between a drag and a click, and capture is taken in the
+  move rather than on the press, so a plain click is never swallowed.
+
+  The dots are the rail's and the testimonials' indicator, laid on its side: a
+  24px target each with an 8px mark inside (the WCAG 2.2 minimum), the current one
+  a longer pill in the accent. That is why the arrows and the `IMAGE n / total`
+  label are gone.
 */
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-
-import { wrapIndex } from '../../utils/format'
 
 const props = defineProps({
   images: { type: Array, default: () => [] }, // real screenshots, in order
   slides: { type: Number, default: 1 }, // placeholder count when there are none
   slug: { type: String, required: true },
   name: { type: String, default: '' },
+  shotLabel: { type: String, default: '' }, // the striped frame's caption
 })
+
+// How far a drag has to travel before it is a drag and not a click, and how much
+// of the box it has to cover to count as "the next slide". Same values as the
+// rail, so a flick behaves the same in both.
+const DRAG_SLOP = 6
+const FLICK = 0.2
 
 const { t } = useI18n()
 const index = ref(0)
@@ -31,46 +47,178 @@ watch(() => props.slug, () => (index.value = 0))
 
 const total = computed(() => props.images.length || props.slides)
 
-const label = computed(
-  () => `${t('modal.image')} ${index.value + 1} / ${total.value} · ${props.slug.toUpperCase()}`,
-)
+const carousel = ref(null)
+const dragging = ref(false) // the class: true only once the drag is claimed
+const dragX = ref(0)
+let startX = 0
+let startY = 0
+let pointerId = null
+let claimed = false
 
-function go(step) {
-  index.value = wrapIndex(index.value, step, total.value)
+const trackStyle = computed(() => {
+  const base = `-${index.value * 100}%`
+  return {
+    // During a drag the pixels are added to the slide's own position; at rest the
+    // index alone decides, and the transition carries it there.
+    transform: dragging.value
+      ? `translate3d(calc(${base} + ${dragX.value}px), 0, 0)`
+      : `translate3d(${base}, 0, 0)`,
+  }
+})
+
+function onPointerDown(event) {
+  if (total.value < 2) return
+  pointerId = event.pointerId
+  startX = event.clientX
+  startY = event.clientY
+  claimed = false
+  dragX.value = 0
+}
+
+function onPointerMove(event) {
+  if (pointerId === null || pointerId !== event.pointerId) return
+  const delta = event.clientX - startX
+
+  if (!claimed) {
+    /*
+      A finger has to prove the gesture is horizontal before it is claimed: until
+      then it belongs to the panel's scroll. Moving the track on any sideways
+      pixel is what made it dance — a diagonal swipe nudged the slide, the browser
+      took the scroll, and the slide snapped back. The rule is the About tabs':
+      past a dead zone, and longer sideways than up or down. A mouse has no
+      gesture of its own, so its own slop is enough.
+    */
+    const touch = event.pointerType === 'touch'
+    const dy = event.clientY - startY
+    const sideways = touch
+      ? Math.abs(delta) > 12 && Math.abs(delta) > Math.abs(dy) * 1.5
+      : Math.abs(delta) > DRAG_SLOP
+    if (!sideways) return
+
+    claimed = true
+    dragging.value = true
+    carousel.value?.setPointerCapture(event.pointerId)
+  }
+
+  dragX.value = delta
+}
+
+function onPointerUp(event) {
+  if (pointerId === null || pointerId !== event.pointerId) return
+  pointerId = null
+  // A gesture that never proved itself was a scroll, not a drag.
+  if (!claimed) return
+  claimed = false
+  dragging.value = false
+
+  if (carousel.value?.hasPointerCapture(event.pointerId)) {
+    carousel.value.releasePointerCapture(event.pointerId)
+  }
+
+  const width = carousel.value?.clientWidth || 1
+  const moved = dragX.value
+  // Dragging left brings the next slide in, so the step is the opposite sign.
+  const step = Math.abs(moved) > width * FLICK ? -Math.sign(moved) : 0
+  index.value = Math.min(Math.max(index.value + step, 0), total.value - 1)
+  dragX.value = 0
 }
 </script>
 
 <template>
-  <div class="carousel" :class="{ shot: images.length }">
-    <img v-if="images.length" class="image" :src="images[index]" :alt="name" />
+  <div class="media">
+    <div
+      ref="carousel"
+      class="carousel"
+      @pointerdown="onPointerDown"
+      @pointermove="onPointerMove"
+      @pointerup="onPointerUp"
+      @pointercancel="onPointerUp"
+    >
+      <div class="track" :class="{ dragging }" :style="trackStyle">
+        <div v-for="n in total" :key="n" class="slide">
+          <img
+            v-if="images.length"
+            class="image"
+            :src="images[n - 1]"
+            :alt="name"
+            draggable="false"
+          />
+          <span v-else class="shot-label">{{ shotLabel }}</span>
+        </div>
+      </div>
+    </div>
 
-    <span class="label">{{ label }}</span>
-
-    <button class="arrow left" type="button" :aria-label="t('a11y.prevImage')" @click="go(-1)">
-      ←
-    </button>
-    <button class="arrow right" type="button" :aria-label="t('a11y.nextImage')" @click="go(1)">
-      →
-    </button>
-
-    <div class="dots" aria-hidden="true">
-      <span v-for="n in total" :key="n" class="dot" :class="{ on: n - 1 === index }" />
+    <div v-if="total > 1" class="dots" role="group" :aria-label="t('a11y.projectImages')">
+      <button
+        v-for="n in total"
+        :key="n"
+        class="dot"
+        :class="{ active: n - 1 === index }"
+        type="button"
+        :aria-label="t('a11y.goToImage', { n })"
+        :aria-current="n - 1 === index ? 'true' : undefined"
+        @click="index = n - 1"
+      />
     </div>
   </div>
 </template>
 
 <style scoped>
-.carousel {
-  position: relative;
-  /* width, explicitly. As a flex item with only an aspect-ratio and a
-     max-height, the width was derived FROM the height — 40svh tall meant 40svh
-     × 16/9 wide, about 600px in a 1000px panel, with the rest of the row left
-     empty. The aspect-ratio now only decides the height on narrow screens,
-     where 100% × 9/16 is under the cap. */
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 40svh;
+.media {
+  display: flex;
+  flex-direction: column;
+  /* The panel is a column that scrolls; the media keeps its measured height and
+     lets the body be the part that scrolls. */
   flex: 0 0 auto;
+}
+
+.carousel {
+  /* width, explicitly. As a flex item with only an aspect-ratio and a
+     max-height, the width was derived FROM the height — it left the right of the
+     row empty. The aspect-ratio now only decides the height on narrow screens. */
+  width: 100%;
+  /*
+    16/10 matches the card's own frame, and a 56svh ceiling keeps it off the roof
+    on a laptop. It was 16/9 × 40svh, which read as a letterbox.
+  */
+  aspect-ratio: 16 / 10;
+  max-height: 56svh;
+  flex: 0 0 auto;
+  display: flex;
+  overflow: hidden;
+  background: var(--ink);
+  /* The rail's declaration: a vertical swipe is left to the page (here, the
+     scrolling panel) and a horizontal one comes to the drag. */
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  /* No long-press callout on a finger: this is a surface to drag, not a picture
+     to save. */
+  -webkit-touch-callout: none;
+}
+
+.carousel.dragging {
+  cursor: grabbing;
+}
+
+/* The travel: the same arrive-and-settle curve the pagers use, so the slide
+   lands with the pill rather than after it. Off while a finger is on it, or the
+   track would chase the pointer a transition behind. */
+.track {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.track.dragging {
+  transition: none;
+}
+
+.slide {
+  position: relative;
+  flex: 0 0 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,86 +231,79 @@ function go(step) {
   );
 }
 
-.label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  color: var(--fg-3);
-}
-
-/* With real screenshots the stripes go, and the label sits over the image on a
-   small dark chip so it stays readable whatever the shot looks like. */
-.carousel.shot {
-  background: var(--ink);
-}
-
+/* Fills the slide, which is the box the aspect-ratio and the track settle. */
 .image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top;
   display: block;
+  /* A dragged image must not be grabbed as a file. */
+  -webkit-user-drag: none;
 }
 
-.carousel.shot .label {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--ink) 70%, transparent);
-  color: var(--fg-2);
+.shot-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--fg-3);
 }
 
-.arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--ink) 70%, transparent);
-  border: 1px solid var(--line);
-  color: var(--fg);
-  cursor: pointer;
-  font-size: 16px;
-  transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    color 0.16s ease;
-}
-
-.left {
-  left: 14px;
-}
-
-.right {
-  right: 14px;
-}
-
-.arrow:hover {
-  border-color: var(--acc-text);
-  color: var(--acc-text);
-}
-
+/*
+  The rail's indicator, horizontal: a 24px target with an 8px mark inside it
+  (WCAG 2.2 asks for 24px), and the active one a longer pill in the accent. It
+  sits under the media on the panel, not over the shot, so the marks are read
+  against the panel rather than against whatever the screenshot happens to show.
+*/
 .dots {
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
-  gap: 7px;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 0;
 }
 
 .dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--line);
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.dot::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  border-radius: 999px;
+  background: var(--fg-3);
+  transition:
+    left 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    right 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.3s ease;
+}
+
+.dot:hover::before {
+  background: var(--fg-2);
 }
 
 /* A fill, so the brand yellow is right in both themes. */
-.dot.on {
+.dot.active::before {
+  left: 4px;
+  right: 4px;
   background: var(--acc);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .dot::before {
+    transition: none;
+  }
 }
 </style>

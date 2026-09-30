@@ -30,6 +30,12 @@ import { sections } from '../../data'
 const props = defineProps({
   activeId: { type: String, default: '' },
   menuOpen: { type: Boolean, default: false },
+  /*
+    Pins the bar in one state so the design-system sheet can show both without
+    scrolling. The site never sets it: left empty, the state follows the scroll,
+    which is the whole behaviour.
+  */
+  state: { type: String, default: null }, // 'wide' | 'compact'
 })
 
 defineEmits(['toggle-menu'])
@@ -51,7 +57,7 @@ const wideWidth = ref(null)
 const bar = ref(null)
 useElementHeight(bar, '--navbar-h')
 
-const compact = computed(() => y.value > 60)
+const compact = computed(() => (props.state ? props.state === 'compact' : y.value > 60))
 const maxWidth = computed(() => {
   if (compact.value && narrowWidth.value) return `${narrowWidth.value}px`
   return wideWidth.value ? `${wideWidth.value}px` : '1180px'

@@ -10,8 +10,8 @@
     const content = computed(() => project[lang.value])
 
   Fields:
-    slug      URL-ish id. Also the modal path (/projects/<slug>) and the
-              carousel label. Lowercase, no spaces.
+    slug      URL-ish id. Also the modal path (/projects/<slug>). Lowercase, no
+              spaces.
     shotLabel Placeholder text drawn over the striped frame until there is a
               real screenshot. Drop it once `image` is set.
     image     Path under public/ for the card's frame, or null while there is
@@ -71,8 +71,9 @@ export const projects = [
   {
     slug: 'sideforge',
     shotLabel: 'SHOT · SIDEFORGE',
-    image: null,
-    slides: 3,
+    image: '/assets/img/sideforge/logo.jpg',
+    images: ['/assets/img/sideforge/logo.jpg'],
+    slides: 1,
     repo: 'https://github.com/krub-dev/sideForge',
     live: 'https://github.com/krub-dev/sideForge#readme',
     stack: [
@@ -116,8 +117,14 @@ export const projects = [
   {
     slug: 'krub-dev',
     shotLabel: 'SHOT · KRUB.DEV',
-    image: null,
-    slides: 3,
+    image: '/assets/img/krub-dev/hero.jpg',
+    images: [
+      '/assets/img/krub-dev/hero.jpg',
+      '/assets/img/krub-dev/projects.jpg',
+      '/assets/img/krub-dev/about.jpg',
+      '/assets/img/krub-dev/contact.jpg',
+    ],
+    slides: 4,
     repo: 'https://github.com/krub-dev/portfolio-krub',
     live: 'https://krub.dev',
     stack: ['Vue 3', 'Vite', 'vue-i18n', 'Vitest', 'Playwright', 'Vercel'],
@@ -133,7 +140,7 @@ export const projects = [
       lead: 'The portfolio you are reading. Designed from a reference, rewritten as idiomatic Vue, and tested in a real browser.',
       body: 'Vue 3 with Vite and vue-i18n for the two languages, on a design system of its own: one token file drives two themes and six accent palettes, and no component keeps a colour or a string of its own. The scroll behaviour, the mascot, the project modal and the custom cursor share a single requestAnimationFrame loop, and every piece of motion switches off under prefers-reduced-motion.',
       body2:
-        'The contact form posts to a serverless function, so the Web3Forms key stays on the server and never reaches the bundle. A unit suite with Vitest and a Playwright suite covering the flows that only fail in a real browser: the scroll spy, the focus trap and the footer on iOS. Deployed on Vercel.',
+        'The contact form posts to a serverless function, so the mail key stays on the server and never reaches the bundle, with Turnstile and a rate limit in front of it. A unit suite with Vitest and a Playwright suite covering the flows that only fail in a real browser: the scroll spy, the focus trap and the footer on iOS. Deployed on Vercel.',
     },
     es: {
       name: 'krub.dev',
@@ -147,14 +154,15 @@ export const projects = [
       lead: 'El portfolio que estás leyendo. Diseñado desde una referencia, reescrito como Vue idiomático y probado en un navegador real.',
       body: 'Vue 3 con Vite y vue-i18n para los dos idiomas, sobre un design system propio: un solo fichero de tokens gobierna dos temas y seis paletas de acento, y ningún componente guarda un color ni un texto suyo. El scroll, la mascota, el modal de proyectos y el cursor comparten un único bucle de requestAnimationFrame, y todo el movimiento se apaga con prefers-reduced-motion.',
       body2:
-        'El formulario de contacto envía a una función serverless, así que la clave de Web3Forms se queda en el servidor y nunca llega al bundle. Suite unitaria con Vitest y suite de Playwright cubriendo los flujos que solo fallan en un navegador real: el scroll spy, la trampa de foco y el pie en iOS. Desplegado en Vercel.',
+        'El formulario de contacto envía a una función serverless, así que la clave del correo se queda en el servidor y nunca llega al bundle, con Turnstile y un límite de peticiones delante. Suite unitaria con Vitest y suite de Playwright cubriendo los flujos que solo fallan en un navegador real: el scroll spy, la trampa de foco y el pie en iOS. Desplegado en Vercel.',
     },
   },
   {
     slug: 'showroom',
     shotLabel: 'SHOT · SHOWROOM',
-    image: null,
-    slides: 4,
+    image: '/assets/img/showroom/desktop.jpg',
+    images: ['/assets/img/showroom/desktop.jpg', '/assets/img/showroom/responsive.jpg'],
+    slides: 2,
     repo: 'https://github.com/krub-dev/SHOWROOM-FULLSTACK-M3',
     live: 'https://showroom-fullstack-m3-production.up.railway.app/',
     stack: ['Vue 3', 'Express', 'PostgreSQL', 'Prisma', 'Jest', 'Railway'],

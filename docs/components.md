@@ -62,16 +62,21 @@ App
 │   ├─ ProjectsSection
 │   │   ├─ SectionHeading
 │   │   ├─ ProjectCard ×n
+│   │   ├─ GithubCard          (the rail's last slot: a dashed card to GitHub)
 │   │   └─ Testimonials         (optional, from config)
 │   └─ ContactSection
 │       ├─ SectionHeading
 │       ├─ TalkBand
 │       ├─ ContactForm
 │       └─ BaseButton
-├─ ProjectModal
+├─ ProjectModal          (inside BaseModal)
 │   ├─ MediaCarousel
 │   └─ SpecList
+├─ CvModal               (inside BaseModal: the CV, page by page)
+│   └─ BaseButton        (the download)
 ├─ NotFoundView         (the 404 route)
+│   └─ BaseButton
+├─ PrivacyView          (the /privacy route: the form's privacy notice)
 │   └─ BaseButton
 └─ TheFooter
     └─ LiveClock
@@ -91,10 +96,20 @@ App
 | `href` | string | — | external link; renders an `<a>` |
 | `to` | string | — | internal route; renders a `RouterLink`, so no reload |
 | `external` | boolean | `false` | adds `target="_blank" rel="noopener"` |
+| `download` | boolean | `false` | `<a>` only: saves the linked file instead of opening it |
 | `magnetic` | boolean | `false` | opts into magnetic hover |
 
 Renders a `<button>` when neither `to` nor `href` is given. Default slot: the content. Emits
 `click`.
+
+### BaseModal
+The shell every dialog uses: the fixed backdrop (a flat scrim, no blur), the panel, the scroll lock
+behind it, the focus trap, the Escape key and the backdrop click. Props: `open`, `labelledby` (the id
+that names the dialog), `closeLabel` and `width` (the panel's cap — the CV wants a narrower one).
+Slots: `head` (the title, left), `actions` (whatever sits beside the close, right) and the default for
+the body. The header is sticky and opaque, so the title, the close and the action stay reachable
+however far the body scrolls. Emits `close`. The project modal and the CV dialog are its two callers,
+so there is one set of dialog rules rather than two that drift.
 
 ### SectionHeading
 | Prop | Type | Notes |
@@ -165,15 +180,36 @@ becoming a cross; the move is a CSS transform so it transitions. Reduced motion 
 
 Emits `open`.
 
+### GithubCard
+Prop: `current` (boolean — the rail's parked marker, for a touch screen). The rail's last slot: not a
+project but a way out to GitHub. It mirrors `ProjectCard`'s structure — a `16/10` media slot carrying
+the mark at 64px over a mosaic of rounded accent squares, then the body, then a foot with the label and
+the arrow — which is what makes the two the same size, and its dashed frame is an SVG `rect` with the
+dash length and gap set by hand, drawn on a layer above the contents so the media slot cannot cover it,
+over a 1px transparent border that only keeps the box the same size as the cards. Its copy is
+`copy.githubCard`, its link label `actions.github`, and the mark and the address come from
+`socials`/`socialIcons`, so they cannot drift from Contact. See decisions.md 101.
 ### ProjectModal
 | Prop | Type |
 |---|---|
 | `project` | object \| null (`null` = closed) |
 | `index` | number (for the `[0N]` in the header) |
 
-Emits `close`. Locks body scroll while open. Contains `MediaCarousel` (props `slides`, `slug`;
-owns its own index state, wrapping around) and `SpecList` (props `role`, `year`, `stack`; it
-resolves its own Role / Year / Stack labels through i18n).
+Emits `close`. Renders inside `BaseModal` (the shared dialog shell), with its `[0N]` and path in the
+header slot, then `MediaCarousel` (props `images`, `slides`, `slug`, `name`, `shotLabel`; owns its own
+index, paged by the dots and by a drag) and `SpecList` (props `role`, `year`, `stack`; it resolves its
+own Role / Year / Stack labels through i18n).
+
+### CvModal
+| Prop | Type |
+|---|---|
+| `open` | boolean |
+| `href` | string (the PDF for the current theme and language) |
+
+Emits `close`. Renders inside `BaseModal` (a narrower panel) with the title in the header slot, then
+the CV's pages, painted from the PDF with pdf.js — the legacy build, imported on first open. The
+download is an icon-only button in the header's `actions` slot. It owns the render, not the state:
+`HomeView` decides whether it is open and which file. See decisions.md 97.
 
 ### TestimonialCard
 `quote`, `name`, `role`, `avatar`, `open`. One entry as the pager's content: the attribution first, then
@@ -182,7 +218,9 @@ pager's pane is the box. Whether it is open belongs to the pager, which is the o
 the card emits `toggle` and reads the state back as a prop. See decisions.md 56 and 72.
 
 ### Testimonials
-The block between the Stack and Contact: a filled accent header carrying the label and a `n / total`,
+Prop: `entries` (array | null — null reads them from `src/data`; the design-system sheet feeds
+placeholders). The block between the Stack and Contact: a filled accent header carrying the label and
+a `n / total`,
 and a vertical pager, one quote at a time. **One entry is in the DOM at all** — the current one — and
 changing swaps it, so the block never grows with the number of quotes; the pane's height is animated to
 the card on show. Navigation is the vertical dot column and a click on the card (which wraps); the pager
@@ -237,8 +275,10 @@ columns carry the measurements, one above the band (the heading) and one below (
 form).
 
 ### ContactForm
-The panel: the three fields, the send button, the mono note with the address, the honeypot and the
-live region. It paints; the state is in `useContactForm`. Every string comes from `src/locales/`.
+The panel: the three fields, the consent box (the line that links to `/privacy`), the send button, the
+mono note with the address, the honeypot and the live region. It paints; the state is in
+`useContactForm`, and the consent rule is the fourth one in `utils/contact.js`. Every string comes from
+`src/locales/`; the notice behind the link lives in `src/data/privacy.js`.
 
 ### TalkBand
 `text`. The band in Contact, between the heading and the rows: on the accent background, display type
@@ -290,7 +330,10 @@ canvas on purpose — `useLoop` and `useTresContext` need the renderer the canva
 ## Chrome components (these carry behaviour)
 
 ### TheNavbar
-Props: `activeId` (string), `menuOpen` (boolean). Publishes its own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`. Emits `toggle-menu`; theme and language are
+Props: `activeId` (string), `menuOpen` (boolean), `state` (`'wide' | 'compact' | null` — null follows
+the scroll, which is the real behaviour; the design-system sheet pins it to show both). Publishes its
+own height as `--navbar-h`, which the hero pads past and anchored sections use for `scroll-margin-top`.
+Emits `toggle-menu`; theme and language are
 handled directly through their composables, and the `AppearanceControl` and `LangButton` sit beside
 it. The measurement is taken with the compact layout applied for one frame, so the hand-over is
 accounted for: once the capsule compacts those two give way to a `SettingsMenu`, and below 900px
@@ -339,7 +382,9 @@ cleanup goes with the unmount. His pupils follow the cursor, and on touch they g
 because with no tail centred over him it reads as sitting on his leaf.
 
 ### BackgroundGrid
-Props: `variant` (`'hero' | 'global'`), `size` (72), `visible` (boolean, for the crossfade).
+Props: `variant` (`'hero' | 'global' | 'page'`), `size` (72), `visible` (boolean, for the crossfade).
+`page` is the whole document, absolute and with no fade: the design-system sheet wears it, where there
+is no hero to leave behind and so no second layer to crossfade into.
 
 ### GridCell
 Prop: `masked` (boolean — which layer is showing: false while the absolute hero grid is visible, true
@@ -350,7 +395,7 @@ grid scrolls and a cell inside it would drift off the cursor. Subscribes to `use
 with `Math.floor` to whichever layer is visible — page coordinates for the hero layer, the viewport
 for the fixed one — so a scroll keeps it on the lines instead of taking it away. The mask is applied
 over the same box the grid covers (`bottom: var(--footer-h)`), or it fades later than the lines behind
-it. It goes with the cursor after two seconds without a `mousemove`. On touch, where there is no
+it. It hides only until the first move, like the cursor. On touch, where there is no
 cursor, it lights on a tap (told from a scroll by the finger's travel) and stays until a scroll clears
 it; the pointer subscription never happens there.
 
@@ -368,16 +413,18 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 | `useLang()` | `lang`, `toggle()`; persists in `localStorage["krub-lang"]` |
 | `useAccent()` | `accent`, `set(id)`; writes `data-accent` on `<html>` and persists |
 | `useScrollSpy(ids, threshold = 0.35)` | reactive `activeId` |
-| `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener |
+| `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener. It keeps the last position while a dialog holds the page still, because the lock reports the scroll as zero |
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
 | `useMagnetic()` | registers the magnetic hover loop for `[data-magnetic]` |
-| `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) and `active`, which goes false after two seconds without a `mousemove` or a scroll, and comes back on either |
+| `usePointer()` | shared mouse position (used by the cursor, the lemon and the logo) and `active`, which is true once the pointer has been seen at least once — it used to go false after two seconds of stillness, and no longer does, so the cursor stays put |
 | `useFooterHeight(el)` | thin wrapper that publishes the footer's `--footer-h` |
 | `useElementHeight(el, prop)` | the mechanism behind it, shared with the navbar's `--navbar-h`. Observes the border box and re-reads on a `visualViewport` resize, because the iOS toolbar changes the footer's padding and a ResizeObserver can miss that |
 | `usePastHero()` | true once the hero wrapper has been scrolled past; the footer and the lemon share it, and it is true from the start on a route with no hero (the 404) |
 | `useAcho()` | `playOnce()`: true on the first poke of a visit — the one that says "acho" and shows the bubble — and false after. Module scope, so it is per page load and nothing is stored |
 | `useLemonVoice()` | `say(text)` / `hush()` for whatever Limonacho should be saying, plus `message`, `listening` and the lemon's `listen()` registration. Owner-aware, so the four Stack groups do not talk over each other, and a `shallowRef` because the owner check is an identity check and a plain `ref` would hand back a proxy |
-| `useBodyScrollLock(active)` | locks scrolling while the modal is open |
+| `useBodyScrollLock(active)` | locks scrolling while a dialog is open — `overflow: hidden` on the desktop, `position: fixed` on the body for iOS, which ignores the former. Also exports `isScrollLocked()`, which the magnetic hover and the scroll reader use to stand down |
+| `useContactForm(labels)` | `fields`, `errors`, `status`, `errorCode`, `token`, `canSend`, `touch(field)` and `send()`. The validation is live but late: a field is shown its error once it has been left, and the button is off until all four rules pass |
+| `useCv()` | `warmCv(href)`: fetches pdf.js, its worker and the PDF in the background on a sign of intent (the button hovered or focused, the photo column in view), once per visit. See decisions.md 97 |
 
 One single `requestAnimationFrame` drives everything that follows the mouse (cursor, lemon
 pupils, the logo's tilt, magnetic hover). No per-component loops. The 3D logo is the one
@@ -397,7 +444,8 @@ src/
 │   ├─ experience.js
 │   ├─ education.js
 │   ├─ stack.js
-│   ├─ socials.js        + email, cvPath, photoPath
+│   ├─ socials.js        + email, socialIcons, cvPath, photoPath
+│   ├─ privacy.js        the /privacy notice, the form's other half
 │   ├─ sound.js          the one audio clip: the "acho" Limonacho says once a visit
 │   ├─ sections.js       the scrollable sections: id, label key, index
 │   ├─ testimonials.js
@@ -416,8 +464,8 @@ Outside `src/`, at the repository root:
 
 ```
 api/
-└─ contact.js            the form's endpoint: a Vercel function holding WEB3FORMS_KEY, and
-                         the same handler mounted by vite.config.js in development
+└─ contact.js            the form's endpoint: a Vercel function that sends by Resend with
+                         the key server-side, and the same handler mounted by vite.config.js
 ```
 
 The split is deliberate and it is the rule to keep:

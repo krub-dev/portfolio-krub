@@ -1,5 +1,6 @@
 import { onMounted, onUnmounted } from 'vue'
 
+import { isScrollLocked } from './useBodyScrollLock'
 import { usePointer } from './usePointer'
 
 /*
@@ -35,6 +36,8 @@ export function useMagnetic(rootSelector = '[data-magnetic]') {
   let observer = null
   // Current offset per element, keyed by the element itself.
   const offsets = new WeakMap()
+  // Whether the loop is standing down because a dialog holds the page still.
+  let paused = false
 
   /*
     Cache the element list instead of querying every frame. A MutationObserver
@@ -47,7 +50,29 @@ export function useMagnetic(rootSelector = '[data-magnetic]') {
     elements = Array.from(document.querySelectorAll(rootSelector))
   }
 
+  function release() {
+    for (const el of elements) {
+      offsets.set(el, { x: 0, y: 0 })
+      el.style.transform = ''
+    }
+  }
+
   function frame(pointer) {
+    /*
+      A dialog over the page takes the pointer with it. The page behind is not
+      what you are pointing at, and elements leaning back there read as the page
+      wobbling under the backdrop. Everything goes home and the loop stands down
+      until the dialog closes.
+    */
+    if (isScrollLocked()) {
+      if (!paused) {
+        paused = true
+        release()
+      }
+      return
+    }
+    paused = false
+
     let winner = null
     let bestScore = 1 // nothing beyond score 1 is in range at all
 

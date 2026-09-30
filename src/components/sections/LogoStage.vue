@@ -179,6 +179,24 @@ let lastDownAt = 0
 let snapFrame = 0
 
 /*
+  The viewport height as the stylesheet sees it — `100vh` — rather than
+  `window.innerHeight`. On iOS the latter shrinks with the browser toolbar, so the
+  same page snapped to a smaller box when the toolbar happened to be out at load
+  and the frame changed size on a refresh while nothing else did. `vh` is the
+  large viewport and does not move with the toolbar, so the box is the same at
+  first paint and after a reload. Measured with a throwaway element because there
+  is no JS property for the large viewport.
+*/
+function viewportHeight() {
+  const probe = document.createElement('div')
+  probe.style.cssText = 'position:absolute;top:0;left:0;width:0;height:100vh;visibility:hidden'
+  document.body.appendChild(probe)
+  const height = probe.offsetHeight
+  probe.remove()
+  return height
+}
+
+/*
   Snap the box to the page's grid: a square of whole 72px cells, its left edge on
   the next line to the right and its top on the nearest one, so a box that is
   otherwise centred in its column lands on the background it sits on. Done in JS
@@ -198,7 +216,7 @@ function snapToGrid() {
 
   const natural = el.getBoundingClientRect().width
   const byWidth = Math.round(natural / GRID)
-  const byHeight = Math.floor((window.innerHeight - 200) / GRID)
+  const byHeight = Math.floor((viewportHeight() - 200) / GRID)
   const cells = Math.max(1, Math.min(MAX_CELLS, byWidth, byHeight))
   const size = cells * GRID
   el.style.width = `${size}px`
@@ -252,14 +270,6 @@ usePointer((pointer) => {
 
   const rect = el.getBoundingClientRect()
 
-  if (dragging.value) {
-    // Both axes, both clamped the same way, so the mark can be thrown up and
-    // down as well as left and right.
-    spin.value = clamp(startSpin + ((pointer.x - startX) / rect.width) * 3, -MAX_SPIN, MAX_SPIN)
-    spinY.value = clamp(startSpinY + ((pointer.y - startY) / rect.height) * 3, -MAX_SPIN_Y, MAX_SPIN_Y)
-    return
-  }
-
   if (rect.bottom < 0 || rect.top > window.innerHeight) return // offscreen, skip the work
 
   // The scene only follows the pointer over the stage. Outside it the tilt goes
@@ -280,6 +290,31 @@ usePointer((pointer) => {
     y: clamp((pointer.y - (rect.top + rect.height / 2)) / (rect.height / 2)),
   }
 })
+
+/*
+  The drag is its own handler on the stage, not part of the shared pointer loop.
+  That loop listens to `mousemove` and switches itself off unless there is a
+  hovering pointer, so on a tablet it never runs at all: the mark did not turn
+  under a finger. Pointer events here cover mouse, pen and touch alike, and the
+  capture taken in onDown keeps them coming while the finger is down. The tilt
+  above stays mouse-only, which is right — there is no hover on a finger.
+*/
+function onDragMove(event) {
+  if (!dragging.value) return
+
+  const el = stage.value
+  if (!el) return
+
+  const rect = el.getBoundingClientRect()
+  // Both axes, both clamped the same way, so the mark can be thrown up and down
+  // as well as left and right.
+  spin.value = clamp(startSpin + ((event.clientX - startX) / rect.width) * 3, -MAX_SPIN, MAX_SPIN)
+  spinY.value = clamp(
+    startSpinY + ((event.clientY - startY) / rect.height) * 3,
+    -MAX_SPIN_Y,
+    MAX_SPIN_Y,
+  )
+}
 
 function onDown(event) {
   if (!stage.value) return
@@ -343,6 +378,7 @@ defineExpose({ exportModel })
       ref="stage"
       class="stage"
       @pointerdown="onDown"
+      @pointermove="onDragMove"
       @pointerup="onUp"
       @pointercancel="onUp"
     >
@@ -445,6 +481,13 @@ defineExpose({ exportModel })
   width: 100%;
   height: 100%;
   border: 1px solid var(--line);
+  /*
+    pan-y, the same declaration the project rail uses: the browser keeps the
+    vertical swipe for the page and hands the horizontal drag to us, which is what
+    lets the mark spin under a finger. Without it the browser claimed the gesture
+    as a scroll and cancelled the pointer, so touch turned nothing.
+  */
+  touch-action: pan-y;
   /*
     Flat background. In the dark theme it is --ink (near black). In the light
     theme it is --stage-bg (medium grey) so the tunnel starts from a darker tone
@@ -683,33 +726,40 @@ defineExpose({ exportModel })
 /*
   The frame: a slim brushed-metal band over the canvas. Opaque, so it masks the
   box's edges — whatever the camera's small lean does to them — and drawn in the
-  metal tokens, a sheen in both themes rather than a colour. `border-image` is
-  what lets a border carry the gradient, and the slice is the band's own width so
-  the corners take a real piece of it: sliced at one pixel the corners were each
-  a single colour stretched over 12px, and the brushed streaks stopped dead at the
-  edges.
+  metal tokens, a sheen in both themes rather than a colour.
 
-  No hairline on its inner edge, and no vignette either: the glow's own hard edge
-  is the line there, and a dark rule or a soft inset shadow on top of it read as a
-  second edge running round the frame. The vignette lasted a while and measured at
-  only about 4/255, but it was the shape — a rounded rectangle, brighter at the
-  sides than at its corners — that kept reading as a shadow cast into the slot.
+  Drawn as a background with a mask, not as a `border-image`. The border-image
+  version of this same gradient did not paint at all on an iPad, while the very
+  same kind of gradient as a background (the shutter's slats) does, so the frame
+  uses the combination that is known to work there (decision 92). The ring is the
+  border box minus the padding box, cut with the mask `exclude` and the legacy
+  `-webkit-mask-composite: xor` for older WebKit. The border itself stays
+  transparent; it is only there to give the mask its padding box.
 */
 .rim {
   position: absolute;
   inset: 0;
   pointer-events: none;
   border: 12px solid transparent;
-  border-image: linear-gradient(
-      135deg,
-      var(--metal) 0%,
-      color-mix(in srgb, var(--metal) 40%, var(--metal-dark)) 15%,
-      var(--metal) 33%,
-      color-mix(in srgb, var(--metal) 20%, var(--metal-dark)) 50%,
-      var(--metal) 68%,
-      var(--metal-dark) 100%
-    )
-    12;
+  background:
+    linear-gradient(
+        135deg,
+        var(--metal) 0%,
+        color-mix(in srgb, var(--metal) 40%, var(--metal-dark)) 15%,
+        var(--metal) 33%,
+        color-mix(in srgb, var(--metal) 20%, var(--metal-dark)) 50%,
+        var(--metal) 68%,
+        var(--metal-dark) 100%
+      )
+      border-box;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
 }
 
 /*

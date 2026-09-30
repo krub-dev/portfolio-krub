@@ -13,12 +13,19 @@
 */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import BaseButton from '../base/BaseButton.vue'
 import { useContactForm } from '../../composables/useContactForm'
-import { email } from '../../data'
+import { useLang } from '../../composables/useLang'
+import { useLemonVoice } from '../../composables/useLemonVoice'
+import { copy, email } from '../../data'
 
 const { t } = useI18n()
+const { lang } = useLang()
+// Limonacho says why the send button will not go, when you hover it.
+const { say, hush } = useLemonVoice()
+const lemon = computed(() => copy.lemon[lang.value])
 
 // A function, not an object: the labels have to be read at validation time, in
 // whatever language is on screen then.
@@ -26,9 +33,10 @@ const labels = () => ({
   required: t('form.required'),
   badEmail: t('form.badEmail'),
   shortMessage: t('form.shortMessage'),
+  consent: t('form.consentRequired'),
 })
 
-const { fields, errors, status, errorCode, token, send } = useContactForm(labels)
+const { fields, errors, status, errorCode, token, canSend, touch, send } = useContactForm(labels)
 
 const statusText = computed(() => {
   if (status.value === 'sent') return t('form.sent')
@@ -87,6 +95,15 @@ async function onSubmit() {
     token.value = ''
   }
 }
+
+/*
+  A disabled button does not take mouse events, so the hint is heard on the
+  wrapper around it: hovering the send button while it cannot go is the one
+  moment the visitor needs telling why.
+*/
+function onSendHover() {
+  if (!canSend.value) say(lemon.value.form)
+}
 </script>
 
 <template>
@@ -105,7 +122,7 @@ async function onSubmit() {
         autocomplete="name"
         :aria-invalid="Boolean(errors.name)"
         :aria-describedby="errors.name ? 'contact-name-error' : undefined"
-        @input="errors.name = ''"
+        @blur="touch('name')"
       />
       <p v-if="errors.name" id="contact-name-error" class="error">{{ errors.name }}</p>
     </div>
@@ -122,7 +139,7 @@ async function onSubmit() {
         autocomplete="email"
         :aria-invalid="Boolean(errors.email)"
         :aria-describedby="errors.email ? 'contact-email-error' : undefined"
-        @input="errors.email = ''"
+        @blur="touch('email')"
       />
       <p v-if="errors.email" id="contact-email-error" class="error">{{ errors.email }}</p>
     </div>
@@ -138,7 +155,7 @@ async function onSubmit() {
         maxlength="4000"
         :aria-invalid="Boolean(errors.message)"
         :aria-describedby="errors.message ? 'contact-message-error' : undefined"
-        @input="errors.message = ''"
+        @blur="touch('message')"
       />
       <p v-if="errors.message" id="contact-message-error" class="error">{{ errors.message }}</p>
     </div>
@@ -160,10 +177,45 @@ async function onSubmit() {
     <!-- Cloudflare Turnstile, rendered only when its site key is configured. -->
     <div v-if="siteKey" ref="turnstileEl" class="turnstile" />
 
+    <!--
+      The consent. It is the form's legal basis, so it is required: an empty box
+      is validated like an empty field, and api/contact.js refuses a payload
+      without it. The native checkbox, tinted with the accent — the honest
+      control, which the browser already knows how to draw and announce.
+    -->
+    <div class="consent">
+      <label class="consent-row">
+        <input
+          v-model="fields.consent"
+          class="box"
+          type="checkbox"
+          :aria-invalid="Boolean(errors.consent)"
+          :aria-describedby="errors.consent ? 'contact-consent-error' : undefined"
+          @change="touch('consent')"
+        />
+        <span class="consent-text">
+          <i18n-t keypath="form.consent">
+            <template #policy>
+              <RouterLink class="policy" to="/privacy">{{ t('form.policyLink') }}</RouterLink>
+            </template>
+          </i18n-t>
+        </span>
+      </label>
+
+      <p v-if="errors.consent" id="contact-consent-error" class="error">{{ errors.consent }}</p>
+    </div>
+
     <div class="foot">
-      <BaseButton variant="solid" size="md" type="submit" :class="{ busy: status === 'sending' }">
-        {{ status === 'sending' ? t('form.sending') : t('form.send') }}
-      </BaseButton>
+      <span
+        class="send"
+        :class="{ blocked: !canSend }"
+        @mouseenter="onSendHover"
+        @mouseleave="hush()"
+      >
+        <BaseButton variant="solid" size="md" type="submit" :disabled="!canSend">
+          {{ status === 'sending' ? t('form.sending') : t('form.send') }}
+        </BaseButton>
+      </span>
 
       <p class="note">{{ t('form.note', { email }) }}</p>
     </div>
@@ -257,11 +309,74 @@ textarea.input {
   min-height: 65px;
 }
 
+/*
+  The consent. A sentence, not a label: set in the sans rather than another
+  uppercase mono tag, so it reads as prose. The checkbox is the browser's own,
+  tinted with the accent — it already knows how to draw and announce one, and a
+  hand-drawn box buys nothing here.
+*/
+.consent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.box {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin: 2px 0 0;
+  accent-color: var(--acc-text);
+  cursor: pointer;
+}
+
+.consent-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg-2);
+}
+
+.policy {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.16s ease;
+}
+
+.policy:hover {
+  color: var(--acc-text);
+}
+
+
 .foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 18px;
+}
+
+/*
+  The wrapper around the send button. A disabled control does not take mouse
+  events, so the hint about why it will not go is heard here; the button keeps
+  the click target when it is live and steps out of the way when it is not.
+*/
+.send {
+  display: inline-flex;
+}
+
+.send.blocked {
+  cursor: not-allowed;
+}
+
+.send.blocked :deep(.btn) {
+  pointer-events: none;
 }
 
 .note {
@@ -283,14 +398,9 @@ textarea.input {
   display: none;
 }
 
-/* On the button itself, which is the child component's root. */
-.busy {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .input {
+  .input,
+  .policy {
     transition: none;
   }
 }

@@ -36,7 +36,10 @@
     "required": "Required",
     "badEmail": "Check the address",
     "shortMessage": "A little more, please",
-    "captcha": "The verification expired. Please try again."
+    "captcha": "The verification expired. Please try again.",
+    "policyLink": "privacy policy",
+    "consent": "I have read and accept the {policy}.",
+    "consentRequired": "Tick the box to continue"
   },
   "stack": {
     "g1": "Languages",
@@ -45,7 +48,8 @@
     "g4": "Tools & AI"
   },
   "actions": {
-    "cv": "Download CV (PDF)",
+    "cv": "Résumé/CV",
+    "github": "See GitHub",
     "talk": "Let's talk ↗",
     "readMore": "Read more",
     "readLess": "Read less",
@@ -70,12 +74,21 @@
   "modal": {
     "role": "Role",
     "year": "Year",
-    "stack": "Stack",
-    "image": "IMAGE"
+    "stack": "Stack"
+  },
+  "cvModal": {
+    "loading": "Loading the CV…",
+    "error": "The CV could not be shown.",
+    "download": "Download the CV"
   },
   "notFound": {
     "title": "/not-found",
     "code": "404"
+  },
+  "privacy": {
+    "label": "/privacy",
+    "title": "Privacy policy",
+    "updated": "Last updated"
   },
   "accent": {
     "label": "Accent colour",
@@ -92,11 +105,12 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "closeModal": "Close project",
-    "prevImage": "Previous image",
-    "nextImage": "Next image",
+    "closeCv": "Close the CV",
     "projectsRail": "Projects",
+    "projectImages": "Project images",
     "goToTestimonial": "Go to testimonial {n}",
     "goToProject": "Go to project {n}",
+    "goToImage": "Go to image {n}",
     "backToTop": "Back to top",
     "openProject": "Open project: {name}",
     "raiseShutter": "Raise the shutter"

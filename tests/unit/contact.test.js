@@ -3,11 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import handler from '../../api/contact.js'
 import { hasErrors, validateContact } from '../../src/utils/contact'
 
-const LABELS = { required: 'required', badEmail: 'bad', shortMessage: 'short' }
+const LABELS = { required: 'required', badEmail: 'bad', shortMessage: 'short', consent: 'consent' }
 const GOOD = {
   name: 'Kiko',
   email: 'kikorubioillan@gmail.com',
   message: 'Hola, te escribo por lo del backend.',
+  consent: true,
 }
 
 function fakeRes() {
@@ -30,8 +31,18 @@ describe('validateContact', () => {
   })
 
   it('asks for each missing field', () => {
-    const errors = validateContact({ name: '', email: '', message: '' }, LABELS)
-    expect(errors).toEqual({ name: 'required', email: 'required', message: 'required' })
+    const errors = validateContact({ name: '', email: '', message: '', consent: false }, LABELS)
+    expect(errors).toEqual({
+      name: 'required',
+      email: 'required',
+      message: 'required',
+      consent: 'consent',
+    })
+  })
+
+  it('blocks the send until the consent box is ticked', () => {
+    expect(validateContact({ ...GOOD, consent: false }, LABELS).consent).toBe('consent')
+    expect(validateContact({ ...GOOD, consent: true }, LABELS).consent).toBe('')
   })
 
   it('tells an empty address apart from a malformed one', () => {
@@ -80,6 +91,15 @@ describe('the contact endpoint', () => {
     const res = fakeRes()
     await handler(req({ ...GOOD, email: 'nope' }), res)
     expect(res.statusCode).toBe(400)
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('refuses a message with no consent, without calling the service', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    const res = fakeRes()
+    await handler(req({ ...GOOD, consent: false }), res)
+    expect(res.statusCode).toBe(400)
+    expect(res.payload.error).toBe('consent')
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 

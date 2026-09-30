@@ -17,48 +17,50 @@ not tasks and have no checkbox.
 This merges the pending list of 2026-09-16 with what used to live in the roadmap's "Later"
 section, folded together where they overlapped.
 
-## Where things stand — 2026-09-28
+## Where things stand — 2026-09-30
 
 A short snapshot so resuming work does not mean reading the whole file. The checklist below is
 the source of truth; this is the index into it.
 
-`main` is what `krub.dev` serves; `dev` is where the work happens. Since launch the site gained the
-accent palettes and the appearance control, the reworked Stack and Contact, the contact form, the
-projects rail, the testimonials pager, the 404, the self-hosted fonts, the interactive grid cell, the
-CV pipeline (four PDFs, light and dark), the refreshed content with the certifications tab, and the
-3D hero — the GLB mark, the portal room, the roller blind and the cursor hints. The 3D branch is
-merged into both; `git log main..dev` lists whatever else is on `dev` but not yet published.
+`main` is what `krub.dev` serves and `dev` is where the work happens. The two dialogs (the project
+modal's media and the CV, which renders its own PDF), the design-system sheet, the GitHub card that
+ends the rail and the project images were released together, so the two are level but for that
+release's merge commit. Since launch the site also gained the accent palettes and the appearance
+control, the reworked Stack and Contact, the testimonials pager, the 404, the self-hosted fonts, the
+interactive grid cell and the CV pipeline. `git log main..dev` lists whatever is on `dev` and not yet
+published.
 
-**Before `dev` can become `main`:**
+**Before the next release:**
 
 1. The pre-publication documentation review.
-2. Re-measure Lighthouse against the merged deployment.
-3. Real screenshots for the projects and the Open Graph artwork.
+2. Re-measure Lighthouse against the deployment, now that it is the current build.
+3. The Open Graph artwork.
 
-The contact form is mid-swap to Resend with Turnstile and a rate limit (see the **Contact form**
-group below); it needs the accounts before it works in production.
+The contact form works end to end now — it sends by Resend, with Turnstile and a rate limit — and it
+carries its privacy notice and a required consent box, both linking to `/privacy`. The domain carries
+a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, sending as through
+Resend's SMTP), and the site points at it everywhere.
 
-**The substantial work still open:** the contact form's Resend and Turnstile setup and its privacy
-notice, the backlight behind the mark without a plane, the tunnel's far end, the project screenshots
-and Open Graph artwork, the LinkedIn update, the GitHub profile README, the prose reread, Bing
-Webmaster Tools, the Vercel DNS change, and making the repository public.
+**The substantial work still open:** the Open Graph artwork, sharper screenshots for krub.dev, the
+LinkedIn update, the GitHub profile README, the prose reread, Bing Webmaster Tools, raising the DMARC
+policy, and making the repository public.
 
 ---
 
 ## Contact form
 
 The form is built and lives in Contact; it posts to `/api/contact`, a Vercel function that now sends
-**by Resend**, with a per-IP rate limit and a Cloudflare Turnstile check (decision 57). What is left
-is the accounts behind it and the law.
+**by Resend**, with a per-IP rate limit and a Cloudflare Turnstile check (decision 57), and it carries
+the privacy notice and the consent the law asks for.
 
-- [ ] **Set Resend and Turnstile up.** The endpoint is written for them (decision 57), but it answers
-  `not-configured` until the settings exist: verify `krub.dev` in Resend and set `RESEND_API_KEY`,
-  `CONTACT_TO` and `CONTACT_FROM` in Vercel, and create the Turnstile site and secret keys
-  (`VITE_TURNSTILE_SITE_KEY` reaches the bundle, which is fine — it is the public one;
-  `TURNSTILE_SECRET_KEY` stays server-side). Then the form works on both, and without them it still
-  runs locally.
-- [ ] **A privacy notice for the form (GDPR).** A short note under the form, a `/privacy` page, and a
-  consent checkbox — the three together, since the name, email and message are personal data.
+- [x] **Set Resend and Turnstile up.** Done: `krub.dev` is verified in Resend and the endpoint sends
+  by it (decision 57), with the Turnstile widget live — `VITE_TURNSTILE_SITE_KEY` in the bundle and
+  the secret server-side. The five variables are set in Vercel's Production environment and the
+  release has gone out; a real send from krub.dev would confirm it end to end.
+- [x] **A privacy notice for the form (GDPR).** Built on 2026-09-29, the three parts together: a
+  required consent box under the fields, carrying the link to `/privacy`, which renders the policy
+  from `src/data/privacy.js` in both languages. The box is enforced in `utils/contact.js` and again
+  in `api/contact.js`, and the endpoint stamps the consent into the email. See decision 89.
 
 ---
 
@@ -83,9 +85,15 @@ is the accounts behind it and the law.
 - [x] **A new photo for /me.** Done: the current one is the 42 portrait, in colour — the grayscale
   filter was dropped with it (decision 70). `photoPath` in `src/data/socials.js` points at
   `public/assets/img/krub-pfp.jpeg` (540×540 JPEG, ~110 KB).
-- [ ] **Real screenshots for the projects.** CreandoMientras, Showroom, sideForge (backend only, so
-  its logo will do) and krub.dev, dropped into the `image` and `slides` fields the model already
-  has. **(owner)**
+- [x] **Images for the projects.** Done 2026-09-30, all four: CreandoMientras has real screenshots,
+  Showroom carries its own two covers (`desktop.jpg` / `responsive.jpg`, taken from its repository)
+  until it is deployed again, sideForge shows its logo, since it is backend-only for now, and krub.dev
+  has screenshots of itself. All 1280×800 JPEG, under `public/assets/img/<slug>/`. Better ones when
+  there is something better to shoot. **(owner)**
+- [ ] **Sharper screenshots for krub.dev.** The four are 1280×800 viewport captures at 1×, and they
+  read soft in the modal, which shows them at up to ~1000 CSS px wide — 2000 device px on a retina
+  screen. Capture again at `deviceScaleFactor: 2` and keep them at 2560×1600, or shoot a wider
+  viewport and downscale. The card is fine either way; the modal is what shows the difference.
 - [ ] **A final banner for LinkedIn and the GitHub profile README.** Same artwork as the Open Graph
   refresh below, so it comes with it.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
@@ -143,10 +151,19 @@ is the accounts behind it and the law.
   the real deployment after the merge, together with the pre-publication documentation review. The
   one thing that got worse is the TBT — the bundle grew with the new sections — so it is worth a
   second look then. **(owner)**
-- [ ] **An address on the domain, like `work@krub.dev`.** Cloudflare Email Routing forwards inbound
-  mail to an existing inbox for free, so receiving needs only DNS (the domain already sits on
-  Cloudflare). Sending *as* that address needs more: either Gmail's "Send mail as" over an app
-  password with SPF and DKIM records in Cloudflare, or a paid sender. **(owner)**
+- [x] **An address on the domain, `contact@krub.dev`.** Done: Cloudflare Email Routing receives for
+  it and forwards to the owner's Gmail, and Gmail sends *as* it through Resend's SMTP
+  (`smtp.resend.com`, user `resend`, the API key), so the mail is DKIM-signed for `krub.dev` and
+  carries no "via gmail.com". The DNS carries it all: the routing MX and DKIM/SPF, Resend's
+  `send`/`rsend` and `resend._domainkey`, and a `_dmarc` at `p=none`. Confirmed on a fresh message:
+  `SPF PASS`, `DKIM PASS` for `krub.dev` and **`DMARC PASS`** (the first tests read `FAIL` only
+  because the record was not yet live). **(owner)**
+- [ ] **Raise the DMARC policy.** The record itself is done and passing (`_dmarc.krub.dev` at
+  `v=DMARC1; p=none`, verified on a real send). `p=none` only *monitors*: a forged `@krub.dev` sender
+  gets reported, not stopped. Tightening it to `p=quarantine`, then `p=reject`, is what actually blocks
+  the forgery. To do it safely: add a `rua=` to the record first so the aggregate reports arrive
+  somewhere (today there is none, so nothing is being collected), watch a week, then raise it. All our
+  sending aligns — SPF and DKIM both pass for `krub.dev` — so the risk is low.
 
 ## Design and sections
 
@@ -190,10 +207,9 @@ is the accounts behind it and the law.
 - [x] **A simple contact form**, in addition to the mailto. Built on 2026-09-17: name, email and
   message in a panel above the rows, with validation, the four states, `aria-live`, a honeypot and
   the theme's border colour with the accent caret. It posts to `/api/contact`, a Vercel function
-  holding `WEB3FORMS_KEY` as an environment variable, so the key never reaches the bundle; the same
-  handler is mounted by `vite.config.js` in development, and `.env.local` carries the key locally.
-  See decision 57. **Still to do by hand: set `WEB3FORMS_KEY` in the Vercel project settings**, or
-  production answers 500 and the form falls back to its error state. **(owner)**
+  that sends through Resend, keeping the key as a server-side environment variable so it never
+  reaches the bundle; the same handler is mounted by `vite.config.js` in development, and
+  `.env.local` carries the keys locally. See decision 57.
 - [x] **The projects grid with four cards.** Closed on 2026-09-17 by turning the grid into a rail: a
   native scroll container with snap, three cards and the sliver of a fourth on a desktop and one and a
   sliver on a phone, with arrows that page one card and a mouse drag with a click guard. It came from
@@ -205,15 +221,13 @@ is the accounts behind it and the law.
   mascot. Wants its own context and a reset/clear. Needs a server-side endpoint: an API key
   cannot live in a static bundle. The speech bubble and its timers are already built and would
   become the chat surface.
-- [ ] **Shimmering skeleton placeholders.** Held until something genuinely arrives late, which today
-  nothing does: the four projects have `image: null` and their cards paint a `shotLabel`, the 30
-  stack icons come to about 60 KB between them, and the photo is local — a placeholder would flash
-  for about 40 ms and read as a fault. The 3D model now has a real loading percentage (not a fake
-  bar). Real project images once they exist would earn one. Whenever it goes in, delay it (~300 ms)
-  so it only shows when the load is actually slow. Technique: a `linear-gradient` with an oversized
-  `background-size` and a `@keyframes` sweeping it across (`background-size: 200% 100%` with
-  `background-position` running to `-200% 0` at 1.2s linear infinite). Reference: @aniakubow on
-  Instagram. See decision 54.
+- [x] **Shimmering skeleton placeholders.** Closed on 2026-09-30 as not needed: nothing arrives late
+  enough to earn one. The four projects paint a `shotLabel` while they have no image, the ~30 stack
+  icons are about 60 KB between them, the photo is local, and the 3D model has a real percentage from
+  `THREE.LoadingManager`. A placeholder would flash for about 40 ms and read as a fault. Reopen when
+  real project screenshots exist, and delay it (~300 ms) so it only shows on a genuinely slow load.
+  Technique, for the day: a `linear-gradient` with `background-size: 200% 100%` and a `@keyframes`
+  sweeping `background-position` to `-200% 0` at 1.2s linear infinite.
 - [x] **A simulated entry loader — no.** Closed on 2026-09-17: a 0-100 over content that is already
   in the first frame is a fake delay, it costs exactly the numbers Lighthouse is built around (the
   largest paint and the time to interactive), and on a return visit it is friction for someone whose
@@ -231,32 +245,36 @@ is the accounts behind it and the law.
   In the logo-lab they do not coincide because the stages are not aligned with the page's grid,
   but that is expected — the lab puts stages side by side for comparison.
 - [x] **The mark as a glTF.** Done: the mesh loads from `public/assets/model/krub-logo.glb` (454KB, 6k tris) instead of being extruded from SVG at runtime. Two materials: front takes the accent colour, back a dark neutral. A real loading percentage from `THREE.LoadingManager` shows while the GLB downloads. The SVG loader and buffer utilities are gone from the bundle.
-- [ ] **A backlight behind the mark, without a plane.** The plane that cleared the grid behind the
-  mark was removed (decision 80): near enough to project wider than the mark, the mark's corners
-  crossed it when it turned; deeper, the tunnel's aperture clipped it smaller than the mark, so a
-  flat quad cannot both cover the mark and stay behind it. The job — separating the mark from the
-  grid behind it — wants something with depth: a back-side sphere around the mark, or a darkening
-  in the room's own material.
-- [ ] **The tunnel's far end reads as a black void.** Fading to `--ink` can only darken the end by the
-  8/255 that separates it from `--surface` in the dark theme, so `near` and `far` differ by about
-  1.5/255 and the end lands as a hole rather than as depth (measured). A `haze` mode that mixed `--fg`
-  into `--ink`, so the end rose above the background, did lift it (12 to 33) but read as a square panel
-  of mist at the end of the tunnel, so it was dropped. Still open: a shape that does not read as a lit
-  panel — spacing the fog on the projection, or lighting the end some other way.
-- [ ] **The project modal's media is cluttered.** The image is small and the carousel carries big
-  arrows and an `IMAGEN 1 / 4 · NAME` label over it. Replace them with dots, as the other pagers do,
-  and give the media a larger, taller slot.
-- [ ] **Fixed blur bands.** A band under the navbar and another above the footer, from the hero down
-  (not over the hero), that blur the content as it passes behind them. On a phone the navbar is a
-  centred pill, so the band reads at its sides. Watch `backdrop-filter`: it makes the element a
-  backdrop root, which is what once stopped the navbar's settings panel from matching the bar
-  (decision 48).
+- [x] **A backlight behind the mark, without a plane.** Closed on 2026-09-30: not doing it. The plane was
+  removed (decision 80) and a flat quad cannot both cover the mark and stay behind it; anything with
+  depth for it (a back-side sphere, darkening the room's material) is more scene than the effect is
+  worth.
+- [x] **The tunnel's far end reads as a black void.** Closed on 2026-09-30: not doing it. Fading to
+  `--ink` can only darken the end by the 8/255 that separates it from `--surface`, so it lands as a hole;
+  the `haze` mode that lifted it read as a square panel of mist and was dropped. Accepted as it is.
+- [x] **The project modal's media is cluttered.** Done on 2026-09-30: the slides are a horizontal track
+  moved by `transform`, paged by the rail's own dots and draggable, at `16/10 × 56svh` to match the
+  card's frame. The arrows and the `IMAGEN 1 / 4 · NAME` label are gone. See decision 94.
+- [x] **Fixed blur bands.** Closed on 2026-09-30 as **dropped**: built (a strip of `backdrop-filter`
+  under the bar and another above the footer, masked at the inner edge) and it read as a smudge lying
+  over the page rather than as the page going under something. Removed. The full account is in
+  decisions-archive.md 100. The navbar fix it turned up stays (decision 98). Reopen only with a
+  different idea for those edges.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
-- [ ] **Finish the design-system page.** The `/preview` page in the site's own style that documents
-  the tokens, components and patterns is out of date and little iterated — the one Claude Design
-  seeded. Bring it up to what the site is now. It is dev-only today (`import.meta.env.DEV`); whether
-  it should also ship on `main` is a separate call, and for now it stays local.
+- [x] **The projects rail ends on a card that leads to GitHub.** Done on 2026-09-30: a dashed slot at
+  the end of the rail with the GitHub mark, a question, a line and a mono link in the accent. The mark
+  and the address come from the socials, so it cannot drift from Contact. See decision 101.
+- [x] **Finish the design-system page.** Rewritten on 2026-09-30 as a proper sheet rather than a patched
+  one: a sticky rail over thirteen sections, then foundations (21 colour tokens grouped by use, the type
+  scale, shape with the one shadow the project actually has, motion with the live keyframes), the
+  components (buttons, blocks, cards, small pieces) and the pieces that belong to no section — the
+  cursor, the hero's stage in a five-cell box, and the navbar, the footer and Limonacho, each in its own
+  section with the real component framed inside it. **English throughout** (it belongs to the repository,
+  not to the site, so only the components' own labels follow the language toggle) and every specimen fed
+  **placeholders** rather than `src/data`. The route is `bare`: it documents the chrome instead of wearing
+  it, and wears one grid that scrolls the whole page instead of the hero/global pair. Still dev-only
+  (`import.meta.env.DEV`); whether it should ship is a separate call.
 
 ## Mobile and responsive
 
@@ -285,9 +303,9 @@ is the accounts behind it and the law.
 - [x] **The certifications tab on a phone.** Done: the pills were the problem, not the row. As
   folder labels on a hairline track the three tabs fit a phone at 12px with no tracking (decision
   73), and the long certification names wrap in the single-column timeline below 900px.
-- [ ] **The badge on /me on a phone.** It sits under the photo, left-aligned but with a gap that
-  reads as stray. Put it bottom-left of the photo — beside it, not stamped inside — and let the photo
-  take more width on a phone.
+- [x] **The badge on /me on a phone.** Closed on 2026-09-30 the other way round from what this asked:
+  under the photo it read as a third item between the photo and the CV, so it stays where a wide screen
+  puts it — above the photo's right corner — and the photo takes the full width.
 - [ ] **A movable navbar on a phone.** Let the compact bar be dragged: it snaps up or down and can
   also be moved sideways within the gutter, and the position is remembered in `localStorage` — so a
   visitor the bar gets in the way of can move it. Mobile only for now. Watch the footer and the
@@ -298,7 +316,7 @@ kept as the record rather than deleted.
 
 ## Testing
 
-- [x] **The e2e suite goes flaky while the hero is on screen.** Partially fixed: the scene is now gated under `navigator.webdriver`, so Playwright workers don't hold WebGL contexts during tests. The suite passes with `--workers=1`. The remaining fix (reducing desktop workers or making flows wait on conditions rather than the clock) is deferred — the gate solves the practical problem.
+- [x] **The e2e suite went flaky while the hero was on screen.** Explained: Playwright runs several browsers at once, and each Chromium worker holding the hero's WebGL context made the frames stall, so tests that depend on animation timing failed at random. Fixed by skipping the 3D scene under `navigator.webdriver` (Playwright sets that flag), so no worker opens a WebGL context. The suite is run with `--workers=1` by habit; parallel workers are still occasionally flaky, and that part is deferred — it costs time, not correctness.
 
 ## Ideas (future)
 

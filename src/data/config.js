@@ -36,9 +36,9 @@ export const config = {
   timezone: 'Europe/Madrid',
 
   /*
-    Where the contact form posts to. Our own endpoint, not Web3Forms directly:
-    the key lives on the server (WEB3FORMS_KEY) and never in the bundle. See
-    api/contact.js.
+    Where the contact form posts to. Our own endpoint, not the mail provider
+    directly: the key lives on the server (RESEND_API_KEY) and never in the
+    bundle. See api/contact.js.
   */
   contactEndpoint: '/api/contact',
 }

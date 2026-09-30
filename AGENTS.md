@@ -31,18 +31,21 @@ The CV is not built from this repository. Its plain-text sources and the generat
 artefacts here are the four compiled PDFs in `public/uploads/` — light and dark, one per language —
 copied in by hand when they change.
 
-`api/contact.js` is the same handler Vercel runs; `vite.config.js` mounts it in development. It reads
-`WEB3FORMS_KEY` from `.env.local` — deliberately **not** `VITE_`-prefixed, so the key never reaches
-the bundle. Production sets the variable in Vercel.
+`api/contact.js` is the same handler Vercel runs; `vite.config.js` mounts it in development. It sends
+through Resend and reads `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM` and `TURNSTILE_SECRET_KEY`
+from `.env.local` — deliberately **not** `VITE_`-prefixed, so the key never reaches the bundle. Only
+`VITE_TURNSTILE_SITE_KEY` is public. Production sets them all in Vercel.
 
 ## Tests
 
 - **Vitest** (`tests/unit/`) runs in jsdom and covers pure functions and the composables that touch
   `localStorage`.
 - **Playwright** (`tests/e2e/`) runs against the production build: its webServer builds and previews
-  it. `E2E_BASE_URL` points the same suite at a deployment. Projects: desktop and a Pixel 7.
+  it. `E2E_BASE_URL` points the same suite at a deployment. Projects: desktop and a Pixel 7 (Chromium),
+  and an iPhone (WebKit). The CDP finger drag is Chromium-only and skips on WebKit.
 - **Verify in WebKit, not only Chromium.** Several real bugs here only show there — pointer capture
-  retargeting a click, `overflow-clip-margin` being unsupported.
+  retargeting a click, `overflow-clip-margin` being unsupported, Safari leaving links out of the tab
+  order (which broke the modal's focus trap).
 - `html { scroll-behavior: smooth }` is global, so a test that scrolls before asserting must scroll
   with `behavior: 'instant'`.
 - Decorative animation opts into `prefers-reduced-motion` with `data-motion="decorative"` on the

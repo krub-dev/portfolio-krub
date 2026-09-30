@@ -6,8 +6,11 @@
   The tab state lives here rather than in TabSwitch: the switch only reports
   what was clicked, this section decides what that means. That is the "a
   component that only paints does not own state" rule from COMPONENTS.md.
+
+  The CV button opens the dialog the page owns, so it emits rather than holding
+  the state itself; it also asks for the CV to be warmed before it is opened.
 */
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../base/BaseButton.vue'
@@ -16,13 +19,13 @@ import SectionHeading from '../base/SectionHeading.vue'
 import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
 import { useLang } from '../../composables/useLang'
-import { useTheme } from '../../composables/useTheme'
 import { useLemonVoice } from '../../composables/useLemonVoice'
-import { certifications, config, copy, cvPath, education, experience, photoPath } from '../../data'
+import { certifications, config, copy, education, experience, photoPath } from '../../data'
 import { formatPeriod } from '../../utils/format'
 
+const emit = defineEmits(['open-cv', 'warm-cv'])
+
 const { lang } = useLang()
-const { theme } = useTheme()
 const { t } = useI18n()
 // Limonacho greets you when the pointer lands on the photo.
 const { say, hush } = useLemonVoice()
@@ -31,6 +34,7 @@ const tab = ref('exp')
 // The id that ties the tab row to the panel it switches, for the ARIA tablist.
 const panelId = 'me-tabs'
 const about = computed(() => copy.about[lang.value])
+const lemon = computed(() => copy.lemon[lang.value])
 const options = computed(() => [
   { value: 'exp', label: t('tab.exp') },
   { value: 'edu', label: t('tab.edu') },
@@ -48,7 +52,6 @@ const period = (entry) => formatPeriod(entry, t('time.now'))
 
 // Which way the content slides when the tab changes, for the transition.
 const direction = ref('left')
-
 watch(tab, (next, previous) => {
   const values = options.value.map((option) => option.value)
   direction.value = values.indexOf(next) > values.indexOf(previous) ? 'left' : 'right'
@@ -97,6 +100,40 @@ function onTouchEnd(event) {
   const next = values.indexOf(tab.value) + (dx < 0 ? 1 : -1)
   if (next >= 0 && next < values.length) tab.value = values[next]
 }
+
+/*
+  Two signs of intent warm the CV dialog (see useCv): the pointer over its button
+  or the button focused, and — for a phone, where there is no hover before the tap
+  — the photo column reaching the viewport. The second waits for idle time, so it
+  never competes with what is being painted.
+*/
+const photoWrap = ref(null)
+let observer = null
+
+function warm() {
+  emit('warm-cv')
+}
+
+function onCvEnter() {
+  say(lemon.value.cv)
+  warm()
+}
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      // Safari has no requestIdleCallback; a plain delay is close enough.
+      if (window.requestIdleCallback) window.requestIdleCallback(warm)
+      else setTimeout(warm, 400)
+    },
+    { rootMargin: '200px' },
+  )
+  observer.observe(photoWrap.value)
+})
+
+onUnmounted(() => observer?.disconnect())
 </script>
 
 <template>
@@ -144,25 +181,27 @@ function onTouchEnd(event) {
             </div>
           </Transition>
         </div>
-
-        <BaseButton
-          v-if="config.showCv"
-          variant="outline"
-          size="md"
-          magnetic
-          external
-          :href="cvPath[theme][lang]"
-          class="cv"
-        >
-          {{ t('actions.cv') }}
-        </BaseButton>
       </div>
 
-      <div class="photo-wrap" data-pfp-wrap>
+      <div ref="photoWrap" class="photo-wrap" data-pfp-wrap>
         <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
         <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
           <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
         </div>
+
+        <BaseButton
+          v-if="config.showCv"
+          variant="solid"
+          size="md"
+          magnetic
+          class="cv"
+          @mouseenter="onCvEnter"
+          @focus="warm"
+          @mouseleave="hush()"
+          @click="emit('open-cv')"
+        >
+          {{ t('actions.cv') }}
+        </BaseButton>
       </div>
     </div>
   </section>
@@ -281,14 +320,27 @@ function onTouchEnd(event) {
   }
 }
 
+/* The CV closes the photo's column now, at the photo's own width, and travels
+   with it. */
 .cv {
-  align-self: flex-start;
+  align-self: stretch;
+  margin-top: 6px;
 }
 
 .photo-wrap {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /*
+    The photo travels with the scroll instead of sitting still while the timeline
+    runs past it. It sticks under the bar and rides down until the column ends, so
+    its foot stops just above the section's own bottom — that is the section's
+    padding, and it is what keeps the last row of the timeline from ending level
+    with the photo.
+  */
+  position: sticky;
+  top: calc(var(--navbar-h, 88px) + 20px);
+  align-self: start;
 }
 
 /* The photo, and the badge that sits on it. */
@@ -317,10 +369,15 @@ function onTouchEnd(event) {
   }
 
   /*
-    The photo takes the full width and the badge goes under its left edge. Beside
-    it, at this size, the label was left hanging in a gap and read as stray.
+    The photo takes the full width. The badge stays where it is on a wide screen
+    — above the photo's right corner — instead of dropping under it: down there it
+    landed between the photo and the CV and read as a third item in the column
+    rather than as part of the picture.
   */
   .photo-wrap {
+    /* No travel on a phone: the photo lands at the end of the section here, so
+       there is nothing to ride past. */
+    position: static;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
@@ -328,12 +385,6 @@ function onTouchEnd(event) {
 
   .photo {
     max-width: none;
-  }
-
-  .availability {
-    order: 2;
-    align-self: flex-start;
-    transform: none;
   }
 }
 </style>
