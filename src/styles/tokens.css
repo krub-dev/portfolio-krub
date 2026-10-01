@@ -314,6 +314,46 @@ a:hover {
   color: var(--acc-text-2);
 }
 
+/* ---------------------------------------------------------------------------
+   No-JavaScript fallback
+
+   The <noscript> block in index.html, shown only when the browser runs no
+   JavaScript. It piggybacks on the body's own colours and the link rule above,
+   so all it needs is a reading measure and some breathing room: the app's grid
+   and sections are not there to provide them. The measure matches the About
+   section's paragraphs, and the gutter is the project's own.
+   --------------------------------------------------------------------------- */
+.nojs {
+  max-width: 58ch;
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 110px) var(--gutter-r) clamp(56px, 8vw, 110px) var(--gutter-l);
+}
+
+.nojs h1 {
+  margin: 0 0 16px;
+  font-size: clamp(24px, 4vw, 40px);
+  line-height: 1.15;
+}
+
+.nojs h2 {
+  margin: 32px 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.nojs p,
+.nojs ul {
+  margin: 0 0 14px;
+  color: var(--fg-2);
+  line-height: 1.65;
+}
+
+.nojs ul {
+  padding-left: 18px;
+}
+
 /* Anchored sections need the navbar's height of breathing room or the heading
    lands underneath it. TheNavbar measures itself and publishes --navbar-h; the
    96px here is the value it settles on at its largest, and covers the frames

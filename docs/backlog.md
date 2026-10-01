@@ -130,6 +130,10 @@ the privacy notice and the consent the law asks for.
 - [ ] **Reread the prose.** Every sentence lives in `src/data/`, both languages side by side, one
   file per kind of content. It was always going to be iterated after launch rather than
   written once. **(owner)**
+- [ ] **Trim the copy and the CV.** The owner's read: the site carries a lot of content and the CV
+  reads long. A pass to cut, not to reword — the prose across `src/data/` and the CV sources in the
+  `cv` tool, keeping only what earns its place. Sits next to the prose pass, but the goal here is
+  subtraction. **(owner)**
 - [ ] **Bing Webmaster Tools.** The same five minutes as Google Search Console, which is done and
   has the sitemap submitted. Bing also feeds DuckDuckGo. **(owner)**
 - [ ] **Make the repository public.** When the pending work is done. The v1 portfolio repository is

@@ -784,3 +784,28 @@ so the address a visitor copies is the one the site is about.
 - **One address, in one place.** `src/data/socials.js` holds it; the contact rows, the form's fallback
   and the JSON-LD head read from it and are kept in step by hand (the static `<head>` cannot import a
   module).
+
+### 103. A no-JavaScript fallback, not a prerendered SPA
+**Status:** active
+
+The site is a Vue SPA, so `vite build` ships an `index.html` with an empty `#app` and the browser builds
+the page. Google renders JavaScript, so it sees the content; crawlers that do not (Bing and DuckDuckGo
+partly, smaller bots, anything that reads the raw HTML) get nothing. The question was whether to close
+that with **prerendering** (`vite-ssg`, which renders the app to HTML at build time) or with a small
+**`<noscript>`** block.
+
+- **Prerendering was turned down.** It renders the app in Node, and the hero is a WebGL scene that cannot
+  exist there, so the scene would have to be client-only behind another guard; every composable that
+  touches `window`, `document` or `localStorage` (`usePointer`, `useScroll`, `useMagnetic`, `useCv`,
+  `useLemonVoice`, the theme and language) becomes a hydration hazard, and a server/client mismatch is an
+  SEO problem, not only a console warning. That is a day of work and real risk for a one-page portfolio.
+- **The `<noscript>` is the shortcut.** The essentials — who, the stack, the four projects with links,
+  the contact rows and `/privacy` — live as plain HTML in `index.html`, next to the `meta` and the
+  JSON-LD that are already hand-kept there. With JavaScript on the browser never renders it, so it costs
+  the app nothing and affects no test; with it off, a plain, on-theme page remains.
+- **English only, like the Open Graph tags,** and for the same reason: it is baked into the static HTML at
+  build time and cannot follow the language toggle.
+- **It is kept in step with `src/data/` by hand.** That is the cost of the shortcut, and the reason the
+  block is short. The JSON-LD `sameAs` already carries the same debt.
+- **What it does not buy:** a Spanish URL that can be indexed on its own. Prerendering could generate one
+  (`/es`); the `<noscript>` cannot. Left for later, if it ever earns it.
