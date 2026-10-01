@@ -12,28 +12,36 @@
       labels the UI needs  ->  src/locales/
 
   The headline is split into parts so no HTML has to live in a data file. The
-  template renders line1 / line2 / then line3pre + accent + line3post, with the
-  accent word wrapped in a span coloured var(--acc-text).
+  template renders line1 / line2, with line2 wrapped in a span coloured
+  var(--acc-text), and then the skills line under it.
 */
+/*
+  The three places, in one spot. The marquee loops them, and the banners read the
+  same strings — by name, not by their index in the loop, which shifted the day
+  the disciplines joined it.
+*/
+const locations = {
+  en: 'Murcia · Barcelona · remote · Spain',
+  es: 'Murcia · Barcelona · remoto · España',
+}
+
 export const copy = {
+  locations,
+
   hero: {
     en: {
       badge: 'Available',
-      line1: 'I build things',
-      line2: 'that hold up',
-      line3pre: 'on the ',
-      accent: 'backend',
-      line3post: '.',
-      body: 'Full Stack Developer in Murcia, open to Barcelona and remote, leaning into backend: Java 17 with Spring Boot, Node and Express, and relational databases. Vue on the front when needed. I used to do 3D, and it still shows in how I look at things.',
+      line1: 'FULL STACK',
+      line2: 'DEVELOPER',
+      skills: 'Frontend · Backend · 3D · Applied AI',
+      body: 'Based in Murcia after a few years in Barcelona. Open to remote, on-site or hybrid roles in either city. I come from 3D and it shows: detail, communication, deadlines.',
     },
     es: {
       badge: 'Disponible',
-      line1: 'Desarrollo cosas',
-      line2: 'que aguantan',
-      line3pre: 'el ',
-      accent: 'backend',
-      line3post: '.',
-      body: 'Desarrollador Full Stack en Murcia, abierto a Barcelona y remoto, girando hacia backend: Java 17 con Spring Boot, Node y Express, y bases de datos relacionales. Frontend en Vue cuando toca. Antes hacía 3D, y todavía se me nota en el ojo.',
+      line1: 'DESARROLLADOR',
+      line2: 'FULL STACK',
+      skills: 'Frontend · Backend · 3D · IA Aplicada',
+      body: 'Con base en Murcia tras varios años en Barcelona. Disponible en remoto, presencial o híbrido en cualquiera de las dos ciudades. Vengo del 3D y se nota: detalle, comunicación y plazos.',
     },
   },
 
@@ -41,23 +49,27 @@ export const copy = {
     en: {
       // What Limonacho says when the pointer lands on the photo.
       greet: 'Kiko!',
-      p1: 'I came from 3D and ended up programming: same thing, fewer twelve-hour renders.',
-      p2: 'Six years modelling and texturing for games, apps and e-commerce taught me to ship on time and to sweat the details. I bring the same to the code: careful, tested, documented, and delivered when I said it would be.',
-      p3: 'Looking for a team where I can grow into backend while still poking at odd things in C on weekends.',
+      p1: 'I started in 3D and the detail stayed with me.',
+      p2: 'I build web applications end to end: backend in Java (Spring Boot) and Node (Express) over relational databases, and frontend in Vue 3. I work with clean architecture, automated testing (JUnit, Mockito, Jest, Supertest, Playwright) and production deploys.',
+      p3: 'My time at 42 Barcelona gave me a grounding in C, algorithms, concurrency and low-level memory management, plus a strong autonomy for tackling complex problems and the habit of code review among peers. I bring AI tools into my daily flow without delegating the technical judgement: I direct the architecture, the specification (SDD) and the tests (TDD), always answering for the code I ship.',
+      p4: 'I come from more than six years as a 3D professional, modelling and texturing for games, apps and e-commerce. It shapes how I work: attention to detail, iterating on feedback, direct contact with the client and a commitment to deadlines.',
+      open: 'Open to Full Stack, Frontend or Backend roles.',
     },
     es: {
       greet: '¡Kiko!',
-      p1: 'Vengo del 3D y acabé programando, que es lo mismo pero con menos renders de doce horas.',
-      p2: 'Seis años modelando y texturizando para videojuegos, apps y e-commerce me enseñaron a entregar a tiempo y a mirar el detalle. Traigo eso mismo al código: cuidado, probado, documentado y entregado cuando dije que lo estaría.',
-      p3: 'Busco equipo donde crecer hacia backend sin dejar de tocar cosas raras en C los fines de semana.',
+      p1: 'Empecé en el 3D y el detalle se quedó conmigo.',
+      p2: 'Construyo aplicaciones web de extremo a extremo: backend en Java (Spring Boot) y Node (Express) sobre bases de datos relacionales, y frontend en Vue 3. Trabajo con arquitectura limpia, testing automatizado (JUnit, Mockito, Jest, Supertest, Playwright) y despliegues en producción.',
+      p3: 'Mi paso por 42 Barcelona me dio base en C, algoritmia, concurrencia y gestión de memoria a bajo nivel, sumado a una gran autonomía para resolver retos complejos y el hábito del code review entre pares. Integro herramientas de IA en mi flujo diario sin delegar el criterio técnico: dirijo la arquitectura, la especificación (SDD) y las pruebas (TDD), respondiendo siempre por el código que entrego.',
+      p4: 'Vengo de más de seis años como profesional 3D, modelando y texturizando para videojuegos, apps y e-commerce. Eso marca cómo trabajo: atención al detalle, iteración sobre feedback, trato directo con cliente y compromiso con los plazos.',
+      open: 'Abierto a roles Full Stack, Frontend o Backend.',
     },
   },
 
   // The marquee loops these two phrases forever, joined by the separator.
   // Add or remove entries freely; the band duplicates whatever it is given.
   marquee: {
-    en: ['Fullstack developer → backend', 'Murcia · Barcelona · remote · Spain'],
-    es: ['Desarrollador fullstack → backend', 'Murcia · Barcelona · remoto · España'],
+    en: ['Full Stack Developer', 'Frontend · Backend · 3D · Applied AI', locations.en],
+    es: ['Desarrollador Full Stack', 'Frontend · Backend · 3D · IA Aplicada', locations.es],
   },
 
   // The 404 page. The title and the button label are interface strings and live

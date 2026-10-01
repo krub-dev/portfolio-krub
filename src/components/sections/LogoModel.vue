@@ -33,6 +33,9 @@ const props = defineProps({
   haloOn: { type: Boolean, default: false },
   // The environment map from SceneRig, so the metal has something to reflect.
   environment: { type: Object, default: null },
+  // A multiplier on the fit-to-stage scale, so the mark can be sized by hand
+  // without touching the room (which scales with the canvas, not with this).
+  markScale: { type: Number, default: 1 },
 })
 
 // How far the hover turns it, in radians. Wider than it was: the room's lean is
@@ -106,11 +109,23 @@ group.position.sub(center)
 
 // Scale to fit the stage. The logo should occupy ~70% of the 504px stage ≈ 353px.
 // At FOV 40, Z 205, one Three unit ≈ 3.38px at Z=0. So we need ~104 units wide.
+//
+// The fit is the base, and `markScale` rides on top of it — a dial the Open Graph
+// card uses to put the mark's edges on the grid. It scales the mark inside the
+// scene, not the canvas: a CSS transform on the canvas would shrink the room with
+// it, and the room has to reach the slot's edge.
 const size = box.getSize(new Vector3())
 const targetWidth = 104
 const currentWidth = size.x || 1
-const s = targetWidth / currentWidth
-group.scale.set(s, s, s)
+const baseScale = targetWidth / currentWidth
+
+function applyMarkScale() {
+  const s = baseScale * props.markScale
+  group.scale.set(s, s, s)
+}
+
+applyMarkScale()
+watch(() => props.markScale, applyMarkScale)
 // The GLB was exported with the logo lying flat (rotation X=90° applied in Blender).
 // Rotate -90° on X to stand it up facing the camera (+Z).
 group.rotation.x = -Math.PI / 2

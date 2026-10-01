@@ -35,11 +35,11 @@ export const education = [
     to: '2025',
     current: false,
     en: {
-      title: 'Ironhack · Full Stack web development (IFCD0210)',
+      title: 'Ironhack · Desarrollo de Aplicaciones con Tecnologías Web (IFCD0210)',
       body: '590 intensive hours: Java with Spring Boot, Node.js, MySQL and PostgreSQL, Docker, testing with JUnit and Mockito, Vue.js, cloud deployment and documentation with Postman and Swagger. Level 3 professional certificate, including a company internship.',
     },
     es: {
-      title: 'Ironhack · Full Stack (IFCD0210)',
+      title: 'Ironhack · Desarrollo de Aplicaciones con Tecnologías Web (IFCD0210)',
       body: '590 h intensivas: Java con Spring Boot, Node.js, MySQL y PostgreSQL, Docker, testing con JUnit y Mockito, Vue.js, despliegue en la nube y documentación con Postman y Swagger. Certificado de profesionalidad nivel 3, con prácticas en empresa.',
     },
   },

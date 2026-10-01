@@ -41,6 +41,17 @@ if (import.meta.env.DEV) {
     name: 'logo-lab',
     component: () => import('../views/LogoLabView.vue'),
   })
+  routes.push({
+    // The Open Graph banner at its real size, to be designed in the browser and
+    // screenshotted from here by the cv tool. Bare for the same reason as the
+    // sheet: what is on screen is the card, not the site around it.
+    path: '/og',
+    name: 'og',
+    component: () => import('../views/OgView.vue'),
+    // No page grid: the banners carry their own, and a second one behind them
+    // only muddles which lines belong to what.
+    meta: { bare: true, noGrid: true },
+  })
 }
 
 // Last, so it only catches what nothing above matched. Lazy-loaded: the 404 is

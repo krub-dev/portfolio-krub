@@ -41,6 +41,34 @@ const props = defineProps({
   camZ: { type: Number, required: true },
   // How the tunnel fades out with depth. See FOG_MODES.
   fog: { type: String, default: 'far' },
+  /*
+    Whether the room is drawn at all. Off leaves the mark alone in the scene,
+    with nothing behind it — what the Open Graph card wants, and what the stage
+    never does, so the default is the stage's.
+  */
+  room: { type: Boolean, default: true },
+  /*
+    How dark the room goes. It is painted into the geometry's vertex colours and
+    the grid texture multiplies it, so the walls and their lines sink together —
+    depth without a light. `opacity` is the darkening at the far wall. 0 is the
+    site's flat `--ink`.
+  */
+  opacity: { type: Number, default: 0 },
+  /*
+    How many grid cells the opening is divided into. Seven is the site's — the
+    stage's own seven — so the room's grid lands on the page's. An odd count puts
+    a line on the opening's edges (its centre mid-cell); an even count puts one on
+    the centre too, which is why the texture shifts by half a cell only when the
+    count is odd. The Open Graph card runs it at four, to match a 4x4 slot.
+  */
+  cells: { type: Number, default: 7 },
+  /*
+    How that darkening is spread. 0 is one flat tone across the whole room, so it
+    reaches the opening as dark as the back; 1 leaves the opening at `--ink` and
+    puts all of it at the back. `opacity` is the far wall either way; this is how
+    much of it the opening shares.
+  */
+  diffuse: { type: Number, default: 0.65 },
 })
 
 // The box's opening is cut to land exactly on the stage: at its distance the
@@ -53,10 +81,8 @@ const props = defineProps({
 const FOV = 40
 const BASE_CAM_Z = 205
 const OPENING_Z = 25
-const CELLS = 7
 const ROOM_HALF = (BASE_CAM_Z - OPENING_Z) * Math.tan((FOV / 2) * (Math.PI / 180))
-const CELL = (ROOM_HALF * 2) / CELLS
-const SPAN = CELL * CELLS
+const SPAN = ROOM_HALF * 2
 // Reduced from 700 to 400 so the transverse lines are not as compressed by the
 // perspective transform. The tunnel still reads as deep, but the grid cells look
 // more square on screen instead of elongated.
@@ -116,10 +142,15 @@ function tokens() {
   const css = getComputedStyle(document.documentElement)
   const read = (name, fallback) => css.getPropertyValue(name).trim() || fallback
   return {
-    surface: read('--surface', '#141416'),
     ink: read('--ink', '#0c0c0d'),
     fogEnd: read('--fog-end', '#0c0c0d'),
-    grid: read('--line', 'rgba(255,255,255,.11)'),
+    /*
+      The page's own grid colour, not `--line`. The room's lines are meant to be
+      the page's lines carried into depth: with the ring lit, the difference is
+      invisible, but the moment the room is shown without it — which is what the
+      Open Graph card does — two grids in two colours read as a mistake.
+    */
+    grid: read('--grid', 'rgba(255,255,255,.045)'),
   }
 }
 
@@ -150,6 +181,7 @@ function buildRoomGeometry() {
 
   const positions = []
   const uvs = []
+  const colors = []
   const indices = []
 
   const addQuad = (corners, project) => {
@@ -157,6 +189,12 @@ function buildRoomGeometry() {
     for (const corner of corners) {
       positions.push(corner[0], corner[1], corner[2])
       uvs.push(project(corner)[0], project(corner)[1])
+      // The darkening, per vertex: `diffuse` of the way to the far wall's tone at
+      // the opening, all of it at the back. Pushed always, read only when the
+      // material asks for vertex colours.
+      const t = (zn - corner[2]) / (zn - zf)
+      const c = 1 - props.opacity * (1 - props.diffuse * (1 - t))
+      colors.push(c, c, c)
     }
     indices.push(base, base + 1, base + 2, base, base + 2, base + 3)
   }
@@ -188,6 +226,7 @@ function buildRoomGeometry() {
   const geo = new BufferGeometry()
   geo.setAttribute('position', new Float32BufferAttribute(positions, 3))
   geo.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
+  geo.setAttribute('color', new Float32BufferAttribute(colors, 3))
   geo.setIndex(indices)
   geo.computeBoundingSphere()
   roomGeo.value?.dispose()
@@ -195,11 +234,15 @@ function buildRoomGeometry() {
 }
 
 /*
-  The room's grid, painted from the theme's tokens. The face texture is `--line`,
-  so the grid reads as the walls' own texture rather than a faint wash.
+  The room's grid, painted from the theme's tokens. Both halves take the page's
+  own colours — the walls the page background, the lines the page grid — so the
+  room's grid *is* the page's grid carried into depth: same colour, same cells at
+  the opening. With the ring lit the wall tone was hidden behind the light, but
+  the moment the room is shown without it, which is what the Open Graph card does,
+  a lighter box with brighter lines reads as a second, mismatched grid.
 */
 function buildRoom() {
-  const { surface, grid } = tokens()
+  const { ink, grid } = tokens()
   /*
     A whole number of cells across the tile, so it is exactly one repeat and
     wraps without a seam. At 512 the tile was not a multiple of seven, and
@@ -207,24 +250,25 @@ function buildRoom() {
     other gap — a faint line running the length of each wall.
   */
   const cellPx = 72
-  const size = cellPx * CELLS
+  const size = cellPx * props.cells
   const canvas = makeCanvas(size)
   const ctx = canvas.getContext('2d')
-  ctx.fillStyle = surface
+  ctx.fillStyle = ink
   ctx.fillRect(0, 0, size, size)
 
   ctx.strokeStyle = grid
   ctx.lineWidth = 1
   ctx.beginPath()
   /*
-    The lines sit on the halves of a cell, not on `i * step`: the stage's own
-    grid puts a line on every edge and none through its middle, because seven
-    whole cells leave the centre mid-cell. Drawing the texture half a cell over
-    is what makes the two grids meet instead of running a cell out of phase. The
-    half-pixel offset lands the one-pixel stroke on a whole texel.
+    With an odd count the lines sit on the halves of a cell, not on `i * step`:
+    the opening then has a line on every edge and none through its middle, which
+    is what makes the two grids meet. With an even count the opening's centre is
+    itself a line, so the lines stay on `i * step`. The half-pixel offset lands
+    the one-pixel stroke on a whole texel.
   */
-  for (let i = 0; i < CELLS; i++) {
-    const p = (i + 0.5) * cellPx + 0.5
+  const shift = props.cells % 2 === 1 ? 0.5 : 0
+  for (let i = 0; i < props.cells; i++) {
+    const p = (i + shift) * cellPx + 0.5
     ctx.moveTo(p, 0)
     ctx.lineTo(p, size)
     ctx.moveTo(0, p)
@@ -276,6 +320,10 @@ function applyFogScale() {
 // recoloured. The zoom only re-scales it.
 watch(() => props.fog, buildFog)
 watch(k, applyFogScale)
+// The darkening lives in the geometry's vertex colours, so the dials rebuild it.
+watch([() => props.opacity, () => props.diffuse], buildRoomGeometry)
+// The cell count lives in the room's texture.
+watch(() => props.cells, buildRoom)
 
 function repaint() {
   buildRoom()
@@ -332,11 +380,22 @@ onBeforeRender(({ delta }) => {
   <!-- The room: a deep box open toward the camera. It scales and moves with the
        zoom so its opening stays on the stage. -->
   <TresMesh
-    v-if="roomGeo"
+    v-if="props.room && roomGeo"
     :geometry="roomGeo"
     :position="[0, 0, roomZ]"
     :scale="[k, k, k]"
   >
-    <TresMeshBasicMaterial :map="room" :side="DoubleSide" :tone-mapped="false" />
+    <!--
+      Unlit: the walls are exactly `--ink`, so the grid is the page's carried into
+      depth. With `opacity`, the vertex colours darken the wall toward the back,
+      and the grid lines ride down with it.
+    -->
+    <TresMeshBasicMaterial
+      :map="room"
+      :side="DoubleSide"
+      :vertex-colors="props.opacity > 0"
+      :tone-mapped="false"
+    />
   </TresMesh>
+
 </template>

@@ -47,6 +47,20 @@ const props = defineProps({
   haloOn: { type: Boolean, default: false },
   // How the tunnel fades out with depth.
   fog: { type: String, default: 'far' },
+  /*
+    Whether the room is drawn at all. Off leaves the mark alone in the scene,
+    with nothing behind it: what the Open Graph card wants, and what the stage
+    never does, so the default is the stage's.
+  */
+  room: { type: Boolean, default: true },
+  // How dark the room goes, and how much of that the opening shares. See SceneRig.
+  opacity: { type: Number, default: 0 },
+  diffuse: { type: Number, default: 0.65 },
+  // How many grid cells the room's opening is divided into. See SceneRig.
+  cells: { type: Number, default: 7 },
+  // A multiplier on the mark's fit-to-stage size, so it can be sized by hand
+  // without shrinking the room. See LogoModel.
+  markScale: { type: Number, default: 1 },
 })
 
 // Tells LogoStage the scene is up, so it can drop its 2D fallback.
@@ -136,7 +150,16 @@ defineExpose({ logoGroup })
       <TresDirectionalLight :position="[0, 0, 10]" :intensity="1.5" />
       <TresDirectionalLight :position="[5, 5, 5]" :intensity="0.6" />
 
-      <SceneRig ref="rig" :tilt="props.tilt" :cam-z="camZ" :fog="props.fog" />
+      <SceneRig
+        ref="rig"
+        :tilt="props.tilt"
+        :cam-z="camZ"
+        :fog="props.fog"
+        :room="props.room"
+        :opacity="props.opacity"
+        :diffuse="props.diffuse"
+        :cells="props.cells"
+      />
 
       <LogoModel
         v-if="logoGroup"
@@ -149,6 +172,7 @@ defineExpose({ logoGroup })
         :logo="props.logo"
         :halo-on="props.haloOn"
         :environment="rig?.environment"
+        :mark-scale="props.markScale"
       />
     </TresCanvas>
   </div>

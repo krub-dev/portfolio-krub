@@ -114,7 +114,7 @@ onBeforeUnmount(() => landTimers.forEach(clearTimeout))
       hero/global pair.
     -->
     <template v-if="route.meta.bare">
-      <BackgroundGrid variant="page" />
+      <BackgroundGrid v-if="!route.meta.noGrid" variant="page" />
     </template>
     <template v-else>
       <BackgroundGrid variant="hero" :visible="!pastHero" />

@@ -395,6 +395,33 @@ the gesture itself, with the dot stepping aside so the hint is the only thing th
 - **The scene is gated under `navigator.webdriver`** so the e2e suite never holds a WebGL context; the
   2D mark stands in there instead (decision 77).
 
+### 102. Depth on the room is opt-in, and the site does not use it
+**Status:** active · **Archive:** — (new, after the split)
+
+Ways to make the open box read as a recess, all gated so the site keeps the box it was built with —
+the Open Graph card is where they are weighed.
+
+- **A darkening in the vertex colours, with two dials.** The geometry carries a vertex colour per
+  corner: the far wall is `opacity` dark and the opening takes `diffuse` of the way there, so the recess
+  can reach the room's own edge (0) or fade back to `--ink` before it (1). The grid texture multiplies
+  the same colour, so the walls *and their lines* sink together. `opacity` 0 is the site's flat box.
+  Measured on the card at opacity 0.6, diffuse 0.65: the opening sits at 10/255 against the page's 12
+  and the walls darken to 8 by the middle. No light and no hard facet.
+- **A contact shadow was tried and taken out.** A plane behind the mark with a radial gradient in
+  `--cast`, over five stops so it read as a blur rather than a disc. On a room this dark it was a black
+  blob on black, and the owner never had it on, so it and its token read went.
+- **The mark's size is a dial in the scene, not a CSS transform.** Scaling the canvas to fit the mark
+  took the room with it and left the room at 90% of the slot, a band short of its edge. `markScale` on
+  LogoModel multiplies the fit-to-stage scale, so the mark can be sized by hand while the room fills the
+  slot and its grid lands on the page's.
+- **Face lighting was tried and taken out.** A `MeshLambertMaterial` on the walls, so each face caught
+  the scene's lights by its normal, differentiated but darkened the near walls (the ceiling to 4.5/255)
+  and the hard tone per face read as facets, not as depth. The prop and the geometry's
+  `computeVertexNormals` went with it.
+- **Exponential fog was tried and taken out.** `FogExp2` fights the darkening — both go for the back,
+  and the fog pulls it back to `--ink` — so it was removed rather than left as a second way to do the
+  same thing badly.
+
 ---
 
 ## Enrutado SPA y endpoints

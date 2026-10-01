@@ -34,16 +34,18 @@ published.
 
 1. The pre-publication documentation review.
 2. Re-measure Lighthouse against the deployment, now that it is the current build.
-3. The Open Graph artwork.
+3. The Open Graph artwork is designed at `/og` — the card, the LinkedIn cover and the README
+   banner. The README one still needs its capture, and the `/og` scaffolding comes out before the
+   repository goes public.
 
 The contact form works end to end now — it sends by Resend, with Turnstile and a rate limit — and it
 carries its privacy notice and a required consent box, both linking to `/privacy`. The domain carries
 a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, sending as through
 Resend's SMTP), and the site points at it everywhere.
 
-**The substantial work still open:** the Open Graph artwork, sharper screenshots for krub.dev, the
-LinkedIn update, the GitHub profile README, the prose reread, Bing Webmaster Tools, raising the DMARC
-policy, and making the repository public.
+**The substantial work still open:** sharper screenshots for krub.dev, the LinkedIn profile update,
+the GitHub profile README, a prose pass over the whole site, folding the old hero bio into `/me`,
+updating the CV, Bing Webmaster Tools, raising the DMARC policy, and making the repository public.
 
 ---
 
@@ -90,23 +92,38 @@ the privacy notice and the consent the law asks for.
   until it is deployed again, sideForge shows its logo, since it is backend-only for now, and krub.dev
   has screenshots of itself. All 1280×800 JPEG, under `public/assets/img/<slug>/`. Better ones when
   there is something better to shoot. **(owner)**
-- [ ] **Sharper screenshots for krub.dev.** The four are 1280×800 viewport captures at 1×, and they
-  read soft in the modal, which shows them at up to ~1000 CSS px wide — 2000 device px on a retina
-  screen. Capture again at `deviceScaleFactor: 2` and keep them at 2560×1600, or shoot a wider
-  viewport and downscale. The card is fine either way; the modal is what shows the difference.
-- [ ] **A final banner for LinkedIn and the GitHub profile README.** Same artwork as the Open Graph
-  refresh below, so it comes with it.
+- [ ] **Sharper screenshots for krub.dev.** The four on its card are 1280×800 viewport captures at 1×,
+  and they read soft in the modal, which shows them at up to ~1000 CSS px wide — 2000 device px on a
+  retina screen. Capture again at `deviceScaleFactor: 2` and keep them at 2560×1600, or shoot a wider
+  viewport and downscale. The card wants fresh ones anyway now that the site has changed, so both
+  jobs go together. The card is fine either way; the modal is what shows the difference. **(owner)**
+- [x] **The Open Graph image.** Done 2026-10-01: designed on a dev-only page, `/og`
+  (`src/views/OgView.vue`), which draws the card at its real 1200×630 out of the site's own pieces —
+  the 3D mark, lit, and Limonacho. The card and the LinkedIn cover are captured and in
+  `public/assets/img/` (`og-banner.png`, `linkedin-banner.png`); the README/social-preview banner
+  (1280×640) is designed and pending its capture. **The page is still scaffolding**: it, its route and
+  the cv tool's `build-og.mjs` come out before the repository goes public — a Playwright pipeline for
+  one image is more machinery than the image is worth. Two earlier attempts are worth remembering: a
+  hand-drawn copy of the hero, which drifts and cannot draw the 3D at all, and a capture of the built
+  site, which dragged the cursor into the middle of the mark and clipped the mascot's leaf off. The
+  structured data beside it is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in
+  `sameAs` and in the `twitter:` tags on purpose — it ties the domain to the profile even though X is
+  no longer a link on the site.
+- [x] **A final banner for LinkedIn and the GitHub profile README.** Done 2026-10-01, on `/og`: the
+  LinkedIn cover (1584×396, its left band kept clear for the profile photo) and the README/social
+  preview banner (1280×640), both out of the card's own pieces. The README one still needs its capture.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
   in it. **(owner)**
+- [ ] **Fold the old hero bio into `/me`.** The hero body was cut back to two lines; the detail it
+  dropped — the full stack range (Java/Node/Vue), the client side and the AI-with-judgment line —
+  belongs in the About, which already carries the 3D and the delivery. Rework `/me` and spread it
+  there. **(owner)**
+- [ ] **Update the CV.** The sources still carry the framing the site has moved away from (the
+  "backend focus" among it, and more); bring them in line with the current copy. **(owner)**
 - [x] **Finish the testimonials.** Done: the first real quote is in — Lourdes Campuzano of
   CreandoMientras, with her own mark in the avatar circle — and the pager now carries only that
   one, prepared for more to arrive. The vertical arrows went, replaced by scrollable dots. Long
   quotes are clamped to four lines with a "read more". Part of the same rework.
-- [ ] **Refresh the Open Graph image.** `og-banner.png` is from the first build and predates the
-  sections that exist now, so it is the owner's artwork to regenerate. The structured data beside it
-  is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in `sameAs` and in the
-  `twitter:` tags on purpose — it ties the domain to the profile even though X is no longer a link
-  on the site. **(owner)**
 - [ ] **Update LinkedIn to match the CV and the site.** The headline, the location (it says
   Barcelona, the owner is in Murcia) and the dates should agree with the CV and the site. Also the
   new banner. **(owner)**
@@ -151,6 +168,10 @@ the privacy notice and the consent the law asks for.
   the real deployment after the merge, together with the pre-publication documentation review. The
   one thing that got worse is the TBT — the bundle grew with the new sections — so it is worth a
   second look then. **(owner)**
+- [ ] **Analytics, if any.** Vercel's own (Web Analytics / Speed Insights) looks like a component to
+  switch on, but the question is whether it sets a cookie: if it does, it pulls in a consent banner
+  the site does not have today. Decide first — a cookieless, privacy-friendly tool (Vercel's
+  cookieless mode, Plausible) or none at all.
 - [x] **An address on the domain, `contact@krub.dev`.** Done: Cloudflare Email Routing receives for
   it and forwards to the owner's Gmail, and Gmail sends *as* it through Resend's SMTP
   (`smtp.resend.com`, user `resend`, the API key), so the mail is DKIM-signed for `krub.dev` and
@@ -262,6 +283,11 @@ the privacy notice and the consent the law asks for.
   different idea for those edges.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
+- [ ] **The selected text takes the accent.** `::selection` with `--acc` behind and `--on-acc` on the
+  letters, so highlighting a paragraph looks like the rest of the site (the owner saw it on
+  riangle.com). Two rules, one per theme; check `--on-acc` against each palette's `--acc`.
+- [ ] **A card for 42.** A future home for the 42 Barcelona work: the projects, links to the repos
+  and a short explanation of each. Either a slot in the projects rail or a block of its own.
 - [x] **The projects rail ends on a card that leads to GitHub.** Done on 2026-09-30: a dashed slot at
   the end of the rail with the GitHub mark, a question, a line and a mono link in the accent. The mark
   and the address come from the socials, so it cannot drift from Contact. See decision 101.
@@ -310,6 +336,11 @@ the privacy notice and the consent the law asks for.
   also be moved sideways within the gutter, and the position is remembered in `localStorage` — so a
   visitor the bar gets in the way of can move it. Mobile only for now. Watch the footer and the
   lemon, which already own the bottom of the screen.
+- [ ] **The rail's hover sticks on a touch pan on iPad.** Dragging the projects rail sideways marks
+  the card under the finger, but the row stops a card or two short of the end — the last card never
+  lights. Low priority. The hover follows the pointer position, so a touch pan has to move it the way
+  a mouse does and still reach the last card; worth checking on the real device, not only in the
+  emulator.
 
 All three were real when the roadmap's "Later" list was written and are closed now; the group is
 kept as the record rather than deleted.
@@ -317,6 +348,34 @@ kept as the record rather than deleted.
 ## Testing
 
 - [x] **The e2e suite went flaky while the hero was on screen.** Explained: Playwright runs several browsers at once, and each Chromium worker holding the hero's WebGL context made the frames stall, so tests that depend on animation timing failed at random. Fixed by skipping the 3D scene under `navigator.webdriver` (Playwright sets that flag), so no worker opens a WebGL context. The suite is run with `--workers=1` by habit; parallel workers are still occasionally flaky, and that part is deferred — it costs time, not correctness.
+
+## Final audit
+
+Before the repository goes public, a pass over the whole thing. The owner brought the list below;
+most of it is already in place, a few entries do not apply to a static portfolio, and a few are real
+work. The point is also to turn it into a reusable checklist — see the skill.
+
+**In place already (verify, do not rebuild):**
+
+- Privacy notice (the `/privacy` route, linked from the form).
+- No frontend secrets: everything sensitive is server-side (`RESEND_API_KEY`, `CONTACT_TO`,
+  `CONTACT_FROM`, `TURNSTILE_SECRET_KEY`); only `VITE_TURNSTILE_SITE_KEY` is public, and it is meant
+  to be.
+- HTTPS, with the apex redirect.
+- SEO: canonical, `sitemap`, `robots.txt`, structured data, meta titles and descriptions, the social
+  preview (the OG image) and the favicon.
+- Image alt text and compression; colour contrast (the `--fg-3` pass); mobile responsiveness.
+- A real 404; form validation; spam protection (Turnstile plus a rate limit).
+- One primary CTA in the hero — the secondary one is a shortcut to the projects, not a second ask.
+
+**To do or to debate:**
+
+- [ ] **Broken links.** A sweep of every outbound link and every internal anchor.
+- [ ] **PageSpeed / Lighthouse on production**, with the accessibility pass (axe, WCAG AA) and a
+  dependency-vulnerability check (`npm audit`) — against the deployment, not the local preview.
+- [ ] **Terms & conditions.** A portfolio sells nothing; decide whether it needs them at all.
+- [ ] **Cookie consent.** There are none today, so no banner; it only appears if analytics brings one.
+- [ ] **The audit itself.** Run the checklist end to end and record the result.
 
 ## Ideas (future)
 
