@@ -168,6 +168,10 @@ the privacy notice and the consent the law asks for.
   the real deployment after the merge, together with the pre-publication documentation review. The
   one thing that got worse is the TBT — the bundle grew with the new sections — so it is worth a
   second look then. **(owner)**
+- [ ] **Analytics, if any.** Vercel's own (Web Analytics / Speed Insights) looks like a component to
+  switch on, but the question is whether it sets a cookie: if it does, it pulls in a consent banner
+  the site does not have today. Decide first — a cookieless, privacy-friendly tool (Vercel's
+  cookieless mode, Plausible) or none at all.
 - [x] **An address on the domain, `contact@krub.dev`.** Done: Cloudflare Email Routing receives for
   it and forwards to the owner's Gmail, and Gmail sends *as* it through Resend's SMTP
   (`smtp.resend.com`, user `resend`, the API key), so the mail is DKIM-signed for `krub.dev` and
@@ -279,6 +283,11 @@ the privacy notice and the consent the law asks for.
   different idea for those edges.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
+- [ ] **The selected text takes the accent.** `::selection` with `--acc` behind and `--on-acc` on the
+  letters, so highlighting a paragraph looks like the rest of the site (the owner saw it on
+  riangle.com). Two rules, one per theme; check `--on-acc` against each palette's `--acc`.
+- [ ] **A card for 42.** A future home for the 42 Barcelona work: the projects, links to the repos
+  and a short explanation of each. Either a slot in the projects rail or a block of its own.
 - [x] **The projects rail ends on a card that leads to GitHub.** Done on 2026-09-30: a dashed slot at
   the end of the rail with the GitHub mark, a question, a line and a mono link in the accent. The mark
   and the address come from the socials, so it cannot drift from Contact. See decision 101.
@@ -327,6 +336,11 @@ the privacy notice and the consent the law asks for.
   also be moved sideways within the gutter, and the position is remembered in `localStorage` — so a
   visitor the bar gets in the way of can move it. Mobile only for now. Watch the footer and the
   lemon, which already own the bottom of the screen.
+- [ ] **The rail's hover sticks on a touch pan on iPad.** Dragging the projects rail sideways marks
+  the card under the finger, but the row stops a card or two short of the end — the last card never
+  lights. Low priority. The hover follows the pointer position, so a touch pan has to move it the way
+  a mouse does and still reach the last card; worth checking on the real device, not only in the
+  emulator.
 
 All three were real when the roadmap's "Later" list was written and are closed now; the group is
 kept as the record rather than deleted.
@@ -334,6 +348,34 @@ kept as the record rather than deleted.
 ## Testing
 
 - [x] **The e2e suite went flaky while the hero was on screen.** Explained: Playwright runs several browsers at once, and each Chromium worker holding the hero's WebGL context made the frames stall, so tests that depend on animation timing failed at random. Fixed by skipping the 3D scene under `navigator.webdriver` (Playwright sets that flag), so no worker opens a WebGL context. The suite is run with `--workers=1` by habit; parallel workers are still occasionally flaky, and that part is deferred — it costs time, not correctness.
+
+## Final audit
+
+Before the repository goes public, a pass over the whole thing. The owner brought the list below;
+most of it is already in place, a few entries do not apply to a static portfolio, and a few are real
+work. The point is also to turn it into a reusable checklist — see the skill.
+
+**In place already (verify, do not rebuild):**
+
+- Privacy notice (the `/privacy` route, linked from the form).
+- No frontend secrets: everything sensitive is server-side (`RESEND_API_KEY`, `CONTACT_TO`,
+  `CONTACT_FROM`, `TURNSTILE_SECRET_KEY`); only `VITE_TURNSTILE_SITE_KEY` is public, and it is meant
+  to be.
+- HTTPS, with the apex redirect.
+- SEO: canonical, `sitemap`, `robots.txt`, structured data, meta titles and descriptions, the social
+  preview (the OG image) and the favicon.
+- Image alt text and compression; colour contrast (the `--fg-3` pass); mobile responsiveness.
+- A real 404; form validation; spam protection (Turnstile plus a rate limit).
+- One primary CTA in the hero — the secondary one is a shortcut to the projects, not a second ask.
+
+**To do or to debate:**
+
+- [ ] **Broken links.** A sweep of every outbound link and every internal anchor.
+- [ ] **PageSpeed / Lighthouse on production**, with the accessibility pass (axe, WCAG AA) and a
+  dependency-vulnerability check (`npm audit`) — against the deployment, not the local preview.
+- [ ] **Terms & conditions.** A portfolio sells nothing; decide whether it needs them at all.
+- [ ] **Cookie consent.** There are none today, so no banner; it only appears if analytics brings one.
+- [ ] **The audit itself.** Run the checklist end to end and record the result.
 
 ## Ideas (future)
 
