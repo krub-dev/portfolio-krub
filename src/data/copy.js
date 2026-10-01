@@ -22,14 +22,14 @@ export const copy = {
       line1: 'FULL STACK',
       line2: 'DEVELOPER',
       skills: 'Frontend · Backend · 3D · Applied AI',
-      body: 'Full Stack Developer based in Murcia after a few years in Barcelona. Open to remote, on-site or hybrid roles in either city. I come from 3D and it shows: detail, communication, deadlines.',
+      body: 'Based in Murcia after a few years in Barcelona. Open to remote, on-site or hybrid roles in either city. I come from 3D and it shows: detail, communication, deadlines.',
     },
     es: {
       badge: 'Disponible',
       line1: 'DESARROLLADOR',
       line2: 'FULL STACK',
-      skills: 'Frontend · Backend · 3D · Applied AI',
-      body: 'Desarrollador Full Stack con base en Murcia tras unos años en Barcelona. Disponible en remoto, presencial o híbrido en cualquiera de las dos ciudades. Vengo del 3D y se nota: detalle, comunicación y plazos.',
+      skills: 'Frontend · Backend · 3D · IA Aplicada',
+      body: 'Con base en Murcia tras unos años en Barcelona. Disponible en remoto, presencial o híbrido en cualquiera de las dos ciudades. Vengo del 3D y se nota: detalle, comunicación y plazos.',
     },
   },
 
@@ -52,8 +52,16 @@ export const copy = {
   // The marquee loops these two phrases forever, joined by the separator.
   // Add or remove entries freely; the band duplicates whatever it is given.
   marquee: {
-    en: ['Full Stack Developer', 'Murcia · Barcelona · remote · Spain'],
-    es: ['Desarrollador Full Stack', 'Murcia · Barcelona · remoto · España'],
+    en: [
+      'Full Stack Developer',
+      'Frontend · Backend · 3D · Applied AI',
+      'Murcia · Barcelona · remote · Spain',
+    ],
+    es: [
+      'Desarrollador Full Stack',
+      'Frontend · Backend · 3D · IA Aplicada',
+      'Murcia · Barcelona · remoto · España',
+    ],
   },
 
   // The 404 page. The title and the button label are interface strings and live
