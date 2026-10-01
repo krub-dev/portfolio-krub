@@ -145,6 +145,8 @@ onUnmounted(() => observer?.disconnect())
         <p class="lead">{{ about.p1 }}</p>
         <p class="para">{{ about.p2 }}</p>
         <p class="para">{{ about.p3 }}</p>
+        <p class="para">{{ about.p4 }}</p>
+        <p class="open">{{ about.open }}</p>
 
         <div class="switcher">
           <TabSwitch v-model="tab" :options="options" :panel-id="panelId" class="tabs" />
@@ -252,6 +254,17 @@ onUnmounted(() => observer?.disconnect())
   font-size: 17px;
   line-height: 1.65;
   color: var(--fg-2);
+  max-width: 58ch;
+  text-wrap: pretty;
+}
+
+/* The closing line, on its own and at full strength: it is the ask, not more
+   prose. */
+.open {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--fg);
   max-width: 58ch;
   text-wrap: pretty;
 }

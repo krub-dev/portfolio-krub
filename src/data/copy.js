@@ -29,7 +29,7 @@ export const copy = {
       line1: 'DESARROLLADOR',
       line2: 'FULL STACK',
       skills: 'Frontend · Backend · 3D · IA Aplicada',
-      body: 'Con base en Murcia tras unos años en Barcelona. Disponible en remoto, presencial o híbrido en cualquiera de las dos ciudades. Vengo del 3D y se nota: detalle, comunicación y plazos.',
+      body: 'Con base en Murcia tras varios años en Barcelona. Disponible en remoto, presencial o híbrido en cualquiera de las dos ciudades. Vengo del 3D y se nota: detalle, comunicación y plazos.',
     },
   },
 
@@ -37,15 +37,19 @@ export const copy = {
     en: {
       // What Limonacho says when the pointer lands on the photo.
       greet: 'Kiko!',
-      p1: 'I came from 3D and ended up programming: same thing, fewer twelve-hour renders.',
-      p2: 'Six years modelling and texturing for games, apps and e-commerce taught me to ship on time and to sweat the details. I bring the same to the code: careful, tested, documented, and delivered when I said it would be.',
-      p3: 'Looking for a team where I can grow into backend while still poking at odd things in C on weekends.',
+      p1: 'I started in 3D and the detail stayed with me.',
+      p2: 'I build web applications end to end: backend in Java (Spring Boot) and Node (Express) over relational databases, and frontend in Vue 3. I work with clean architecture, automated testing (JUnit, Mockito, Jest, Supertest, Playwright) and production deploys.',
+      p3: 'My time at 42 Barcelona gave me C, algorithms and concurrency, and the habit of reviewing code among peers. I use AI tools without delegating the technical thinking: I direct the architecture, the specification (SDD) and the tests (TDD), and I stand behind what I ship.',
+      p4: 'I come from more than six years as a 3D professional, modelling and texturing for games, apps and e-commerce. It shapes how I work: attention to detail, iterating on feedback, direct contact with the client and a commitment to deadlines.',
+      open: 'Open to Full Stack, Frontend or Backend roles.',
     },
     es: {
       greet: '¡Kiko!',
-      p1: 'Vengo del 3D y acabé programando, que es lo mismo pero con menos renders de doce horas.',
-      p2: 'Seis años modelando y texturizando para videojuegos, apps y e-commerce me enseñaron a entregar a tiempo y a mirar el detalle. Traigo eso mismo al código: cuidado, probado, documentado y entregado cuando dije que lo estaría.',
-      p3: 'Busco equipo donde crecer hacia backend sin dejar de tocar cosas raras en C los fines de semana.',
+      p1: 'Empecé en el 3D y el detalle se quedó conmigo.',
+      p2: 'Construyo aplicaciones web de extremo a extremo: backend en Java (Spring Boot) y Node (Express) sobre bases de datos relacionales, y frontend en Vue 3. Trabajo con arquitectura limpia, testing automatizado (JUnit, Mockito, Jest, Supertest, Playwright) y despliegues en producción.',
+      p3: 'Mi paso por 42 Barcelona me dio C, algoritmia y concurrencia, y el hábito de revisar código entre pares. Uso herramientas de IA sin delegar el pensamiento técnico: dirijo la arquitectura, la especificación (SDD) y los tests (TDD), y respondo por lo que entrego.',
+      p4: 'Vengo de más de seis años como profesional 3D, modelando y texturizando para videojuegos, apps y e-commerce. Eso marca cómo trabajo: atención al detalle, iteración sobre feedback, trato directo con cliente y compromiso con los plazos.',
+      open: 'Abierto a roles Full Stack, Frontend o Backend.',
     },
   },
 
