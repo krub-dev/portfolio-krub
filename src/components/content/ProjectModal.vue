@@ -64,7 +64,16 @@ const label = computed(() => `[${String(props.index + 1).padStart(2, '0')}]`)
           <a class="link outline" :href="project.repo" target="_blank" rel="noopener" data-magnetic>
             {{ content.repoLabel }}
           </a>
-          <a class="link solid" :href="project.live" target="_blank" rel="noopener" data-magnetic>
+          <!-- A project with no live URL (a backend-only one, or a deploy that is
+               down) keeps the field but renders no link. -->
+          <a
+            v-if="project.live"
+            class="link solid"
+            :href="project.live"
+            target="_blank"
+            rel="noopener"
+            data-magnetic
+          >
             {{ content.liveLabel }}
           </a>
         </div>

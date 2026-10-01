@@ -137,8 +137,11 @@ the privacy notice and the consent the law asks for.
   subtraction. **(owner)**
 - [ ] **Bing Webmaster Tools.** The same five minutes as Google Search Console, which is done and
   has the sitemap submitted. Bing also feeds DuckDuckGo. **(owner)**
-- [ ] **Make the repository public.** When the pending work is done. The v1 portfolio repository is
-  archived and its links redirect here. **(owner)**
+- [x] **Make the repository public.** Done 2026-10-02. The v1 portfolio repository is archived and
+  its links redirect here. **(owner)**
+- [ ] **Redeploy Showroom.** Its Railway deploy is down (404 as of 2026-10-02), so the card and the
+  modal carry no live link: `projects.js` has `live: null` with the old URL in a comment. Bring the
+  deploy back, or point the link somewhere else, and set the field again. **(owner)**
 - [x] **Audit the documentation against the code.** Every `.md` here plus the README. It has
   drifted once already — four claims in the README were untrue and two files described
   components and composables that do not exist. Worth doing while the build is still fresh in
@@ -376,6 +379,7 @@ kept as the record rather than deleted.
 ## Testing
 
 - [x] **The e2e suite went flaky while the hero was on screen.** Explained: Playwright runs several browsers at once, and each Chromium worker holding the hero's WebGL context made the frames stall, so tests that depend on animation timing failed at random. Fixed by skipping the 3D scene under `navigator.webdriver` (Playwright sets that flag), so no worker opens a WebGL context. The suite is run with `--workers=1` by habit; parallel workers are still occasionally flaky, and that part is deferred — it costs time, not correctness.
+- [ ] **`never covers the last section` is flaky.** The test that scrolls to the bottom and checks the contact section ends where the footer begins passes on its own and fails in the full suite roughly one run in three. It reads a footer `y` while the slide-in settles, so the likely fix is to poll the second measurement too, not just the first. Deferred; it costs a re-run, not correctness.
 
 ## Final audit
 
