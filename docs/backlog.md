@@ -92,11 +92,10 @@ the privacy notice and the consent the law asks for.
   until it is deployed again, sideForge shows its logo, since it is backend-only for now, and krub.dev
   has screenshots of itself. All 1280×800 JPEG, under `public/assets/img/<slug>/`. Better ones when
   there is something better to shoot. **(owner)**
-- [ ] **Sharper screenshots for krub.dev.** The four on its card are 1280×800 viewport captures at 1×,
-  and they read soft in the modal, which shows them at up to ~1000 CSS px wide — 2000 device px on a
-  retina screen. Capture again at `deviceScaleFactor: 2` and keep them at 2560×1600, or shoot a wider
-  viewport and downscale. The card wants fresh ones anyway now that the site has changed, so both
-  jobs go together. The card is fine either way; the modal is what shows the difference. **(owner)**
+- [x] **Sharper screenshots for krub.dev.** Done 2026-10-01: about, projects and contact recaptured
+  at `deviceScaleFactor: 2` (2560×1600), and the hero at 1600×1000 from the real browser because the
+  3D scene does not mount under the automated capture. A hand-recorded tour GIF and the `scripts/`
+  pipeline (a Playwright tour and a video-to-GIF convertor) came with them. **(owner)**
 - [x] **The Open Graph image.** Done 2026-10-01: designed on a dev-only page, `/og`
   (`src/views/OgView.vue`), which draws the card at its real 1200×630 out of the site's own pieces —
   the 3D mark, lit, and Limonacho. The card and the LinkedIn cover are captured and in
@@ -112,24 +111,30 @@ the privacy notice and the consent the law asks for.
 - [x] **A final banner for LinkedIn and the GitHub profile README.** Done 2026-10-01, on `/og`: the
   LinkedIn cover (1584×396, its left band kept clear for the profile photo) and the README/social
   preview banner (1280×640), both out of the card's own pieces. The README one still needs its capture.
-- [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
-  in it. **(owner)**
-- [ ] **Fold the old hero bio into `/me`.** The hero body was cut back to two lines; the detail it
-  dropped — the full stack range (Java/Node/Vue), the client side and the AI-with-judgment line —
-  belongs in the About, which already carries the 3D and the delivery. Rework `/me` and spread it
-  there. **(owner)**
-- [ ] **Update the CV.** The sources still carry the framing the site has moved away from (the
-  "backend focus" among it, and more); bring them in line with the current copy. **(owner)**
+- [x] **Redo the GitHub profile README.** Done 2026-10-01: rewritten from scratch in the repo the
+  README lives in (`krub-dev/krub-dev`), around the current site — a new banner and footer, the
+  stack groups with Simple Icons for the three skillicons lacks, the four projects, a 42 block and a
+  metrics Action. **(owner)**
+- [x] **Fold the old hero bio into `/me`.** Done: `/me` was reworked around the LinkedIn bio and the
+  old hero detail landed there — the full stack range (Java/Node/Vue), the client side and the
+  AI-with-judgment line. **(owner)**
+- [x] **Update the CV.** Done 2026-10-01: the header and profile brought in line with the site (no
+  "backend focus", the AI-with-judgement line, Full Stack / Frontend / Backend), the name without
+  the second surname and the domain address. The PDFs were regenerated and the one-pager and cover
+  letters stored in `public/uploads/` for later. **(owner)**
 - [x] **Finish the testimonials.** Done: the first real quote is in — Lourdes Campuzano of
   CreandoMientras, with her own mark in the avatar circle — and the pager now carries only that
   one, prepared for more to arrive. The vertical arrows went, replaced by scrollable dots. Long
   quotes are clamped to four lines with a "read more". Part of the same rework.
-- [ ] **Update LinkedIn to match the CV and the site.** The headline, the location (it says
-  Barcelona, the owner is in Murcia) and the dates should agree with the CV and the site. Also the
-  new banner. **(owner)**
+- [x] **Update LinkedIn to match the CV and the site.** Done: headline, location and dates aligned
+  with the site, and the new banner in. **(owner)**
 - [ ] **Reread the prose.** Every sentence lives in `src/data/`, both languages side by side, one
   file per kind of content. It was always going to be iterated after launch rather than
   written once. **(owner)**
+- [ ] **Trim the copy and the CV.** The owner's read: the site carries a lot of content and the CV
+  reads long. A pass to cut, not to reword — the prose across `src/data/` and the CV sources in the
+  `cv` tool, keeping only what earns its place. Sits next to the prose pass, but the goal here is
+  subtraction. **(owner)**
 - [ ] **Bing Webmaster Tools.** The same five minutes as Google Search Console, which is done and
   has the sitemap submitted. Bing also feeds DuckDuckGo. **(owner)**
 - [ ] **Make the repository public.** When the pending work is done. The v1 portfolio repository is
@@ -283,9 +288,9 @@ the privacy notice and the consent the law asks for.
   different idea for those edges.
 - [ ] **Sound micro-interactions.** A quiet click for the menu and the controls, the way Limonacho
   already has his "acho" (decision 51). Fetched on first use, never preloaded.
-- [ ] **The selected text takes the accent.** `::selection` with `--acc` behind and `--on-acc` on the
-  letters, so highlighting a paragraph looks like the rest of the site (the owner saw it on
-  riangle.com). Two rules, one per theme; check `--on-acc` against each palette's `--acc`.
+- [x] **The selected text takes the accent.** Done: `::selection` paints `--acc` behind and `--on-acc`
+  on the letters, so it follows the palette and the theme, and the pair is the same one the filled
+  controls already use.
 - [ ] **A card for 42.** A future home for the 42 Barcelona work: the projects, links to the repos
   and a short explanation of each. Either a slot in the projects rail or a block of its own.
 - [x] **The projects rail ends on a card that leads to GitHub.** Done on 2026-09-30: a dashed slot at

@@ -164,6 +164,20 @@ const ghGridStyle = computed(() => ({
   backgroundSize: `${ghCell.value}px ${ghCell.value}px`,
 }))
 
+// The footer banner (1920x240): a wide strip for the README's foot. The room's
+// grid across, the lockup at the left and Limonacho at the right. No 3D mark: the
+// strip is too short for it to read. Same column count as the GitHub banner (16)
+// on purpose: shown at the same width in the README, the two grids read the same.
+const ftLemon = ref(true)
+const ftGrid = ref(true)
+const ftCols = ref(16)
+const ftLockX = ref(72)
+const ftCell = computed(() => 1920 / ftCols.value)
+
+const ftGridStyle = computed(() => ({
+  backgroundSize: `${ftCell.value}px ${ftCell.value}px`,
+}))
+
 const liStageStyle = computed(() => ({
   left: `${liSlot.value.x * liCell.value}px`,
   top: `${liSlot.value.y * liCell.value}px`,
@@ -460,6 +474,48 @@ const liGridStyle = computed(() => ({
       </div>
 
       <div v-if="ghLemon" class="pet">
+        <LemonPet />
+      </div>
+    </div>
+
+    <header class="bar">
+      <p class="eyebrow">dev only · footer</p>
+      <p class="size">1920 × 240</p>
+
+      <div class="controls">
+        <label class="toggle"><input v-model="ftLemon" type="checkbox" />Lemon</label>
+        <label class="toggle"><input v-model="ftGrid" type="checkbox" />Grid</label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">cols</span>
+        <label class="field"
+          ><input v-model.number="ftCols" type="number" min="4" max="60" step="2"
+        /></label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">lockup x</span>
+        <label class="field"
+          ><input v-model.number="ftLockX" type="number" step="8"
+        /></label>
+      </div>
+    </header>
+
+    <!--
+      The footer banner: 1920x291. A wide strip that closes the README's foot and
+      the profile page. The room's grid runs the full width, the krub.dev lockup
+      sits at the left and Limonacho is parked at the right.
+    -->
+    <div class="banner banner-ft">
+      <div v-if="ftGrid" class="grid ft-grid" :style="ftGridStyle" aria-hidden="true" />
+
+      <div class="ft-brand" :style="{ left: `${ftLockX}px` }">
+        <BrandLogo :height="40" />
+        <span class="brand-dev">.dev</span>
+      </div>
+
+      <div v-if="ftLemon" class="ft-pet">
         <LemonPet />
       </div>
     </div>
@@ -817,5 +873,56 @@ const liGridStyle = computed(() => ({
 /* The 3D mark. Its place and size come from the slot (x/y/size, in cells). */
 .gh-mark {
   position: absolute;
+}
+
+/* ---------------------------------------------------------------------------
+   The footer banner: 1920x291, a wide strip. The room's grid runs the full
+   width, the krub.dev lockup sits at the left and Limonacho at the right.
+   --------------------------------------------------------------------------- */
+.banner-ft {
+  width: 1920px;
+  height: 240px;
+}
+
+.ft-grid {
+  /* Size comes from ftGridStyle: a column count, so the grid meets both edges. */
+}
+
+/* The lockup, vertically centred and nudged from the left by the dial. */
+.ft-brand {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+/* The .dev rides with the mark's height, as in the LinkedIn banner. */
+.banner-ft .brand-dev {
+  font-size: 33px;
+}
+
+/* Limonacho, centred on the strip's axis and scaled: his parts are absolute
+   pixels, so a wider box would pull him apart. */
+.ft-pet {
+  position: absolute;
+  right: 96px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ft-pet :deep(.pet) {
+  position: relative;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  transform: scale(1.8);
+  transform-origin: center right;
+}
+
+.ft-pet :deep(.bubble) {
+  display: none;
 }
 </style>

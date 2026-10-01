@@ -151,6 +151,69 @@
   </head>
   <body>
     <div id="app"></div>
+
+    <!--
+      No-JavaScript fallback. The app is a Vue SPA, so a crawler that does not
+      run JavaScript — or a visitor who turned it off — would otherwise get an
+      empty #app and nothing to read. This carries the essentials as plain HTML:
+      who, what, the projects and the ways to reach out. A browser with
+      JavaScript never renders it, so it costs the page nothing.
+
+      English only, like the Open Graph tags above and for the same reason: it
+      is baked into the static HTML at build time and cannot follow the language
+      toggle. Kept in step with src/data/ by hand.
+    -->
+    <noscript>
+      <div class="nojs">
+        <h1>Kiko Rubio · Full Stack Developer</h1>
+        <p>
+          Based in Murcia, Spain. Open to remote, on-site or hybrid roles in Murcia or
+          Barcelona.
+        </p>
+        <p>
+          Making and building things is what I do. In 3D or in software, it does not
+          matter. I build web applications end to end: backend in Java (Spring Boot) and
+          Node (Express), frontend in Vue 3.
+        </p>
+
+        <h2>Stack</h2>
+        <p>
+          Java, Spring Boot, Node.js, Express, MySQL, PostgreSQL, Vue 3, Vite, Three.js,
+          Docker, Git, Playwright.
+        </p>
+
+        <h2>Projects</h2>
+        <ul>
+          <li>
+            <a href="https://creandomientras.com">CreandoMientras</a>. Site and self-managed
+            panel for a handmade macramé business, with no subscription: Vue 3 on a
+            Git-based CMS.
+          </li>
+          <li>
+            <a href="https://github.com/krub-dev/sideForge">sideForge</a>. Java Spring Boot
+            REST API to manage and customise 3D assets for the web.
+          </li>
+          <li>
+            <a href="https://krub.dev">krub.dev</a>. This site: a Vue 3 SPA with a design
+            system of its own.
+          </li>
+          <li>
+            <a href="https://showroom-fullstack-m3-production.up.railway.app/">Showroom</a>.
+            Full stack app to manage and show projects: full CRUD, search and an admin panel.
+          </li>
+        </ul>
+
+        <h2>Contact</h2>
+        <ul>
+          <li><a href="mailto:contact@krub.dev">contact@krub.dev</a></li>
+          <li><a href="https://linkedin.com/in/krub">LinkedIn</a></li>
+          <li><a href="https://github.com/krub-dev">GitHub</a></li>
+        </ul>
+
+        <p><a href="/privacy">Privacy</a></p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

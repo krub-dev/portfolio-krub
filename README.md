@@ -5,16 +5,16 @@ Live at **[krub.dev](https://krub.dev)**.
 My personal portfolio. One page plus a 404, bilingual (English / Spanish), dark and light themes
 with five accent palettes, built with Vue 3 and Vite.
 
-Kiko Rubio — fullstack developer in Murcia, leaning toward backend.
+Kiko Rubio — full stack developer in Murcia.
 
 ## Stack
 
 - **Vue 3** with `<script setup>`. Plain JavaScript, no TypeScript.
 - **Vite** for the dev server and the build.
-- **vue-router** — two routes: the page and a catch-all 404. There are also two dev-only screens,
-  `/design-system` (the tokens and components sheet) and `/logo-lab` (the hero stage: the entrance, the
-  fog modes, and the mark, the ring and the halo switched on and off), lazy-loaded and kept out of the
-  production bundle.
+- **vue-router** — two routes: the page and a catch-all 404. There are also three dev-only screens,
+  `/design-system` (the tokens and components sheet), `/logo-lab` (the hero stage: the entrance, the
+  fog modes, and the mark, the ring and the halo switched on and off) and `/og` (the Open Graph card,
+  the LinkedIn cover and the README banner), lazy-loaded and kept out of the production bundle.
 - **vue-i18n** — nested dictionaries, English by default.
 - **Vitest** and **Playwright** for tests.
 - No CSS framework and no preprocessor. Design tokens are CSS custom properties in one global
@@ -35,19 +35,22 @@ npm run dev
 | `npm run test` | unit tests (Vitest) |
 | `npm run test:watch` | the same, in watch mode |
 | `npm run test:e2e` | end-to-end tests (Playwright, real Chromium) |
+| `npm run capture:tour` | record a GIF tour of the running site (needs a server up) |
+| `npm run gif:video` | turn a screen recording into a GIF (see `scripts/`) |
 
 The CV is not built from this repository. Its plain-text sources and generator live in a sibling
 `cv/` folder outside it, run with `node build-cv.mjs`; that script turns each file into LaTeX and
 compiles it with [tectonic](https://tectonic-typesetting.github.io), a single binary rather than a
 full TeX distribution. Put it on your `PATH`; on Windows the script also looks in
 `%LOCALAPPDATA%\Programs\tectonic`. It builds three documents — the full CV in light and dark, a
-one-page CV and a base cover letter, both light — into its own `out/` folder; copy the four `cv-*`
-PDFs into this repository's `public/uploads/` to publish a change. The same folder holds
+one-page CV and a base cover letter, both light — into its own `out/` folder; copy the ones you
+want to publish into this repository's `public/uploads/` (all eight live there now, though the site
+only links the full CV's four). The same folder holds
 `build-og.mjs`, which renders the Open Graph banner.
 
 ## Tests
 
-Forty-one unit tests and around forty end-to-end flows, the latter run across two viewports.
+Forty-four unit tests and around seventy end-to-end flows, the latter run on a desktop and on a phone.
 
 Vitest covers the pure functions — how a timeline period is formatted, how the carousel index
 wraps, how a URL is tidied — the contact validation and its endpoint, and the composables that
@@ -79,6 +82,7 @@ public/            served as-is: logo, photo, og banner, stack icons, self-hoste
                    (with their OFL licences), the acho clip, the CV PDFs, favicon,
                    apple touch icon, robots, sitemap
 docs/              the spec, the component contracts, the roadmap, the decision log, the backlog
+scripts/           dev tooling: a Playwright site tour and a video-to-GIF convertor
 tests/
 ├─ unit/           Vitest
 └─ e2e/            Playwright

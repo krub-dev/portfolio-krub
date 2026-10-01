@@ -49,7 +49,7 @@ export const copy = {
     en: {
       // What Limonacho says when the pointer lands on the photo.
       greet: 'Kiko!',
-      p1: 'I started in 3D and the detail stayed with me.',
+      p1: 'Making and building things is what I do. In 3D or in software, it does not matter.',
       p2: 'I build web applications end to end: backend in Java (Spring Boot) and Node (Express) over relational databases, and frontend in Vue 3. I work with clean architecture, automated testing (JUnit, Mockito, Jest, Supertest, Playwright) and production deploys.',
       p3: 'My time at 42 Barcelona gave me a grounding in C, algorithms, concurrency and low-level memory management, plus a strong autonomy for tackling complex problems and the habit of code review among peers. I bring AI tools into my daily flow without delegating the technical judgement: I direct the architecture, the specification (SDD) and the tests (TDD), always answering for the code I ship.',
       p4: 'I come from more than six years as a 3D professional, modelling and texturing for games, apps and e-commerce. It shapes how I work: attention to detail, iterating on feedback, direct contact with the client and a commitment to deadlines.',
@@ -57,7 +57,7 @@ export const copy = {
     },
     es: {
       greet: '¡Kiko!',
-      p1: 'Empecé en el 3D y el detalle se quedó conmigo.',
+      p1: 'Hacer y construir es lo mío. En 3D o en software, da igual.',
       p2: 'Construyo aplicaciones web de extremo a extremo: backend en Java (Spring Boot) y Node (Express) sobre bases de datos relacionales, y frontend en Vue 3. Trabajo con arquitectura limpia, testing automatizado (JUnit, Mockito, Jest, Supertest, Playwright) y despliegues en producción.',
       p3: 'Mi paso por 42 Barcelona me dio base en C, algoritmia, concurrencia y gestión de memoria a bajo nivel, sumado a una gran autonomía para resolver retos complejos y el hábito del code review entre pares. Integro herramientas de IA en mi flujo diario sin delegar el criterio técnico: dirijo la arquitectura, la especificación (SDD) y las pruebas (TDD), respondiendo siempre por el código que entrego.',
       p4: 'Vengo de más de seis años como profesional 3D, modelando y texturizando para videojuegos, apps y e-commerce. Eso marca cómo trabajo: atención al detalle, iteración sobre feedback, trato directo con cliente y compromiso con los plazos.',
