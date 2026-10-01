@@ -48,7 +48,9 @@ if (import.meta.env.DEV) {
     path: '/og',
     name: 'og',
     component: () => import('../views/OgView.vue'),
-    meta: { bare: true },
+    // No page grid: the banners carry their own, and a second one behind them
+    // only muddles which lines belong to what.
+    meta: { bare: true, noGrid: true },
   })
 }
 

@@ -55,6 +55,14 @@ const props = defineProps({
   */
   opacity: { type: Number, default: 0 },
   /*
+    How many grid cells the opening is divided into. Seven is the site's — the
+    stage's own seven — so the room's grid lands on the page's. An odd count puts
+    a line on the opening's edges (its centre mid-cell); an even count puts one on
+    the centre too, which is why the texture shifts by half a cell only when the
+    count is odd. The Open Graph card runs it at four, to match a 4x4 slot.
+  */
+  cells: { type: Number, default: 7 },
+  /*
     How that darkening is spread. 0 is one flat tone across the whole room, so it
     reaches the opening as dark as the back; 1 leaves the opening at `--ink` and
     puts all of it at the back. `opacity` is the far wall either way; this is how
@@ -73,10 +81,8 @@ const props = defineProps({
 const FOV = 40
 const BASE_CAM_Z = 205
 const OPENING_Z = 25
-const CELLS = 7
 const ROOM_HALF = (BASE_CAM_Z - OPENING_Z) * Math.tan((FOV / 2) * (Math.PI / 180))
-const CELL = (ROOM_HALF * 2) / CELLS
-const SPAN = CELL * CELLS
+const SPAN = ROOM_HALF * 2
 // Reduced from 700 to 400 so the transverse lines are not as compressed by the
 // perspective transform. The tunnel still reads as deep, but the grid cells look
 // more square on screen instead of elongated.
@@ -244,7 +250,7 @@ function buildRoom() {
     other gap — a faint line running the length of each wall.
   */
   const cellPx = 72
-  const size = cellPx * CELLS
+  const size = cellPx * props.cells
   const canvas = makeCanvas(size)
   const ctx = canvas.getContext('2d')
   ctx.fillStyle = ink
@@ -254,14 +260,15 @@ function buildRoom() {
   ctx.lineWidth = 1
   ctx.beginPath()
   /*
-    The lines sit on the halves of a cell, not on `i * step`: the stage's own
-    grid puts a line on every edge and none through its middle, because seven
-    whole cells leave the centre mid-cell. Drawing the texture half a cell over
-    is what makes the two grids meet instead of running a cell out of phase. The
-    half-pixel offset lands the one-pixel stroke on a whole texel.
+    With an odd count the lines sit on the halves of a cell, not on `i * step`:
+    the opening then has a line on every edge and none through its middle, which
+    is what makes the two grids meet. With an even count the opening's centre is
+    itself a line, so the lines stay on `i * step`. The half-pixel offset lands
+    the one-pixel stroke on a whole texel.
   */
-  for (let i = 0; i < CELLS; i++) {
-    const p = (i + 0.5) * cellPx + 0.5
+  const shift = props.cells % 2 === 1 ? 0.5 : 0
+  for (let i = 0; i < props.cells; i++) {
+    const p = (i + shift) * cellPx + 0.5
     ctx.moveTo(p, 0)
     ctx.lineTo(p, size)
     ctx.moveTo(0, p)
@@ -315,6 +322,8 @@ watch(() => props.fog, buildFog)
 watch(k, applyFogScale)
 // The darkening lives in the geometry's vertex colours, so the dials rebuild it.
 watch([() => props.opacity, () => props.diffuse], buildRoomGeometry)
+// The cell count lives in the room's texture.
+watch(() => props.cells, buildRoom)
 
 function repaint() {
   buildRoom()

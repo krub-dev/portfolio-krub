@@ -55,9 +55,10 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 
         <h1 class="headline">
           {{ hero.line1 }}<br />
-          {{ hero.line2 }}<br />
-          {{ hero.line3pre }}<span class="accent">{{ hero.accent }}</span>{{ hero.line3post }}
+          <span class="accent">{{ hero.line2 }}</span>
         </h1>
+
+        <p class="skills">{{ hero.skills }}</p>
 
         <span class="rule" aria-hidden="true" />
 
@@ -117,6 +118,17 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 
 .accent {
   color: var(--acc-text);
+}
+
+/* The disciplines line, the same one the banners carry, in the mono the site
+   uses for labels. */
+.skills {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 1.1vw, 15px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-2);
 }
 
 .rule {

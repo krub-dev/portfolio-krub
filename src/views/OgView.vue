@@ -29,6 +29,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import BrandLogo from '../components/base/BrandLogo.vue'
+import SpeechBubble from '../components/base/SpeechBubble.vue'
 import AppearanceControl from '../components/chrome/AppearanceControl.vue'
 import LemonPet from '../components/chrome/LemonPet.vue'
 import LogoScene from '../components/sections/LogoScene.vue'
@@ -120,6 +121,62 @@ const gridStyle = computed(() => {
     backgroundPosition: `${slot.value.x * CELL}px ${slot.value.y * CELL}px`,
   }
 })
+
+/*
+  The LinkedIn banner's own switches and slot, kept apart from the card's. The
+  slot is the 3D box in whole cells of the page grid: it is placed and sized from
+  x/y/size, the room is divided into the same number of cells, and the background
+  grid starts at its corner — so the room's lines always land on the page's.
+*/
+const liGridOn = ref(true)
+const liLemon = ref(true)
+const liBubble = ref(true)
+// The cell size of the banner's own grid, so the grid can be made coarser or
+// finer and the slot still lands on its lines.
+const liCell = ref(72)
+const liSlot = ref({ x: 15, y: 1, size: 4 })
+// Nudges, in px: the middle column, and Limonacho's bubble off its column.
+const liCenterX = ref(0)
+const liBubbleX = ref(-30)
+// The lockup: its size, and where it sits from the top-left.
+const liBrandSize = ref(48)
+const liBrandX = ref(0)
+const liBrandY = ref(0)
+
+// The README banner (1280x640, 2:1 — GitHub's social-preview size). Same pieces
+// as the card, no photo band to dodge, so the column and the mark are balanced.
+//
+// Its grid is defined by a column count rather than a pixel cell, so it always
+// starts at the banner's edge and ends on the other one — 1280/cols is the cell,
+// and the height (half the width) comes out at cols/2 rows for an even count.
+const ghLemon = ref(true)
+const ghGrid = ref(true)
+const ghCols = ref(16)
+const ghSlot = ref({ x: 8, y: 1, size: 6 })
+const ghCell = computed(() => 1280 / ghCols.value)
+
+const ghStageStyle = computed(() => ({
+  left: `${ghSlot.value.x * ghCell.value}px`,
+  top: `${ghSlot.value.y * ghCell.value}px`,
+  width: `${ghSlot.value.size * ghCell.value}px`,
+  height: `${ghSlot.value.size * ghCell.value}px`,
+}))
+
+const ghGridStyle = computed(() => ({
+  backgroundSize: `${ghCell.value}px ${ghCell.value}px`,
+}))
+
+const liStageStyle = computed(() => ({
+  left: `${liSlot.value.x * liCell.value}px`,
+  top: `${liSlot.value.y * liCell.value}px`,
+  width: `${liSlot.value.size * liCell.value}px`,
+  height: `${liSlot.value.size * liCell.value}px`,
+}))
+
+const liGridStyle = computed(() => ({
+  backgroundSize: `${liCell.value}px ${liCell.value}px`,
+  backgroundPosition: `${liSlot.value.x * liCell.value}px ${liSlot.value.y * liCell.value}px`,
+}))
 </script>
 
 <template>
@@ -226,6 +283,185 @@ const gridStyle = computed(() => {
       </div>
 
       <div v-if="showLemon" class="pet">
+        <LemonPet />
+      </div>
+    </div>
+
+    <header class="bar">
+      <p class="eyebrow">dev only · linkedin</p>
+      <p class="size">1584 × 396</p>
+
+      <div class="controls">
+        <label class="toggle"><input v-model="liLemon" type="checkbox" />Lemon</label>
+        <label class="toggle"><input v-model="liBubble" type="checkbox" />Bubble</label>
+        <label class="toggle"><input v-model="liGridOn" type="checkbox" />Grid</label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">slot · cells</span>
+        <label class="field">x<input v-model.number="liSlot.x" type="number" min="0" max="60" /></label>
+        <label class="field">y<input v-model.number="liSlot.y" type="number" min="0" max="20" /></label>
+        <label class="field"
+          >size<input v-model.number="liSlot.size" type="number" min="1" max="20"
+        /></label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">cell</span>
+        <label class="field"
+          ><input v-model.number="liCell" type="number" min="12" max="200" step="2"
+        /></label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">center x</span>
+        <label class="field"
+          ><input v-model.number="liCenterX" type="number" step="4"
+        /></label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">bubble x</span>
+        <label class="field"
+          ><input v-model.number="liBubbleX" type="number" step="4"
+        /></label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">logo</span>
+        <label class="field"
+          >size<input v-model.number="liBrandSize" type="number" min="16" max="120" step="2"
+        /></label>
+        <label class="field">x<input v-model.number="liBrandX" type="number" step="4" /></label>
+        <label class="field">y<input v-model.number="liBrandY" type="number" step="4" /></label>
+      </div>
+    </header>
+
+    <!--
+      The LinkedIn banner: 1584x396, the personal-profile cover size. The lockup
+      sits alone at the top-left, clear of the profile photo's corner; the card's
+      own column — name, headline, disciplines, place, mail — holds the middle, and
+      the 3D mark the right. Its grid is measured to the mark's box, so the two
+      read as one.
+    -->
+    <div class="banner banner-li">
+      <div v-if="liGridOn" class="grid li-grid" :style="liGridStyle" aria-hidden="true" />
+
+      <div class="li-left" :style="{ transform: `translate(${liBrandX}px, ${liBrandY}px)` }">
+        <div class="li-brand">
+          <BrandLogo :height="liBrandSize" />
+          <span class="brand-dev" :style="{ fontSize: `${liBrandSize * 0.83}px` }">.dev</span>
+        </div>
+      </div>
+
+      <div class="li-center" :style="{ transform: `translateX(${liCenterX}px)` }">
+        <p class="name"><span class="acc">K</span>IKO<br /><span class="acc">RUB</span>IO</p>
+
+        <h2 class="headline">FULL STACK<br /><span class="accent">DEVELOPER</span></h2>
+
+        <p class="line skills">Frontend · Backend · 3D · Applied AI</p>
+
+        <span class="rule" aria-hidden="true" />
+
+        <!-- English, like the rest of the card: LinkedIn is not toggled. -->
+        <p class="line place">{{ copy.marquee.en[1] }}</p>
+        <p class="line mail">{{ email }}</p>
+      </div>
+
+      <div class="li-stage" :style="liStageStyle" aria-hidden="true">
+        <Suspense>
+          <LogoScene
+            :halo-on="armed"
+            :room="showRoom"
+            :opacity="opacity"
+            :diffuse="diffuse"
+            :cells="liSlot.size"
+            :mark-scale="markScale"
+            @ready="onReady"
+          />
+        </Suspense>
+      </div>
+
+      <div v-if="liLemon" class="li-pet">
+        <SpeechBubble
+          v-if="liBubble"
+          :style="{ left: `${liBubbleX}px` }"
+          text="Let's connect!"
+          :live="false"
+        />
+        <LemonPet />
+      </div>
+    </div>
+
+    <header class="bar">
+      <p class="eyebrow">dev only · github</p>
+      <p class="size">1280 × 640</p>
+
+      <div class="controls">
+        <label class="toggle"><input v-model="ghLemon" type="checkbox" />Lemon</label>
+        <label class="toggle"><input v-model="ghGrid" type="checkbox" />Grid</label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">slot · cells</span>
+        <label class="field">x<input v-model.number="ghSlot.x" type="number" min="0" max="30" /></label>
+        <label class="field">y<input v-model.number="ghSlot.y" type="number" min="0" max="12" /></label>
+        <label class="field"
+          >size<input v-model.number="ghSlot.size" type="number" min="1" max="12"
+        /></label>
+      </div>
+
+      <div class="slot-controls">
+        <span class="size">cols</span>
+        <label class="field"
+          ><input v-model.number="ghCols" type="number" min="4" max="40" step="2"
+        /></label>
+      </div>
+    </header>
+
+    <!--
+      The GitHub banner: 1280x640, 2:1 — the size GitHub asks for a repository's
+      social preview, and what a README header is read at once scaled down. The
+      card's column on the left, the 3D mark on the right, Limonacho in the corner.
+    -->
+    <div class="banner banner-gh">
+      <div v-if="ghGrid" class="grid gh-grid" :style="ghGridStyle" aria-hidden="true" />
+
+      <div class="left">
+        <p class="brand">
+          <BrandLogo :height="20" />
+          <span class="brand-dev">.dev</span>
+        </p>
+
+        <p class="name"><span class="acc">K</span>IKO<br /><span class="acc">RUB</span>IO</p>
+
+        <h1 class="headline">FULL STACK<br /><span class="accent">DEVELOPER</span></h1>
+
+        <p class="line skills">Frontend · Backend · 3D · Applied AI</p>
+
+        <span class="rule" aria-hidden="true" />
+
+        <div class="details">
+          <p class="line place">{{ copy.marquee.en[1] }}</p>
+          <p class="line mail">{{ email }}</p>
+        </div>
+      </div>
+
+      <div class="gh-mark" :style="ghStageStyle" aria-hidden="true">
+        <Suspense>
+          <LogoScene
+            :halo-on="armed"
+            :room="showRoom"
+            :opacity="opacity"
+            :diffuse="diffuse"
+            :cells="ghSlot.size"
+            :mark-scale="markScale"
+            @ready="onReady"
+          />
+        </Suspense>
+      </div>
+
+      <div v-if="ghLemon" class="pet">
         <LemonPet />
       </div>
     </div>
@@ -458,5 +694,130 @@ const gridStyle = computed(() => {
 
 .pet :deep(.bubble) {
   display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   The LinkedIn banner: 1584x396, 4:1. The profile photo is drawn over the
+   bottom-left (a ~360px circle), so the name sits above it and nothing important
+   goes in that corner; the sides are cropped on mobile, so the content stays off
+   the far edges. The grid follows the 3D box (see liGridStyle).
+   --------------------------------------------------------------------------- */
+.banner-li {
+  width: 1584px;
+  height: 396px;
+  padding: 0 56px;
+  /* Three columns of equal side width, so the lockup is centred in the banner
+     whatever the name and the mark measure. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.li-grid {
+  /* Size and offset come from the mark's box, measured on mount. */
+  background-size: 72px 72px;
+}
+
+/* The name, above the profile photo: the photo's circle tops out around 216px
+   down, so the column starts high and stops before it. */
+/* The lockup on its own, top-left and clear of the photo's corner. */
+.li-left {
+  justify-self: start;
+  align-self: start;
+  margin-top: 40px;
+}
+
+.li-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+/* The .dev size rides with the mark's, set inline from the lockup dial. */
+
+/* The card's column, centred and a size up: name, headline, disciplines, rule,
+   place and mail, the same order as the card above. */
+.li-center {
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+}
+
+.banner-li .name {
+  font-size: 32px;
+}
+
+.banner-li .headline {
+  font-size: 54px;
+  text-align: left;
+}
+
+.banner-li .rule {
+  width: 104px;
+}
+
+.banner-li .skills,
+.banner-li .place,
+.banner-li .mail {
+  font-size: 15px;
+}
+
+/* The 3D mark. Its place and size come from the slot (x/y/size, in cells); the
+   scene fills it. */
+.li-stage {
+  position: absolute;
+}
+
+/* Limonacho, out of his fixed corner, parked at the banner's lower-right with his
+   line above him and nudged to his right. */
+.li-pet {
+  position: absolute;
+  right: 30px;
+  bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* Offset from its column by the bubble-x dial (see the template). */
+.li-pet :deep(.bubble) {
+  position: relative;
+}
+
+.li-pet :deep(.pet) {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  transform: scale(1.1);
+  transform-origin: bottom left;
+}
+
+/* The banner says its own line, so the lemon's own bubble stays down. */
+.li-pet :deep(.pet .bubble) {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   The GitHub banner: 1280x640, 2:1. The card's own layout — column left, mark
+   right — at the size a repository's social preview wants.
+   --------------------------------------------------------------------------- */
+.banner-gh {
+  width: 1280px;
+  height: 640px;
+}
+
+.gh-grid {
+  /* Size comes from ghGridStyle: a column count, so the grid meets both edges. */
+}
+
+/* The 3D mark. Its place and size come from the slot (x/y/size, in cells). */
+.gh-mark {
+  position: absolute;
 }
 </style>

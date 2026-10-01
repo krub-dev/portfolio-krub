@@ -56,6 +56,8 @@ const props = defineProps({
   // How dark the room goes, and how much of that the opening shares. See SceneRig.
   opacity: { type: Number, default: 0 },
   diffuse: { type: Number, default: 0.65 },
+  // How many grid cells the room's opening is divided into. See SceneRig.
+  cells: { type: Number, default: 7 },
   // A multiplier on the mark's fit-to-stage size, so it can be sized by hand
   // without shrinking the room. See LogoModel.
   markScale: { type: Number, default: 1 },
@@ -156,6 +158,7 @@ defineExpose({ logoGroup })
         :room="props.room"
         :opacity="props.opacity"
         :diffuse="props.diffuse"
+        :cells="props.cells"
       />
 
       <LogoModel

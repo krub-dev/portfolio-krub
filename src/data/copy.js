@@ -12,28 +12,24 @@
       labels the UI needs  ->  src/locales/
 
   The headline is split into parts so no HTML has to live in a data file. The
-  template renders line1 / line2 / then line3pre + accent + line3post, with the
-  accent word wrapped in a span coloured var(--acc-text).
+  template renders line1 / line2, with line2 wrapped in a span coloured
+  var(--acc-text), and then the skills line under it.
 */
 export const copy = {
   hero: {
     en: {
       badge: 'Available',
-      line1: 'I build things',
-      line2: 'that hold up',
-      line3pre: 'on the ',
-      accent: 'backend',
-      line3post: '.',
-      body: 'Full Stack Developer in Murcia, open to Barcelona and remote, leaning into backend: Java 17 with Spring Boot, Node and Express, and relational databases. Vue on the front when needed. I used to do 3D, and it still shows in how I look at things.',
+      line1: 'FULL STACK',
+      line2: 'DEVELOPER',
+      skills: 'Frontend · Backend · 3D · Applied AI',
+      body: 'Based in Murcia after years in Barcelona, open to remote work or roles in either city. I build full stack web apps: from backend services in Java (Spring Boot), Node (Express), and relational databases to Vue on the frontend. My background in 3D still shows: an eye for detail, on-time delivery, and clear client communication. I use AI, but with judgment: I review it and stand behind what I ship.',
     },
     es: {
       badge: 'Disponible',
-      line1: 'Desarrollo cosas',
-      line2: 'que aguantan',
-      line3pre: 'el ',
-      accent: 'backend',
-      line3post: '.',
-      body: 'Desarrollador Full Stack en Murcia, abierto a Barcelona y remoto, girando hacia backend: Java 17 con Spring Boot, Node y Express, y bases de datos relacionales. Frontend en Vue cuando toca. Antes hacía 3D, y todavía se me nota en el ojo.',
+      line1: 'DESARROLLADOR',
+      line2: 'FULL STACK',
+      skills: 'Frontend · Backend · 3D · Applied AI',
+      body: 'Con base en Murcia tras años en Barcelona, disponible para ambas ciudades o en remoto. Desarrollo aplicaciones web full stack, abarcando desde backend en Java (Spring Boot), Node (Express) y bases de datos relacionales hasta Vue en el frontend. Vengo del 3D y se nota: atención al detalle, entrega puntual y trato claro con el cliente. Uso IA, pero con criterio: la reviso y respondo por lo que entrego.',
     },
   },
 
@@ -56,8 +52,8 @@ export const copy = {
   // The marquee loops these two phrases forever, joined by the separator.
   // Add or remove entries freely; the band duplicates whatever it is given.
   marquee: {
-    en: ['Fullstack developer → backend', 'Murcia · Barcelona · remote · Spain'],
-    es: ['Desarrollador fullstack → backend', 'Murcia · Barcelona · remoto · España'],
+    en: ['Full Stack Developer', 'Murcia · Barcelona · remote · Spain'],
+    es: ['Desarrollador Full Stack', 'Murcia · Barcelona · remoto · España'],
   },
 
   // The 404 page. The title and the button label are interface strings and live
