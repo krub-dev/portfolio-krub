@@ -193,25 +193,25 @@ the privacy notice and the consent the law asks for.
 
 ## Performance
 
-Re-measured against the deployment on 2026-10-02. Accessibility, best practices and SEO are 100;
-performance is where the weight shows. The page is 2.2 MB and over half of it is images, with a
-694 KB third-party and an 885 KB 3D chunk in the mix. Three fixes, in impact order.
+Re-measured against the deployment on 2026-10-02. Accessibility, best practices and SEO were already
+100; performance started at 60 mobile / 66 desktop and ended at **96 mobile / 100 desktop**. Four
+fixes, in impact order. What is left in the report — image delivery (526 KB), the static assets'
+one-day cache lifetime (366 KB) and a render-blocking request (300 ms) — is down here for another
+day; the scores are where they should be.
 
-- [ ] **Load Turnstile only when the form is in view.** The captcha script
-  (`challenges.cloudflare.com`) is 694 KB and loads in `ContactForm`'s `onMounted`, so every visitor
-  pays for it long before reaching the contact section. Load it when the form approaches the viewport
-  instead, or on the first interaction with it.
-- [ ] **Keep the `LogoScene` chunk off a phone.** `HeroSection` gates the stage behind `!narrow`
-  (≤900 px), so on a phone it should never mount, yet the 885 KB chunk shows up in the mobile run.
-  Work out whether it is a `modulepreload`, a stray import or a measurement artefact, and make the
-  phone skip it entirely.
-- [ ] **Lighten the card images.** The four krub.dev covers (and the hero) are heavy JPEGs for what
-  the card and the modal actually show. Recompress them, or move to WebP/AVIF with a JPEG fallback.
-  This is the 1.1 MB of the 2.2 MB page.
-- [ ] **Start the 3D only when the shutter is raised.** On desktop the `LogoScene` chunk (885 KB)
-  and its WebGL start-up are what keep the TBT high (~450 ms); on mobile it never loads. Behind the
-  closed shutter the scene is hidden anyway, so it is now imported on the first reveal rather than on
-  mount, and the failure timer moved with it. Verify on a real browser and re-measure.
+- [x] **Load Turnstile only when the form is in view.** The captcha script
+  (`challenges.cloudflare.com`) is 694 KB and loaded in `ContactForm`'s `onMounted`, so every visitor
+  paid for it before reaching the contact section. It is now pulled in by an `IntersectionObserver`
+  as the form approaches the viewport.
+- [x] **Keep the `LogoScene` chunk off a phone.** Verified: at 412 px the site makes **zero**
+  requests for the chunk. The `!narrow` gate in `HeroSection` was already doing its job; the mobile
+  appearance in the first run was a measurement artefact.
+- [x] **Lighten the card images.** `scripts/optimize-images.mjs` re-encodes them to 1600 px at a
+  sane quality: the four krub.dev covers went from 1.4 MB to 0.54 MB (`npm run optimize:images`).
+- [x] **Start the 3D only when the shutter is raised.** The `LogoScene` chunk (885 KB) and its WebGL
+  start-up were what kept the desktop TBT high. Behind the closed shutter the scene is hidden anyway,
+  so it is imported on the first reveal rather than on mount, and the failure timer moved with it.
+  Desktop TBT fell from ~450 ms to 10 ms.
 
 ## Design and sections
 
