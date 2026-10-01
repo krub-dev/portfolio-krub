@@ -47,14 +47,17 @@ const statusText = computed(() => {
 })
 
 /*
-  Turnstile, loaded only with the form and only when its site key is set, so no
-  third-party script reaches a visitor who is not going to submit. The token it
-  drops is single-use, so the widget is reset after every attempt.
+  Turnstile, loaded only when the form is about to be seen and only when its site
+  key is set. The script is 694 KB, so a visitor who never scrolls this far never
+  fetches it: an IntersectionObserver loads it as the widget approaches the
+  viewport, the same way AboutSection warms the CV. The token it drops is
+  single-use, so the widget is reset after every attempt.
 */
 const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
 const turnstileEl = ref(null)
 let widgetId = null
 let loader = null
+let observer = null
 
 function loadTurnstile() {
   if (!loader) {
@@ -70,8 +73,7 @@ function loadTurnstile() {
   return loader
 }
 
-onMounted(() => {
-  if (!siteKey) return
+function renderTurnstile() {
   loadTurnstile().then(() => {
     widgetId = window.turnstile.render(turnstileEl.value, {
       sitekey: siteKey,
@@ -81,9 +83,23 @@ onMounted(() => {
       'error-callback': () => (token.value = ''),
     })
   })
+}
+
+onMounted(() => {
+  if (!siteKey) return
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      renderTurnstile()
+    },
+    { rootMargin: '400px' },
+  )
+  observer.observe(turnstileEl.value)
 })
 
 onBeforeUnmount(() => {
+  observer?.disconnect()
   if (widgetId !== null && window.turnstile) window.turnstile.remove(widgetId)
 })
 
