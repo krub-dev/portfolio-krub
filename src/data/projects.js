@@ -164,7 +164,9 @@ export const projects = [
     images: ['/assets/img/showroom/desktop.jpg', '/assets/img/showroom/responsive.jpg'],
     slides: 2,
     repo: 'https://github.com/krub-dev/SHOWROOM-FULLSTACK-M3',
-    live: 'https://showroom-fullstack-m3-production.up.railway.app/',
+    // The Railway deploy is down as of 2026-10-02; the card and the modal keep
+    // the live link hidden until it is redeployed and this is set again.
+    live: null,
     stack: ['Vue 3', 'Express', 'PostgreSQL', 'Prisma', 'Jest', 'Railway'],
     en: {
       name: 'Showroom',

@@ -137,8 +137,11 @@ the privacy notice and the consent the law asks for.
   subtraction. **(owner)**
 - [ ] **Bing Webmaster Tools.** The same five minutes as Google Search Console, which is done and
   has the sitemap submitted. Bing also feeds DuckDuckGo. **(owner)**
-- [ ] **Make the repository public.** When the pending work is done. The v1 portfolio repository is
-  archived and its links redirect here. **(owner)**
+- [x] **Make the repository public.** Done 2026-10-02. The v1 portfolio repository is archived and
+  its links redirect here. **(owner)**
+- [ ] **Redeploy Showroom.** Its Railway deploy is down (404 as of 2026-10-02), so the card and the
+  modal carry no live link: `projects.js` has `live: null` with the old URL in a comment. Bring the
+  deploy back, or point the link somewhere else, and set the field again. **(owner)**
 - [x] **Audit the documentation against the code.** Every `.md` here plus the README. It has
   drifted once already — four claims in the README were untrue and two files described
   components and composables that do not exist. Worth doing while the build is still fresh in
@@ -146,10 +149,11 @@ the privacy notice and the consent the law asks for.
   Done on 2026-09-16: the README, `components.md` and `design-spec.md` were checked against the
   code and corrected, and the one deliberate divergence that had no record (the magnetic pull)
   went into `decisions.md` as 47.
-- [ ] **Review the documentation once more before the repo goes public.** The same sweep, as the
-  last step before the repository is made public, because the code moves between now and then
-  and this file is only as good as its last check. It is not a first reading: the 2026-09-16
-  pass is the baseline it starts from.
+- [x] **Review the documentation once more before the repo goes public.** Done 2026-10-02: a full
+  pass over `README.md` (rewritten, with a Performance section), `components.md`, `design-spec.md`
+  and `decisions.md`, checked claim by claim against the code. It is not a first reading — the
+  2026-09-16 pass was the baseline. The findings and fixes are in each file; the point of the pass
+  was to make the docs describe what the code actually does.
 
 ## Config, performance and deployment
 
@@ -193,25 +197,25 @@ the privacy notice and the consent the law asks for.
 
 ## Performance
 
-Re-measured against the deployment on 2026-10-02. Accessibility, best practices and SEO are 100;
-performance is where the weight shows. The page is 2.2 MB and over half of it is images, with a
-694 KB third-party and an 885 KB 3D chunk in the mix. Three fixes, in impact order.
+Re-measured against the deployment on 2026-10-02. Accessibility, best practices and SEO were already
+100; performance started at 60 mobile / 66 desktop and ended at **96 mobile / 100 desktop**. Four
+fixes, in impact order. What is left in the report — image delivery (526 KB), the static assets'
+one-day cache lifetime (366 KB) and a render-blocking request (300 ms) — is down here for another
+day; the scores are where they should be.
 
-- [ ] **Load Turnstile only when the form is in view.** The captcha script
-  (`challenges.cloudflare.com`) is 694 KB and loads in `ContactForm`'s `onMounted`, so every visitor
-  pays for it long before reaching the contact section. Load it when the form approaches the viewport
-  instead, or on the first interaction with it.
-- [ ] **Keep the `LogoScene` chunk off a phone.** `HeroSection` gates the stage behind `!narrow`
-  (≤900 px), so on a phone it should never mount, yet the 885 KB chunk shows up in the mobile run.
-  Work out whether it is a `modulepreload`, a stray import or a measurement artefact, and make the
-  phone skip it entirely.
-- [ ] **Lighten the card images.** The four krub.dev covers (and the hero) are heavy JPEGs for what
-  the card and the modal actually show. Recompress them, or move to WebP/AVIF with a JPEG fallback.
-  This is the 1.1 MB of the 2.2 MB page.
-- [ ] **Start the 3D only when the shutter is raised.** On desktop the `LogoScene` chunk (885 KB)
-  and its WebGL start-up are what keep the TBT high (~450 ms); on mobile it never loads. Behind the
-  closed shutter the scene is hidden anyway, so it is now imported on the first reveal rather than on
-  mount, and the failure timer moved with it. Verify on a real browser and re-measure.
+- [x] **Load Turnstile only when the form is in view.** The captcha script
+  (`challenges.cloudflare.com`) is 694 KB and loaded in `ContactForm`'s `onMounted`, so every visitor
+  paid for it before reaching the contact section. It is now pulled in by an `IntersectionObserver`
+  as the form approaches the viewport.
+- [x] **Keep the `LogoScene` chunk off a phone.** Verified: at 412 px the site makes **zero**
+  requests for the chunk. The `!narrow` gate in `HeroSection` was already doing its job; the mobile
+  appearance in the first run was a measurement artefact.
+- [x] **Lighten the card images.** `scripts/optimize-images.mjs` re-encodes them to 1600 px at a
+  sane quality: the four krub.dev covers went from 1.4 MB to 0.54 MB (`npm run optimize:images`).
+- [x] **Start the 3D only when the shutter is raised.** The `LogoScene` chunk (885 KB) and its WebGL
+  start-up were what kept the desktop TBT high. Behind the closed shutter the scene is hidden anyway,
+  so it is imported on the first reveal rather than on mount, and the failure timer moved with it.
+  Desktop TBT fell from ~450 ms to 10 ms.
 
 ## Design and sections
 
@@ -375,6 +379,7 @@ kept as the record rather than deleted.
 ## Testing
 
 - [x] **The e2e suite went flaky while the hero was on screen.** Explained: Playwright runs several browsers at once, and each Chromium worker holding the hero's WebGL context made the frames stall, so tests that depend on animation timing failed at random. Fixed by skipping the 3D scene under `navigator.webdriver` (Playwright sets that flag), so no worker opens a WebGL context. The suite is run with `--workers=1` by habit; parallel workers are still occasionally flaky, and that part is deferred — it costs time, not correctness.
+- [ ] **`never covers the last section` is flaky.** The test that scrolls to the bottom and checks the contact section ends where the footer begins passes on its own and fails in the full suite roughly one run in three. It reads a footer `y` while the slide-in settles, so the likely fix is to poll the second measurement too, not just the first. Deferred; it costs a re-run, not correctness.
 
 ## Final audit
 
