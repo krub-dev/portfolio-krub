@@ -191,6 +191,24 @@ the privacy notice and the consent the law asks for.
   somewhere (today there is none, so nothing is being collected), watch a week, then raise it. All our
   sending aligns — SPF and DKIM both pass for `krub.dev` — so the risk is low.
 
+## Performance
+
+Re-measured against the deployment on 2026-10-02. Accessibility, best practices and SEO are 100;
+performance is where the weight shows. The page is 2.2 MB and over half of it is images, with a
+694 KB third-party and an 885 KB 3D chunk in the mix. Three fixes, in impact order.
+
+- [ ] **Load Turnstile only when the form is in view.** The captcha script
+  (`challenges.cloudflare.com`) is 694 KB and loads in `ContactForm`'s `onMounted`, so every visitor
+  pays for it long before reaching the contact section. Load it when the form approaches the viewport
+  instead, or on the first interaction with it.
+- [ ] **Keep the `LogoScene` chunk off a phone.** `HeroSection` gates the stage behind `!narrow`
+  (≤900 px), so on a phone it should never mount, yet the 885 KB chunk shows up in the mobile run.
+  Work out whether it is a `modulepreload`, a stray import or a measurement artefact, and make the
+  phone skip it entirely.
+- [ ] **Lighten the card images.** The four krub.dev covers (and the hero) are heavy JPEGs for what
+  the card and the modal actually show. Recompress them, or move to WebP/AVIF with a JPEG fallback.
+  This is the 1.1 MB of the 2.2 MB page.
+
 ## Design and sections
 
 - [x] **An accent theme switcher.** Five palettes chosen with `data-accent` — the brand yellow plus

@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "capture:tour": "node scripts/capture-tour.mjs",
-    "gif:video": "node scripts/video-to-gif.mjs"
+    "gif:video": "node scripts/video-to-gif.mjs",
+    "optimize:images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "@tresjs/core": "^5.9.0",
