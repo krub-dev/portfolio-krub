@@ -208,6 +208,10 @@ performance is where the weight shows. The page is 2.2 MB and over half of it is
 - [ ] **Lighten the card images.** The four krub.dev covers (and the hero) are heavy JPEGs for what
   the card and the modal actually show. Recompress them, or move to WebP/AVIF with a JPEG fallback.
   This is the 1.1 MB of the 2.2 MB page.
+- [ ] **Start the 3D only when the shutter is raised.** On desktop the `LogoScene` chunk (885 KB)
+  and its WebGL start-up are what keep the TBT high (~450 ms); on mobile it never loads. Behind the
+  closed shutter the scene is hidden anyway, so it is now imported on the first reveal rather than on
+  mount, and the failure timer moved with it. Verify on a real browser and re-measure.
 
 ## Design and sections
 

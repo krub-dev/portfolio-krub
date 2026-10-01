@@ -241,18 +241,27 @@ function scheduleSnap() {
   snapFrame = requestAnimationFrame(snapToGrid)
 }
 
+/*
+  Slow is not broken. The scene loads a chunk and then builds; if it has not
+  reported by now something is wrong with it rather than slow, and the flat mark
+  is better than an empty frame.
+
+  The timer starts on the reveal, not on mount: until the shutter is raised the
+  chunk is not even requested, so "not ready" would be the shutter being down
+  rather than a failure.
+*/
+watch(revealed, (isRevealed) => {
+  if (!isRevealed) return
+  clearTimeout(failTimer)
+  failTimer = window.setTimeout(() => {
+    if (!ready.value) failed.value = true
+  }, 8000)
+})
+
 onMounted(() => {
   scheduleSnap()
   window.addEventListener('resize', scheduleSnap)
   document.fonts?.ready.then(scheduleSnap)
-  /*
-    Slow is not broken. The scene loads a chunk and then builds; if it has not
-    reported by now something is wrong with it rather than slow, and the flat mark
-    is better than an empty frame.
-  */
-  failTimer = window.setTimeout(() => {
-    if (!ready.value) failed.value = true
-  }, 8000)
 })
 
 onUnmounted(() => {
@@ -385,8 +394,15 @@ defineExpose({ exportModel })
       <!-- The fallback. It paints only if the scene never came up. -->
       <div v-if="failed" class="mark" aria-hidden="true" />
 
+      <!--
+        The scene is not imported until the shutter is raised. Behind the closed
+        blind it is hidden anyway, so a visitor who never opens it never downloads
+        the ~885 KB of TresJS and Three, nor pays for the WebGL start-up: the first
+        reveal is what pulls the chunk in. The fallback covers the beat while it
+        loads.
+      -->
       <div
-        v-if="!failed"
+        v-if="!failed && revealed"
         class="scene"
         :class="{ fade: props.entrance === 'fade', shown: ready }"
         aria-hidden="true"
