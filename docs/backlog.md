@@ -34,16 +34,18 @@ published.
 
 1. The pre-publication documentation review.
 2. Re-measure Lighthouse against the deployment, now that it is the current build.
-3. The Open Graph artwork, being designed at `/og`.
+3. The Open Graph artwork is designed at `/og` — the card, the LinkedIn cover and the README
+   banner. The README one still needs its capture, and the `/og` scaffolding comes out before the
+   repository goes public.
 
 The contact form works end to end now — it sends by Resend, with Turnstile and a rate limit — and it
 carries its privacy notice and a required consent box, both linking to `/privacy`. The domain carries
 a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, sending as through
 Resend's SMTP), and the site points at it everywhere.
 
-**The substantial work still open:** the Open Graph artwork, sharper screenshots for krub.dev, the
-LinkedIn banner and profile update, the GitHub profile README, the prose reread, Bing Webmaster Tools,
-raising the DMARC policy, and making the repository public.
+**The substantial work still open:** sharper screenshots for krub.dev, the LinkedIn profile update,
+the GitHub profile README, a prose pass over the whole site, folding the old hero bio into `/me`,
+updating the CV, Bing Webmaster Tools, raising the DMARC policy, and making the repository public.
 
 ---
 
@@ -90,25 +92,34 @@ the privacy notice and the consent the law asks for.
   until it is deployed again, sideForge shows its logo, since it is backend-only for now, and krub.dev
   has screenshots of itself. All 1280×800 JPEG, under `public/assets/img/<slug>/`. Better ones when
   there is something better to shoot. **(owner)**
-- [ ] **Sharper screenshots for krub.dev.** The four are 1280×800 viewport captures at 1×, and they
-  read soft in the modal, which shows them at up to ~1000 CSS px wide — 2000 device px on a retina
-  screen. Capture again at `deviceScaleFactor: 2` and keep them at 2560×1600, or shoot a wider
-  viewport and downscale. The card is fine either way; the modal is what shows the difference.
-- [ ] **The Open Graph image.** Being designed on a dev-only page, `/og`
+- [ ] **Sharper screenshots for krub.dev.** The four on its card are 1280×800 viewport captures at 1×,
+  and they read soft in the modal, which shows them at up to ~1000 CSS px wide — 2000 device px on a
+  retina screen. Capture again at `deviceScaleFactor: 2` and keep them at 2560×1600, or shoot a wider
+  viewport and downscale. The card wants fresh ones anyway now that the site has changed, so both
+  jobs go together. The card is fine either way; the modal is what shows the difference. **(owner)**
+- [x] **The Open Graph image.** Done 2026-10-01: designed on a dev-only page, `/og`
   (`src/views/OgView.vue`), which draws the card at its real 1200×630 out of the site's own pieces —
-  the 3D mark, lit, and Limonacho — instead of screenshots of them. **The page is scaffolding.** When
-  the design settles, the PNG is taken from it by hand and the page, its route and the cv tool's
-  `build-og.mjs` come out before the repository goes public: a Playwright pipeline for one image is
-  more machinery than the image is worth. Two earlier attempts are worth remembering: a hand-drawn copy
-  of the hero, which drifts and cannot draw the 3D at all, and a capture of the built site, which
-  dragged the cursor into the middle of the mark and clipped the mascot's leaf off. The structured data
-  beside it is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in `sameAs` and in
-  the `twitter:` tags on purpose — it ties the domain to the profile even though X is no longer a link
-  on the site.
-- [ ] **A final banner for LinkedIn and the GitHub profile README.** Same artwork as the Open Graph
-  card, so it comes with it.
+  the 3D mark, lit, and Limonacho. The card and the LinkedIn cover are captured and in
+  `public/assets/img/` (`og-banner.png`, `linkedin-banner.png`); the README/social-preview banner
+  (1280×640) is designed and pending its capture. **The page is still scaffolding**: it, its route and
+  the cv tool's `build-og.mjs` come out before the repository goes public — a Playwright pipeline for
+  one image is more machinery than the image is worth. Two earlier attempts are worth remembering: a
+  hand-drawn copy of the hero, which drifts and cannot draw the 3D at all, and a capture of the built
+  site, which dragged the cursor into the middle of the mark and clipped the mascot's leaf off. The
+  structured data beside it is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in
+  `sameAs` and in the `twitter:` tags on purpose — it ties the domain to the profile even though X is
+  no longer a link on the site.
+- [x] **A final banner for LinkedIn and the GitHub profile README.** Done 2026-10-01, on `/og`: the
+  LinkedIn cover (1584×396, its left band kept clear for the profile photo) and the README/social
+  preview banner (1280×640), both out of the card's own pieces. The README one still needs its capture.
 - [ ] **Redo the GitHub profile README.** Bring it in line with the CV and the site, and fix the bug
   in it. **(owner)**
+- [ ] **Fold the old hero bio into `/me`.** The hero body was cut back to two lines; the detail it
+  dropped — the full stack range (Java/Node/Vue), the client side and the AI-with-judgment line —
+  belongs in the About, which already carries the 3D and the delivery. Rework `/me` and spread it
+  there. **(owner)**
+- [ ] **Update the CV.** The sources still carry the framing the site has moved away from (the
+  "backend focus" among it, and more); bring them in line with the current copy. **(owner)**
 - [x] **Finish the testimonials.** Done: the first real quote is in — Lourdes Campuzano of
   CreandoMientras, with her own mark in the avatar circle — and the pager now carries only that
   one, prepared for more to arrive. The vertical arrows went, replaced by scrollable dots. Long

@@ -22,14 +22,14 @@ export const copy = {
       line1: 'FULL STACK',
       line2: 'DEVELOPER',
       skills: 'Frontend · Backend · 3D · Applied AI',
-      body: 'Based in Murcia after years in Barcelona, open to remote work or roles in either city. I build full stack web apps: from backend services in Java (Spring Boot), Node (Express), and relational databases to Vue on the frontend. My background in 3D still shows: an eye for detail, on-time delivery, and clear client communication. I use AI, but with judgment: I review it and stand behind what I ship.',
+      body: 'Full Stack Developer based in Murcia after years in Barcelona. Open to remote, on-site or hybrid roles in either city. I come from 3D and it shows: detail, communication, deadlines.',
     },
     es: {
       badge: 'Disponible',
       line1: 'DESARROLLADOR',
       line2: 'FULL STACK',
       skills: 'Frontend · Backend · 3D · Applied AI',
-      body: 'Con base en Murcia tras años en Barcelona, disponible para ambas ciudades o en remoto. Desarrollo aplicaciones web full stack, abarcando desde backend en Java (Spring Boot), Node (Express) y bases de datos relacionales hasta Vue en el frontend. Vengo del 3D y se nota: atención al detalle, entrega puntual y trato claro con el cliente. Uso IA, pero con criterio: la reviso y respondo por lo que entrego.',
+      body: 'Desarrollador Full Stack con base en Murcia tras años en Barcelona. Disponible en remoto, presencial o híbrido en cualquiera de las dos ciudades. Vengo del 3D y se nota: detalle, comunicación y plazos.',
     },
   },
 
