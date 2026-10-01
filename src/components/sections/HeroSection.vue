@@ -109,10 +109,10 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 
 .headline {
   margin: 0;
-  font-size: clamp(38px, 6vw, 76px);
+  font-size: clamp(26px, 3vw, 40px);
   font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 0.98;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
   text-wrap: balance;
 }
 

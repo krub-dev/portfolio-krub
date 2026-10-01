@@ -47,7 +47,7 @@
   font-family: var(--font-mono);
   font-weight: 700;
   letter-spacing: 0.18em;
-  font-size: clamp(22px, 2.4vw, 32px);
+  font-size: clamp(30px, 3.8vw, 52px);
   line-height: 1;
   white-space: nowrap;
   color: var(--acc-text);
