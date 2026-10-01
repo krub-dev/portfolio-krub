@@ -351,6 +351,19 @@ section[id] {
   outline-color: var(--fg);
 }
 
+/* ---------------------------------------------------------------------------
+   Selection
+
+   The accent behind the highlight and --on-acc on the letters, so selecting a
+   paragraph looks like the rest of the site. --on-acc is the same colour the
+   filled controls put on the accent, so the pair is already contrast-checked,
+   and both follow the palette and the theme.
+   --------------------------------------------------------------------------- */
+::selection {
+  background: var(--acc);
+  color: var(--on-acc);
+}
+
 /* Stack icons that are monochrome-dark (Express, Prisma, Three.js, GitHub,
    Linux) are inverted in dark theme only, so they read against --surface-2. */
 [data-invert-dark] {
