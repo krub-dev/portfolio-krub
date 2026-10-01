@@ -42,6 +42,7 @@ App
 │   ├─ AppearanceControl (compact only)
 │   └─ LangButton        (compact only)
 ├─ ScrollProgress       (only where the route has a hero)
+├─ GridCell             (behind config.showGridCell)
 ├─ CursorFx
 ├─ LemonPet             (only where the route has a hero)
 │   └─ SpeechBubble
@@ -58,12 +59,13 @@ App
 │   │   ├─ SectionHeading
 │   │   ├─ TabSwitch
 │   │   ├─ TimelineItem ×n
+│   │   ├─ AvailabilityBadge
 │   │   └─ BaseButton (CV, behind config.showCv)
 │   ├─ ProjectsSection
 │   │   ├─ SectionHeading
 │   │   ├─ ProjectCard ×n
-│   │   ├─ GithubCard          (the rail's last slot: a dashed card to GitHub)
-│   │   └─ Testimonials         (optional, from config)
+│   │   └─ GithubCard          (the rail's last slot: a dashed card to GitHub)
+│   ├─ Testimonials         (optional, from config; between the Stack and Contact)
 │   └─ ContactSection
 │       ├─ SectionHeading
 │       ├─ TalkBand
@@ -90,9 +92,11 @@ App
 | Prop | Type | Default | Use |
 |---|---|---|---|
 | `variant` | `'solid' \| 'outline'` | `'outline'` | yellow fill / border |
-| `shape` | `'pill' \| 'square'` | `'pill'` | radius 999 / radius 10–12 |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 14 / 15–16 / 18–19px |
+| `shape` | `'pill' \| 'square'` | `'pill'` | both are 10px; the pill is no longer a capsule |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 14 / 15 / 18px |
 | `mono` | boolean | `false` | uses JetBrains Mono |
+| `type` | string | `'button'` | the `<button>`'s `type` |
+| `disabled` | boolean | `false` | greys it out and takes the pointer away |
 | `href` | string | — | external link; renders an `<a>` |
 | `to` | string | — | internal route; renders a `RouterLink`, so no reload |
 | `external` | boolean | `false` | adds `target="_blank" rel="noopener"` |
@@ -103,7 +107,7 @@ Renders a `<button>` when neither `to` nor `href` is given. Default slot: the co
 `click`.
 
 ### BaseModal
-The shell every dialog uses: the fixed backdrop (a flat scrim, no blur), the panel, the scroll lock
+The shell every dialog uses: the fixed backdrop (a scrim with a `blur(4px)`), the panel, the scroll lock
 behind it, the focus trap, the Escape key and the backdrop click. Props: `open`, `labelledby` (the id
 that names the dialog), `closeLabel` and `width` (the panel's cap — the CV wants a narrower one).
 Slots: `head` (the title, left), `actions` (whatever sits beside the close, right) and the default for
@@ -156,8 +160,12 @@ focus. See decision 73.
 Not live for a technology name, which changes as the pointer sweeps the grid.
 
 ### LangButton
-No props. The ES / EN button; calls `useLang().toggle()`. Used in the navbar on desktop and in the
-mobile menu header, so it is a component rather than inline markup.
+No props. The ES / EN button; calls `useLang().toggle()`. Used in the navbar on desktop, in the
+compact `SettingsMenu` and in the mobile menu header, so it is a component rather than inline markup.
+
+### BrandLogo
+Props: `height` (number, `22`) and `opacity` (number, `1`). The `krub` wordmark as inline SVG, in
+`--mark`. Used by the navbar, the footer and the `/og` banners.
 
 ### DotsIcon
 Prop: `open` (boolean). The four dots the mobile menu button and the desktop settings button share.
@@ -177,6 +185,7 @@ becoming a cross; the move is a CSS transform so it transitions. Reduced motion 
 | `shotLabel` | string (placeholder while there is no image) |
 | `image` | string \| null |
 | `stack` | array of strings (the first three are shown, joined by `·`) |
+| `current` | boolean (`false` — the rail's parked marker, for a touch screen) |
 
 Emits `open`.
 
@@ -238,9 +247,9 @@ nav links to.
 
 ### HeroSection
 `id="top"`. The hero wrapper itself — the element `usePastHero` measures, and the reason a route
-either has a hero or does not. Holds the badge, the headline, the two buttons, `BrandName` and the
-stage. Below 900px the badge moves into the text column and `LogoStage` is not mounted at all
-(decision 37), which is also why nothing 3D ever runs on a phone.
+either has a hero or does not. Holds the headline (two lines plus the disciplines line), the two
+buttons, `BrandName` and the stage. `LogoStage` is not mounted below 900px (decision 37), which is
+also why nothing 3D ever runs on a phone; the availability badge lives in `/me`, not here.
 
 ### MarqueeBar
 `items` (array of strings), `separator` (defaults to `//`), `duration` (defaults to `26s`).
@@ -252,8 +261,9 @@ repeat count is measured, since it depends on the viewport, the font and the lan
 No `id`: it is a band, not a destination.
 
 ### AboutSection
-`id="me"`. Three paragraphs, the experience / education / certifications tabs with their timeline,
-the CV button behind `config.showCv`, and the photo.
+`id="me"`. Four paragraphs plus the closing `.open` line, the experience / education / certifications
+tabs with their timeline, the availability badge over the photo, and the CV button behind
+`config.showCv`. Emits `open-cv` and `warm-cv`.
 
 ### ProjectsSection
 `id="projects"`. A horizontal rail of `ProjectCard`: a clipped viewport holding a track moved by
@@ -261,7 +271,8 @@ the CV button behind `config.showCv`, and the photo.
 one per parking spot, recomputed per width, each a 24px button with an 8px mark inside. It drags with
 any pointer type, and swallows the click when the drag passed 6px so a drag does not open a card. Cards
 fully out of the rail are `inert`, so Tab cannot walk into one nobody can see. Emits `open` with the
-project that was clicked — the modal itself lives in `HomeView`, so the section does not own it.
+**index** of the card that was clicked — the modal itself lives in `HomeView`, so the section does not
+own it.
 
 ### StackSection
 `id="stack"`. The four groups from `src/data/stack.js` in a two-column grid: `StackGroup` →
@@ -301,17 +312,20 @@ edges are covered (decision 80). The opening starts closed behind a roller blind
 button, labelled from the locales, raised on a click and lowered again by a click on the coil it
 leaves at the head (decision 86) — and the entrance glow inside the frame ignites once the reveal is
 done (decisions 81 and 83); the rotating glow that used to live here is gone (decision 71). The scene
-is lazy (`defineAsyncComponent`), so Three never reaches the initial bundle, and `HeroSection` decides
-not to mount it below 900px (decision 37).
+is lazy (`defineAsyncComponent`) **and imported only on the first reveal**, since behind the closed
+blind it is hidden anyway: Three never reaches the initial load. `HeroSection` decides not to mount
+the stage below 900px (decision 37). Props: `entrance` (`'none'`), `logo` (`true`), `ring` (`true`),
+`fog` (`'far'`), `snap` (`true`) and `shutter` (`true`); exposes `exportModel()` for the logo lab.
 
 ### LogoScene
 The `<TresCanvas>`: the lights, the wheel-zoom (clamped, and it only takes the gesture while it can
 still move), the off-screen pause (an IntersectionObserver at 60%) and the fps and DPR caps. It loads
 the mark's GLB and reports the download up as `ready` and `progress`. The camera and the depth are
-`SceneRig`'s. Prop: `room` (boolean, default true) — off, the room is not drawn and the mark stands
-alone, which is what the Open Graph card asks for and what the stage never does. Props: the pieces the
-Open Graph card tries — `opacity` (number, default 0), `diffuse` (number, default 0.65) and
-`markScale` (number, default 1). The stage uses none of them.
+`SceneRig`'s. Props: `room` (boolean, default true) — off, the room is not drawn and the mark stands
+alone, which is what the Open Graph card asks for and what the stage never does; `opacity` (default
+0), `diffuse` (default 0.65), `markScale` (default 1), `cells` (default 7), `fog` (default `'far'`)
+and `logo` (default true), which the banners and the stage dial; and the gestures `tilt`, `spin`,
+`spinY`, `dragging` and `reset`, forwarded from `LogoStage`.
 
 ### SceneRig
 The rig around the mark: the camera and the depth. A deep open box — four walls converging on a
@@ -319,11 +333,12 @@ distant far wall, built by hand so the grid is world-uniform, sized to the camer
 opening lands on the stage, and divided into the stage's seven cells — carries the grid and is
 faded by a `Fog` read from `--ink`; it scales with the wheel's zoom so the opening stays put. The
 camera leans a little with the pointer's `tilt`, always looking back at the mark. A child of the
-canvas, because `useLoop` and `useTresContext` need the renderer. Prop: `room` (boolean, default true)
-— the box is the whole of this component, so off is the rig without it. Props: `opacity` (number,
-default 0) — how dark the room goes toward the back, painted into the geometry's vertex colours so the
-walls and their grid sink together; and `diffuse` (number, default 0.65) — how much of that darkening
-the opening shares, from one flat tone at 0 to all of it at the back at 1. See decisions 78–82 and 102.
+canvas, because `useLoop` and `useTresContext` need the renderer. Props: `room` (default true) — the
+box is the whole of this component, so off is the rig without it; `opacity` (default 0) — how dark the
+room goes toward the back, painted into the geometry's vertex colours so the walls and their grid sink
+together; `diffuse` (default 0.65) — how much of that darkening the opening shares, from one flat tone
+at 0 to all of it at the back at 1; `cells` (default 7) — the grid divisions; `fog` (default `'far'`);
+`camZ` (required) and `tilt`, the camera. See decisions 78–82 and 102.
 
 ### LogoModel
 The mesh and everything about how it looks and moves: the two `MeshStandardMaterial`s (the front in
@@ -331,8 +346,10 @@ the accent, the back a dark neutral), the `RoomEnvironment` the rig generates as
 the hover sway, drag spin and magnetic return. On the halo's ignition it walks its colour from the
 page background up to the accent on the same stepped timing the glow strikes on. It is a child of the
 canvas on purpose — `useLoop` and `useTresContext` need the renderer the canvas provides. Loaded once.
-Prop: `markScale` (number, default 1) — a multiplier on the fit-to-stage scale, so the mark can be
-sized by hand without shrinking the room (a CSS transform on the canvas would take the room with it).
+Props: `markScale` (default 1) — a multiplier on the fit-to-stage scale, so the mark can be sized by
+hand without shrinking the room (a CSS transform on the canvas would take the room with it); the
+gestures `tilt`, `spin`, `spinY`, `dragging`, `logo` (default true), `haloOn` (default false),
+`running` (default true), `environment` (default null) and `logoGroup` (required).
 
 ---
 
@@ -377,6 +394,9 @@ circle growing a little.
 No props. Emits `go-top`. Reads the timezone from `config.js`, publishes its own height in
 `--footer-h` by observing its size, and owns its scroll entrance. Contains `LiveClock`.
 
+### LiveClock
+Prop: `timezone` (string, default `'Europe/Madrid'`). The local time in the footer, ticking on the minute.
+
 ### CursorFx
 Props: `interactiveSelector` (the "hot" element selector). Sizes are in its own stylesheet, not
 props. Subscribes to `usePointer()` and refuses to mount on touch or below 900px. No dependency
@@ -420,8 +440,8 @@ Props: `label` (defaults to "Scroll", rendered uppercase). Reads the progress fr
 |---|---|
 | `useTheme()` | `theme`, `toggle()`; writes `data-theme` on `<html>` and persists |
 | `useLang()` | `lang`, `toggle()`; persists in `localStorage["krub-lang"]` |
-| `useAccent()` | `accent`, `set(id)`; writes `data-accent` on `<html>` and persists |
-| `useScrollSpy(ids, threshold = 0.35)` | reactive `activeId` |
+| `useAccent()` | `accent`, `set(id)`, `cycle()` (the one the disc calls); writes `data-accent` on `<html>` and persists |
+| `useScrollSpy(ids, threshold = 0.35)` | reactive `activeId`; also exports `useSectionReached(id)`, which `App` uses to tell when the hero has been left |
 | `useScroll()` | `y`, `progress` 0–1 and `atEnd`, from one shared listener. It keeps the last position while a dialog holds the page still, because the lock reports the scroll as zero |
 | `useFocusTrap(el, active)` | keeps keyboard focus inside the open modal |
 | `useMagnetic()` | registers the magnetic hover loop for `[data-magnetic]` |
@@ -452,6 +472,7 @@ src/
 │   ├─ projects.js
 │   ├─ experience.js
 │   ├─ education.js
+│   ├─ certifications.js
 │   ├─ stack.js
 │   ├─ socials.js        + email, socialIcons, cvPath, photoPath
 │   ├─ privacy.js        the /privacy notice, the form's other half

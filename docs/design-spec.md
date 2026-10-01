@@ -13,13 +13,13 @@ vertical order:
 
 | # | id | Name | Content |
 |---|----|------|---------|
-| — | `top` | Hero | Name, headline, paragraph, two CTAs, square stage holding the logo |
-| — | — | Marquee | Yellow band with two looping phrases |
-| 00 | `me` | About | Three paragraphs, experience/education tabs, CV button, photo |
+| — | `top` | Hero | Name, headline, disciplines line, paragraph, two CTAs, square stage holding the logo |
+| — | — | Marquee | Yellow band with three looping phrases |
+| 00 | `me` | About | Four paragraphs plus the closing line, experience/education/certifications tabs, CV button, photo |
 | 01 | `projects` | Projects | Horizontal rail of cards; clicking one opens a detail modal |
 | 02 | `stack` | Stack | Four groups of technology icons, two per row |
 | — | `testimonials` | Testimonials | One quote at a time, in a vertical pager. **Optional section**, toggled by config |
-| 03 | `contact` | Contact | Large headline, email CTA, three social icons |
+| 03 | `contact` | Contact | Large band, the rows and the form, two social rows plus the email |
 | — | — | Footer | Pinned to the bottom: credit, copyright, TOP button, city and Madrid clock |
 
 Floating above all of the above: the fixed navigation bar, the custom cursor, the vertical
@@ -132,7 +132,7 @@ The four non-default palettes — aqua, rose, mint, violet — swap exactly thes
 the exception among them: its dark value is the solid `#8B5CF6`, not a pastel, because the pastel
 read washed out, so light and dark share the fill and only the text and `--mark` change in light.
 
-The four non-default palettes — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, violet `#D8C7FF` —
+The four non-default palettes — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, violet `#8B5CF6` —
 are pastels made for a dark background: as text they read straight away (aqua 17.7:1, mint 16.3:1
 on `--ink`). On the light theme those pastels are nearly invisible **as fills** (`#C3FFFC` is
 1.00:1 on the light page), so each has a more saturated light-theme counterpart for `--acc`, and
@@ -148,8 +148,9 @@ Every `clamp` below is a literal from the design. They do not get rounded.
 
 | Use | Value |
 |---|---|
-| Hero headline | `clamp(38px, 6.4vw, 82px)`, weight 700, `letter-spacing:-.04em`, `line-height:.98` |
-| Contact headline | `clamp(26px, 4vw, 52px)`, weight 700, `letter-spacing:-.03em`, `line-height:1.06` |
+| Hero headline | `clamp(34px, 4.6vw, 58px)`, weight 700, `letter-spacing:-.03em`, `line-height:1` |
+| Hero name | mono, `clamp(24px,2.6vw,36px)`, weight 700 |
+| Hero disciplines line | mono, 13px, `--fg-2` |
 | Section title (`/about`) | mono, `clamp(22px, 2.6vw, 30px)`, weight 500 |
 | Giant section number | mono, `clamp(48px, 6vw, 74px)`, weight 700, `letter-spacing:-.05em` |
 | Lead paragraph | `clamp(18px, 2vw, 24px)`, `line-height:1.5` |
@@ -158,9 +159,9 @@ Every `clamp` below is a literal from the design. They do not get rounded.
 | Card title | 19px, weight 600 |
 | Small mono label | 10–11px, `letter-spacing:.12em`, uppercase, colour `--fg-3` |
 
-Reading widths: paragraphs carry a `max-width` in `ch` (46ch in the hero, 52ch and 58ch in
-about, 60ch in the timeline, 22ch in the contact headline) and `text-wrap: pretty`
-(`balance` on the contact headline).
+Reading widths: paragraphs carry a `max-width` in `ch` (46ch in the hero, 52ch and 58ch in about,
+60ch in the timeline) and `text-wrap: pretty`. The contact band is display type with no measure of
+its own.
 
 ### Spacing, borders, shadows
 
@@ -168,9 +169,9 @@ about, 60ch in the timeline, 22ch in the contact headline) and `text-wrap: prett
 - Maximum content width: **1180px**, centred.
 - Section padding: `clamp(56px,8vw,110px)` vertical, `clamp(20px,5vw,64px)` horizontal.
 - Section inner spacing: `gap: 34px`. Card padding: 24–26px.
-- Radii: **8px** chips and labels · **10–12px** icon tiles and square buttons · **14px**
-  lemon speech bubble · **18px** cards and images · **20–22px** panels and modal · **999px**
-  pill buttons.
+- Radii: **8px** chips and labels · **10px** icon tiles and buttons (pill and square alike; the
+  capsule was dropped) · **14px** lemon speech bubble · **18px** cards and images · **20–22px**
+  panels and modal.
 - Borders: always `1px solid var(--line)`. No coloured shadows anywhere.
 - Shadow (one in the whole site — the compact navbar's and the lemon bubble's were removed, see
   decisions.md): mobile menu `0 24px 60px rgba(0,0,0,.45)`.
@@ -266,11 +267,11 @@ column and needs the room.
 Two-column grid `1.1fr .9fr`, `gap: clamp(32px,5vw,64px)`, vertically centred,
 `max-width:1180px`. One column on mobile.
 
-Left column: the name, a three-line headline with the key word
-in `--acc`, a paragraph (`--fg-2`, 46ch) and two buttons — primary "Let's talk ↗" (background
-`--acc`, radius 999, `padding:11px 24px`, 18px, weight 600, hover to `--acc-2`) and secondary
-"/projects" (border `--line`, radius 999, `padding:14px 26px`, mono 15px, hover turns border and
-text yellow).
+Left column: the name (mono), a two-line headline with the key word
+in `--acc-text`, a mono disciplines line (`--fg-2`), a paragraph (`--fg-2`, 46ch) and two buttons —
+primary "Let's talk ↗" (background `--acc`, radius 10, `padding:11px 24px`, 18px, weight 600, hover
+to `--acc-2`) and secondary "/projects" (border `--line`, radius 10, `padding:14px 26px`, mono 15px,
+hover turns border and text yellow).
 
 Right column, the **square stage**: a square of whole 72px cells of the page's background grid —
 seven by seven (504×504) at the usual viewport, its four edges on the grid lines and nudged to the
@@ -303,8 +304,8 @@ A full-bleed band, background `--acc`, text `--on-acc`, `padding:13px 0`, top an
 borders in the same yellow. Mono text 13px, weight 700, `letter-spacing:.22em`, uppercase.
 Two identical blocks in a row (`gap:38px`, `padding-right:38px`) animated with
 `marquee 26s linear infinite`, which translates `-50%`: the loop is seamless because the
-content is duplicated. Phrases: "Fullstack developer → backend" and "Murcia · Barcelona ·
-remote · Spain", separated by `//`.
+content is duplicated. Three phrases — "Full Stack Developer", "Frontend · Backend · 3D · Applied
+AI" and the locations (`copy.locations`) — separated by `//`.
 
 ### 3.4 Section heading (reusable pattern)
 
@@ -315,17 +316,17 @@ front (`z-index:1`). The overlap is deliberate: the number is decorative and rea
 title.
 
 In projects the `<h2>` also carries the project count as a superscript (`font-size:.4em`,
-weight 700, yellow, `vertical-align:super`).
+weight 700, `--acc-text`, `vertical-align:super`).
 
 ### 3.5 About
 
-Grid `1.3fr .7fr` (one column on mobile). Left: lead paragraph + two secondary paragraphs +
-**tabs** `/experience`, `/education` and `/certifications` — a row of folder labels (mono 13px,
+Grid `1.3fr .7fr` (one column on mobile). Left: a lead paragraph, three secondary paragraphs and the
+closing `.open` line + **tabs** `/experience`, `/education` and `/certifications` — a row of folder labels (mono 13px,
 12px on a phone) on a hairline track, the active one in `--acc-text` with a 3px `--acc` rule
 under it; no pills + the matching timeline. It is a real ARIA tablist: roving `tabindex`,
 `aria-controls`, a `role="tabpanel"` on the panel, and the arrows move the selection and the focus.
 
-Under the photo sits **the availability indicator**: a mono row of 10px uppercase,
+Above the photo's right corner sits **the availability indicator**: a mono row of 11px uppercase,
 `letter-spacing:.14em`, colour `--fg-3`, `gap:7px`, preceded by a dot. The dot is two layers inside
 a 5×5px container: a core, a solid `#39D98A` circle filling it and **not animated**; and a ring,
 `inset:-5px`, `border:1px solid #39D98A`, `border-radius:50%`, animated
@@ -334,7 +335,7 @@ completely before restarting. Text: "Available" / "Disponible".
 
 Each timeline row: `display:grid`, columns `minmax(90px,130px) 1fr`,
 `gap: clamp(14px,3vw,32px)`, `padding:22px 0`, `border-top:1px solid var(--line)` (the last
-one also gets `border-bottom`). Left column: the year range in mono 12px — yellow if it is the
+one also gets `border-bottom`). Left column: the year range in mono 12px — `--acc-text` if it is the
 current period, `--fg-3` if it is past. Right: title 18px weight 600 + description 15px
 `--fg-2` at 60ch. On mobile it collapses to one column with `gap:8px`.
 
@@ -401,7 +402,7 @@ frame. A hard vertical edge where a card is cut reads as a mistake rather than a
 way", and the side with nothing to continue is left alone: at the start the first card's rounded corner
 sits on the edge, and fading it would eat it. **The fade is the peek plus the room**, derived from the
 same variables the card width is, so it stops exactly where the card you are reading begins. A flat `56px`
-did not: the peek is `45px` on a phone, so the fade reached 11px into the visible card and smudged its
+did not: the peek is `18%` on a phone, so the fade reached into the visible card and smudged its
 right edge instead of softening the next one.
 
 **Cards that are fully out of the rail carry `inert`.** They stay in the DOM — the keyboard has to
@@ -433,9 +434,9 @@ address are read from the socials, so they cannot drift from Contact. See decisi
 
 1. Screenshot frame: `aspect-ratio:16/10`, diagonal stripe background
    `repeating-linear-gradient(135deg, var(--surface-2) 0 12px, var(--ink) 12px 24px)`, with a
-   centred 10px mono label. It is a placeholder: swap it for the real image once there is one.
+   centred 11px mono label. It is a placeholder: swap it for the real image once there is one.
 2. Body (`padding:24px`, `gap:11px`): a row with the 19px/600 title and the type label in
-   yellow 10px mono; 15px `--fg-2` summary.
+   `--acc-text` 11px mono; 15px `--fg-2` summary.
 3. Footer, pinned to the bottom (`margin-top:auto`, `padding-top:16px`, `border-top`): the
    first three technologies joined by `·` in mono 11px `--fg-3`, and on the right a 30px
    circular button with a `--line` border and the **`↗`** arrow (diagonal, not horizontal);
@@ -572,7 +573,7 @@ radius clips the band's two top corners.
 The band also carries, in the window's top right, a large `”` in `--acc` at `opacity:.08` — a font glyph
 and not an SVG, because it is a watermark and the two faces the site self-hosts already have one. It
 belongs to the box and not to an entry, so it is the one thing in the block that does not move. On a phone
-it drops, moves right and grows (`74px`, `6px`, `112px`): in a window that narrow it lands behind the quote
+it drops, moves right and grows (top `52px`, right `6px`, `112px`): in a window that narrow it lands behind the quote
 instead of behind the name, which is where a watermark belongs — under the text rather than beside the
 attribution. **The indicator is a vertical column of dots** on the window's right edge, centred on the window and
 not on the whole box (which includes the header, and pushed it high). One per quote, the one you are
@@ -612,10 +613,8 @@ is how it reads: who is talking, then what they said. The avatar is `object-fit:
 cropping a logo cuts away the part that says who it is.
 
 **The quotes are in quotation marks.** A testimonial is a quote and the marks are what say so before
-anyone reads the attribution; the placeholders had them and the first real one did not, which is what
-gave it away. One is real and two are placeholders, in square brackets with "Name Surname" so they
-cannot be mistaken for genuine ones and shipped by accident: **delete or replace them before this
-reaches `main`.**
+anyone reads the attribution. There is one real quote (Lourdes Campuzano of CreandoMientras); the
+placeholders are gone, and the array is ready for more to arrive.
 
 **No "optional section" note** in the interface.
 
@@ -646,7 +645,7 @@ The section is the full-bleed container the band needs, so it carries no gutter 
 inner columns carry the gutter and the 1180px cap the other sections use, one above the band (the
 heading) and one below (the rows and the form).
 
-**The rows**, separated by `--line`: the label in mono 10px uppercase `--fg-3`, the address below it
+**The rows**, separated by `--line`: the label in mono 11px uppercase `--fg-3`, the address below it
 (`contact@krub.dev`, `linkedin.com/in/krub`, `github.com/krub-dev` — a network's address is
 derived from its href), `clamp(22px,3.2vw,40px)` weight 700, and `↗` on the right spanning both
 lines. Hover turns the address and the arrow `--acc-text` and moves the arrow 3px up and right. The
@@ -654,8 +653,8 @@ email row is the mailto — there is no separate button; one address, one way in
 
 **The form** sits after the rows, in a panel: border `--line`, radius 18,
 `padding:clamp(20px,3vw,34px)`, the fields in a column with `clamp(18px,2.4vw,26px)` between them.
-A mono 10px uppercase label (`SEND A MESSAGE`) titles it, and each field repeats the pattern: a mono
-10px uppercase label in `--fg-3`, the input, and its error in `--acc-text` when there is one. The
+A mono 11px uppercase label (`SEND A MESSAGE`) titles it, and each field repeats the pattern: a mono
+11px uppercase label in `--fg-3`, the input, and its error in `--acc-text` when there is one. The
 fields are **a line, not a box**: `border-bottom:1px solid var(--line)`, transparent background,
 17px `--fg`, and focus turns that line `--acc-text`. The caret is the browser's own, coloured with
 `caret-color:var(--acc-text)` — a drawn one cannot follow the insertion point in a textarea, so it is
@@ -696,10 +695,10 @@ Links: `mailto:contact@krub.dev`, `linkedin.com/in/krub`, `github.com/krub-dev`.
 1. `DESIGNED & BUILT WITH ♥ BY` + logo (mono 10px, `letter-spacing:.12em`, `--fg-3`; the heart
    is an 11px SVG filled with **`var(--mark)`** so it turns black in light theme) · `·`
    separator · `©2026 KRUB.DEV`.
-2. A "TOP" button with an up arrow (30px-tall pill, mono 10px, `letter-spacing:.16em`), filled
+2. A "TOP" button with an up arrow (30px tall, radius 8, mono 10px, `letter-spacing:.16em`), filled
    with `--acc` and `--on-acc` on top so it does not disappear into the footer's own background.
    Hidden on mobile.
-3. `BARCELONA, SPAIN · hh:mm:ss CET (UTC+1)` — a live clock, `Europe/Madrid`, updated every
+3. `MURCIA, SPAIN · hh:mm:ss CET (UTC+1)` — a live clock, `Europe/Madrid`, updated every
    second; the label alternates between `CET (UTC+1)` and `CEST (UTC+2)` with daylight saving.
 
 **Key behaviour.** The footer slides in: it starts at `translateY(102%)` and moves to
@@ -784,12 +783,12 @@ frame, inside a 12px dead zone around the resting centre, and resets to zero on 
 never jumps. The pull and the easing are softer than the spec's original 16px and 0.14, which
 read as too eager; see decisions.md. On mobile the TOP button is excluded.
 
-Magnetic elements: hero CTAs, hero stage, CV button, project cards, modal links, contact CTA
-and icons, and the TOP button.
+Magnetic elements: hero CTAs, the CV button, project cards, modal links, and the contact CTA and
+icons. The hero stage and the footer's TOP button are deliberately non-magnetic.
 
 ### 3.15 Scroll indicator
 
-The word "Scroll" set vertically (mono 10px, `letter-spacing:.28em`, `--fg-3`) above a 1px line
+The word "Scroll" set vertically (mono 11px, `letter-spacing:.28em`, `--fg-3`) above a 1px line
 96px tall in `--line`, filled with the accent in proportion to the scroll. It is `position:fixed`
 on the right (`right:20px`, vertically centred, `z-index:95`), fades out at 98% of the page,
 hides below 900px, and is only rendered on a route with a hero — on the 404 there is nothing to
@@ -833,12 +832,13 @@ preloaded — and the bubble appears. Every later poke is only the shake.
 
 ### 3.17 Mobile menu
 
-A panel below the menu button (`top:74px; right:16px`, `z-index:150`),
-`width: min(300px, calc(100vw - 40px))`, radius 20, background `--surface`, `padding:16px`,
-`gap:12px`, shadow `0 24px 60px rgba(0,0,0,.45)`. It holds: a header with "Menu", a mono subtitle
-and — on the right of that same row — the appearance and language controls, which appear here only
-once the bar has compacted (before that they are still in the navbar); a 2×2 grid with Github,
-LinkedIn, GitHub and "Let's talk ↗" (this last one in yellow); a list of four navigation links, each
+A panel below the menu button (`top:74px`, centred: `left:50%` with `translateX(-50%)`,
+`z-index:150`), `width: min(300px, calc(100vw - 40px))`, radius 20, background `--surface`,
+`padding:16px`, `gap:12px`, shadow `0 24px 60px rgba(0,0,0,.45)`. It holds: a header with "Menu", a
+mono subtitle and — on the right of that same row — the appearance and language controls, which
+appear here only once the bar has compacted (before that they are still in the navbar); a grid with
+LinkedIn, GitHub and "Let's talk ↗" (this last one in yellow, full width); a list of four navigation
+links, each
 with its `[00]`…`[03]` mono index (the active section's in yellow) and its path; and a centred
 "↑ back to top" pill filled with the accent. Every link closes the menu when pressed.
 
@@ -881,7 +881,7 @@ scroll and when the bar expands again.
 | Theme | `dark` \| `light` | `data-theme` attribute on `<html>` | absent = dark |
 | Language | `en` \| `es` | global + `localStorage["krub-lang"]` | restored on load; sets `<html lang>` |
 | Accent | a palette id | `data-accent` attribute on `<html>` | absent = yellow |
-| About tab | `exp` \| `edu` | local to the section | defaults to `exp` |
+| About tab | `exp` \| `edu` \| `cert` | local to the section | defaults to `exp` |
 | Open project | index \| `null` | global or local to projects | `null` = modal closed |
 | Carousel image | integer | local to the modal | resets to 0 on open |
 | Mobile menu | boolean | global | |
@@ -907,22 +907,21 @@ None of this belongs inside a template, and there are two homes for it (decision
 - **Interface strings** — nav paths, button labels, aria-labels — live in `src/locales/en.json`
   and `es.json`, nested rather than flat, so `t('hero.badge')` resolves as a path.
 
-- **Copy** (`copy.js`): `hero`, `about`, `marquee`, `contact`, `lemon`, `notFound`.
-- **Projects** (`projects.js`): each entry has `slug`, `shotLabel`, `image`, `slides` (image
-  count), `repo`, `live`, `stack`, and an `en` / `es` object with `name`, `tag`, `role`, `year`,
-  `repoLabel`, `liveLabel`, `summary`, `lead`, `body`, `body2`. Four today:
-  `creandomientras`, `sideforge`, `krub-dev`, `showroom`.
-- **Timelines** (`experience.js`, `education.js`): two and four entries. Each has `from`, `to`
-  (`null` for "still going"), a `current` flag that paints the years in `--acc-text`, and an
-  `en` / `es` object with `title` and `body`.
+- **Copy** (`copy.js`): `locations`, `hero`, `about`, `marquee`, `notFound`, `githubCard`, `lemon`.
+- **Projects** (`projects.js`): each entry has `slug`, `shotLabel`, `image`, `images` (the modal
+  carousel), `slides` (placeholder count), `repo`, `live`, `stack`, and an `en` / `es` object with
+  `name`, `tag`, `role`, `year`, `repoLabel`, `liveLabel`, `summary`, `lead`, `body`, `body2`. Four
+  today: `creandomientras`, `sideforge`, `krub-dev`, `showroom`.
+- **Timelines** (`experience.js`, `education.js`, `certifications.js`): three, four and three
+  entries. Each has `from`, `to` (`null` for "still going"), a `current` flag that paints the years
+  in `--acc-text`, and an `en` / `es` object with `title` and `body`.
 - **Stack** (`stack.js`): four groups with a name and a list of technologies; each technology
   with a name, an icon file and whether it needs inverting in dark theme.
 - **Socials** (`socials.js`): name, URL and icon, plus `email`, `cvPath` and `photoPath`. The email is
   the domain's own address, `contact@krub.dev`.
 - **Privacy** (`privacy.js`): the form's notice, a `date`, an `intro` and `sections` (each a `heading`
   and a `body`), both languages. `/privacy` renders it and the form links to it.
-- **Testimonials** (`testimonials.js`): quote, name, role, avatar. One real quote and two
-  placeholders; the section is on.
+- **Testimonials** (`testimonials.js`): quote, name, role, avatar. One real quote; the section is on.
 
 ---
 
@@ -953,9 +952,9 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
 - Every decorative element carries `aria-hidden="true"`: grids, cursor, dot, marquee, lemon
   texture dots, separators.
 - Text-free buttons (theme, language, menu, close, carousel dots) carry an `aria-label`.
-- Touch targets: 44px or more on mobile (carousel arrows 44px, social icons 46px, navbar
-  buttons 36px with spacing), and the pagers' dots are 24px — the WCAG 2.2 minimum — with an 8px
-  mark drawn inside, so the target can grow without the dot growing.
+- Touch targets: 44px or more on mobile (social icons 46px, navbar buttons 36px with spacing), and
+  the pagers' dots are 24px — the WCAG 2.2 minimum — with an 8px mark drawn inside, so the target
+  can grow without the dot growing.
 - External links get `target="_blank"` and `rel="noopener"`.
 
 ---
@@ -964,9 +963,9 @@ JetBrains Mono (variable, 100–800), latin subset only. See decisions.md.
 
 A single breakpoint: **900px**. Below it: one column in every two-column grid, navigation
 replaced by the menu, the custom cursor and scroll indicator disabled, the appearance and language
-controls in the bar until it compacts and in the menu after, the hero stage dropped (the badge
-moves into the text column), the footer centred with the TOP button hidden, a smaller 4/5 photo,
-and the lemon at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
+controls in the bar until it compacts and in the menu after, the hero stage dropped, the footer
+centred with the TOP button hidden, the photo square as on a wide screen (only its sticky travel is
+dropped), and the lemon at `right:18px` and `bottom: calc(16px + var(--footer-h))`.
 
 ---
 

@@ -16,7 +16,7 @@ el contrato visual, este es el registro de dónde nos hemos movido de él.
 
 Stack icons and project images are referenced by name from `src/data/`. Under `public/` the paths are
 stable literals (`/icons/vuejs/vuejs-original.svg`) that a data file can hold as a string. Going
-through the bundler would mean importing each of the 24 icons individually, for a caching benefit
+through the bundler would mean importing each of the 30 icons individually, for a caching benefit
 that does not matter at this size.
 
 **Trade-off:** these files are not fingerprinted, so a changed icon needs a cache bust.
@@ -46,10 +46,10 @@ The few elements that genuinely want `border-box` declare it themselves.
 **Status:** active · **Archive:** 10
 
 `main.js` loads as a module, which is deferred, so the browser paints once before Vue runs. A small
-blocking script in `<head>` reads the same two `localStorage` keys and sets `data-theme` and `lang`
-before the first paint.
+blocking script in `<head>` reads the same three `localStorage` keys (`krub-theme`, `krub-lang`,
+`krub-accent`) and sets `data-theme`, `lang` and `data-accent` before the first paint.
 
-**Trade-off:** the two storage key names are written in two places.
+**Trade-off:** the three storage key names are written in two places.
 
 ### 11. Accent fills and accent text are separate tokens
 **Status:** active · **Archive:** 11 · **Overrides the design spec**
@@ -88,9 +88,10 @@ against both `--ink` and `--surface`.
 ### 48. The accent is a separate axis from the theme
 **Status:** active · **Archive:** 48
 
-Five accent palettes, chosen with `data-accent` on `<html>`: the brand yellow (default) plus four
-pastels — aqua `#C3FFFC`, rose `#FB7185`, mint `#9AFFC9`, violet `#D8C7FF`. The dark/light theme is
-untouched and orthogonal: two themes times five accents.
+Five accent palettes, chosen with `data-accent` on `<html>`: the brand yellow (default) plus aqua
+`#C3FFFC`, rose `#FB7185`, mint `#9AFFC9` and violet `#8B5CF6`. The dark/light theme is untouched and
+orthogonal: two themes times five accents. (Violet is the one that is not a pastel: `#D8C7FF` read
+washed out, so its fill is the solid `#8B5CF6`.)
 
 **The two-tier structure:** The reference colours are pastels made for a black background. On the
 light theme they are nearly invisible *as fills*, so each palette gets a more saturated light-theme
@@ -185,11 +186,13 @@ The `[data-motion="decorative"]` rule now clears both. Killing a transition stil
 at its final value: the footer arrives, it just does not travel.
 
 ### 26. The project card gets an explicit `aria-label`
-**Status:** active · **Archive:** 26
+**Status:** active · **Archive:** 26 · **Superseded in shape by 28**
 
-The whole card is one `<button>`, so without a label a screen reader falls back to its contents and
-announces the title, the type, the summary and three technologies as the *name of a single control*.
-"Open project: Showroom" is what someone needs to hear before deciding to press it.
+Without a label a screen reader falls back to the card's contents and announces the title, the type,
+the summary and three technologies as the *name of a single control*. "Open project: Showroom" is what
+someone needs to hear before deciding to press it. (The button that carries it was later narrowed to
+the title and stretched over the card — decision 28 — so the name is the same without the whole card
+being the control.)
 
 ### 28. The project card uses the overlay pattern, not a button around everything
 **Status:** active · **Archive:** 28
@@ -209,13 +212,13 @@ ordinary readable text again; the whole card surface is still clickable.
 ### 34. Tests: Vitest for logic, Playwright for what only a browser can answer
 **Status:** active · **Archive:** 34
 
-Twenty unit tests and five end-to-end flows. Deliberately small — the point is a safety net and a
-working setup, not coverage.
+Forty-four unit tests and around seventy end-to-end flows. Deliberately small — the point is a safety
+net and a working setup, not coverage.
 
-**Vitest** covers pure logic and the two composables that touch storage. **Playwright** covers the
-five things that could not be verified any other way, because they depend on scroll events, animation
-frames and CSS transitions actually advancing. It runs against the production build, not the dev
-server.
+**Vitest** covers pure logic and the composables that touch storage (`useTheme`, `useLang`,
+`useAccent`). **Playwright** covers what could not be verified any other way, because it depends on
+scroll events, animation frames and CSS transitions actually advancing. It runs against the production
+build, not the dev server, and on WebKit as well as Chromium (decision 91).
 
 ### 73. The `/me` tabs are a row again, and a real tablist
 **Status:** active · **Archive:** 73
@@ -242,9 +245,10 @@ panel is a `role="tabpanel"` with `aria-labelledby`.
 ### 77. The 2D mark is the fallback, and it fades
 **Status:** active · **Archive:** 77
 
-The PNG mask over `var(--mark)` paints first and is what a browser without WebGL, a failed fetch or
-a rejected shader falls back to. The scene reports readiness with a `ready` emit, and the mark fades
-(`opacity`, 0.4s) so the hand-off from the flat mark to the scene is a crossfade instead of a pop.
+The PNG mask over `var(--mark)` is the failure state: a browser without WebGL, a failed fetch or a
+rejected shader gets it, and it is painted only then (`v-if="failed"`). It no longer crossfades with
+the scene — a working load shows the 3D once the shutter is raised, with the loading percentage
+covering the beat before it, rather than a flash of the flat logo.
 
 ### 78. The room comes back, as one box and a rig
 **Status:** active · **Archive:** 78
@@ -270,7 +274,8 @@ run it off the screen.
 - **The opening is cut to the stage** — its half-size is `d * tan(fov/2)` at its distance — and
   divided into the stage's own **seven cells**, so its grid lines land on the page's at the frame.
 - **The wheel zooms, and the box scales with it** so its opening stays on the stage at any zoom.
-- **The fog falls off to `--ink`** so the tunnel has no bottom to see.
+- **The fog falls off to `--fog-end`** so the tunnel has no bottom to see. In dark that is `--ink`;
+  in light it is a mid grey, because fading to the white page would leave a hole, not a depth.
 - **A backlight behind the mark was removed.** It was a neutral plane on the camera's axis that
   cleared the grid behind the mark. As a plane it cannot do that job: to project wider than the mark
   it has to sit just behind it, and there the mark's own corners cross it once it is turned (the
@@ -615,13 +620,14 @@ text column instead — so on a wide screen the two halves drifted apart and the
 wrong side.
 
 - **The CV moved under the photo, at the photo's own width**, and became the section's one call to
-  action: a solid accent fill, and just "Résumé/CV" / "Currículum/CV" — the "(PDF)" went, because the
+  action: a solid accent fill, labelled "Résumé/CV" in both languages — the "(PDF)" went, because the
   file being a PDF is what the download arrow already says.
 - **That column is `position: sticky`** at `top: calc(var(--navbar-h, 88px) + 20px)`. It rides down
   while the timeline scrolls past and stops with its foot just above the section's bottom, which is the
   section's own padding — no second value to keep in step with it.
 - **No travel on a phone.** The photo lands at the end of the section there, so there is nothing to
-  ride past; the order is photo, badge, CV.
+  ride past; the order is unchanged — the badge above the photo's right corner, then the photo, then
+  the CV.
 
 ### 96. The modal backdrop is a uniform scrim with a gentle blur
 **Status:** active
@@ -715,11 +721,6 @@ in the accent.
   the same centre. `overflow: visible` is what lets the outer half of the stroke out. It is a layer above
   the contents (`z-index: 2`, `pointer-events: none`) because the media slot's opaque panel would hide it
   as a background, and the link stretched over the card still gets the click.
-- **A `rect` SVG for the dashes was tried, and dropped.** It followed the corners exactly, but it is more
-  machinery than the job needs — and the owner asked for CSS where CSS will do. It also brought two traps:
-  an `svg` without an explicit size falls back to the replaced-element default of 300×150, and
-  `overflow: hidden` clips at the padding box, 1px inside, so the dashes sat inside the card rather than
-  on its edge.
 - **The component is `GithubCard`.** It began as `ProjectsCta`; "CTA" is the general term for the link
   that asks for the action, and the spec already uses it for the hero's and Contact's buttons, so the card
   is named for what it is instead.
@@ -751,8 +752,9 @@ The generator is a small, self-contained text-to-PDF tool. It is not part of the
 keeping it here mixed a personal document tool into a public front-end repository. Nothing about the
 site depends on it at build or run time — the site only ever ships the compiled PDFs.
 
-**What stayed.** The four compiled PDFs, in `public/uploads/`: the light pair for print and email,
-and the dark pair to match the site on screen.
+**What stayed.** The compiled PDFs, in `public/uploads/`: the full CV's light pair for print and
+email and its dark pair for the screen (the four the site links), plus the one-page CV and the cover
+letter, stored for later.
 
 ### 71. The light theme is a cooler grey, and the stage glow is gone
 **Status:** active · **Archive:** 71

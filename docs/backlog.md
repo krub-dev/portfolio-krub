@@ -146,10 +146,11 @@ the privacy notice and the consent the law asks for.
   Done on 2026-09-16: the README, `components.md` and `design-spec.md` were checked against the
   code and corrected, and the one deliberate divergence that had no record (the magnetic pull)
   went into `decisions.md` as 47.
-- [ ] **Review the documentation once more before the repo goes public.** The same sweep, as the
-  last step before the repository is made public, because the code moves between now and then
-  and this file is only as good as its last check. It is not a first reading: the 2026-09-16
-  pass is the baseline it starts from.
+- [x] **Review the documentation once more before the repo goes public.** Done 2026-10-02: a full
+  pass over `README.md` (rewritten, with a Performance section), `components.md`, `design-spec.md`
+  and `decisions.md`, checked claim by claim against the code. It is not a first reading — the
+  2026-09-16 pass was the baseline. The findings and fixes are in each file; the point of the pass
+  was to make the docs describe what the code actually does.
 
 ## Config, performance and deployment
 
