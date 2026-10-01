@@ -27,9 +27,9 @@ workaround there. Commands handed to the owner must run in both a bash terminal 
 PowerShell 5.1: no `&&`, no `printf`, no POSIX heredocs.
 
 The CV is not built from this repository. Its plain-text sources and the generator live outside it
-(a sibling `cv/` folder, run with `node build-cv.mjs`, writing to its own `out/`); the only CV
-artefacts here are the four compiled PDFs in `public/uploads/` — light and dark, one per language —
-copied in by hand when they change.
+(a sibling `cv/` folder, run with `node build-cv.mjs`, writing to its own `out/`); the CV artefacts
+here are the compiled PDFs in `public/uploads/` — the full CV in light and dark, one per language,
+plus the one-page CV and the base cover letter — copied in by hand when they change.
 
 `api/contact.js` is the same handler Vercel runs; `vite.config.js` mounts it in development. It sends
 through Resend and reads `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM` and `TURNSTILE_SECRET_KEY`

@@ -92,11 +92,10 @@ the privacy notice and the consent the law asks for.
   until it is deployed again, sideForge shows its logo, since it is backend-only for now, and krub.dev
   has screenshots of itself. All 1280×800 JPEG, under `public/assets/img/<slug>/`. Better ones when
   there is something better to shoot. **(owner)**
-- [ ] **Sharper screenshots for krub.dev.** The four on its card are 1280×800 viewport captures at 1×,
-  and they read soft in the modal, which shows them at up to ~1000 CSS px wide — 2000 device px on a
-  retina screen. Capture again at `deviceScaleFactor: 2` and keep them at 2560×1600, or shoot a wider
-  viewport and downscale. The card wants fresh ones anyway now that the site has changed, so both
-  jobs go together. The card is fine either way; the modal is what shows the difference. **(owner)**
+- [x] **Sharper screenshots for krub.dev.** Done 2026-10-01: about, projects and contact recaptured
+  at `deviceScaleFactor: 2` (2560×1600), and the hero at 1600×1000 from the real browser because the
+  3D scene does not mount under the automated capture. A hand-recorded tour GIF and the `scripts/`
+  pipeline (a Playwright tour and a video-to-GIF convertor) came with them. **(owner)**
 - [x] **The Open Graph image.** Done 2026-10-01: designed on a dev-only page, `/og`
   (`src/views/OgView.vue`), which draws the card at its real 1200×630 out of the site's own pieces —
   the 3D mark, lit, and Limonacho. The card and the LinkedIn cover are captured and in
@@ -119,8 +118,10 @@ the privacy notice and the consent the law asks for.
 - [x] **Fold the old hero bio into `/me`.** Done: `/me` was reworked around the LinkedIn bio and the
   old hero detail landed there — the full stack range (Java/Node/Vue), the client side and the
   AI-with-judgment line. **(owner)**
-- [ ] **Update the CV.** The sources still carry the framing the site has moved away from (the
-  "backend focus" among it, and more); bring them in line with the current copy. **(owner)**
+- [x] **Update the CV.** Done 2026-10-01: the header and profile brought in line with the site (no
+  "backend focus", the AI-with-judgement line, Full Stack / Frontend / Backend), the name without
+  the second surname and the domain address. The PDFs were regenerated and the one-pager and cover
+  letters stored in `public/uploads/` for later. **(owner)**
 - [x] **Finish the testimonials.** Done: the first real quote is in — Lourdes Campuzano of
   CreandoMientras, with her own mark in the avatar circle — and the pager now carries only that
   one, prepared for more to arrive. The vertical arrows went, replaced by scrollable dots. Long
