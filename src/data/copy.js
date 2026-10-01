@@ -15,7 +15,19 @@
   template renders line1 / line2, with line2 wrapped in a span coloured
   var(--acc-text), and then the skills line under it.
 */
+/*
+  The three places, in one spot. The marquee loops them, and the banners read the
+  same strings — by name, not by their index in the loop, which shifted the day
+  the disciplines joined it.
+*/
+const locations = {
+  en: 'Murcia · Barcelona · remote · Spain',
+  es: 'Murcia · Barcelona · remoto · España',
+}
+
 export const copy = {
+  locations,
+
   hero: {
     en: {
       badge: 'Available',
@@ -56,16 +68,8 @@ export const copy = {
   // The marquee loops these two phrases forever, joined by the separator.
   // Add or remove entries freely; the band duplicates whatever it is given.
   marquee: {
-    en: [
-      'Full Stack Developer',
-      'Frontend · Backend · 3D · Applied AI',
-      'Murcia · Barcelona · remote · Spain',
-    ],
-    es: [
-      'Desarrollador Full Stack',
-      'Frontend · Backend · 3D · IA Aplicada',
-      'Murcia · Barcelona · remoto · España',
-    ],
+    en: ['Full Stack Developer', 'Frontend · Backend · 3D · Applied AI', locations.en],
+    es: ['Desarrollador Full Stack', 'Frontend · Backend · 3D · IA Aplicada', locations.es],
   },
 
   // The 404 page. The title and the button label are interface strings and live

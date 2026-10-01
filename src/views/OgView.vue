@@ -38,8 +38,6 @@ import { copy, email } from '../data'
 
 const { lang } = useLang()
 
-const marquee = computed(() => copy.marquee[lang.value])
-
 /*
   The mark lights up when the stage is armed, and on the site that happens a beat
   after the scene is ready — the prop goes from false to true rather than starting
@@ -258,7 +256,7 @@ const liGridStyle = computed(() => ({
         <span class="rule" aria-hidden="true" />
 
         <div class="details">
-          <p class="line place">{{ marquee[1] }}</p>
+          <p class="line place">{{ copy.locations[lang] }}</p>
           <p class="line mail">{{ email }}</p>
         </div>
       </div>
@@ -364,7 +362,7 @@ const liGridStyle = computed(() => ({
         <span class="rule" aria-hidden="true" />
 
         <!-- English, like the rest of the card: LinkedIn is not toggled. -->
-        <p class="line place">{{ copy.marquee.en[1] }}</p>
+        <p class="line place">{{ copy.locations.en }}</p>
         <p class="line mail">{{ email }}</p>
       </div>
 
@@ -442,7 +440,7 @@ const liGridStyle = computed(() => ({
         <span class="rule" aria-hidden="true" />
 
         <div class="details">
-          <p class="line place">{{ copy.marquee.en[1] }}</p>
+          <p class="line place">{{ copy.locations.en }}</p>
           <p class="line mail">{{ email }}</p>
         </div>
       </div>
