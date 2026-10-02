@@ -133,7 +133,9 @@ function onCardClick(event) {
 
         <div class="head">
           <p class="label">{{ t('section.test') }}</p>
-          <span class="position">{{ index + 1 }} / {{ items.length }}</span>
+          <!-- One quote is not a page: with nothing to page through, the counter
+               is left out rather than reading "1 / 1". -->
+          <span v-if="items.length > 1" class="position">{{ index + 1 }} / {{ items.length }}</span>
         </div>
 
         <div class="body">

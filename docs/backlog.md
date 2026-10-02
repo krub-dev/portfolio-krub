@@ -408,12 +408,19 @@ to turn it into a reusable checklist — see the skill.
 
 **To do or to debate:**
 
-- [ ] **Broken links.** A sweep of every outbound link and every internal anchor.
-- [ ] **PageSpeed / Lighthouse on production**, with the accessibility pass (axe, WCAG AA) and a
-  dependency-vulnerability check (`npm audit`) — against the deployment, not the local preview.
-- [ ] **Terms & conditions.** A portfolio sells nothing; decide whether it needs them at all.
-- [ ] **Cookie consent.** There are none today, so no banner; it only appears if analytics brings one.
-- [ ] **The audit itself.** Run the checklist end to end and record the result.
+- [x] **Broken links.** Swept 2026-10-02: every outbound link and internal anchor checked.
+  Showroom's Railway deploy was the one casualty — the card hides the link and the no-JS fallback
+  now points at its repository. `creandomientras.com` answers a 308 the browser follows.
+- [x] **PageSpeed / Lighthouse, axe and `npm audit`.** Lighthouse is 96 mobile / 100 desktop, with
+  accessibility, best practices and SEO at 100. `npm audit` is clean. Axe runs as
+  `tests/e2e/a11y.spec.js` — the home page in both themes and languages, plus `/privacy` and the 404
+  — and is green.
+- [ ] **Re-measure Lighthouse once more** after the header and rewrite changes, and settle **terms &
+  conditions**: a portfolio sells nothing, so decide whether it needs them at all.
+- [x] **Cookie consent.** There are none today, so no banner; it only appears if analytics brings one.
+- [x] **The audit itself.** Run the checklist end to end and record the result — done 2026-10-02.
+- [ ] **A CSP.** Deliberately deferred: a real one has to account for the inline theme script,
+  Turnstile and the 3D worker, so it is its own piece of work, not a line in `vercel.json`.
 
 ## Ideas (future)
 

@@ -77,6 +77,10 @@ function renderTurnstile() {
   loadTurnstile().then(() => {
     widgetId = window.turnstile.render(turnstileEl.value, {
       sitekey: siteKey,
+      // interaction-only: no badge on the ordinary path, so the form does not
+      // carry a "success" box. Cloudflare only shows itself if it has to
+      // challenge the visitor.
+      appearance: 'interaction-only',
       theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
       callback: (value) => (token.value = value),
       'expired-callback': () => (token.value = ''),

@@ -465,13 +465,18 @@ test('the testimonials page one at a time', async ({ page }) => {
   // The count follows the data, so adding a quote does not break the test.
   const total = await dots.count()
   await expect(dots.nth(0)).toHaveClass(/active/)
-  await expect(count).toHaveText(`1 / ${total}`)
 
   // Only the current quote is in the DOM at all.
   await expect(page.locator('.testimonials .entry')).toHaveCount(1)
 
-  // Paging only means something with more than one quote.
-  test.skip(total < 2, 'one quote so far')
+  // Paging only means something with more than one quote; with one, the counter
+  // is not rendered at all.
+  if (total < 2) {
+    await expect(count).toHaveCount(0)
+    test.skip(true, 'one quote so far')
+    return
+  }
+  await expect(count).toHaveText(`1 / ${total}`)
   const first = await quote.textContent()
 
   await dots.nth(1).click()
@@ -510,6 +515,7 @@ test('the read more button does not page the quote', async ({ page }) => {
   const count = page.locator('.testimonials .position')
   const more = page.locator('.testimonials .entry .more')
   const total = await page.locator('.testimonials .dot').count()
+  test.skip(total < 2, 'one quote so far: no counter to hold still')
 
   await expect(count).toHaveText(`1 / ${total}`)
   await more.click()
