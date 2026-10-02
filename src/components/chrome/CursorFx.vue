@@ -43,6 +43,7 @@ const hintBox = ref(null)
 let over = false
 let idle = false
 let lastHint = null
+let lastHit = null
 
 usePointer((pointer) => {
   const move = `translate3d(${pointer.x}px, ${pointer.y}px, 0)`
@@ -70,6 +71,20 @@ usePointer((pointer) => {
   */
   const el = document.elementFromPoint(pointer.x, pointer.y)
   const hot = Boolean(el?.closest(props.interactiveSelector))
+
+  /*
+    The cursor is --acc-solid, the accent itself, so on a surface that is already
+    accent (the CV panel) it would vanish. Any element can set --cursor-color to
+    change it while the pointer is over it. Read only when the element under the
+    pointer changes, so a getComputedStyle never runs per frame.
+  */
+  if (el !== lastHit) {
+    lastHit = el
+    const color = el ? getComputedStyle(el).getPropertyValue('--cursor-color').trim() : ''
+    for (const node of [dot.value, ring.value, hintBox.value]) {
+      if (node) node.style.setProperty('--cursor-color', color)
+    }
+  }
   /*
     Over the blind or the mark the cursor becomes the hint and nothing else: the
     dot steps aside and a glyph stands in — up over the blind, down over the coil,
@@ -151,7 +166,7 @@ usePointer((pointer) => {
   width: 10px;
   height: 10px;
   margin: -5px 0 0 -5px;
-  background: var(--acc-solid);
+  background: var(--cursor-color, var(--acc-solid));
   border-radius: 50%;
   z-index: 301;
   transition: opacity 0.15s ease;
@@ -161,7 +176,7 @@ usePointer((pointer) => {
   width: 40px;
   height: 40px;
   margin: -20px 0 0 -20px;
-  border: 1.5px solid var(--acc-solid);
+  border: 1.5px solid var(--cursor-color, var(--acc-solid));
   border-radius: 50%;
   z-index: 300;
   opacity: 0;
@@ -224,7 +239,7 @@ usePointer((pointer) => {
 
 .hint-glyph {
   font: 700 18px var(--font-mono);
-  color: var(--acc-solid);
+  color: var(--cursor-color, var(--acc-solid));
   line-height: 1;
   opacity: 1;
 }
@@ -244,7 +259,7 @@ usePointer((pointer) => {
   follows the theme like everything else.
 */
 .hint-turn {
-  background: var(--acc-solid);
+  background: var(--cursor-color, var(--acc-solid));
   -webkit-mask: url('/assets/img/360icon.svg') center / contain no-repeat;
   mask: url('/assets/img/360icon.svg') center / contain no-repeat;
   opacity: 0;

@@ -77,6 +77,9 @@
     "stack": "Stack"
   },
   "cvModal": {
+    "variants": "Versión del CV",
+    "full": "Completo",
+    "onePage": "Compacto",
     "loading": "Cargando el CV…",
     "error": "No se ha podido mostrar el CV.",
     "download": "Descargar el CV"

@@ -179,12 +179,10 @@ The form is built and lives in Contact; it posts to `/api/contact`, a Vercel fun
 - [x] **Update Vercel's DNS records.** Done: krub.dev resolves on the current records — `A @ →
   76.76.21.21` and `CNAME www → cname.vercel-dns.com` — checked against the live DNS. They now live
   in Cloudflare, where the mail records also went.
-- [ ] **Re-measure Lighthouse once `dev` is on `main`.** The numbers so far are not the ones that
-  count: the deployed `krub.dev` is an older build (still loading Google Fonts; mobile 84 / desktop
-  98) and the `dev` figures came from a local preview (mobile 84–85 / desktop 99). Run it against
-  the real deployment after the merge, together with the pre-publication documentation review. The
-  one thing that got worse is the TBT — the bundle grew with the new sections — so it is worth a
-  second look then.
+- [x] **Re-measure Lighthouse once `dev` is on `main`.** Done 2026-10-02, against the deployment:
+  **95 mobile / 100 desktop**, accessibility, best practices and SEO all 100. The 96 in the README
+  was the earlier run; 95 is the same result within Lighthouse's run-to-run noise. The work that got
+  it there is in the Performance section below.
 - [ ] **Analytics, if any.** Vercel's own (Web Analytics / Speed Insights) looks like a component to
   switch on, but the question is whether it sets a cookie: if it does, it pulls in a consent banner
   the site does not have today. Decide first — a cookieless, privacy-friendly tool (Vercel's
@@ -415,8 +413,9 @@ to turn it into a reusable checklist — see the skill.
   accessibility, best practices and SEO at 100. `npm audit` is clean. Axe runs as
   `tests/e2e/a11y.spec.js` — the home page in both themes and languages, plus `/privacy` and the 404
   — and is green.
-- [ ] **Re-measure Lighthouse once more** after the header and rewrite changes, and settle **terms &
-  conditions**: a portfolio sells nothing, so decide whether it needs them at all.
+- [x] **Re-measure Lighthouse once more** after the header and rewrite changes: done 2026-10-02,
+  95 mobile / 100 desktop, everything else 100.
+- [ ] **Terms & conditions.** A portfolio sells nothing, so decide whether it needs them at all.
 - [x] **Cookie consent.** There are none today, so no banner; it only appears if analytics brings one.
 - [x] **The audit itself.** Run the checklist end to end and record the result — done 2026-10-02.
 - [ ] **A CSP.** Deliberately deferred: a real one has to account for the inline theme script,

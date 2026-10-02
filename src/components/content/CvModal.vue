@@ -23,9 +23,13 @@ import BaseModal from '../base/BaseModal.vue'
 const props = defineProps({
   open: { type: Boolean, default: false },
   href: { type: String, required: true },
+  // 'full' or 'onePage': the two documents on offer.
+  variant: { type: String, default: 'full' },
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'variant'])
+
+const VARIANTS = ['full', 'onePage']
 
 const { t } = useI18n()
 
@@ -113,6 +117,15 @@ watch(
     }
   },
 )
+
+// Switching document while the dialog is open re-renders; the download follows
+// through the `href` the page hands down.
+watch(
+  () => props.href,
+  () => {
+    if (props.open) render()
+  },
+)
 </script>
 
 <template>
@@ -124,7 +137,22 @@ watch(
     @close="emit('close')"
   >
     <template #head>
-      <span id="cv-modal-title" class="title">{{ t('actions.cv') }}</span>
+      <div class="head-left">
+        <span id="cv-modal-title" class="title">{{ t('actions.cv') }}</span>
+        <div class="variants" role="group" :aria-label="t('cvModal.variants')">
+          <button
+            v-for="v in VARIANTS"
+            :key="v"
+            class="variant"
+            :class="{ active: variant === v }"
+            type="button"
+            :aria-pressed="variant === v"
+            @click="emit('variant', v)"
+          >
+            {{ t(`cvModal.${v}`) }}
+          </button>
+        </div>
+      </div>
     </template>
 
     <!--
@@ -192,6 +220,46 @@ watch(
   width: 15px;
   height: 15px;
   display: block;
+}
+
+.head-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.variants {
+  display: inline-flex;
+  gap: 3px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.variant {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-3);
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.variant:hover {
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+.variant.active {
+  background: var(--acc);
+  color: var(--on-acc);
 }
 
 .note {

@@ -395,7 +395,7 @@ onMounted(readTokens)
           <BaseButton variant="outline" size="md">{{ t('actions.cv') }}</BaseButton>
           <BaseButton variant="outline" size="sm" mono>{{ t('tab.edu') }}</BaseButton>
           <BaseButton variant="solid" size="md" disabled>{{ t('form.send') }}</BaseButton>
-          <BaseButton variant="solid" size="sm" :href="cvPath[theme][lang]" download>
+          <BaseButton variant="solid" size="sm" :href="cvPath.full[theme][lang]" download>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="icon">
               <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
             </svg>

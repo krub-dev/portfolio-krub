@@ -48,7 +48,10 @@ const openProject = computed(() => (openIndex.value === null ? null : projects[o
   dialog and the download cannot disagree about which file it is.
 */
 const cvOpen = ref(false)
-const cvHref = computed(() => cvPath[theme.value][lang.value])
+// 'full' or 'onePage': the dialog offers both and the visitor picks; the file
+// follows the variant, the theme and the language together.
+const cvVariant = ref('full')
+const cvHref = computed(() => cvPath[cvVariant.value][theme.value][lang.value])
 </script>
 
 <template>
@@ -58,7 +61,12 @@ const cvHref = computed(() => cvPath[theme.value][lang.value])
       <MarqueeBar :items="marqueeItems" />
     </div>
 
-    <AboutSection @open-cv="cvOpen = true" @warm-cv="warmCv(cvHref)" />
+    <AboutSection
+      :variant="cvVariant"
+      @set-variant="cvVariant = $event"
+      @open-cv="cvOpen = true"
+      @warm-cv="warmCv(cvHref)"
+    />
     <ProjectsSection @open="openIndex = $event" />
     <StackSection />
     <Testimonials v-if="config.showTestimonials" />
@@ -70,7 +78,13 @@ const cvHref = computed(() => cvPath[theme.value][lang.value])
       @close="openIndex = null"
     />
 
-    <CvModal :open="cvOpen" :href="cvHref" @close="cvOpen = false" />
+    <CvModal
+      :open="cvOpen"
+      :href="cvHref"
+      :variant="cvVariant"
+      @variant="cvVariant = $event"
+      @close="cvOpen = false"
+    />
   </main>
 </template>
 

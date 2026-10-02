@@ -816,3 +816,19 @@ that with **prerendering** (`vite-ssg`, which renders the app to HTML at build t
   block is short. The JSON-LD `sameAs` already carries the same debt.
 - **What it does not buy:** a Spanish URL that can be indexed on its own. Prerendering could generate one
   (`/es`); the `<noscript>` cannot. Left for later, if it ever earns it.
+
+### 104. The CV is two documents, picked in About and opened by a glyph
+**Status:** active
+
+The CV now comes in a full version and a one-page compact, each in both themes and languages, and About
+offers both where it used to carry one button. The panel is the photo card's foot: it shares the photo's
+frame, tucks a little behind it (the photo keeps only its top corners round), and draws a hairline
+around itself.
+
+- **The options pick, the glyph opens.** The two labelled options move the choice; a document glyph
+  beside them opens the dialog with whatever is current, so tapping an option never opens something by
+  surprise. The dialog carries the same selector, so the choice moves in both places.
+- **Both documents follow the theme.** The one-page CV gained dark variants to match the full one, and
+  the cover letters left `public/uploads/` — the site never links them, so they live only in the cv tool.
+- **Three.js and TresJS were added to both documents' frontend line.** They were missing, which was an
+  oversight rather than a decision.

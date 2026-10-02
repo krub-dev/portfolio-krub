@@ -946,11 +946,11 @@ test('the CV opens in a dialog, rendered page by page', async ({ page }) => {
     the background, so the dialog is usually ready by the time it is opened. The
     document is asked for first, which is what this checks.
   */
-  await bringIntoView(page.locator('.cv'))
-  await page.locator('.cv').hover()
+  await bringIntoView(page.locator('.cv-block'))
+  await page.locator('.cv-open').hover()
   await expect(page.locator('link[rel="prefetch"][href$="cv-en-dark.pdf"]')).toBeAttached()
 
-  await page.locator('.cv').click()
+  await page.locator('.cv-open').click()
 
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
@@ -960,6 +960,12 @@ test('the CV opens in a dialog, rendered page by page', async ({ page }) => {
   await expect(dialog.locator('canvas.page').first()).toBeVisible()
   expect(await dialog.locator('canvas.page').count()).toBeGreaterThan(0)
   await expect(dialog.locator('a[download]')).toHaveAttribute('href', /cv-en-dark\.pdf$/)
+
+  // The one-page summary is on offer too, and both the download and the pages
+  // follow the choice.
+  await dialog.getByRole('button', { name: 'Compact' }).click()
+  await expect(dialog.locator('a[download]')).toHaveAttribute('href', /cv-1p-en-dark\.pdf$/)
+  await expect(dialog.locator('canvas.page').first()).toBeVisible()
 
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()

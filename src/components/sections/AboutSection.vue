@@ -13,7 +13,6 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import BaseButton from '../base/BaseButton.vue'
 import AvailabilityBadge from '../base/AvailabilityBadge.vue'
 import SectionHeading from '../base/SectionHeading.vue'
 import TabSwitch from '../base/TabSwitch.vue'
@@ -23,7 +22,15 @@ import { useLemonVoice } from '../../composables/useLemonVoice'
 import { certifications, config, copy, education, experience, photoPath } from '../../data'
 import { formatPeriod } from '../../utils/format'
 
-const emit = defineEmits(['open-cv', 'warm-cv'])
+const emit = defineEmits(['open-cv', 'warm-cv', 'set-variant'])
+
+defineProps({
+  // Which document is current, so the matching option reads as active.
+  variant: { type: String, default: 'full' },
+})
+
+// The two documents the CV control offers, in order.
+const CV_VARIANTS = ['full', 'onePage']
 
 const { lang } = useLang()
 const { t } = useI18n()
@@ -187,23 +194,42 @@ onUnmounted(() => observer?.disconnect())
 
       <div ref="photoWrap" class="photo-wrap" data-pfp-wrap>
         <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
-        <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
-          <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
-        </div>
+        <div class="photo-card">
+          <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
+            <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
+          </div>
 
-        <BaseButton
-          v-if="config.showCv"
-          variant="solid"
-          size="md"
-          magnetic
-          class="cv"
-          @mouseenter="onCvEnter"
-          @focus="warm"
-          @mouseleave="hush()"
-          @click="emit('open-cv')"
-        >
-          {{ t('actions.cv') }}
-        </BaseButton>
+          <div v-if="config.showCv" class="cv-block">
+            <span class="cv-label">{{ t('actions.cv') }}</span>
+            <span class="cv-divider" aria-hidden="true" />
+            <div class="cv-variants" role="group" :aria-label="t('cvModal.variants')">
+            <button
+              v-for="v in CV_VARIANTS"
+              :key="v"
+              class="cv-variant"
+              :class="{ active: variant === v }"
+              type="button"
+              @click="emit('set-variant', v)"
+            >
+                {{ t(`cvModal.${v}`) }}
+              </button>
+
+              <span class="cv-sep" aria-hidden="true" />
+
+              <button
+                class="cv-open"
+              type="button"
+              :aria-label="t('actions.cv')"
+              @mouseenter="onCvEnter"
+              @focus="warm"
+              @mouseleave="hush()"
+              @click="emit('open-cv')"
+            >
+              <span class="cv-open-icon" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+        </div>
       </div>
     </div>
   </section>
@@ -333,11 +359,149 @@ onUnmounted(() => observer?.disconnect())
   }
 }
 
-/* The CV closes the photo's column now, at the photo's own width, and travels
-   with it. */
-.cv {
+/* The CV panel is a touch wider than the photo and tucks a long way up behind
+   it: its rounded top is hidden, but its sides run up alongside the photo's
+   lower half, so the photo's frame reads as opening into it. The top padding
+   clears the part behind the photo. */
+.cv-block {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  margin: -40px 0 0;
+  padding: 48px 20px 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-sizing: border-box;
+}
+
+/* The accent, like the tag on a project card: it names the row without being
+   the accent surface it used to be. */
+.cv-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--acc-text);
+}
+
+/* The same control the dialog carries: a hairline pill around the two options. */
+.cv-variants {
+  display: inline-flex;
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.cv-variant {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.cv-variant:hover {
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+/* The document that is current, filled with the accent, like the dialog's own
+   selector. Kept after :hover so it stays filled while the pointer is on it. */
+.cv-variant.active {
+  background: var(--acc);
+  color: var(--on-acc);
+}
+
+/* The two options butt together: the corners they meet on are square, so the
+   active fill joins the neighbour instead of reading as its own pill. */
+.cv-variant:first-of-type {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.cv-variant:nth-of-type(2) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Opens the dialog with the document the selector picked. It is the last cell of
+   the selector rather than a button beside it: the two options pick, the glyph
+   opens, so a tap on an option never surprises. */
+.cv-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+/* A hairline, like the navbar's dividers, between the options and the glyph. */
+.cv-sep {
+  width: 1px;
   align-self: stretch;
-  margin-top: 6px;
+  margin: 7px 0;
+  background: var(--line);
+  flex: 0 0 auto;
+}
+
+/* The same hairline, this time between the label and the whole control. */
+.cv-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 6px 0;
+  background: var(--line);
+  flex: 0 0 auto;
+}
+
+.cv-open:hover,
+.cv-open:focus-visible {
+  color: var(--acc-text);
+}
+
+/* The icon the owner drew, masked so it takes the button's colour and follows
+   the theme. Same trick as the cursor's 360 glyph. */
+.cv-open-icon {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url('/assets/img/file-icon.svg') center / contain no-repeat;
+  mask: url('/assets/img/file-icon.svg') center / contain no-repeat;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cv-open:hover .cv-open-icon,
+.cv-open:focus-visible .cv-open-icon {
+  transform: scale(1.15) rotate(-8deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-open-icon {
+    transition: none;
+  }
+
+  .cv-open:hover .cv-open-icon,
+  .cv-open:focus-visible .cv-open-icon {
+    transform: none;
+  }
 }
 
 .photo-wrap {
@@ -356,9 +520,17 @@ onUnmounted(() => observer?.disconnect())
   align-self: start;
 }
 
-/* The photo, and the badge that sits on it. */
+/* The CV panel tucks behind the photo: a rounded box the same width and radius,
+   its top 18px hidden. The photo sits above it. */
+.photo-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .photo-box {
   position: relative;
+  z-index: 1;
 }
 
 .photo {
@@ -366,8 +538,13 @@ onUnmounted(() => observer?.disconnect())
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 18px;
+  /* Only the top is rounded: the photo's bottom meets the CV panel, which shares
+     the frame, so any radius down here would let the panel show at the corners. */
+  border-radius: 18px 18px 0 0;
   border: 1px solid var(--line);
+  /* No global border-box (decision 6): without this the 1px frame adds 2px to
+     the width and the photo ends a hair wider than the panel behind it. */
+  box-sizing: border-box;
 }
 
 /* Above the photo, out of the picture and nudged in off the corner. */

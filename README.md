@@ -70,7 +70,7 @@ and the compiled PDFs are copied by hand into `public/uploads/`.
 
 ## Performance
 
-Measured against the deployment with PageSpeed Insights: **96 mobile / 100 desktop**, with
+Measured against the deployment with PageSpeed Insights: **95 mobile / 100 desktop**, with
 accessibility, best practices and SEO at 100 across the board. Getting there was mostly about weight,
 and four things did it:
 
