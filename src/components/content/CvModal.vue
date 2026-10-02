@@ -229,6 +229,15 @@ watch(
   min-width: 0;
 }
 
+/* A phone has no room for the title, the selector, the download and the close on
+   one row; the selector drops under the title. */
+@media (max-width: 560px) {
+  .head-left {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+}
+
 .variants {
   display: inline-flex;
   gap: 3px;
