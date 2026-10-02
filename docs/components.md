@@ -395,7 +395,8 @@ No props. Emits `go-top`. Reads the timezone from `config.js`, publishes its own
 `--footer-h` by observing its size, and owns its scroll entrance. Contains `LiveClock`.
 
 ### LiveClock
-Prop: `timezone` (string, default `'Europe/Madrid'`). The local time in the footer, ticking on the minute.
+Prop: `timezone` (string, default `'Europe/Madrid'`). The local time in the footer, ticking every
+second, with the label alternating between CET and CEST.
 
 ### CursorFx
 Props: `interactiveSelector` (the "hot" element selector). Sizes are in its own stylesheet, not

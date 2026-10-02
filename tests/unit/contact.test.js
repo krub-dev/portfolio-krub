@@ -70,6 +70,7 @@ describe('the contact endpoint', () => {
     process.env.RESEND_API_KEY = 'test-key'
     process.env.CONTACT_TO = 'owner@example.com'
     delete process.env.TURNSTILE_SECRET_KEY
+    delete process.env.VERCEL_ENV
     vi.restoreAllMocks()
   })
 
@@ -140,10 +141,52 @@ describe('the contact endpoint', () => {
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
-  it('reports a failure from the service instead of pretending', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: false, text: async () => 'nope' })
+  it('reports a failure from the service without echoing its reason', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 403,
+      text: async () => 'the krub.dev domain is not verified',
+    })
     const res = fakeRes()
     await handler(req(GOOD), res)
     expect(res.statusCode).toBe(502)
+    // The provider's message names account details; the client gets none of it.
+    expect(res.payload).toEqual({ ok: false, error: 'send-failed' })
+  })
+
+  it('survives a null body instead of throwing', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    const res = fakeRes()
+    await handler(req(null), res)
+    expect(res.statusCode).toBe(400)
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('fails closed in production when the Turnstile secret is missing', async () => {
+    process.env.VERCEL_ENV = 'production'
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    const res = fakeRes()
+    await handler(req(GOOD), res)
+    expect(res.statusCode).toBe(500)
+    expect(res.payload.error).toBe('not-configured')
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('refuses a display-name reply address', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    const res = fakeRes()
+    await handler(req({ ...GOOD, email: 'Boss <ana@example.com>' }), res)
+    expect(res.statusCode).toBe(400)
+    expect(res.payload.error).toBe('email')
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('strips newlines from the name before it reaches the subject', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true })
+    const res = fakeRes()
+    await handler(req({ ...GOOD, name: 'Ana\r\nBcc: x@y.com' }), res)
+    expect(res.statusCode).toBe(200)
+    const sent = JSON.parse(globalThis.fetch.mock.calls[0][1].body)
+    expect(sent.subject).not.toMatch(/[\r\n]/)
   })
 })

@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Local env files: cover every .env* shape, while keeping the template tracked.
+.env
+.env.*
+!.env.example
+
+# Vercel's project linkage (the org and project ids live in here).
+.vercel/
+
 # Editor directories and files.
 #
 # The whole of .vscode/, including extensions.json — which the Vite scaffold

@@ -1,15 +1,15 @@
 # Decisions
 
-Registro activo de decisiones arquitectónicas que condicionan cómo se programa y diseña el proyecto
-hoy. Agrupadas temáticamente. Los identificadores numéricos mantienen trazabilidad con el archivo
-histórico [`decisions-archive.md`](decisions-archive.md).
+The live record of the architectural decisions that shape how this project is built and designed
+today. Grouped by theme. The numeric ids keep them traceable to the historical
+[`decisions-archive.md`](decisions-archive.md).
 
-Si una decisión aquí contradice [`design-spec.md`](design-spec.md), este archivo wins — el spec es
-el contrato visual, este es el registro de dónde nos hemos movido de él.
+Where a decision here contradicts [`design-spec.md`](design-spec.md), this file wins: the spec is
+the visual contract, this is the record of where the build has moved away from it.
 
 ---
 
-## Fundamentos y tokens
+## Foundations and tokens
 
 ### 1. Static assets live in `public/`, not `src/assets/`
 **Status:** active · **Archive:** 1
@@ -99,7 +99,7 @@ fill. The logo follows the accent in both themes via `--mark`.
 
 ---
 
-## Rendimiento y rAF unificado
+## Performance and the single rAF
 
 ### 16. One rAF loop and a subscription list for everything that follows the mouse
 **Status:** active · **Archive:** 16
@@ -164,7 +164,7 @@ and never below 900px (decision 37).
 
 ---
 
-## Accesibilidad WCAG
+## Accessibility (WCAG)
 
 ### 24. A visible focus ring, using `:focus-visible`
 **Status:** active · **Archive:** 24 · **Not in the design spec**
@@ -240,7 +240,7 @@ panel is a `role="tabpanel"` with `aria-labelledby`.
 
 ---
 
-## Persiana y escena WebGL
+## The shutter and the WebGL scene
 
 ### 77. The 2D mark is the fallback, and it fades
 **Status:** active · **Archive:** 77
@@ -414,7 +414,7 @@ the Open Graph card is where they are weighed.
   and the walls darken to 8 by the middle. No light and no hard facet.
 - **A contact shadow was tried and taken out.** A plane behind the mark with a radial gradient in
   `--cast`, over five stops so it read as a blur rather than a disc. On a room this dark it was a black
-  blob on black, and the owner never had it on, so it and its token read went.
+  blob on black, and I never had it on, so it and its token read went.
 - **The mark's size is a dial in the scene, not a CSS transform.** Scaling the canvas to fit the mark
   took the room with it and left the room at 90% of the slot, a band short of its edge. `markScale` on
   LogoModel multiplies the fit-to-stage scale, so the mark can be sized by hand while the room fills the
@@ -429,7 +429,7 @@ the Open Graph card is where they are weighed.
 
 ---
 
-## Enrutado SPA y endpoints
+## SPA routing and endpoints
 
 ### 7. The design system is a dev-only route
 **Status:** active · **Archive:** 7
@@ -481,7 +481,8 @@ them; the consent is one of those rules.
   and only the labels (`/privacy`, "Last updated") live in `src/locales/`.
 - **The box is the browser's own,** tinted with `--acc-text`. A hand-drawn control would add states to
   get right for no gain, and the native one is announced correctly for free.
-- **The endpoint records the consent.** The email carries the time the box was ticked, which is the
+- **The endpoint records the consent.** The email carries the time the send was received (the
+  server's clock, not the moment the box was ticked, which the browser never reports), which is the
   accountability the notice promises. Keeping the message for longer than it takes to answer would
   contradict the retention the page states, so it is not stored anywhere else.
 
@@ -525,7 +526,7 @@ WebKit.
 
 ---
 
-## Responsive y mobile
+## Responsive and mobile
 
 ### 14. The hero's viewport-height escape is keyed to width, not just height
 **Status:** active · **Archive:** 14 · **Fixes a prototype bug**
@@ -557,7 +558,7 @@ The inset belongs where the page's own gutter is, so the gutter became a token:
 
 ---
 
-## Secciones y contenido
+## Sections and content
 
 ### 55. The contact section: a band that moves with the scroll
 **Status:** active · **Archive:** 55
@@ -711,7 +712,7 @@ said. The rail's last slot is a card that does: the GitHub mark, a question, a l
 in the accent.
 
 - **Dashed, and the dash pattern is set by hand.** The border is what says "a slot in the rail, not a
-  fifth project", and the owner wanted the dashes longer and further apart than the browser's own. A CSS
+  fifth project", and I wanted the dashes longer and further apart than the browser's own. A CSS
   `border-style: dashed` follows the card's rounded corner but its pattern is fixed against the border's
   width; a `repeating-linear-gradient` can be tuned but is straight, and it left the corners bare. So the
   frame is an SVG `rect` with `stroke-dasharray` (18px dashes, 12px gaps), which does both at once. This
@@ -741,9 +742,9 @@ in the accent.
 ### 62. No em dashes in the copy
 **Status:** active · **Archive:** 62
 
-The owner reads the em dash as a tell — the thing that makes prose look machine-written — and asked
-for it out of the copy a visitor can see. Appositives and asides became a colon, a comma or
-parentheses. The year ranges got an en dash instead.
+I read the em dash as a tell, the thing that makes prose look machine-written, so it stays out of
+the copy a visitor can see; this repository's own Markdown keeps its own style. Appositives and
+asides became a colon, a comma or parentheses. The year ranges got an en dash instead.
 
 ### 69. The CV tool moved out of the repository, and the CV now comes in two themes
 **Status:** active · **Archive:** 69
@@ -779,7 +780,7 @@ structured data. It now has its own address on the domain, and the whole path to
 so the address a visitor copies is the one the site is about.
 
 - **Receiving is Cloudflare Email Routing.** An MX record and a DKIM record forward anything sent to
-  `contact@krub.dev` to the owner's real inbox, well before any of the rest.
+  `contact@krub.dev` to my real inbox, well before any of the rest.
 - **Sending as it is "Send mail as" over Resend's SMTP,** not Gmail's: a reply goes out signed for
   `krub.dev`, carries no "via gmail.com", and passes `DMARC` because both `SPF` and the `DKIM` domain
   align. A `_dmarc` record already sits at `p=none`.

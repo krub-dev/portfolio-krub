@@ -21,7 +21,10 @@ const SITEVERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 
 const LIMITS = { name: 80, email: 120, message: 4000 }
 const MIN = { name: 2, message: 10 }
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+// Stricter than it looks like it needs to be: whitespace and the characters
+// that make an address a display-name form (`Boss <a@b.co>`) or a header
+// injection are out, so what reaches `reply_to` is a bare address.
+const EMAIL = /^[^\s@,;:"()<>[\]\\]+@[^\s@,;:"()<>[\]\\]+\.[^\s@,;:"()<>[\]\\]{2,}$/
 
 // A best-effort limit, not a promise: a serverless instance is one of many and
 // can be recycled at any time, so this only ever catches a burst that lands on
@@ -64,6 +67,8 @@ async function turnstileOk(secret, token, ip) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ secret, response: token, remoteip: ip }),
+    // Cloudflare hanging must not hang the request.
+    signal: AbortSignal.timeout(8000),
   })
   const outcome = await response.json().catch(() => ({}))
   return outcome.success === true
@@ -72,6 +77,18 @@ async function turnstileOk(secret, token, ip) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'method' })
 
+  /*
+    A cheap extra layer over Turnstile, which already binds its token to the
+    domain. Only checked in production, so the dev server on localhost and the
+    local endpoint are unaffected.
+  */
+  if (process.env.VERCEL_ENV === 'production') {
+    const origin = req.headers.origin
+    if (origin && origin !== 'https://krub.dev') {
+      return json(res, 403, { ok: false, error: 'origin' })
+    }
+  }
+
   const apiKey = (process.env.RESEND_API_KEY ?? '').trim()
   const to = (process.env.CONTACT_TO ?? '').trim()
   if (!apiKey || !to) return json(res, 500, { ok: false, error: 'not-configured' })
@@ -79,13 +96,20 @@ export default async function handler(req, res) {
   const ip = clientIp(req)
   if (rateLimited(ip)) return json(res, 429, { ok: false, error: 'rate-limited' })
 
-  const body = typeof req.body === 'string' ? safeParse(req.body) : req.body ?? {}
+  // `req.body` can be a string (Vite's raw stream, or an unparsed body), an
+  // already-parsed object (Vercel), or null — `"null"` parses to null, and a
+  // bare `null ?? {}` misses the string branch. Anything that is not an object
+  // becomes one, so nothing below ever touches a property of null.
+  const parsed = typeof req.body === 'string' ? safeParse(req.body) : req.body
+  const body = parsed && typeof parsed === 'object' ? parsed : {}
 
   // The honeypot. Answer as if it had worked: a bot that gets an error learns
   // which field to leave alone.
   if (body.trap) return json(res, 200, { ok: true })
 
-  const name = String(body.name ?? '').trim()
+  // Newlines and tabs collapse to a space: the name is what the subject line is
+  // built from, and a raw CR/LF there is how a header gets a Bcc added to it.
+  const name = String(body.name ?? '').replace(/[\r\n\t]+/g, ' ').trim()
   const email = String(body.email ?? '').trim()
   const message = String(body.message ?? '').trim()
 
@@ -104,9 +128,16 @@ export default async function handler(req, res) {
     return json(res, 400, { ok: false, error: 'consent' })
   }
 
-  // Turnstile is required only when its secret is configured, so the form and
-  // this handler can still be exercised locally without the keys.
+  /*
+    Turnstile can be left unconfigured locally so the form and the handler can be
+    exercised without Cloudflare's keys — but in production a missing secret has
+    to fail closed: a deleted or mistyped variable would otherwise drop the
+    captcha silently, and nobody would notice.
+  */
   const turnstileSecret = (process.env.TURNSTILE_SECRET_KEY ?? '').trim()
+  if (!turnstileSecret && process.env.VERCEL_ENV === 'production') {
+    return json(res, 500, { ok: false, error: 'not-configured' })
+  }
   if (turnstileSecret) {
     const token = String(body.token ?? '')
     if (!token) return json(res, 400, { ok: false, error: 'captcha' })
@@ -116,8 +147,8 @@ export default async function handler(req, res) {
 
   const from = (process.env.CONTACT_FROM ?? 'krub.dev <contact@krub.dev>').trim()
 
-  // The consent line is a record of when the box was ticked, which is what an
-  // accountability check asks for.
+  // The consent line records when the send was received, on the server's clock —
+  // not the moment the box was ticked, which the browser never tells us.
   const text = `Name: ${name}\nEmail: ${email}\n\n${message}\n\nConsent: given ${new Date().toISOString()}`
 
   try {
@@ -127,25 +158,26 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from,
         to: [to],
-        subject: `krub.dev — ${name}`,
+        subject: `krub.dev: ${name}`,
         // Resend replies to this address, so the answer goes straight back.
         reply_to: email,
         text,
       }),
+      signal: AbortSignal.timeout(8000),
     })
 
     if (!response.ok) {
       const detail = await response.text().catch(() => `http ${response.status}`)
-      // Logged for the deploy's function logs and echoed back: the handler
-      // swallowing the provider's reason is what turned the first failure into a
-      // mystery.
+      // Logged for the deploy's function logs, and kept there: echoing the
+      // provider's reason back let any caller read account details (the
+      // unverified-domain message named the from address) by forcing a failure.
       console.error('[contact] resend rejected:', response.status, detail.slice(0, 300))
-      return json(res, 502, { ok: false, error: 'send-failed', detail: detail.slice(0, 300) })
+      return json(res, 502, { ok: false, error: 'send-failed' })
     }
 
     return json(res, 200, { ok: true })
   } catch (error) {
     console.error('[contact] resend unreachable:', error)
-    return json(res, 502, { ok: false, error: 'send-failed', detail: 'unreachable' })
+    return json(res, 502, { ok: false, error: 'send-failed' })
   }
 }
