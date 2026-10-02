@@ -58,7 +58,13 @@ let smoothSpin = 0
 let smoothSpinY = 0
 // Strike progress: 0 = off, 1 = fully lit. Driven by the same timing as
 // glowStrike in LogoStage (flickers at 8%, 44%, 58%, 80%, hold at 100%).
-let strikeProgress = 0
+/*
+  Start lit when the halo is already on. The scene is remounted when the blind is
+  lowered and raised again, and by then the halo never changes, so the strike
+  below would not fire and the mark would sit in its "off" grey. Starting at 1
+  puts it straight at the accent, like the ring, which stays lit the whole time.
+*/
+let strikeProgress = props.haloOn ? 1 : 0
 
 /*
   Two materials: the front face gets the accent colour, the back gets a dark
