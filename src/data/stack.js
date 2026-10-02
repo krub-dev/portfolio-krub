@@ -56,6 +56,7 @@ export const stack = [
       { name: 'CSS3', icon: '/icons/css3/css3-original.svg', invertOnDark: false },
       { name: 'Vite', icon: '/icons/vitejs/vitejs-original.svg', invertOnDark: false },
       { name: 'Three.js', icon: '/icons/threejs/threejs-original.svg', invertOnDark: true },
+      { name: 'TresJS', icon: '/icons/tresjs/tresjs-original.svg', invertOnDark: false },
       { name: 'GSAP', icon: '/icons/gsap/gsap-original.svg', invertOnDark: true, wide: true },
       { name: 'Figma', icon: '/icons/figma/figma-original.svg', invertOnDark: false },
       { name: 'Framer', icon: '/icons/framer/framer-original.svg', invertOnDark: true },
