@@ -40,7 +40,9 @@ test.describe('chrome reacts to scrolling', () => {
   })
 
   test('the footer slides in and never covers the last section', async ({ page }) => {
-    await openSite(page)
+    // Reduced motion: this is about settled geometry, not the slide itself, so
+    // the transform lands instantly and nothing races the 0.4s entrance.
+    await openSite(page, { reduced: true })
     const footer = page.locator('footer')
     const viewport = page.viewportSize().height
 
@@ -53,11 +55,23 @@ test.describe('chrome reacts to scrolling', () => {
       .poll(async () => (await footer.boundingBox()).y, { timeout: 2000 })
       .toBeLessThan(viewport)
 
-    // The page reserves exactly the footer's height, so contact ends where the
-    // footer begins — the 1px allowance is sub-pixel rounding.
-    const contactBottom = (await page.locator('#contact').boundingBox()).y +
-      (await page.locator('#contact').boundingBox()).height
-    expect(contactBottom).toBeLessThanOrEqual((await footer.boundingBox()).y + 1)
+    /*
+      The page reserves exactly the footer's height, so contact ends where the
+      footer begins — the 1px allowance is sub-pixel rounding. Polled, because
+      the footer slides in over a transition and the height it publishes
+      (`--footer-h`) settles a beat after the class lands: a plain read here was
+      the one that came back red about one run in three.
+    */
+    await expect
+      .poll(
+        async () => {
+          const contact = await page.locator('#contact').boundingBox()
+          const bar = await footer.boundingBox()
+          return contact.y + contact.height - bar.y
+        },
+        { timeout: 2000 },
+      )
+      .toBeLessThanOrEqual(1)
   })
 
   test('exactly one nav link is highlighted, and it follows the scroll', async ({ page }) => {
@@ -653,7 +667,7 @@ test('theme and language survive a reload', async ({ page }) => {
   expect(painted).toBe('rgb(242, 243, 242)')
 })
 
-test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
+test('the accent cycles and survives a reload', async ({ page }) => {
   await openSite(page)
   const html = page.locator('html')
   await expect(html).toHaveAttribute('data-accent', 'yellow')
@@ -671,7 +685,11 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
   )
   expect(fill).toBe('#c3fffc')
 
-  if (isMobile) {
+  // Branch on width, not on `isMobile`: a tablet is touch but the layout picks
+  // its controls at the 900px breakpoint, so touch on its own chose the wrong
+  // path and the hidden menu button never became clickable.
+  const narrow = page.viewportSize().width < 900
+  if (narrow) {
     // Before the bar compacts the menu has no controls: they are in the bar.
     await page.locator('.menu-btn').click()
     await expect(page.locator('.menu .settings')).toHaveCount(0)
@@ -682,7 +700,7 @@ test('the accent cycles and survives a reload', async ({ page, isMobile }) => {
   // desktop, to the menu on a phone.
   await scrollTo(page, 400)
   await expect(page.locator('.capsule')).toHaveClass(/compact/)
-  if (isMobile) {
+  if (narrow) {
     await expect(page.locator('.controls.mobile .full')).toBeHidden()
     await page.locator('.menu-btn').click()
     await expect(page.locator('.menu .settings .lang-btn')).toBeVisible()
@@ -902,7 +920,12 @@ test('the privacy link opens the notice on its own route', async ({ page }) => {
   // old offset behind: the new page opens at its top, at once.
   expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(1000)
 
-  await page.locator('.form .policy').first().click()
+  // Centre the link first: the consent row lands at the very bottom of the
+  // viewport where the fixed footer sits, and a click there can go to the
+  // footer instead — intermittently, which is how it read on WebKit.
+  const policy = page.locator('.form .policy').first()
+  await bringIntoView(policy)
+  await policy.click()
 
   await expect(page).toHaveURL(/\/privacy$/)
   await expect(page.locator('main h1')).toBeVisible()

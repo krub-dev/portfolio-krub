@@ -42,8 +42,8 @@ axe and `npm audit` against the deployment, and the terms decision).
 ## Contact form
 
 The form is built and lives in Contact; it posts to `/api/contact`, a Vercel function that now sends
-**by Resend**, with a per-IP rate limit and a Cloudflare Turnstile check (decision 57), and it carries
-the privacy notice and the consent the law asks for.
+**by Resend**, with a best-effort per-instance rate limit and a Cloudflare Turnstile check (decision
+57), and it carries the privacy notice and the consent the law asks for.
 
 - [x] **Set Resend and Turnstile up.** Done: `krub.dev` is verified in Resend and the endpoint sends
   by it (decision 57), with the Turnstile widget live — `VITE_TURNSTILE_SITE_KEY` in the bundle and
@@ -53,6 +53,11 @@ the privacy notice and the consent the law asks for.
   required consent box under the fields, carrying the link to `/privacy`, which renders the policy
   from `src/data/privacy.js` in both languages. The box is enforced in `utils/contact.js` and again
   in `api/contact.js`, and the endpoint stamps the consent into the email. See decision 89.
+- [x] **Harden the endpoint.** Done 2026-10-02: it no longer echoes the provider's error back (it is
+  logged instead), a missing Turnstile secret now fails closed in production, a null body can no
+  longer crash the handler, the name is stripped of newlines before it reaches the subject, the
+  email check refuses display-name forms, both `fetch` calls time out, and a mismatched `Origin` is
+  refused in production. The rate limit stays by-instance and best effort; Turnstile is the guard.
 
 ---
 
@@ -138,6 +143,10 @@ the privacy notice and the consent the law asks for.
   the dangling blobs and the working tree were searched for a phone number and a home address and
   found clean; the only hits were PDF creation timestamps (`D:20261001214655`) and a font's own
   encoding table. The CV purge held, so no history rewrite was needed. **(owner)**
+- [ ] **A banner and a "how it's made" note for the README.** The README still opens on dry text. Add
+  the banner and the tour GIF at the top with a link to krub.dev, and a short, honest note on how the
+  project is built: the spec and the rules first, an agent that follows them, the review and the
+  verification in a real browser, and the tests as the net. After the audit. **(owner)**
 - [ ] **Redeploy Showroom.** Its Railway deploy is down (404 as of 2026-10-02), so the card and the
   modal carry no live link: `projects.js` has `live: null` with the old URL in a comment. Bring the
   deploy back, or point the link somewhere else, and set the field again. **(owner)**

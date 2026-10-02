@@ -9,7 +9,9 @@
   browser is not a rule: anyone can post to the endpoint directly.
 */
 const MIN = { name: 2, message: 10 }
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+// Kept in step with the copy in api/contact.js by hand: the server's is the one
+// that actually matters, this one only saves a round trip.
+const EMAIL = /^[^\s@,;:"()<>[\]\\]+@[^\s@,;:"()<>[\]\\]+\.[^\s@,;:"()<>[\]\\]{2,}$/
 
 export function validateContact({ name, email, message, consent }, labels) {
   const errors = { name: '', email: '', message: '', consent: '' }

@@ -1,15 +1,12 @@
 import vue from '@vitejs/plugin-vue'
 import { defineConfig, loadEnv } from 'vite'
 
-import contact from './api/contact.js'
-
 /*
   Asset location: `assets/`, `icons/` and `uploads/` are copied to `public/`,
   not to `src/assets/`. The stack icons and project images are referenced by
   name from the files in `src/data/`, and the CV is a plain link, so stable
   literal paths (`/icons/vuejs/vuejs-original.svg`) are worth more here than
   bundler hashing — otherwise every icon would need its own import or a glob.
-  https://vite.dev/config/
 */
 
 /*
@@ -25,12 +22,28 @@ import contact from './api/contact.js'
   against a preview build, and a live endpoint would post a real message every
   time the suite ran.
 */
+const isLocal = (address) =>
+  address === '127.0.0.1' || address === '::1' || address === '::ffff:127.0.0.1'
+
 function contactEndpoint() {
   return {
     name: 'krub-contact-endpoint',
-    configureServer(server) {
+    async configureServer(server) {
+      // Imported here rather than at the top of the file: the dev-only endpoint
+      // must not be able to break `vite build` with a syntax error, and the
+      // production bundle has no use for it.
+      const { default: contact } = await import('./api/contact.js')
+
       server.middlewares.use('/api/contact', (req, res, next) => {
         if (req.method !== 'POST') return next()
+
+        // `host: true` below puts the dev server on the LAN so a phone can read
+        // the site. It must not also hand that network a live endpoint that
+        // sends real mail with the key from .env.local, so only loopback posts.
+        if (!isLocal(req.socket?.remoteAddress)) {
+          res.statusCode = 403
+          return res.end('The contact endpoint is local-only in development.')
+        }
 
         // Vite hands a custom middleware the raw stream; the handler expects a
         // body, exactly as Vercel's runtime would have parsed one for it.

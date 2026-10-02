@@ -481,7 +481,8 @@ them; the consent is one of those rules.
   and only the labels (`/privacy`, "Last updated") live in `src/locales/`.
 - **The box is the browser's own,** tinted with `--acc-text`. A hand-drawn control would add states to
   get right for no gain, and the native one is announced correctly for free.
-- **The endpoint records the consent.** The email carries the time the box was ticked, which is the
+- **The endpoint records the consent.** The email carries the time the send was received (the
+  server's clock, not the moment the box was ticked, which the browser never reports), which is the
   accountability the notice promises. Keeping the message for longer than it takes to answer would
   contradict the retention the page states, so it is not stored anywhere else.
 

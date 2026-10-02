@@ -66,8 +66,8 @@ See decision 103 and the backlog's Performance section for the detail.
 
 ## Tests
 
-Forty-four unit tests and around seventy end-to-end flows, the latter run on a desktop and on two
-phones (Chromium and WebKit).
+Forty-four unit tests and around seventy end-to-end flows, run on a desktop, two phones and a
+tablet (Chromium and WebKit).
 
 Vitest covers the pure functions — how a timeline period is formatted, how the carousel index wraps,
 how a URL is tidied — the contact validation and its endpoint, and the composables that touch storage:
@@ -87,8 +87,13 @@ The same suite can be pointed at a deployment instead of the local build, which 
 checked before a domain is moved onto it:
 
 ```bash
-E2E_BASE_URL=https://example.vercel.app npx playwright test
+E2E_BASE_URL=https://example.vercel.app npx playwright test              # bash
+$env:E2E_BASE_URL='https://example.vercel.app'; npx playwright test      # PowerShell
 ```
+
+One limit worth stating: the hero's 3D scene is gated under `navigator.webdriver`, so no project in
+the suite opens WebGL. The shutter, the logo drag and the cursor gesture are verified by hand in a
+real browser, not here.
 
 ## Layout
 
@@ -174,6 +179,6 @@ Plus `nosniff`, `Referrer-Policy` and `X-Frame-Options` on everything.
 
 ## Licence
 
-No licence, which means default copyright: the code is here to be read, not reused wholesale. The
-content, the brand, the logo and the photographs are mine and are not reusable at all. If a particular
-piece is useful to you, ask me.
+Proprietary, all rights reserved (see [`LICENSE`](LICENSE)): the code is here to be read, not reused
+wholesale. The content, the brand, the logo and the photographs are mine and are not reusable at all.
+If a particular piece is useful to you, ask me.
