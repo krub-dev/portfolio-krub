@@ -1,13 +1,20 @@
 # krub.dev
 
 [![CI](https://github.com/krub-dev/portfolio-krub/actions/workflows/ci.yml/badge.svg)](https://github.com/krub-dev/portfolio-krub/actions/workflows/ci.yml)
+[![Vue 3](https://img.shields.io/badge/Vue_3-4fc08d?logo=vuedotjs&logoColor=white)](https://vuejs.org)
+[![Vite](https://img.shields.io/badge/Vite-646cff?logo=vite&logoColor=white)](https://vite.dev)
+[![Three.js](https://img.shields.io/badge/Three.js-000000?logo=threedotjs&logoColor=white)](https://threejs.org)
+[![TresJS](https://img.shields.io/badge/TresJS-000000?logo=threedotjs&logoColor=white)](https://tresjs.org)
+[![Vitest](https://img.shields.io/badge/Vitest-6da13f?logo=vitest&logoColor=white)](https://vitest.dev)
+[![Playwright](https://img.shields.io/badge/Playwright-2ead33?logo=playwright&logoColor=white)](https://playwright.dev)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com)
 
-Live at **[krub.dev](https://krub.dev)**.
+[![krub.dev](public/assets/img/github-banner.png)](https://krub.dev)
 
-My personal portfolio. One page plus a 404, bilingual (English / Spanish), dark and light themes
-with five accent palettes, built with Vue 3 and Vite.
+Live at **[krub.dev](https://krub.dev)**. My personal portfolio: one page plus a 404, bilingual
+(English / Spanish), dark and light themes with five accent palettes, built with Vue 3 and Vite.
 
-Kiko Rubio — full stack developer in Murcia.
+Kiko Rubio, full stack developer in Murcia.
 
 ## Stack
 
@@ -176,6 +183,21 @@ status would need edge middleware, so the 404 view adds its own `robots: noindex
 unknown URL is not indexed despite the 200.
 
 Plus `nosniff`, `Referrer-Policy` and `X-Frame-Options` on everything.
+
+## How it is made
+
+Spec first. [`docs/design-spec.md`](docs/design-spec.md) is the visual contract,
+[`docs/decisions.md`](docs/decisions.md) records every choice that is not obvious from the code, and
+[`docs/roadmap.md`](docs/roadmap.md) is the order the work happened in. The rules the code obeys —
+no hardcoded strings, no literal colours, one animation loop — live in [`AGENTS.md`](AGENTS.md).
+
+I build with an AI agent doing most of the typing, and I review and verify: changes land through the
+browser, and `npm run build`, `npm run test` and `npm run test:e2e` (WebKit as well as Chromium) are
+the net. That is also why the repository carries the spec and the decision log and not only the code:
+it is where the thinking is written down.
+
+So the honest answer to "who wrote this": the design and the decisions are mine; the agent types; the
+tests and a real browser decide what stays.
 
 ## Licence
 

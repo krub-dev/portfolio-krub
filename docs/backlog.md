@@ -11,8 +11,8 @@ being picked up — content and deployment first, mobile after, ideas last.
 
 **How progress is tracked:** every task is a checkbox. Unticked is outstanding, ticked is
 done, so the file — not memory — says where things stand when work resumes. A few entries are
-mine to do by hand rather than a code change; those carry **(owner)**. The ideas at the end are
-not tasks and have no checkbox.
+mine to do by hand rather than a code change. The ideas at the end are not tasks and have no
+checkbox.
 
 This merges the pending list of 2026-09-16 with what used to live in the roadmap's "Later"
 section, folded together where they overlapped.
@@ -34,8 +34,7 @@ a real address (`contact@krub.dev`, receiving by Cloudflare Email Routing and se
 Resend's SMTP), and the site points at it everywhere.
 
 **The substantial work still open:** a reread and a trim of the prose, a redeploy of Showroom, Bing
-Webmaster Tools, raising the DMARC policy, and the rest of the final audit (the broken-link sweep,
-axe and `npm audit` against the deployment, and the terms decision).
+Webmaster Tools, raising the DMARC policy and the terms decision. The audit itself is closed.
 
 ---
 
@@ -86,11 +85,11 @@ The form is built and lives in Contact; it posts to `/api/contact`, a Vercel fun
   Showroom carries its own two covers (`desktop.jpg` / `responsive.jpg`, taken from its repository)
   until it is deployed again, sideForge shows its logo, since it is backend-only for now, and krub.dev
   has screenshots of itself. All 1280×800 JPEG, under `public/assets/img/<slug>/`. Better ones when
-  there is something better to shoot. **(owner)**
+  there is something better to shoot.
 - [x] **Sharper screenshots for krub.dev.** Done 2026-10-01: about, projects and contact recaptured
   at `deviceScaleFactor: 2` (2560×1600), and the hero at 1600×1000 from the real browser because the
   3D scene does not mount under the automated capture. A hand-recorded tour GIF and the `scripts/`
-  pipeline (a Playwright tour and a video-to-GIF convertor) came with them. **(owner)**
+  pipeline (a Playwright tour and a video-to-GIF convertor) came with them.
 - [x] **The Open Graph image.** Done 2026-10-01: designed on a dev-only page, `/og`
   (`src/views/OgView.vue`), which draws the card at its real 1200×630 out of the site's own pieces —
   the 3D mark, lit, and Limonacho. The card and the LinkedIn cover are captured and in
@@ -109,47 +108,47 @@ The form is built and lives in Contact; it posts to `/api/contact`, a Vercel fun
 - [x] **Redo the GitHub profile README.** Done 2026-10-01: rewritten from scratch in the repo the
   README lives in (`krub-dev/krub-dev`), around the current site — a new banner and footer, the
   stack groups with Simple Icons for the three skillicons lacks, the four projects, a 42 block and a
-  metrics Action. **(owner)**
+  metrics Action.
 - [x] **Fold the old hero bio into `/me`.** Done: `/me` was reworked around the LinkedIn bio and the
   old hero detail landed there — the full stack range (Java/Node/Vue), the client side and the
-  AI-with-judgment line. **(owner)**
+  AI-with-judgment line.
 - [x] **Update the CV.** Done 2026-10-01: the header and profile brought in line with the site (no
   "backend focus", the AI-with-judgement line, Full Stack / Frontend / Backend), the name without
   the second surname and the domain address. The PDFs were regenerated and the one-pager and cover
-  letters stored in `public/uploads/` for later. **(owner)**
+  letters stored in `public/uploads/` for later.
 - [x] **Finish the testimonials.** Done: the first real quote is in — Lourdes Campuzano of
   CreandoMientras, with her own mark in the avatar circle — and the pager now carries only that
   one, prepared for more to arrive. The vertical arrows went, replaced by scrollable dots. Long
   quotes are clamped to four lines with a "read more". Part of the same rework.
 - [x] **Update LinkedIn to match the CV and the site.** Done: headline, location and dates aligned
-  with the site, and the new banner in. **(owner)**
-- [ ] **Reread the prose.** Every sentence lives in `src/data/`, both languages side by side, one
+  with the site, and the new banner in.
+- [x] **Reread the prose.** Every sentence lives in `src/data/`, both languages side by side, one
   file per kind of content. It was always going to be iterated after launch rather than
-  written once. **(owner)**
+  written once.
 - [ ] **Trim the copy and the CV.** My read: the site carries a lot of content and the CV
   reads long. A pass to cut, not to reword — the prose across `src/data/` and the CV sources in the
   `cv` tool, keeping only what earns its place. Sits next to the prose pass, but the goal here is
-  subtraction. **(owner)**
+  subtraction.
 - [ ] **Bing Webmaster Tools.** The same five minutes as Google Search Console, which is done and
-  has the sitemap submitted. Bing also feeds DuckDuckGo. **(owner)**
+  has the sitemap submitted. Bing also feeds DuckDuckGo.
 - [x] **Make the repository public.** Done 2026-10-02. The v1 portfolio repository is archived and
-  its links redirect here. **(owner)**
+  its links redirect here.
 - [x] **Make the documentation read as published work.** Done 2026-10-02: the live `.md` files
   rewritten to the first person (the earlier drafts described the build from the outside), the
   Spanish preamble and group headings in `decisions.md` turned to English, the README's `Running it`
   cut back to the commands a visitor needs, and the em-dash rule's wording, the `LiveClock` line and
-  the "where things stand" snapshot corrected. **(owner)**
+  the "where things stand" snapshot corrected.
 - [x] **Check the git history for personal data.** Done 2026-10-02: every PDF blob in the history,
   the dangling blobs and the working tree were searched for a phone number and a home address and
   found clean; the only hits were PDF creation timestamps (`D:20261001214655`) and a font's own
-  encoding table. The CV purge held, so no history rewrite was needed. **(owner)**
-- [ ] **A banner and a "how it's made" note for the README.** The README still opens on dry text. Add
-  the banner and the tour GIF at the top with a link to krub.dev, and a short, honest note on how the
-  project is built: the spec and the rules first, an agent that follows them, the review and the
-  verification in a real browser, and the tests as the net. After the audit. **(owner)**
+  encoding table. The CV purge held, so no history rewrite was needed.
+- [x] **A banner and a "how it's made" note for the README.** Done 2026-10-02: the banner (reused from
+  the Open Graph artwork) and a row of technology chips at the top, and a short, honest note on how
+  the project is built — spec and rules first, an agent that follows them, review and verification in
+  a real browser, tests as the net.
 - [ ] **Redeploy Showroom.** Its Railway deploy is down (404 as of 2026-10-02), so the card and the
   modal carry no live link: `projects.js` has `live: null` with the old URL in a comment. Bring the
-  deploy back, or point the link somewhere else, and set the field again. **(owner)**
+  deploy back, or point the link somewhere else, and set the field again.
 - [x] **Audit the documentation against the code.** Every `.md` here plus the README. It has
   drifted once already — four claims in the README were untrue and two files described
   components and composables that do not exist. Worth doing while the build is still fresh in
@@ -178,13 +177,13 @@ The form is built and lives in Contact; it posts to `/api/contact`, a Vercel fun
   Responsive. A second route also puts the router to the use it was wired up for.
 - [x] **Update Vercel's DNS records.** Done: krub.dev resolves on the current records — `A @ →
   76.76.21.21` and `CNAME www → cname.vercel-dns.com` — checked against the live DNS. They now live
-  in Cloudflare, where the mail records also went. **(owner)**
+  in Cloudflare, where the mail records also went.
 - [ ] **Re-measure Lighthouse once `dev` is on `main`.** The numbers so far are not the ones that
   count: the deployed `krub.dev` is an older build (still loading Google Fonts; mobile 84 / desktop
   98) and the `dev` figures came from a local preview (mobile 84–85 / desktop 99). Run it against
   the real deployment after the merge, together with the pre-publication documentation review. The
   one thing that got worse is the TBT — the bundle grew with the new sections — so it is worth a
-  second look then. **(owner)**
+  second look then.
 - [ ] **Analytics, if any.** Vercel's own (Web Analytics / Speed Insights) looks like a component to
   switch on, but the question is whether it sets a cookie: if it does, it pulls in a consent banner
   the site does not have today. Decide first — a cookieless, privacy-friendly tool (Vercel's
@@ -194,7 +193,7 @@ The form is built and lives in Contact; it posts to `/api/contact`, a Vercel fun
   The DNS carries it all: the routing MX and DKIM/SPF, Resend's `send`/`rsend` and
   `resend._domainkey`, and a `_dmarc` at `p=none`. Confirmed on a fresh message: `SPF PASS`,
   `DKIM PASS` for `krub.dev` and **`DMARC PASS`** (the first tests read `FAIL` only because the
-  record was not yet live). **(owner)**
+  record was not yet live).
 - [ ] **Raise the DMARC policy.** The record is done and passing (`_dmarc.krub.dev` at
   `v=DMARC1; p=none`, verified on a real send). Tightening it to `p=quarantine`, then `p=reject`, is
   the next step. To do it safely: add a `rua=` first so the aggregate reports arrive somewhere, watch

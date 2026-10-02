@@ -3,18 +3,26 @@ import { readonly, ref } from 'vue'
 import { i18n, SUPPORTED_LOCALES } from '../i18n'
 
 /*
-  Site language: 'en' (the default) or 'es'.
+  Site language: 'en' or 'es'.
 
   Same module-scope ref pattern as useTheme(): one shared source of truth for
   every component that asks for it.
 
-  English is the default on purpose — see docs/decisions.md. There is no
-  browser-language detection: a saved choice wins, otherwise English, so what a
-  first-time visitor sees does not depend on their machine.
+  The first visit follows the browser, so a visitor whose browser asks for
+  Spanish lands in Spanish and everyone else in English. From then on the saved
+  choice wins, which is why the browser is consulted once and never again: after
+  the first visit it is the toggle, not the machine, that decides. See
+  docs/decisions.md 2.
 */
 
 const STORAGE_KEY = 'krub-lang'
 const DEFAULT_LANG = 'en'
+
+/* The browser's own preference, read only when there is nothing saved. */
+function detect() {
+  const asked = navigator.languages?.length ? navigator.languages : [navigator.language]
+  return asked.some((tag) => String(tag).toLowerCase().startsWith('es')) ? 'es' : DEFAULT_LANG
+}
 
 const lang = ref(DEFAULT_LANG)
 
@@ -54,7 +62,7 @@ function set(next) {
 
 /** Called once from main.js, before the app mounts. */
 export function initLang() {
-  lang.value = readStored() ?? DEFAULT_LANG
+  lang.value = readStored() ?? detect()
   apply(lang.value)
 }
 

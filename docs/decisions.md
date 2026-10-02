@@ -21,13 +21,17 @@ that does not matter at this size.
 
 **Trade-off:** these files are not fingerprinted, so a changed icon needs a cache bust.
 
-### 2. Default language is English
+### 2. The first visit follows the browser, then the saved choice
 **Status:** active · **Archive:** 2
 
 `index.html` ships `lang="en"`, and vue-i18n uses `en` as both the initial locale and the
-`fallbackLocale`. Spanish is available through the toggle and is persisted in
-`localStorage["krub-lang"]`. No browser-language detection on purpose — a portfolio's audience is
-mostly non-Spanish readers.
+`fallbackLocale`. On a first visit with nothing saved, `useLang.initLang()` reads
+`navigator.languages` and opens in Spanish if the browser asks for Spanish, English otherwise. From
+then on `localStorage["krub-lang"]` wins, so the toggle decides and the browser is consulted exactly
+once. This reverses the original call (English always, on the reasoning that the audience was mostly
+non-Spanish): the roles are in Murcia and Barcelona, and a Spanish browser should land in Spanish.
+The Open Graph and structured-data tags stay English either way — they are baked into the static HTML
+before any script runs.
 
 ### 4. Text is LF everywhere, enforced by `.gitattributes`
 **Status:** active · **Archive:** 4
