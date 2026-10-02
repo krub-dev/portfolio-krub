@@ -64,6 +64,3 @@ support.js
 /playwright-report/
 /playwright/.cache/
 
-# The capture pipeline's output (scripts/capture-tour.mjs). Regenerated on demand,
-# so the GIFs it writes are throwaway.
-/scripts/out/

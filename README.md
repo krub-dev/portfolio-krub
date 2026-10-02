@@ -61,9 +61,9 @@ npm run dev
 | `npm run test:watch` | the same, in watch mode |
 | `npm run test:e2e` | end-to-end tests (Playwright: Chromium and WebKit) |
 
-Three more scripts under `scripts/` are maintenance rather than part of the flow: a site-tour
-recorder, a video-to-GIF converter and the image optimiser the Performance section mentions. The
-GIF tools carry their own dependency (ffmpeg); install it once with `npm --prefix scripts install`.
+One more script under `scripts/` is maintenance rather than part of the flow: the image optimiser the
+Performance section mentions. It carries its own dependency (ffmpeg); install it once with
+`npm --prefix scripts install`.
 
 The CV is not built from this repository. Its sources and generator live in a sibling `cv/` folder,
 and the compiled PDFs are copied by hand into `public/uploads/`.
@@ -125,8 +125,7 @@ public/            served as-is: logo, photo, og banner, stack icons, self-hoste
                    apple touch icon, robots, sitemap, llms.txt
 api/               the contact handler, the same one Vercel runs
 docs/              the spec, the component contracts, the roadmap, the decision log, the backlog
-scripts/           dev tooling: a Playwright site tour, a video-to-GIF convertor and the
-                   image optimiser
+scripts/           dev tooling: the image optimiser
 tests/
 ├─ unit/           Vitest
 └─ e2e/            Playwright
