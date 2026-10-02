@@ -141,6 +141,25 @@ function onShutterClick(event) {
 }
 
 /*
+  The scene is kept mounted until the blind has finished covering the stage, so
+  lowering it does not show the mark vanishing over an empty slot. Opening still
+  mounts it at once, which is when the lazy chunk is pulled in.
+*/
+const SHUTTER_MS = 1100
+const sceneMounted = ref(false)
+let closeTimer = 0
+watch(revealed, (open) => {
+  clearTimeout(closeTimer)
+  if (open) {
+    sceneMounted.value = true
+    return
+  }
+  closeTimer = window.setTimeout(() => {
+    if (!revealed.value) sceneMounted.value = false
+  }, SHUTTER_MS)
+})
+
+/*
   The glow waits for the reveal. With the shutter the reveal *is* the entrance —
   the blind lifts and the tube strikes behind it — so it does not wait out the
   fade, which played where nobody could see it. Without the shutter the fade is
@@ -402,7 +421,7 @@ defineExpose({ exportModel })
         loads.
       -->
       <div
-        v-if="!failed && revealed"
+        v-if="!failed && sceneMounted"
         class="scene"
         :class="{ fade: props.entrance === 'fade', shown: ready }"
         aria-hidden="true"

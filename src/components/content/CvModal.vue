@@ -17,7 +17,6 @@
 import { nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import BaseButton from '../base/BaseButton.vue'
 import BaseModal from '../base/BaseModal.vue'
 
 const props = defineProps({
@@ -139,6 +138,7 @@ watch(
     <template #head>
       <div class="head-left">
         <span id="cv-modal-title" class="title">{{ t('actions.cv') }}</span>
+        <span class="cv-divider" aria-hidden="true" />
         <div class="variants" role="group" :aria-label="t('cvModal.variants')">
           <button
             v-for="v in VARIANTS"
@@ -151,37 +151,26 @@ watch(
           >
             {{ t(`cvModal.${v}`) }}
           </button>
+
+          <span class="cv-sep" aria-hidden="true" />
+
+          <!-- The download sits where the open glyph sits outside: the last cell
+               of the same control. Icon only; the label is for the screen reader. -->
+          <a class="cv-download" :href="href" download :aria-label="t('cvModal.download')">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
+            </svg>
+          </a>
         </div>
       </div>
-    </template>
-
-    <!--
-      The download lives in the header with the close, not at the foot of the
-      document: it is the one thing you want whatever page you are on, and the
-      header stays put while the pages scroll. Icon only — an arrow into a tray
-      says "download" without a word, and the label is for the screen reader.
-    -->
-    <template #actions>
-      <BaseButton
-        variant="solid"
-        size="sm"
-        :href="href"
-        download
-        :aria-label="t('cvModal.download')"
-        class="download"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
-        </svg>
-      </BaseButton>
     </template>
 
     <div class="body">
@@ -211,17 +200,6 @@ watch(
   color: var(--fg-2);
 }
 
-/* A square icon button: the same padding all round, no text to make room for. */
-.download {
-  padding: 9px;
-}
-
-.download svg {
-  width: 15px;
-  height: 15px;
-  display: block;
-}
-
 .head-left {
   display: flex;
   align-items: center;
@@ -238,9 +216,11 @@ watch(
   }
 }
 
+/* The same control as the one beside the photo in About: a pill with the two
+   options joined, a hairline, and the download as its last cell. */
 .variants {
   display: inline-flex;
-  gap: 3px;
+  gap: 0;
   padding: 2px;
   border: 1px solid var(--line);
   border-radius: 9px;
@@ -248,18 +228,29 @@ watch(
 
 .variant {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 6px 9px;
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--fg-3);
+  color: var(--fg);
   cursor: pointer;
   transition:
     background-color 0.16s ease,
     color 0.16s ease;
+}
+
+/* The corners the two options meet on are square, so the active fill joins. */
+.variant:first-of-type {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.variant:nth-of-type(2) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .variant:hover {
@@ -269,6 +260,45 @@ watch(
 .variant.active {
   background: var(--acc);
   color: var(--on-acc);
+}
+
+/* The hairline between the options and the download, and the one between the
+   title and the control, like the navbar's dividers. */
+.cv-sep,
+.cv-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--line);
+  flex: 0 0 auto;
+}
+
+.cv-sep {
+  margin: 7px 0;
+}
+
+.cv-divider {
+  margin: 6px 0;
+}
+
+/* The download, as the control's last cell. */
+.cv-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  border-radius: 6px;
+  color: var(--fg);
+}
+
+.cv-download:hover,
+.cv-download:focus-visible {
+  color: var(--acc-text);
+}
+
+.cv-download svg {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .note {
