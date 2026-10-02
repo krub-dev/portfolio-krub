@@ -17,35 +17,25 @@ not tasks and have no checkbox.
 This merges the pending list of 2026-09-16 with what used to live in the roadmap's "Later"
 section, folded together where they overlapped.
 
-## Where things stand — 2026-09-30
+## Where things stand — 2026-10-02
 
 A short snapshot so resuming work does not mean reading the whole file. The checklist below is
 the source of truth; this is the index into it.
 
-`main` is what `krub.dev` serves and `dev` is where the work happens. The two dialogs (the project
-modal's media and the CV, which renders its own PDF), the design-system sheet, the GitHub card that
-ends the rail and the project images were released together, so the two are level but for that
-release's merge commit. Since launch the site also gained the accent palettes and the appearance
-control, the reworked Stack and Contact, the testimonials pager, the 404, the self-hosted fonts, the
-interactive grid cell and the CV pipeline. `git log main..dev` lists whatever is on `dev` and not yet
-published.
+`main` is what `krub.dev` serves and `dev` is where the work happens, and the two are level between
+releases. Since launch the site has gained the accent palettes and the appearance control, the
+reworked Stack and Contact, the testimonials pager, the 404, the self-hosted fonts, the interactive
+grid cell, the CV pipeline and the performance work that took Lighthouse to 96 mobile / 100 desktop.
+The repository is public.
 
-**Before the next release:**
-
-1. The pre-publication documentation review.
-2. Re-measure Lighthouse against the deployment, now that it is the current build.
-3. The Open Graph artwork is designed at `/og` — the card, the LinkedIn cover and the README
-   banner. The README one still needs its capture, and the `/og` scaffolding comes out before the
-   repository goes public.
-
-The contact form works end to end now — it sends by Resend, with Turnstile and a rate limit — and it
+The contact form works end to end — it sends by Resend, with Turnstile and a rate limit — and it
 carries its privacy notice and a required consent box, both linking to `/privacy`. The domain carries
-a real address too (`contact@krub.dev`: receiving by Cloudflare Email Routing, sending as through
+a real address (`contact@krub.dev`, receiving by Cloudflare Email Routing and sending as through
 Resend's SMTP), and the site points at it everywhere.
 
-**The substantial work still open:** sharper screenshots for krub.dev, the LinkedIn profile update,
-the GitHub profile README, a prose pass over the whole site, folding the old hero bio into `/me`,
-updating the CV, Bing Webmaster Tools, raising the DMARC policy, and making the repository public.
+**The substantial work still open:** a reread and a trim of the prose, a redeploy of Showroom, Bing
+Webmaster Tools, raising the DMARC policy, and the rest of the final audit (the broken-link sweep,
+axe and `npm audit` against the deployment, and the terms decision).
 
 ---
 
@@ -68,7 +58,7 @@ the privacy notice and the consent the law asks for.
 
 ## Content, CV and SEO
 
-- [x] **Review the CV.** Done 2026-09-20: the owner approved the content, and the plain-text
+- [x] **Review the CV.** Done 2026-09-20: I approved the content, and the plain-text
   sources and generator were moved out of this repository (decision 69). The four compiled PDFs
   (light and dark, per language) stay in `public/uploads/`. ATS-friendly: one column, Arial,
   standard headings, no phone number and no home address.
@@ -100,9 +90,9 @@ the privacy notice and the consent the law asks for.
   (`src/views/OgView.vue`), which draws the card at its real 1200×630 out of the site's own pieces —
   the 3D mark, lit, and Limonacho. The card and the LinkedIn cover are captured and in
   `public/assets/img/` (`og-banner.png`, `linkedin-banner.png`); the README/social-preview banner
-  (1280×640) is designed and pending its capture. **The page is still scaffolding**: it, its route and
-  the cv tool's `build-og.mjs` come out before the repository goes public — a Playwright pipeline for
-  one image is more machinery than the image is worth. Two earlier attempts are worth remembering: a
+  (1280×640) and its footer strip are designed and captured too. The page is dev-only and kept off
+  the production bundle, so it stays as the tool for future artwork. Two earlier attempts are worth
+  remembering: a
   hand-drawn copy of the hero, which drifts and cannot draw the 3D at all, and a capture of the built
   site, which dragged the cursor into the middle of the mark and clipped the mascot's leaf off. The
   structured data beside it is done (2026-09-23): `workLocation` is Murcia, and the X handle stays in
@@ -131,7 +121,7 @@ the privacy notice and the consent the law asks for.
 - [ ] **Reread the prose.** Every sentence lives in `src/data/`, both languages side by side, one
   file per kind of content. It was always going to be iterated after launch rather than
   written once. **(owner)**
-- [ ] **Trim the copy and the CV.** The owner's read: the site carries a lot of content and the CV
+- [ ] **Trim the copy and the CV.** My read: the site carries a lot of content and the CV
   reads long. A pass to cut, not to reword — the prose across `src/data/` and the CV sources in the
   `cv` tool, keeping only what earns its place. Sits next to the prose pass, but the goal here is
   subtraction. **(owner)**
@@ -139,6 +129,15 @@ the privacy notice and the consent the law asks for.
   has the sitemap submitted. Bing also feeds DuckDuckGo. **(owner)**
 - [x] **Make the repository public.** Done 2026-10-02. The v1 portfolio repository is archived and
   its links redirect here. **(owner)**
+- [x] **Make the documentation read as published work.** Done 2026-10-02: the live `.md` files
+  rewritten to the first person (the earlier drafts described the build from the outside), the
+  Spanish preamble and group headings in `decisions.md` turned to English, the README's `Running it`
+  cut back to the commands a visitor needs, and the em-dash rule's wording, the `LiveClock` line and
+  the "where things stand" snapshot corrected. **(owner)**
+- [x] **Check the git history for personal data.** Done 2026-10-02: every PDF blob in the history,
+  the dangling blobs and the working tree were searched for a phone number and a home address and
+  found clean; the only hits were PDF creation timestamps (`D:20261001214655`) and a font's own
+  encoding table. The CV purge held, so no history rewrite was needed. **(owner)**
 - [ ] **Redeploy Showroom.** Its Railway deploy is down (404 as of 2026-10-02), so the card and the
   modal carry no live link: `projects.js` has `live: null` with the old URL in a comment. Bring the
   deploy back, or point the link somewhere else, and set the field again. **(owner)**
@@ -182,18 +181,16 @@ the privacy notice and the consent the law asks for.
   the site does not have today. Decide first — a cookieless, privacy-friendly tool (Vercel's
   cookieless mode, Plausible) or none at all.
 - [x] **An address on the domain, `contact@krub.dev`.** Done: Cloudflare Email Routing receives for
-  it and forwards to the owner's Gmail, and Gmail sends *as* it through Resend's SMTP
-  (`smtp.resend.com`, user `resend`, the API key), so the mail is DKIM-signed for `krub.dev` and
-  carries no "via gmail.com". The DNS carries it all: the routing MX and DKIM/SPF, Resend's
-  `send`/`rsend` and `resend._domainkey`, and a `_dmarc` at `p=none`. Confirmed on a fresh message:
-  `SPF PASS`, `DKIM PASS` for `krub.dev` and **`DMARC PASS`** (the first tests read `FAIL` only
-  because the record was not yet live). **(owner)**
-- [ ] **Raise the DMARC policy.** The record itself is done and passing (`_dmarc.krub.dev` at
-  `v=DMARC1; p=none`, verified on a real send). `p=none` only *monitors*: a forged `@krub.dev` sender
-  gets reported, not stopped. Tightening it to `p=quarantine`, then `p=reject`, is what actually blocks
-  the forgery. To do it safely: add a `rua=` to the record first so the aggregate reports arrive
-  somewhere (today there is none, so nothing is being collected), watch a week, then raise it. All our
-  sending aligns — SPF and DKIM both pass for `krub.dev` — so the risk is low.
+  it, and Resend's SMTP sends as it (`smtp.resend.com`), so the mail is DKIM-signed for `krub.dev`.
+  The DNS carries it all: the routing MX and DKIM/SPF, Resend's `send`/`rsend` and
+  `resend._domainkey`, and a `_dmarc` at `p=none`. Confirmed on a fresh message: `SPF PASS`,
+  `DKIM PASS` for `krub.dev` and **`DMARC PASS`** (the first tests read `FAIL` only because the
+  record was not yet live). **(owner)**
+- [ ] **Raise the DMARC policy.** The record is done and passing (`_dmarc.krub.dev` at
+  `v=DMARC1; p=none`, verified on a real send). Tightening it to `p=quarantine`, then `p=reject`, is
+  the next step. To do it safely: add a `rua=` first so the aggregate reports arrive somewhere, watch
+  a week, then raise it. All our sending aligns — SPF and DKIM both pass for `krub.dev` — so the risk
+  is low.
 
 ## Performance
 
@@ -383,9 +380,9 @@ kept as the record rather than deleted.
 
 ## Final audit
 
-Before the repository goes public, a pass over the whole thing. The owner brought the list below;
-most of it is already in place, a few entries do not apply to a static portfolio, and a few are real
-work. The point is also to turn it into a reusable checklist — see the skill.
+The pre-publication pass over the whole thing. The list below is mine; most of it is already in
+place, a few entries do not apply to a static portfolio, and a few are real work. The point is also
+to turn it into a reusable checklist — see the skill.
 
 **In place already (verify, do not rebuild):**
 
@@ -417,9 +414,8 @@ Not tasks. No urgency and no order — written down so they do not evaporate.
 - Pet Grok / Limonacho.
 - A guest section: a counter and a dedication.
 - 3D Limonacho, rubber-hose style.
-- Stickers stuck on a 3D shape, movable. DIMTECH built exactly this for products — images placed
-  on clothing or an object. The idea here is a sphere (or something else) wearing stickers of
-  the logo, 42, a technology, a lemon.
+- Stickers stuck on a 3D shape, movable. A sphere (or something else) wearing stickers of the
+  logo, 42, a technology, a lemon.
 - Logo appearance animation.
 - A 3D business card with my details.
 - A blog?

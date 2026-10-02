@@ -1,17 +1,17 @@
 # Decisions Archive
 
-Historial cronológico completo de decisiones, experimentos descartados, bugs resueltos y decisiones
-marcadas como `reversed` o superadas por otras posteriores.
+The full chronological history of the decisions, the discarded experiments, the fixed bugs and the
+entries marked `reversed` or superseded later.
 
-Este archivo es el registro de evolución del proyecto. Las decisiones que siguen 100% activas y que
-condicionan cómo se programa y diseña el proyecto hoy viven en [`decisions.md`](decisions.md),
-reescritas de forma temática y sintética.
+This file is the project's evolution log. The decisions still fully active, the ones that shape how
+the project is built today, live in [`decisions.md`](decisions.md), rewritten in a thematic and
+synthetic form.
 
-**Cuándo consultar este archivo:**
-- Para entender por qué se descartó un enfoque (cristal, vignette, goo effect, etc.).
-- Para ver la narrativa completa de ensayo/error de una decisión.
-- Para bugs de maquetación/iOS ya subsanados (35, 38, 44, 49, 50).
-- Para decisiones marcadas como `reversed` (84) o `informational` (30).
+**When to read this file:**
+- To understand why an approach was dropped (glass, vignette, goo effect, and so on).
+- To read the whole trial-and-error narrative behind a decision.
+- For layout or iOS bugs already fixed (35, 38, 44, 49, 50).
+- For entries marked `reversed` (84) or `informational` (30).
 
 **Cuándo NO consultar este archivo:**
 - Para saber cómo está implementado algo hoy → `decisions.md`.
@@ -662,7 +662,7 @@ knowing rather than discovering.
 
 **Where the generator lives (2026-09-23):** `build-og.mjs`, in the cv tool beside this repository
 (`../cv/`), not here — it is a personal document tool that borrows the site's fonts, mark and
-tokens, and the owner copies the PNG in by hand. The banner itself is unchanged in behaviour: the
+tokens, and I copy the PNG in by hand. The banner itself is unchanged in behaviour: the
 hero rendered at 1200x630 by a real Chromium, because the typography has to be the site's own.
 
 Unused assets removed along the way: `krub-icon.png` (replaced by the new favicon),
@@ -1309,15 +1309,15 @@ three attempts:
 
 1. `animation-timeline: view()` alone, with the marquee as the fallback for browsers without
    scroll-driven animations — so on those browsers the band moved **on its own**, which is exactly
-   what the owner did not want.
+   what I did not want.
 2. The progress worked out in the component and written to a custom property. It never moved on its
-   own, but the owner reported it as jerky, and the reasons are visible in the code: the value was
+   own, but I reported it as jerky, and the reasons are visible in the code: the value was
    computed on the main thread on every scroll tick, and a custom property inherits, so setting it on
    the band invalidated the computed style of all 216 letters — letters that carry a text stroke and
    are expensive to re-raster.
 3. The `view()` timeline where the browser has it, and the hand-written progress where it does not.
    Composited, but still not right: it moved **half the track across the band's own crossing** — about
-   two and a half times the scroll — and the owner still read it as not fluid. No amount of
+   two and a half times the scroll — and I still read it as not fluid. No amount of
    frame-perfect rendering makes a movement that fast feel calm; the problem was the velocity and the
    size of the layer, not the frames.
 4. What ships: one track per layer, four repetitions instead of two copies of three, and the text
@@ -1477,7 +1477,7 @@ interaction, a mask" and the mask never happened. What shipped is the first thre
 **Date:** 2026-09-17 — **Status:** active
 
 The Stack used to name its tiles itself: a mono readout that followed the cursor, and a static one
-placed next to a tapped tile on touch. The owner did not like the tap version, and asked for the
+placed next to a tapped tile on touch. I did not like the tap version, and asked for the
 lemon to say it instead — he is already there, in the corner, with a bubble and a voice.
 
 - **He does the naming, and the readout becomes the fallback.** He says the name of the tile the
@@ -1520,7 +1520,7 @@ likely to be skimming.
   most away for free: `scroll-snap` keeps the cards in the DOM, so the keyboard reaches them, and the
   phone gets its swipe. But the snap fights a drag — it has to be switched off while dragging, and
   switching it back on snaps without animating — and the easing of a programmatic scroll belongs to
-  the browser, not to us. The owner read it as steppy and asked for the other way round.
+  the browser, not to us. I read it as steppy and asked for the other way round.
 - **So it is a track moved by `transform`.** Composited, with the same arrive-and-settle curve the
   lemon and the footer use, and a drag that can follow the pointer exactly. What that costs is the
   two things the scroll container gave away: the phone's swipe is no longer free, so the drag handles
@@ -1533,7 +1533,7 @@ likely to be skimming.
   drag has travelled 6px.
 - **And a flick threshold.** Settling on the nearest card meant a phone swipe had to travel more than
   half a card — 160px — before anything happened: shorter than that and the rail glided back where it
-  came from, which the owner read as the rail refusing to budge. A drag that moved more than a fifth
+  came from, which I read as the rail refusing to budge. A drag that moved more than a fifth
   of a card now takes the next one in the direction it was going.
 - **The cut edge gets a soft one.** A `mask-image` fade on whichever side the rail continues on. A
   hard vertical edge where a card is clipped reads as a mistake rather than as "there is more this
@@ -1543,9 +1543,9 @@ likely to be skimming.
    card you were reading and smudged its edge instead of softening the next one's.
 - **The viewport keeps a room for the magnetic pull, on every side.** The pull moves a card up to `10px`
   toward the cursor, and a card at either end of the rail was pushed past the viewport's own edge, where
-  the clip took its border and its rounded corner off. A few pixels, and the owner saw it. The one-line
+  the clip took its border and its rounded corner off. A few pixels, and I saw it. The one-line
   answer would be `overflow-clip-margin`, and it is out: **WebKit does not support it** — checked in
-  Playwright's WebKit rather than assumed, `CSS.supports` says no — and WebKit is what the owner carries.
+  Playwright's WebKit rather than assumed, `CSS.supports` says no — and WebKit is the browser I use.
   So the room is `padding`, taken straight back with a negative margin: the content box is unchanged, so
   the cards keep the width they were measured at and still line up with the section's gutter, and only the
   clip is wider. Two consequences, both handled: the fade adds the room to its length, or the extra strip
@@ -1553,7 +1553,7 @@ likely to be skimming.
   `clientWidth` when it works out `maxOffset`, or the rail stops a room short of its last card.
 - **Hover is guarded by `hover: hover`, and touch gets a position marker.** A tap leaves `:hover`
   stuck on whatever it touched, so the yellow border was there or not depending on where the last
-  finger landed — the owner read that as the marking being unreliable. The hover styles now live
+  finger landed — I read that as the marking being unreliable. The hover styles now live
   under `@media (hover:hover)`, and where there is no hover the same border marks the card the rail
   is parked on, moving with the rail rather than with the finger. The arrow fills with it too: the
   fill stayed behind in the hover block, so on a phone the card was marked and its arrow was not,
@@ -1573,7 +1573,7 @@ likely to be skimming.
 The bar is a `position:fixed` strip across the whole viewport with 14px of vertical padding, and the
 capsule inside it shrinks to hug its own contents once compact. Nothing about the strip is
 interactive, but nothing said so either: it was a normal element covering a full-width band, so every
-click that landed in that band went to it and stopped there. The owner found it with the project
+click that landed in that band went to it and stopped there. I found it with the project
 arrows, which are simply the first thing that happened to scroll up behind the bar.
 
 `pointer-events:none` on the strip and `pointer-events:auto` on the capsule. It is the standard fix
@@ -1586,7 +1586,7 @@ the capsule, so it fails if the strip ever takes clicks again.
 
 **Date:** 2026-09-17 — **Status:** active
 
-The owner reads the em dash as a tell — the thing that makes prose look machine-written — and asked
+I read the em dash as a tell — the thing that makes prose look machine-written — and asked
 for it out of the copy a visitor can see: the `<title>`, the meta and Open Graph descriptions, the
 project copy, the About paragraph, the 404 line, the testimonial and the year ranges in the timeline.
 
@@ -1694,7 +1694,7 @@ projects grid, and it got the same answer — one at a time.
 - **The mark stays a font glyph, and an SVG of it was tried and dropped.** The `”` from the site's own
   face, large and faint in the box's top right, is not the most beautiful quote mark that could be
   drawn — a calligraphic comma is. So Material Symbols' `format_quote` was inlined as a path, tilted and
-  hung under the counter. It read as clutter and the owner asked for the glyph back, which is the
+  hung under the counter. It read as clutter and I asked for the glyph back, which is the
   answer: at `opacity:.08` the mark is a watermark, and the difference between a good comma and a
   mediocre one is not worth a third typeface, a new licence to track, or the extra rules that came with
   positioning it. The system serif that would have given the better shape for free varies by platform,
@@ -1820,19 +1820,19 @@ scroll could stop a few pixels short, leaving a sliver of the next section visib
   nothing. Now the hero wrapper is the anchor and it sits at zero.
 
 Not reproduced in the emulator — there the scroll already ended at zero — so this is the fix for the
-phone case the owner hit, and it should be re-checked on the device.
+phone case I hit, and it should be re-checked on the device.
 
 ### 68. The CV is plain text in `cv/`, built with tectonic
 
-**Date:** 2026-09-18 · **Status:** active
+**Date:** 2026-09-18 · **Status:** reversed, superseded by 69
 
 The About button links to a CV, and `public/uploads/` held no file: it downloaded a 404. The CV is
 now two plain-text files in `cv/` — `cv-es.txt` and `cv-en.txt` — and `npm run build:cv` turns each
 into LaTeX and compiles it with tectonic to `public/uploads/cv-es.pdf` and `cv-en.pdf`.
 
-- **Plain text as the source, not `.tex`.** The first version was LaTeX the owner was expected to
-  edit, and before that HTML. Neither is what he wants to touch. The `.txt` is words and a few line
-  markers (`#`, `## Title @@ Dates`, `~`, `-`), so he edits sentences and the generator handles the
+- **Plain text as the source, not `.tex`.** The first version was LaTeX I was expected to
+  edit, and before that HTML. Neither is what I want to touch. The `.txt` is words and a few line
+  markers (`#`, `## Title @@ Dates`, `~`, `-`), so I edit sentences and the generator handles the
   escaping (`&`, `_`, `%`…) and the layout. It never changes the case: what is typed is printed.
 - **The generated `.tex` is disposable.** The generator writes it into `node_modules/.cache/cv`, so
   the tree carries only the sources and the PDFs.
@@ -1847,13 +1847,13 @@ into LaTeX and compiles it with tectonic to `public/uploads/cv-es.pdf` and `cv-e
 - **The extraction is the test.** `pdfjs-dist` in a scratch folder reads the compiled PDF back the
   way a parser would. That is how the ligature, the middle-dot codepoint and the hyphenation were
   caught — each one silently breaks a keyword the ATS is looking for.
-- **One file per language.** The owner edits the Spanish; the English is kept in step by hand. Both
+- **One file per language.** I edit the Spanish; the English is kept in step by hand. Both
   go through the same generator, so the two never drift in layout.
 - **The path is per language.** `cvPath` in `src/data/socials.js` is an object, and About links to
   `cvPath[lang]`, so an English visitor gets the English CV.
 
-Needs tectonic installed (see the README). The wording is drafted from the site's data and the CV he
-sent, and it is his document to approve.
+Needs tectonic installed (see the README). The wording is drafted from the site's data and the CV I
+sent, and it is my document to approve.
 
 ### 69. The CV tool moved out of the repository, and the CV now comes in two themes
 
@@ -1871,7 +1871,7 @@ build or run time — the site only ever ships the compiled PDFs.
 **What stayed.** The four compiled PDFs, in `public/uploads/`: the light pair (`cv-es.pdf`,
 `cv-en.pdf`) for print and email, and the dark pair (`cv-es-dark.pdf`, `cv-en-dark.pdf`) to match
 the site on screen. They are still committed, because they are what the visitor downloads. The
-generator writes to its own `out/` folder and never touches the repository; the owner copies the
+generator writes to its own `out/` folder and never touches the repository; I copy the
 four files in when they change.
 
 **The dark variant.** The CV's only colour is the brand rule, and a PDF's colours are baked in, so a
@@ -2093,7 +2093,7 @@ repeat either of the two mistakes that sent it out the first time.
   box behind it. The canvas fills it and `overflow: hidden` clips it to the frame; the stage keeps
   its single `--line` border, and the inset mat and the inner rim an earlier attempt added are gone.
 - **No fog and no glow.** The fog was fading the very grid that gives the walls their perspective,
-  and the glow never earned its place — a strong one reflected on the metal, and the owner did not
+  and the glow never earned its place — a strong one reflected on the metal, and I did not
   want it. Both removed, `LogoModel`'s `material.fog = false` with them.
 - **The mark's tilt is softer** (0.5 → 0.34 rad on y, 0.32 → 0.22 on x): the camera leans too now,
   and the two must not add up to a lurch.

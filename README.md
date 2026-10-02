@@ -1,5 +1,7 @@
 # krub.dev
 
+[![CI](https://github.com/krub-dev/portfolio-krub/actions/workflows/ci.yml/badge.svg)](https://github.com/krub-dev/portfolio-krub/actions/workflows/ci.yml)
+
 Live at **[krub.dev](https://krub.dev)**.
 
 My personal portfolio. One page plus a 404, bilingual (English / Spanish), dark and light themes
@@ -11,7 +13,7 @@ Kiko Rubio — full stack developer in Murcia.
 
 - **Vue 3** with `<script setup>`. Plain JavaScript, no TypeScript.
 - **Vite** for the dev server and the build.
-- **vue-router** — two routes: the page and a catch-all 404. There are also three dev-only screens,
+- **vue-router** — three routes: `/`, `/privacy` and a catch-all 404. There are also three dev-only screens,
   `/design-system` (the tokens and the components sheet), `/logo-lab` (the hero stage: the entrance,
   the fog modes, and the mark, the ring and the halo switched on and off) and `/og` (the Open Graph
   card, the LinkedIn cover and the README banner), lazy-loaded and kept out of the production bundle.
@@ -35,21 +37,14 @@ npm run dev
 | `npm run preview` | serve that bundle locally |
 | `npm run test` | unit tests (Vitest) |
 | `npm run test:watch` | the same, in watch mode |
-| `npm run test:e2e` | end-to-end tests (Playwright, real Chromium) |
-| `npm run capture:tour` | record a GIF tour of the running site (needs a server up) |
-| `npm run gif:video` | turn a screen recording into a GIF |
-| `npm run optimize:images` | re-encode the card images down to what the page shows |
+| `npm run test:e2e` | end-to-end tests (Playwright: Chromium and WebKit) |
 
-The last three are dev tooling: see `scripts/`.
+Three more scripts under `scripts/` are maintenance rather than part of the flow: a site-tour
+recorder, a video-to-GIF converter and the image optimiser the Performance section mentions. The
+GIF tools carry their own dependency (ffmpeg); install it once with `npm --prefix scripts install`.
 
-The CV is not built from this repository. Its plain-text sources and generator live in a sibling
-`cv/` folder outside it, run with `node build-cv.mjs`; that script turns each file into LaTeX and
-compiles it with [tectonic](https://tectonic-typesetting.github.io), a single binary rather than a
-full TeX distribution. Put it on your `PATH`; on Windows the script also looks in
-`%LOCALAPPDATA%\Programs\tectonic`. It builds three documents — the full CV in light and dark, a
-one-page CV and a base cover letter, both light — into its own `out/` folder; copy the ones you want
-to publish into this repository's `public/uploads/` (all eight live there now, though the site only
-links the full CV's four). The same folder holds `build-og.mjs`, which renders the Open Graph banner.
+The CV is not built from this repository. Its sources and generator live in a sibling `cv/` folder,
+and the compiled PDFs are copied by hand into `public/uploads/`.
 
 ## Performance
 
@@ -71,7 +66,8 @@ See decision 103 and the backlog's Performance section for the detail.
 
 ## Tests
 
-Forty-four unit tests and around seventy end-to-end flows, the latter run on a desktop and on a phone.
+Forty-four unit tests and around seventy end-to-end flows, the latter run on a desktop and on two
+phones (Chromium and WebKit).
 
 Vitest covers the pure functions — how a timeline period is formatted, how the carousel index wraps,
 how a URL is tidied — the contact validation and its endpoint, and the composables that touch storage:
@@ -164,11 +160,15 @@ Cache headers are split by one question: **does the filename change when the con
   visitor to an old build.
 
 The one rewrite sends every unmatched path to `/`, so the SPA's own 404 route renders instead of
-Vercel's plain-text page. Vercel checks the filesystem **before** applying a rewrite, so `/assets`,
-`/icons` and `/fonts` are served normally. The catch-all answers HTTP 200 with the 404 content — a soft
-404 — which is the trade-off for keeping the site's chrome (grid, cursor, navbar, footer) around the
-message. A real 404 status would need edge middleware, so the 404 view adds its own `robots: noindex`
-meta instead: an unknown URL is not indexed despite the 200.
+Vercel's plain-text page. It deliberately excludes `/assets`, `/icons`, `/fonts`, `/uploads` and
+`/api`. Vercel checks the filesystem **before** applying a rewrite, so real static files are served
+normally — and a missing one under those prefixes now returns a proper 404 instead of the SPA shell.
+That matters because the fingerprinted `/assets/*.js` is cached immutable for a year: without the
+exclusion, a stale `index.html` asking for a chunk a later deploy had removed would cache the shell
+for a year too. The catch-all answers HTTP 200 with the 404 content — a soft 404 — which is the
+trade-off for keeping the site's chrome (grid, cursor, navbar, footer) around the message. A real 404
+status would need edge middleware, so the 404 view adds its own `robots: noindex` meta instead: an
+unknown URL is not indexed despite the 200.
 
 Plus `nosniff`, `Referrer-Policy` and `X-Frame-Options` on everything.
 
