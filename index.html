@@ -90,6 +90,9 @@
       Kept in sync by hand with src/data/socials.js. It cannot import from it —
       this file is static HTML served before any JavaScript runs, and a crawler
       that does not execute the bundle has to find it here.
+
+      No `image`: the profile photo is deliberately left out of the entity, and
+      blocked in robots.txt too, so a search for the name does not surface it.
     -->
     <script type="application/ld+json">
       {
@@ -98,7 +101,6 @@
         "name": "Kiko Rubio",
         "alternateName": "krub",
         "url": "https://krub.dev/",
-        "image": "https://krub.dev/assets/img/krub-pfp.jpeg",
         "jobTitle": "Full Stack Developer",
         "workLocation": { "@type": "Place", "name": "Murcia, Spain" },
         "email": "mailto:contact@krub.dev",

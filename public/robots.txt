@@ -7,4 +7,7 @@ Allow: /
 # be findable by searching for them.
 Disallow: /uploads/
 
+# The profile photo is shown on the page but kept out of image search on purpose.
+Disallow: /assets/img/krub-pfp.jpeg
+
 Sitemap: https://krub.dev/sitemap.xml
