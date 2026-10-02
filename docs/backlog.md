@@ -129,8 +129,9 @@ The form is built and lives in Contact; it posts to `/api/contact`, a Vercel fun
   reads long. A pass to cut, not to reword — the prose across `src/data/` and the CV sources in the
   `cv` tool, keeping only what earns its place. Sits next to the prose pass, but the goal here is
   subtraction.
-- [ ] **Bing Webmaster Tools.** The same five minutes as Google Search Console, which is done and
-  has the sitemap submitted. Bing also feeds DuckDuckGo.
+- [x] **Bing Webmaster Tools.** Done 2026-10-02: the domain is verified, the sitemap submitted and a
+  site scan run. Bing also feeds DuckDuckGo. Google Search Console was already set up, with the
+  sitemap submitted.
 - [x] **Make the repository public.** Done 2026-10-02. The v1 portfolio repository is archived and
   its links redirect here.
 - [x] **Make the documentation read as published work.** Done 2026-10-02: the live `.md` files
@@ -384,7 +385,7 @@ kept as the record rather than deleted.
 ## Testing
 
 - [x] **The e2e suite went flaky while the hero was on screen.** Explained: Playwright runs several browsers at once, and each Chromium worker holding the hero's WebGL context made the frames stall, so tests that depend on animation timing failed at random. Fixed by skipping the 3D scene under `navigator.webdriver` (Playwright sets that flag), so no worker opens a WebGL context. The suite is run with `--workers=1` by habit; parallel workers are still occasionally flaky, and that part is deferred — it costs time, not correctness.
-- [ ] **`never covers the last section` is flaky.** The test that scrolls to the bottom and checks the contact section ends where the footer begins passes on its own and fails in the full suite roughly one run in three. It reads a footer `y` while the slide-in settles, so the likely fix is to poll the second measurement too, not just the first. Deferred; it costs a re-run, not correctness.
+- [x] **`never covers the last section` is flaky.** Fixed 2026-10-02: the footer test now runs under reduced motion and polls the settled geometry, so it no longer races the 0.4s entrance. The privacy-link test got the same treatment, centring its target before clicking, because the fixed footer sat over the row it landed on.
 
 ## Final audit
 
