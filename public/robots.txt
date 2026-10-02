@@ -1,4 +1,4 @@
-# krub.dev — a one-page portfolio.
+# krub.dev, a one-page portfolio.
 User-agent: *
 Allow: /
 

@@ -122,7 +122,7 @@ real browser, not here.
 ```
 public/            served as-is: logo, photo, og banner, stack icons, self-hosted fonts
                    (with their OFL licences), the acho clip, the CV PDFs, favicon,
-                   apple touch icon, robots, sitemap
+                   apple touch icon, robots, sitemap, llms.txt
 api/               the contact handler, the same one Vercel runs
 docs/              the spec, the component contracts, the roadmap, the decision log, the backlog
 scripts/           dev tooling: a Playwright site tour, a video-to-GIF convertor and the

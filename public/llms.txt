@@ -1,0 +1,21 @@
+# krub.dev
+
+> Personal portfolio of Kiko Rubio, a full stack developer in Murcia (Spain): one bilingual page
+> with a WebGL hero, dark and light themes, built with Vue 3, Vite and TresJS.
+
+## Pages
+
+- [Home](https://krub.dev/): who I am, the projects, the stack and a contact form.
+- [Privacy](https://krub.dev/privacy): the privacy notice for the contact form.
+
+## About
+
+- Full stack developer: Java with Spring Boot and Node with Express on the backend, Vue 3 on the
+  frontend.
+- Based in Murcia, open to remote, on-site or hybrid roles in Murcia or Barcelona.
+- Contact: contact@krub.dev
+
+## Source
+
+- [Repository](https://github.com/krub-dev/portfolio-krub)
+- [Spec, decisions and backlog](https://github.com/krub-dev/portfolio-krub/tree/main/docs)
