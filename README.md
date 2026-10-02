@@ -1,13 +1,13 @@
 # krub.dev
 
 [![CI](https://github.com/krub-dev/portfolio-krub/actions/workflows/ci.yml/badge.svg)](https://github.com/krub-dev/portfolio-krub/actions/workflows/ci.yml)
-[![Vue 3](https://img.shields.io/badge/Vue_3-4fc08d?logo=vuedotjs&logoColor=white)](https://vuejs.org)
-[![Vite](https://img.shields.io/badge/Vite-646cff?logo=vite&logoColor=white)](https://vite.dev)
-[![Three.js](https://img.shields.io/badge/Three.js-000000?logo=threedotjs&logoColor=white)](https://threejs.org)
-[![TresJS](https://img.shields.io/badge/TresJS-000000?logo=threedotjs&logoColor=white)](https://tresjs.org)
-[![Vitest](https://img.shields.io/badge/Vitest-6da13f?logo=vitest&logoColor=white)](https://vitest.dev)
-[![Playwright](https://img.shields.io/badge/Playwright-2ead33?logo=playwright&logoColor=white)](https://playwright.dev)
-[![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com)
+[![Vue 3](https://img.shields.io/badge/Vue_3-4fc08d?logo=vuedotjs&logoColor=white&style=flat-square)](https://vuejs.org)
+[![Vite](https://img.shields.io/badge/Vite-646cff?logo=vite&logoColor=white&style=flat-square)](https://vite.dev)
+[![Three.js](https://img.shields.io/badge/Three.js-000000?logo=threedotjs&logoColor=white&style=flat-square)](https://threejs.org)
+[![TresJS](https://img.shields.io/badge/TresJS-000000?logo=threedotjs&logoColor=white&style=flat-square)](https://tresjs.org)
+[![Vitest](https://img.shields.io/badge/Vitest-6da13f?logo=vitest&logoColor=white&style=flat-square)](https://vitest.dev)
+[![Playwright](https://img.shields.io/badge/Playwright-2ead33?logo=playwright&logoColor=white&style=flat-square)](https://playwright.dev)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white&style=flat-square)](https://vercel.com)
 
 [![krub.dev](public/assets/img/github-banner.png)](https://krub.dev)
 
@@ -15,6 +15,18 @@ Live at **[krub.dev](https://krub.dev)**. My personal portfolio: one page plus a
 (English / Spanish), dark and light themes with five accent palettes, built with Vue 3 and Vite.
 
 Kiko Rubio, full stack developer in Murcia.
+
+## How it is made
+
+Spec first, and that is how it started. The contract comes first, the code follows, and any trade-off
+is logged rather than hidden.
+
+The tests take the same stance: unit coverage and a Playwright suite across Chromium and WebKit run in
+CI on every push. Still, the final pass is always manual. A machine cannot judge whether an easing
+curve feels right, a hover communicates clearly, or a 3D scene responds naturally.
+
+I use AI tooling to accelerate the work, but never to delegate the thinking. I design the system,
+review every diff, and answer for what ships.
 
 ## Stack
 
@@ -25,7 +37,10 @@ Kiko Rubio, full stack developer in Murcia.
   the fog modes, and the mark, the ring and the halo switched on and off) and `/og` (the Open Graph
   card, the LinkedIn cover and the README banner), lazy-loaded and kept out of the production bundle.
 - **vue-i18n** — nested dictionaries, English by default.
-- **TresJS / Three.js** for the hero's 3D mark. Lazy, and never even imported below 900px.
+- **TresJS / Three.js** for the hero's 3D mark. I come from a 3D background, and TresJS is where it
+  met Vue: the same declarative components as the rest of the page describe the scene, the renderer
+  owns its own loop and stops when the stage leaves the screen, and the chunk is lazy, never even
+  imported below 900px. [tresjs.org](https://tresjs.org) · [repo](https://github.com/Tresjs/tres)
 - **Vitest** and **Playwright** for tests.
 - No CSS framework and no preprocessor. Design tokens are CSS custom properties in one global
   stylesheet; everything else is `<style scoped>`.
@@ -183,21 +198,6 @@ status would need edge middleware, so the 404 view adds its own `robots: noindex
 unknown URL is not indexed despite the 200.
 
 Plus `nosniff`, `Referrer-Policy` and `X-Frame-Options` on everything.
-
-## How it is made
-
-Spec first. [`docs/design-spec.md`](docs/design-spec.md) is the visual contract,
-[`docs/decisions.md`](docs/decisions.md) records every choice that is not obvious from the code, and
-[`docs/roadmap.md`](docs/roadmap.md) is the order the work happened in. The rules the code obeys —
-no hardcoded strings, no literal colours, one animation loop — live in [`AGENTS.md`](AGENTS.md).
-
-I build with an AI agent doing most of the typing, and I review and verify: changes land through the
-browser, and `npm run build`, `npm run test` and `npm run test:e2e` (WebKit as well as Chromium) are
-the net. That is also why the repository carries the spec and the decision log and not only the code:
-it is where the thinking is written down.
-
-So the honest answer to "who wrote this": the design and the decisions are mine; the agent types; the
-tests and a real browser decide what stays.
 
 ## Licence
 
