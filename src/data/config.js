@@ -13,6 +13,14 @@ export const config = {
   showLemon: true,
 
   /*
+    Halloween. With this on, choosing the orange accent switches on the seasonal
+    layer: the sticker on the shutter, the ghost tile in the Stack and the ghost
+    testimonial, plus the seasonal styles in styles/halloween.css. Off, or on any
+    other accent, and the site is exactly what it was. See useSeason.js.
+  */
+  showHalloween: true,
+
+  /*
     The grid cell that lights up under the pointer (GridCell.vue).
 
     Off for now: with everything else moving, the cell reads as busy. Flip it to

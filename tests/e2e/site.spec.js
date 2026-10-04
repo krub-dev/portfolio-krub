@@ -723,6 +723,36 @@ test('the accent cycles and survives a reload', async ({ page }) => {
   await expect(html).toHaveAttribute('data-accent', 'aqua')
 })
 
+test('the orange accent turns the seasonal layer on and off', async ({ page }) => {
+  await openSite(page)
+  const html = page.locator('html')
+
+  // Choose orange the way the switcher would, then boot on it.
+  await page.evaluate(() => localStorage.setItem('krub-accent', 'orange'))
+  await page.reload()
+  await expect(html).toHaveAttribute('data-accent', 'orange')
+  await expect(html).toHaveAttribute('data-season', 'halloween')
+
+  // The seasonal tile joins the Stack and the ghost quote joins the pager, so
+  // there are two dots instead of one.
+  await expect(page.locator('[data-tile][data-name="Ghost"]')).toHaveCount(1)
+  await expect(page.locator('.testimonials .dots .dot')).toHaveCount(2)
+
+  // The sticker is stuck to the shutter, which only the desktop hero carries.
+  if (page.viewportSize().width >= 900) {
+    await expect(page.locator('.sticker')).toBeVisible()
+  }
+
+  // Another palette takes the whole layer off with it.
+  await page.evaluate(() => localStorage.setItem('krub-accent', 'aqua'))
+  await page.reload()
+  await expect(html).toHaveAttribute('data-accent', 'aqua')
+  await expect(html).not.toHaveAttribute('data-season')
+  await expect(page.locator('[data-tile][data-name="Ghost"]')).toHaveCount(0)
+  await expect(page.locator('.testimonials .dots .dot')).toHaveCount(1)
+  await expect(page.locator('.sticker')).toHaveCount(0)
+})
+
 test('Limonacho greets you on the first poke of a visit, and only on that one', async ({ page }) => {
   // Counting calls to play() is the only way to see the sound without a
   // speaker, and stubbing it also keeps the run silent.

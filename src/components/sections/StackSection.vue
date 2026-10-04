@@ -2,13 +2,31 @@
 /*
   Section 02. Four groups of technology icons, straight from src/data/stack.js.
 */
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SectionHeading from '../base/SectionHeading.vue'
 import StackGroup from '../base/StackGroup.vue'
+import { useSeason } from '../../composables/useSeason'
 import { stack } from '../../data'
 
 const { t } = useI18n()
+const { season } = useSeason()
+
+/*
+  The groups as they show right now: seasonal tiles only while their season is on,
+  and a group left empty dropped. With the season off this is the plain list. The
+  count passed down is the reduced one, since the touch reveal divides the grid's
+  travel between the groups actually on screen.
+*/
+const groups = computed(() =>
+  stack
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !item.season || item.season === season.value),
+    }))
+    .filter((group) => group.items.length > 0),
+)
 </script>
 
 <template>
@@ -17,12 +35,12 @@ const { t } = useI18n()
 
     <div class="grid">
       <StackGroup
-        v-for="(group, i) in stack"
+        v-for="(group, i) in groups"
         :key="group.labelKey"
         :label="t(group.labelKey)"
         :items="group.items"
         :index="i"
-        :total="stack.length"
+        :total="groups.length"
       />
     </div>
   </section>

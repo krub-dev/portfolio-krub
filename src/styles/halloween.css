@@ -1,0 +1,25 @@
+/* ---------------------------------------------------------------------------
+   The seasonal layer (Halloween), and all of it.
+
+   Imported by HalloweenFx.vue, which also stamps data-season="halloween" on
+   <html> while the season is on. Every rule here is scoped to that attribute, so
+   with the season off this file matches nothing and the site is untouched.
+   Removing Halloween is deleting the component, this file and the config line.
+
+   No colour is declared here: these are effects, and what little colour they use
+   comes from the tokens (--acc turns orange with the seasonal accent). Colours
+   live in tokens.css alone.
+   --------------------------------------------------------------------------- */
+
+/*
+  The project card gets a glow on hover, in the season's own light. An addition,
+  not a change: the card keeps its accent border, this only spills around it.
+  Hover devices only, the same guard the card's own hover uses.
+*/
+@media (hover: hover) {
+  [data-season='halloween'] .card:hover {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--acc) 70%, transparent),
+      0 0 30px -6px color-mix(in srgb, var(--acc) 75%, transparent);
+  }
+}

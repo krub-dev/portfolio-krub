@@ -102,6 +102,9 @@
     "violet": "Violeta",
     "orange": "Naranja"
   },
+  "season": {
+    "sticker": "CODE O TREAT"
+  },
   "a11y": {
     "toggleTheme": "Cambiar de tema",
     "settings": "Apariencia e idioma",
