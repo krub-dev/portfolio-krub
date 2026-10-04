@@ -99,7 +99,8 @@
     "aqua": "Aqua",
     "rose": "Rose",
     "mint": "Mint",
-    "violet": "Violet"
+    "violet": "Violet",
+    "orange": "Orange"
   },
   "a11y": {
     "toggleTheme": "Switch colour theme",

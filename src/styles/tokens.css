@@ -245,6 +245,16 @@
   --acc-solid: #8b5cf6;
 }
 
+[data-accent='orange'] {
+  --acc: #f36e21;
+  --acc-2: #ff8a4a;
+  --acc-text: #f36e21;
+  --acc-text-2: #ff8a4a;
+  --on-acc: #0c0c0d;
+  --mark: #f36e21;
+  --acc-solid: #f36e21;
+}
+
 [data-theme='light'][data-accent='aqua'] {
   --acc: #2dd4bf;
   --acc-2: #5eead4;
@@ -266,6 +276,14 @@
   --acc-2: #6ee7b7;
   --acc-text: #047857;
   --acc-text-2: #065f46;
+  --mark: var(--acc-text);
+}
+
+[data-theme='light'][data-accent='orange'] {
+  --acc: #f36e21;
+  --acc-2: #ff8a4a;
+  --acc-text: #b34700;
+  --acc-text-2: #9a3c00;
   --mark: var(--acc-text);
 }
 
