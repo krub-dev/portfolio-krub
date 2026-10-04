@@ -77,7 +77,10 @@ describe('useAccent', () => {
     cycle()
     expect(accent.value).toBe('violet')
 
-    // The list is yellow, aqua, rose, mint, violet — so one more wraps to yellow.
+    cycle()
+    expect(accent.value).toBe('orange')
+
+    // The list is yellow, aqua, rose, mint, violet, orange — one more wraps.
     cycle()
     expect(accent.value).toBe('yellow')
     expect(document.documentElement.getAttribute('data-accent')).toBe('yellow')

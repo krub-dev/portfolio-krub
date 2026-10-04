@@ -12,6 +12,7 @@ export const accents = [
   { id: 'rose' },
   { id: 'mint' },
   { id: 'violet' },
+  { id: 'orange' },
 ]
 
 export default accents
