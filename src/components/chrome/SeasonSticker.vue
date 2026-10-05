@@ -7,47 +7,56 @@
   over the room behind would read as a bug. The stage itself is untouched.
 
   Self-guarding: it reads the season from useSeason and renders nothing when it
-  is off, so where it is placed never has to know about Halloween. The text is a
-  locale string like any other visible label.
+  is off, so where it is placed never has to know about Halloween. The artwork is
+  the owner's own sticker; a faint gloss (below) is what makes it read as a
+  sticker rather than as a printed label.
 */
-import { useI18n } from 'vue-i18n'
-
 import { useSeason } from '../../composables/useSeason'
 
-const { t } = useI18n()
 const { season } = useSeason()
 </script>
 
 <template>
-  <span v-if="season === 'halloween'" class="sticker" aria-hidden="true">
-    {{ t('season.sticker') }}
-  </span>
+  <span v-if="season === 'halloween'" class="sticker" aria-hidden="true" />
 </template>
 
 <style scoped>
 /*
-  A pasted label, not a control: rotated a touch, dashed inset and a cast shadow,
-  in the season's own accent. pointer-events off, so the click that lifts the
-  blind still belongs to the shutter under it.
+  A pasted sticker, not a control: tilted a touch, lifting off the metal with a
+  soft shadow. pointer-events off, so the click that raises the blind still
+  belongs to the shutter under it.
 */
 .sticker {
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 2;
-  transform: translate(-50%, -50%) rotate(-6deg);
-  padding: 9px 20px;
-  border-radius: 12px;
-  background: var(--acc);
-  color: var(--on-acc);
-  border: 2px dashed color-mix(in srgb, var(--on-acc) 45%, transparent);
-  font-family: var(--font-mono);
-  font-size: clamp(12px, 1.5vw, 17px);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  width: min(58%, 180px);
+  aspect-ratio: 586 / 515;
+  /*
+    No tilt: the artwork hangs a spider from a thread, and rotating the sticker
+    swung the thread off the vertical. It falls straight.
+  */
+  transform: translate(-50%, -50%);
+  background: url('/assets/img/themeHalloween/codeortreat-sticker.svg') center / contain no-repeat;
+  /* A short, soft lift off the metal — enough to read as a sticker, not a drop. */
+  filter: drop-shadow(0 2px 3px color-mix(in srgb, var(--ink) 45%, transparent));
   pointer-events: none;
-  box-shadow: 0 10px 22px -8px color-mix(in srgb, var(--ink) 80%, transparent);
+}
+
+/*
+  The gloss: one soft diagonal shine, masked to the sticker's own shape so it
+  catches the sticker and not the blind behind it. `--specular` is the same
+  white highlight the metal uses, so it belongs to the material rather than to
+  the theme, and it is deliberately faint.
+*/
+.sticker::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(112deg, transparent 34%, var(--specular) 47%, transparent 60%);
+  -webkit-mask: url('/assets/img/themeHalloween/codeortreat-sticker.svg') center / contain no-repeat;
+  mask: url('/assets/img/themeHalloween/codeortreat-sticker.svg') center / contain no-repeat;
+  pointer-events: none;
 }
 </style>

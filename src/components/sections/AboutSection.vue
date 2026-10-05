@@ -19,7 +19,16 @@ import TabSwitch from '../base/TabSwitch.vue'
 import TimelineItem from '../base/TimelineItem.vue'
 import { useLang } from '../../composables/useLang'
 import { useLemonVoice } from '../../composables/useLemonVoice'
-import { certifications, config, copy, education, experience, photoPath } from '../../data'
+import { useSeason } from '../../composables/useSeason'
+import {
+  certifications,
+  config,
+  copy,
+  education,
+  experience,
+  photoPath,
+  seasonPhotoPath,
+} from '../../data'
 import { formatPeriod } from '../../utils/format'
 
 const emit = defineEmits(['open-cv', 'warm-cv', 'set-variant'])
@@ -34,8 +43,16 @@ const CV_VARIANTS = ['full', 'onePage']
 
 const { lang } = useLang()
 const { t } = useI18n()
+const { season } = useSeason()
 // Limonacho greets you when the pointer lands on the photo.
 const { say, hush } = useLemonVoice()
+
+// The photo and the availability badge are swapped while Halloween is on.
+const photo = computed(() => (season.value === 'halloween' ? seasonPhotoPath : photoPath))
+const badge = computed(() => {
+  const words = copy.hero[lang.value]
+  return season.value === 'halloween' ? words.spooky : words.badge
+})
 
 const tab = ref('exp')
 // The id that ties the tab row to the panel it switches, for the ARIA tablist.
@@ -193,10 +210,10 @@ onUnmounted(() => observer?.disconnect())
       </div>
 
       <div ref="photoWrap" class="photo-wrap" data-pfp-wrap>
-        <AvailabilityBadge class="availability" :label="copy.hero[lang].badge" />
+        <AvailabilityBadge class="availability" :label="badge" />
         <div class="photo-card">
           <div class="photo-box" @mouseenter="say(about.greet)" @mouseleave="hush()">
-            <img class="photo" :src="photoPath" alt="Kiko Rubio" data-pfp />
+            <img class="photo" :src="photo" alt="Kiko Rubio" data-pfp />
           </div>
 
           <div v-if="config.showCv" class="cv-block">

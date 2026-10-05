@@ -24,6 +24,9 @@ defineProps({
   src: { type: String, required: true },
   invertOnDark: { type: Boolean, default: false },
   wide: { type: Boolean, default: false },
+  // A mark with no negative space that can carry a bigger box than the 38px
+  // default without crowding its tile.
+  big: { type: Boolean, default: false },
   // Marks the tile as something the cursor should open its ring over. The Stack
   // only asks for that when there is no Limonacho to name tiles, because that is
   // the only case where clicking one does anything.
@@ -34,7 +37,7 @@ defineProps({
 <template>
   <span
     class="tile"
-    :class="{ wide }"
+    :class="{ wide, big }"
     data-tile
     :data-name="name"
     :data-interactive="interactive || undefined"
@@ -73,6 +76,9 @@ defineProps({
   display: flex;
   align-items: center;
   justify-content: center;
+  /* A mark that carries more of the tile than the default (the seasonal one) can
+     spill past the rounded box; this keeps it inside. */
+  overflow: hidden;
 }
 
 .icon {
@@ -84,6 +90,14 @@ defineProps({
 /* A wordmark gets the width; the SVG letterboxes itself to its own ratio. */
 .tile.wide .icon {
   width: 52px;
+}
+
+/* A solid mark that can carry more of its tile than the default. Nudged down so
+   its own baseline sits under the tile's edge rather than level with it. */
+.tile.big .icon {
+  width: 50px;
+  height: 50px;
+  transform: translateY(4px);
 }
 
 @media (max-width: 900px) {
@@ -100,6 +114,11 @@ defineProps({
 
   .tile.wide .icon {
     width: 42px;
+  }
+
+  .tile.big .icon {
+    width: 40px;
+    height: 40px;
   }
 }
 

@@ -14,9 +14,11 @@
   only known after the document loads, and the renderer owns that DOM the way the
   3D scene owns its canvas.
 */
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { useSeason } from '../../composables/useSeason'
+import { seasonPumpkinPath } from '../../data'
 import BaseModal from '../base/BaseModal.vue'
 
 const props = defineProps({
@@ -31,6 +33,9 @@ const emit = defineEmits(['close', 'variant'])
 const VARIANTS = ['full', 'onePage']
 
 const { t } = useI18n()
+const { season } = useSeason()
+// While the pages render, the season puts a pumpkin in place of the plain line.
+const pumpkin = computed(() => season.value === 'halloween')
 
 const pages = ref(null)
 const state = ref('idle') // idle | loading | ready | error
@@ -174,7 +179,10 @@ watch(
     </template>
 
     <div class="body">
-      <p v-if="state === 'loading'" class="note">{{ t('cvModal.loading') }}</p>
+      <div v-if="state === 'loading'" class="loading">
+        <img v-if="pumpkin" class="pumpkin" :src="seasonPumpkinPath" alt="" aria-hidden="true" />
+        <p class="note">{{ t('cvModal.loading') }}</p>
+      </div>
       <p v-else-if="state === 'error'" class="note">
         {{ t('cvModal.error') }}<span v-if="detail" class="detail">{{ detail }}</span>
       </p>
@@ -299,6 +307,19 @@ watch(
   width: 16px;
   height: 16px;
   display: block;
+}
+
+/* The loading line. In the season a pumpkin rides beside it. */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pumpkin {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
 }
 
 .note {

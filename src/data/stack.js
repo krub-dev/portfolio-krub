@@ -79,8 +79,15 @@ export const stack = [
       { name: 'Linux', icon: '/icons/linux/linux-plain.svg', invertOnDark: true },
       { name: 'Claude', icon: '/icons/claude/claude-original.svg', invertOnDark: false },
       { name: 'OpenCode', icon: '/icons/opencode/opencode-original.svg', invertOnDark: true },
-      // Seasonal: a joke tile, only while Halloween is on.
-      { name: 'Ghost', icon: '/icons/ghost/ghost.svg', invertOnDark: false, season: 'halloween' },
+      // Seasonal: a joke tile, only while Halloween is on. An animated GIF: the
+      // AVIF is smaller but a phone's browser does not play an animated one.
+      {
+        name: 'Spectre',
+        icon: '/assets/img/themeHalloween/spectrePls.gif',
+        invertOnDark: false,
+        big: true,
+        season: 'halloween',
+      },
     ],
   },
 ]
