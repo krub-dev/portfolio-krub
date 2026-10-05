@@ -23,8 +23,9 @@ import { copy } from '../../data'
 
 // How long the dark holds if nobody finds the pumpkin.
 const ESCAPE_MS = 20000
-// How long Calabazacho's line stays up after a poke.
-const SAY_MS = 4000
+// How long his line stays up, and the beat before the page glides home; the
+// glide starts as the line goes, so it is never carried off unread.
+const SAY_MS = 2000
 // After the click, wait out the blind, the beat and the tube's whole strike, so
 // the page only follows them out once the 3D has finished lighting up.
 const IGNITION_MS = 3600
@@ -43,7 +44,6 @@ let observer = null
 let timer = 0
 let sayTimer = 0
 let ignitionTimer = 0
-let scrollTimer = 0
 // The dark happens once, on the shutter's first open. Without this the lights
 // came back and then went out again: the observer looks for a `.shutter.open`
 // on every class change, and the flicker toggling a class IS such a change.
@@ -89,19 +89,19 @@ function lightsOn(touched = false) {
     window.setTimeout(() => (flicker.value = false), 1200)
   }
   if (touched) {
+    /*
+      His line, briefly, and then back to the top — no reload. He is fixed to the
+      corner, so the poke lands wherever the visitor happened to be, often well
+      past the hero in the dark, and the page reads from the start. The glide
+      starts as the bubble goes, so it is never carried off half-read; the global
+      `scroll-behavior: smooth` is what makes it a glide.
+    */
     clearTimeout(sayTimer)
     say(copy.lemon[lang.value].touched)
-    sayTimer = window.setTimeout(hush, SAY_MS)
-    /*
-      Back to the top, without reloading — but only once his line has been read.
-      He is fixed to the corner, so the poke lands wherever the visitor happened
-      to be, often well past the hero in the dark, and the page reads from the
-      start. Gliding home at once would carry the bubble off before it is read,
-      so the glide waits for the bubble's own life (the global
-      `scroll-behavior: smooth` is what makes it a glide).
-    */
-    clearTimeout(scrollTimer)
-    scrollTimer = window.setTimeout(() => window.scrollTo({ top: 0 }), SAY_MS)
+    sayTimer = window.setTimeout(() => {
+      hush()
+      window.scrollTo({ top: 0 })
+    }, SAY_MS)
   }
 }
 
@@ -167,7 +167,6 @@ onBeforeUnmount(() => {
   clearTimeout(timer)
   clearTimeout(sayTimer)
   clearTimeout(ignitionTimer)
-  clearTimeout(scrollTimer)
 })
 </script>
 

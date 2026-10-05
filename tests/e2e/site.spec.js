@@ -735,7 +735,7 @@ test('with the season off the site is untouched', async ({ page }) => {
   await expect(page.locator('.web')).toHaveCount(0)
   await expect(page.locator('.bat')).toHaveCount(0)
   await expect(page.locator('.sticker')).toHaveCount(0)
-  await expect(page.locator('.heading-sticker')).toHaveCount(0)
+  await expect(page.locator('.hero-sticker')).toHaveCount(0)
   await expect(page.locator('.pumpkin-body')).toHaveCount(0)
   await expect(page.locator('.ghost')).toHaveCount(0)
   await expect(page.locator('.dark')).toHaveCount(0)
@@ -776,7 +776,7 @@ test('the orange accent turns the seasonal layer on and off', async ({ page }) =
   // stage).
   if (page.viewportSize().width >= 900) {
     await expect(page.locator('.sticker')).toBeVisible()
-    await expect(page.locator('.heading-sticker')).toBeHidden()
+    await expect(page.locator('.hero-sticker')).toBeHidden()
 
     // The dark is desktop only: a touch tablet is wide enough for the stage but
     // has no cursor for the beam.
@@ -801,7 +801,7 @@ test('the orange accent turns the seasonal layer on and off', async ({ page }) =
         .toBeLessThan(40)
     }
   } else {
-    await expect(page.locator('.heading-sticker')).toBeVisible()
+    await expect(page.locator('.hero-sticker')).toBeVisible()
   }
 
   // Another palette takes the whole layer off with it.
@@ -812,7 +812,7 @@ test('the orange accent turns the seasonal layer on and off', async ({ page }) =
   await expect(page.locator('[data-tile][data-name="Spectre"]')).toHaveCount(0)
   await expect(page.locator('.testimonials .dots .dot')).toHaveCount(1)
   await expect(page.locator('.sticker')).toHaveCount(0)
-  await expect(page.locator('.heading-sticker')).toHaveCount(0)
+  await expect(page.locator('.hero-sticker')).toHaveCount(0)
   await expect(page.locator('.dark')).toHaveCount(0)
   await expect(page.locator('.web')).toHaveCount(0)
   await expect(page.locator('.bat')).toHaveCount(0)

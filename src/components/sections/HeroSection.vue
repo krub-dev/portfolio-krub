@@ -14,12 +14,14 @@ import { useI18n } from 'vue-i18n'
 
 import BaseButton from '../base/BaseButton.vue'
 import { useLang } from '../../composables/useLang'
+import { useSeason } from '../../composables/useSeason'
 import { copy } from '../../data'
 import BrandName from './BrandName.vue'
 import LogoStage from './LogoStage.vue'
 
 const { lang } = useLang()
 const { t } = useI18n()
+const { season } = useSeason()
 
 const hero = computed(() => copy.hero[lang.value])
 
@@ -52,6 +54,14 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
     <div class="grid">
       <div class="left">
         <BrandName />
+
+        <!--
+          Seasonal, and only on a phone: there is no shutter to stick it to, so
+          it is pasted over the space beside the name. Absolute and out of the
+          flow, so it never moves the text it sits next to. On a desktop it rides
+          the blind, where it belongs.
+        -->
+        <span v-if="season === 'halloween'" class="hero-sticker" aria-hidden="true" />
 
         <h1 class="headline">
           {{ hero.line1 }}<br />
@@ -102,9 +112,31 @@ onUnmounted(() => query?.removeEventListener('change', syncLayout))
 }
 
 .left {
+  /* The sticker hangs off this box, so the text flows as it always did. */
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: clamp(14px, 2.2vh, 24px);
+}
+
+/* Only on a phone: on a desktop the sticker rides the shutter. Absolute, so it
+   adds nothing to the flow — the name-to-headline gap is untouched — and not
+   tilted, so the spider on its thread hangs straight. */
+.hero-sticker {
+  display: none;
+  position: absolute;
+  /*top: clamp(30px, 10vw, 74px);*/
+  right: 0;
+  width: clamp(108px, 34vw, 165px);
+  aspect-ratio: 586 / 515;
+  background: url('/assets/img/themeHalloween/codeortreat-sticker.svg') center / contain no-repeat;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .hero-sticker {
+    display: block;
+  }
 }
 
 .headline {
