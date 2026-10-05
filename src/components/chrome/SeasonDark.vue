@@ -43,6 +43,7 @@ let observer = null
 let timer = 0
 let sayTimer = 0
 let ignitionTimer = 0
+let scrollTimer = 0
 // The dark happens once, on the shutter's first open. Without this the lights
 // came back and then went out again: the observer looks for a `.shutter.open`
 // on every class change, and the flicker toggling a class IS such a change.
@@ -88,16 +89,19 @@ function lightsOn(touched = false) {
     window.setTimeout(() => (flicker.value = false), 1200)
   }
   if (touched) {
-    /*
-      Back to the top, without reloading. He is fixed to the corner, so the poke
-      lands wherever the visitor happened to be — often well past the hero, in
-      the dark. The page reads from the start, so that is where they come back to
-      (the glide is the global `scroll-behavior: smooth`).
-    */
-    window.scrollTo({ top: 0 })
     clearTimeout(sayTimer)
     say(copy.lemon[lang.value].touched)
     sayTimer = window.setTimeout(hush, SAY_MS)
+    /*
+      Back to the top, without reloading — but only once his line has been read.
+      He is fixed to the corner, so the poke lands wherever the visitor happened
+      to be, often well past the hero in the dark, and the page reads from the
+      start. Gliding home at once would carry the bubble off before it is read,
+      so the glide waits for the bubble's own life (the global
+      `scroll-behavior: smooth` is what makes it a glide).
+    */
+    clearTimeout(scrollTimer)
+    scrollTimer = window.setTimeout(() => window.scrollTo({ top: 0 }), SAY_MS)
   }
 }
 
@@ -163,6 +167,7 @@ onBeforeUnmount(() => {
   clearTimeout(timer)
   clearTimeout(sayTimer)
   clearTimeout(ignitionTimer)
+  clearTimeout(scrollTimer)
 })
 </script>
 

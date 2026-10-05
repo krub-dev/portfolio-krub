@@ -795,7 +795,10 @@ test('the orange accent turns the seasonal layer on and off', async ({ page }) =
       await expect(page.locator('.lemon')).toBeVisible()
       await page.locator('.lemon').click()
       await expect(page.locator('.dark')).not.toHaveClass(/on/)
-      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(40)
+      // The glide home waits for the bubble to be read, so give the poll room.
+      await expect
+        .poll(() => page.evaluate(() => window.scrollY), { timeout: 10000 })
+        .toBeLessThan(40)
     }
   } else {
     await expect(page.locator('.heading-sticker')).toBeVisible()
