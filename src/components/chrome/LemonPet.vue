@@ -319,6 +319,13 @@ onUnmounted(() => {
 
 .pumpkin-eyes {
   background-image: url('/assets/img/themeHalloween/eyes-pumpkin.svg');
+  /*
+    Its own layer. The eyes are one raster that the loop moves a fraction of a
+    pixel every frame; without a stable layer the browser re-rasterises it each
+    time and the pupil shimmers — the same flicker the lemon's CSS-drawn pupils
+    never had, because those are vectors.
+  */
+  will-change: transform;
 }
 
 .nub {

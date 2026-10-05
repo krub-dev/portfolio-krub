@@ -31,15 +31,7 @@ const groups = computed(() =>
 
 <template>
   <section id="stack" class="stack">
-    <div class="head">
-      <SectionHeading index="02" :title="t('section.stack')" />
-      <!--
-        On a phone the hero has no shutter to stick it to, so the seasonal
-        sticker is pasted in the gap beside the heading instead. Desktop keeps it
-        on the blind, where it belongs.
-      -->
-      <span v-if="season === 'halloween'" class="heading-sticker" aria-hidden="true" />
-    </div>
+    <SectionHeading index="02" :title="t('section.stack')" />
 
     <div class="grid">
       <StackGroup
