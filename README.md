@@ -88,7 +88,7 @@ See decision 103 and the backlog's Performance section for the detail.
 
 ## Tests
 
-Forty-eight unit tests and over a hundred end-to-end flows, run on a desktop, two phones and a
+Fifty-one unit tests and over a hundred end-to-end flows, run on a desktop, two phones and a
 tablet (Chromium and WebKit).
 
 Vitest covers the pure functions — how a timeline period is formatted, how the carousel index wraps,

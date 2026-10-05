@@ -723,6 +723,30 @@ test('the accent cycles and survives a reload', async ({ page }) => {
   await expect(html).toHaveAttribute('data-accent', 'aqua')
 })
 
+test('with the season off the site is untouched', async ({ page }) => {
+  // The default accent is yellow, so nothing seasonal is on. Every piece the
+  // season adds must be absent, and the two things it swaps must be the plain
+  // ones — this is the check that switching it off leaves the site as it was.
+  await openSite(page)
+  const html = page.locator('html')
+
+  await expect(html).not.toHaveAttribute('data-season')
+  await expect(html).not.toHaveAttribute('data-season-dark')
+  await expect(page.locator('.web')).toHaveCount(0)
+  await expect(page.locator('.bat')).toHaveCount(0)
+  await expect(page.locator('.sticker')).toHaveCount(0)
+  await expect(page.locator('.heading-sticker')).toHaveCount(0)
+  await expect(page.locator('.pumpkin-body')).toHaveCount(0)
+  await expect(page.locator('.ghost')).toHaveCount(0)
+  await expect(page.locator('.dark')).toHaveCount(0)
+  await expect(page.locator('[data-tile][data-name="Spectre"]')).toHaveCount(0)
+  await expect(page.locator('.testimonials .dots .dot')).toHaveCount(1)
+
+  // The photo and the badge are the plain ones, not the Halloween stand-ins.
+  await expect(page.locator('.photo')).toHaveAttribute('src', '/assets/img/krub-pfp.jpeg')
+  await expect(page.locator('.availability')).not.toHaveText(/Spooky|Escalofriante/)
+})
+
 test('the orange accent turns the seasonal layer on and off', async ({ page }) => {
   await openSite(page)
   const html = page.locator('html')
