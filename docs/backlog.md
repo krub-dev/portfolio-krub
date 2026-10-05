@@ -378,6 +378,18 @@ day; the scores are where they should be.
   a mouse does and still reach the last card; worth checking on the real device, not only in the
   emulator.
 
+- [ ] **The projects rail's swipe does nothing on some Android phones.** Reported on an Honor Note 14
+  Pro (Chrome, Android version unknown): dragging the rail sideways does not move it at all. It is a
+  native scroll container with `touch-action: pan-y`, so a horizontal drag is meant to come to it;
+  on that device the gesture is not starting, or the page is claiming it. Needs a look on the real
+  device — the emulator is Chromium and does not reproduce it. Start with `touch-action` and whether
+  something above the rail is intercepting the horizontal gesture. Next to the iPad entry above.
+- [ ] **The About column crowds the screen's edges on a phone.** Seen on the timeline tab
+  (experience / education / certifications): the text runs close to the sides, and on a phone with a
+  curved edge the first and last characters fall on the curve. Likely a wider lateral gutter for that
+  column below 900px — the gutter already reads `env(safe-area-inset-*)`, so the same mechanism can
+  carry it. Verify on a curved-edge device.
+
 All three were real when the roadmap's "Later" list was written and are closed now; the group is
 kept as the record rather than deleted.
 
