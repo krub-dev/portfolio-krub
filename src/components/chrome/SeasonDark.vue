@@ -88,6 +88,13 @@ function lightsOn(touched = false) {
     window.setTimeout(() => (flicker.value = false), 1200)
   }
   if (touched) {
+    /*
+      Back to the top, without reloading. He is fixed to the corner, so the poke
+      lands wherever the visitor happened to be — often well past the hero, in
+      the dark. The page reads from the start, so that is where they come back to
+      (the glide is the global `scroll-behavior: smooth`).
+    */
+    window.scrollTo({ top: 0 })
     clearTimeout(sayTimer)
     say(copy.lemon[lang.value].touched)
     sayTimer = window.setTimeout(hush, SAY_MS)
