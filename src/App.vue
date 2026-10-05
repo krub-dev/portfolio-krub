@@ -20,6 +20,7 @@ import { useRoute } from 'vue-router'
 import BackgroundGrid from './components/chrome/BackgroundGrid.vue'
 import CursorFx from './components/chrome/CursorFx.vue'
 import GridCell from './components/chrome/GridCell.vue'
+import HalloweenFx from './components/chrome/HalloweenFx.vue'
 import LemonPet from './components/chrome/LemonPet.vue'
 import ScrollProgress from './components/chrome/ScrollProgress.vue'
 import TheFooter from './components/chrome/TheFooter.vue'
@@ -144,6 +145,9 @@ onBeforeUnmount(() => landTimers.forEach(clearTimeout))
     -->
     <ScrollProgress v-if="route.meta.hero" />
     <CursorFx />
+
+    <!-- Seasonal layer: stamps data-season on <html>. Renderless. -->
+    <HalloweenFx v-if="config.showHalloween" />
 
     <RouterView />
 

@@ -18,11 +18,18 @@
 */
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
+import { useSeason } from '../../composables/useSeason'
+
 const props = defineProps({
   items: { type: Array, required: true },
   separator: { type: String, default: '//' },
   duration: { type: String, default: '26s' },
 })
+
+const { season } = useSeason()
+// With the season on, the `//` between the phrases becomes a bat. Only the
+// separator changes; the phrases and the loop are untouched.
+const bat = computed(() => season.value === 'halloween')
 
 const run = ref(null)
 const repeats = ref(1)
@@ -55,11 +62,15 @@ onUnmounted(() => window.removeEventListener('resize', measure))
 // The phrases change width with the language, so the count has to be redone.
 watch(() => props.items, () => requestAnimationFrame(measure), { deep: true })
 
-// Flattened once here rather than nesting two v-for in the template.
+// Flattened once here rather than nesting two v-for in the template. Objects,
+// not strings, because the separator can render as the bat rather than as text.
 const cells = computed(() => {
   const out = []
   for (let r = 0; r < repeats.value; r += 1) {
-    for (const item of props.items) out.push(item, props.separator)
+    for (const item of props.items) {
+      out.push({ text: item })
+      out.push({ text: props.separator, sep: true })
+    }
   }
   return out
 })
@@ -69,7 +80,10 @@ const cells = computed(() => {
   <div class="marquee" aria-hidden="true">
     <div class="track" data-motion="decorative" :style="{ animationDuration: duration }">
       <div v-for="copy in 2" :key="copy" ref="run" class="run">
-        <span v-for="(cell, i) in cells" :key="`${copy}-${i}`">{{ cell }}</span>
+        <span v-for="(cell, i) in cells" :key="`${copy}-${i}`">
+          <span v-if="cell.sep && bat" class="bat" aria-hidden="true" />
+          <template v-else>{{ cell.text }}</template>
+        </span>
       </div>
     </div>
   </div>
@@ -103,5 +117,20 @@ const cells = computed(() => {
   display: flex;
   gap: 38px;
   padding-right: 38px;
+}
+
+/*
+  The bat: a mask, not an image, so it takes the band's own text colour and
+  follows the theme, and keeps the band's rhythm. Sized to the `//` it stands in
+  for, and centred on the line rather than sitting on the baseline.
+*/
+.bat {
+  display: inline-block;
+  width: 40px;
+  height: 17px;
+  vertical-align: middle;
+  background: var(--on-acc);
+  -webkit-mask: url('/assets/img/themeHalloween/bat.svg') center / contain no-repeat;
+  mask: url('/assets/img/themeHalloween/bat.svg') center / contain no-repeat;
 }
 </style>

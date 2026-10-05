@@ -20,10 +20,12 @@ import { useI18n } from 'vue-i18n'
 
 import TestimonialCard from './TestimonialCard.vue'
 import { useLang } from '../../composables/useLang'
+import { useSeason } from '../../composables/useSeason'
 import { testimonials } from '../../data'
 
 const { lang } = useLang()
 const { t } = useI18n()
+const { season } = useSeason()
 
 /*
   The entries to page through. Left unset the block reads them from src/data;
@@ -34,8 +36,17 @@ const props = defineProps({
   entries: { type: Array, default: null },
 })
 
+/*
+  Seasonal quotes come and go with the season; the rest are always there. The
+  filter is skipped when entries are passed in (the design-system sheet), which
+  is a specimen rather than the real list.
+*/
 const items = computed(
-  () => props.entries ?? testimonials.map((entry) => ({ ...entry, ...entry[lang.value] })),
+  () =>
+    props.entries ??
+    testimonials
+      .filter((entry) => !entry.season || entry.season === season.value)
+      .map((entry) => ({ ...entry, ...entry[lang.value] })),
 )
 
 const index = ref(0)

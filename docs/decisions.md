@@ -832,3 +832,24 @@ around itself.
   the cover letters left `public/uploads/` — the site never links them, so they live only in the cv tool.
 - **Three.js and TresJS were added to both documents' frontend line.** They were missing, which was an
   oversight rather than a decision.
+
+### 105. The seasonal layer hangs off one component and the orange accent
+**Status:** active
+
+Halloween is not wired through the site; it is a layer that switches itself on. `useSeason.js` is the
+one place that decides: the `showHalloween` switch in `config.js` and the orange accent, both true, and
+the season is `halloween`; anything else and it is off. Pick orange and it appears, pick another palette
+and it goes, with no page component involved either way.
+
+- **One attribute, one stylesheet.** `HalloweenFx.vue`, mounted once in `App.vue`, stamps
+  `data-season="halloween"` on `<html>` and imports `styles/halloween.css`, where every seasonal rule is
+  scoped to that attribute. Nothing else knows the season exists.
+- **The extra content is flagged, not branched.** The ghost tile in `stack.js` and the ghost quote in
+  `testimonials.js` carry `season: 'halloween'`; the Stack and the pager filter them by the season and
+  drop a group left empty or a quote that should not count. Off, the data is the plain list again.
+- **The sticker rides the shutter.** `SeasonSticker.vue` is dropped inside the blind's slats, so it lifts
+  with them; it guards itself on the season, so the stage stays as it was.
+- **Removing it is deletion, not surgery.** Delete the two components, the stylesheet, the composable,
+  the config line and the two `season` flags. Nothing else refers to them.
+- **It is an easter egg and it says so.** A joke tile, a joke quote and a sticker, only while the orange
+  accent is chosen. The accent is a normal, permanent palette; the season is only what it triggers.

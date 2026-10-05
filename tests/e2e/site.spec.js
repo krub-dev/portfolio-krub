@@ -723,6 +723,66 @@ test('the accent cycles and survives a reload', async ({ page }) => {
   await expect(html).toHaveAttribute('data-accent', 'aqua')
 })
 
+test('the orange accent turns the seasonal layer on and off', async ({ page }) => {
+  await openSite(page)
+  const html = page.locator('html')
+
+  // Choose orange the way the switcher would, then boot on it.
+  await page.evaluate(() => localStorage.setItem('krub-accent', 'orange'))
+  await page.reload()
+  await expect(html).toHaveAttribute('data-accent', 'orange')
+  await expect(html).toHaveAttribute('data-season', 'halloween')
+
+  // The seasonal tile joins the Stack and the ghost quote joins the pager, so
+  // there are two dots instead of one.
+  await expect(page.locator('[data-tile][data-name="Spectre"]')).toHaveCount(1)
+  await expect(page.locator('.testimonials .dots .dot')).toHaveCount(2)
+  // The ghost opens the pager while the season is on.
+  await expect(page.locator('.testimonials .name')).toHaveText('A Friendly Ghost')
+
+  // The seasonal dressing: a web in each top corner and one at the foot, the
+  // marquee's bats and Limonacho's pumpkin.
+  await expect(page.locator('.web')).toHaveCount(3)
+  await expect(page.locator('.bat').first()).toBeVisible()
+  await expect(page.locator('.pumpkin-body')).toHaveCount(1)
+  await expect(page.locator('.ghost')).toHaveCount(1)
+
+  // The sticker: on the shutter on a desktop (which the hero only carries
+  // there), in the gap beside the Stack heading on a phone (which has no
+  // stage).
+  if (page.viewportSize().width >= 900) {
+    await expect(page.locator('.sticker')).toBeVisible()
+    await expect(page.locator('.heading-sticker')).toBeHidden()
+
+    // The dark is desktop only: a touch tablet is wide enough for the stage but
+    // has no cursor for the beam.
+    const hoverable = await page.evaluate(() => matchMedia('(hover: hover)').matches)
+    if (hoverable) {
+      // Opening the shutter breaks the light: the page goes dark.
+      await expect(page.locator('.dark')).not.toHaveClass(/on/)
+      await page.locator('.shutter').click()
+      await expect(page.locator('.dark')).toHaveClass(/on/)
+    }
+  } else {
+    await expect(page.locator('.heading-sticker')).toBeVisible()
+  }
+
+  // Another palette takes the whole layer off with it.
+  await page.evaluate(() => localStorage.setItem('krub-accent', 'aqua'))
+  await page.reload()
+  await expect(html).toHaveAttribute('data-accent', 'aqua')
+  await expect(html).not.toHaveAttribute('data-season')
+  await expect(page.locator('[data-tile][data-name="Spectre"]')).toHaveCount(0)
+  await expect(page.locator('.testimonials .dots .dot')).toHaveCount(1)
+  await expect(page.locator('.sticker')).toHaveCount(0)
+  await expect(page.locator('.heading-sticker')).toHaveCount(0)
+  await expect(page.locator('.dark')).toHaveCount(0)
+  await expect(page.locator('.web')).toHaveCount(0)
+  await expect(page.locator('.bat')).toHaveCount(0)
+  await expect(page.locator('.pumpkin-body')).toHaveCount(0)
+  await expect(page.locator('.ghost')).toHaveCount(0)
+})
+
 test('Limonacho greets you on the first poke of a visit, and only on that one', async ({ page }) => {
   // Counting calls to play() is the only way to see the sound without a
   // speaker, and stubbing it also keeps the run silent.

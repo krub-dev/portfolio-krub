@@ -1,0 +1,79 @@
+/* ---------------------------------------------------------------------------
+   The seasonal layer (Halloween), and all of it.
+
+   Imported by HalloweenFx.vue, which also stamps data-season="halloween" on
+   <html> while the season is on. Every rule here is scoped to that attribute, so
+   with the season off this file matches nothing and the site is untouched.
+   Removing Halloween is deleting the component, this file and the config line.
+
+   No colour is declared here: these are effects, and what little colour they use
+   comes from the tokens (--acc turns orange with the seasonal accent). Colours
+   live in tokens.css alone.
+   --------------------------------------------------------------------------- */
+
+/*
+  The project card glows on hover, in the season's own light. An addition, not a
+  change: the card keeps its accent border.
+
+  The glow is INSET. The rail clips its viewport (`overflow: hidden`) with only a
+  sliver of room at the sides, so any glow spilling outward was being cut off
+  there and read as a hard edge. An inset glow lives inside the card, so there is
+  nothing to clip, and it reads as the card lighting up from within. Hover
+  devices only, the same guard the card's own hover uses.
+*/
+/*
+  The card's own "this is the one" marks go season-green too, so the border, the
+  arrow and the glow all agree instead of the orange accent sitting inside a
+  green halo. Both the hover path and the touch path (`current`), the same pair
+  the card styles.
+*/
+/*
+  The project card gets a glow on hover, in the accent — the same orange the card
+  already uses. An addition, not a change: the cursor only adds the halo; the
+  border, the arrow and the rest are the card's own. (The doubled class beats the
+  card's scoped rule, whose extra data attribute would otherwise tie and win on
+  order.) Hover devices only, the same guard the card's own hover uses.
+*/
+@media (hover: hover) {
+  [data-season='halloween'] .card.card:hover {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--acc) 70%, transparent),
+      inset 0 0 34px -6px color-mix(in srgb, var(--acc) 65%, transparent);
+  }
+}
+
+/*
+  While the lights are out, the one lit thing shivers now and then — a shake that
+  is over almost as soon as it starts, every few seconds, so the eye finds it in
+  the dark. The marker is on <html> (SeasonDark), the pet knows nothing of it.
+*/
+[data-season='halloween'][data-season-dark] .pet .lemon {
+  animation: petTremble 4s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes petTremble {
+  0%,
+  86%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  88% {
+    transform: translate3d(-2px, 0, 0) rotate(-3deg);
+  }
+  90% {
+    transform: translate3d(2px, 0, 0) rotate(3deg);
+  }
+  92% {
+    transform: translate3d(-2px, 0, 0) rotate(-2deg);
+  }
+  94% {
+    transform: translate3d(2px, 0, 0) rotate(2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-season='halloween'][data-season-dark] .pet .lemon {
+    animation: none;
+  }
+}

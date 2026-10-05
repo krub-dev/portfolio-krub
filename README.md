@@ -88,7 +88,7 @@ See decision 103 and the backlog's Performance section for the detail.
 
 ## Tests
 
-Forty-four unit tests and around seventy end-to-end flows, run on a desktop, two phones and a
+Forty-eight unit tests and over a hundred end-to-end flows, run on a desktop, two phones and a
 tablet (Chromium and WebKit).
 
 Vitest covers the pure functions — how a timeline period is formatted, how the carousel index wraps,
@@ -156,6 +156,22 @@ src/
   exception — Three's renderer owns its own loop, paused while off-screen.
 - **Content and interface are separate.** Sentences I wrote live in `src/data/`, with both languages
   side by side in one file. Strings the interface needs live in `src/locales/`.
+
+## Security
+
+A static site with one server endpoint. The contact form is the only place input crosses the boundary,
+and it is handled defensively:
+
+- No input is rendered as HTML — Vue escapes every string, and there is no `v-html`.
+- The email is sent as plain text, never HTML.
+- Header injection is closed: the name is stripped of newlines, the address checked strictly.
+- Turnstile (failed closed in production), a honeypot, a per-IP rate limit and a production `Origin`
+  check.
+- The server secrets are not `VITE_`-prefixed, so they never reach the bundle.
+- The mail provider's error is logged, never returned.
+
+Known gap: no Content-Security-Policy yet (it is in the backlog). Dependency risk is covered by
+`npm audit` and Dependabot. A `<script>` through the form cannot run.
 
 ## Documentation
 

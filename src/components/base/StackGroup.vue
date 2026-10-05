@@ -112,6 +112,15 @@ function measure() {
 }
 
 /*
+  Measure again whenever the list changes, not only when the group resizes. A
+  seasonal tile can join or leave without changing the group's box — it fits on
+  the last row — and a ResizeObserver says nothing, so the new tile was never lit
+  nor named and the pointer reported its neighbour. Items only change identity
+  when the season (and with it the list) does.
+*/
+watch(() => props.items, measure, { flush: 'post' })
+
+/*
   Lights every tile near (x, y), which are viewport coordinates. Returns the
   nearest one, so the caller can name it.
 */
@@ -318,6 +327,7 @@ onUnmounted(() => {
         :src="item.icon"
         :invert-on-dark="item.invertOnDark"
         :wide="item.wide"
+        :big="item.big"
         :interactive="!voice"
       />
     </div>
