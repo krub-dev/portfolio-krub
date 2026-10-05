@@ -43,7 +43,15 @@ export { experience } from './experience.js'
 export { privacy } from './privacy.js'
 export { projects } from './projects.js'
 export { sections } from './sections.js'
-export { socials, socialIcons, email, cvPath, photoPath } from './socials.js'
+export {
+  socials,
+  socialIcons,
+  email,
+  cvPath,
+  photoPath,
+  seasonPhotoPath,
+  seasonPumpkinPath,
+} from './socials.js'
 export { achoSound } from './sound.js'
 export { stack } from './stack.js'
 export { testimonials } from './testimonials.js'

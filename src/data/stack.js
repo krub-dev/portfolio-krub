@@ -23,6 +23,9 @@
     wide          For a logo that is a wordmark rather than a mark. GSAP's is
                   almost 3:1, so it is given a wider box or it would render as a
                   thin stripe in the middle of its tile.
+    season        Only shown while that seasonal layer is on (see useSeason.js).
+                  The Stack drops these from its groups and drops a group left
+                  empty. Nothing else reads it.
 
   Adding a technology: drop the SVG in public/icons/<name>/ and add a line.
 */
@@ -76,6 +79,15 @@ export const stack = [
       { name: 'Linux', icon: '/icons/linux/linux-plain.svg', invertOnDark: true },
       { name: 'Claude', icon: '/icons/claude/claude-original.svg', invertOnDark: false },
       { name: 'OpenCode', icon: '/icons/opencode/opencode-original.svg', invertOnDark: true },
+      // Seasonal: a joke tile, only while Halloween is on. An animated GIF: the
+      // AVIF is smaller but a phone's browser does not play an animated one.
+      {
+        name: 'Spectre',
+        icon: '/assets/img/themeHalloween/spectrePls.gif',
+        invertOnDark: false,
+        big: true,
+        season: 'halloween',
+      },
     ],
   },
 ]

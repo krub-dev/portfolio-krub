@@ -24,6 +24,7 @@
 import { defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import SeasonSticker from '../chrome/SeasonSticker.vue'
 import { usePointer } from '../../composables/usePointer'
 
 // The shutter is a real button, so its label has to come from the locales.
@@ -483,6 +484,8 @@ defineExpose({ exportModel })
           <span v-for="n in SLATS" :key="n" class="slat">
             <span v-if="n === SLATS" class="handle" />
           </span>
+          <!-- Seasonal, self-guarding: it rides up with the slats it is stuck to. -->
+          <SeasonSticker />
         </span>
       </button>
 
@@ -614,6 +617,9 @@ defineExpose({ exportModel })
 }
 
 .slats {
+  /* relative so the seasonal sticker inside it positions against the blind and
+     rides its translate; out of the flex flow, it never disturbs the slats. */
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;

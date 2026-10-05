@@ -43,6 +43,10 @@ dist-ssr
 .claude/
 CLAUDE.md
 
+# Affinity Designer sources: the editable original behind an exported asset, not
+# something the site ships.
+*.af
+
 # Design reference material — the .dc.html prototypes, their runtime, and the
 # asset folders they load from. All of it now lives outside the project, in
 # `krub brand/reference/`, since the spec is written and nothing needs

@@ -11,8 +11,30 @@
             the marks are what say so before anyone reads the attribution.
     name    As the client agreed to be credited.
     role    The project, in the same mono caps the rest of the site uses.
+    season  Only shown while that seasonal layer is on (see useSeason.js). The
+            pager filters these out when it is off, so a seasonal quote never
+            counts towards the dots or the counter.
 */
 export const testimonials = [
+  {
+    // Seasonal, and first on purpose: while it is on, the ghost opens the pager
+    // so it is the quote a visitor actually sees. With the season off the filter
+    // drops it and Lourdes is back at the top.
+    avatar: '/assets/img/themeHalloween/ghost.svg',
+    season: 'halloween',
+    en: {
+      quote:
+        '“I have haunted this site since before the grid had cells, and he never once blamed me for the flickering cursor. Five stars. I would rattle the shutters again.”',
+      name: 'A Friendly Ghost',
+      role: 'UNPAID INTERN',
+    },
+    es: {
+      quote:
+        '“Llevo rondando esta web desde antes de que la cuadrícula tuviera celdas, y nunca me culpó por el cursor parpadeante. Cinco estrellas. Volvería a mover la persiana.”',
+      name: 'Un fantasma amistoso',
+      role: 'BECARIO SIN SUELDO',
+    },
+  },
   {
     avatar: '/assets/img/creandomientras.svg',
     en: {
