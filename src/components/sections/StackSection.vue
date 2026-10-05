@@ -31,7 +31,15 @@ const groups = computed(() =>
 
 <template>
   <section id="stack" class="stack">
-    <SectionHeading index="02" :title="t('section.stack')" />
+    <div class="head">
+      <SectionHeading index="02" :title="t('section.stack')" />
+      <!--
+        On a phone the hero has no shutter to stick it to, so the seasonal
+        sticker is pasted in the gap beside the heading instead. Desktop keeps it
+        on the blind, where it belongs.
+      -->
+      <span v-if="season === 'halloween'" class="heading-sticker" aria-hidden="true" />
+    </div>
 
     <div class="grid">
       <StackGroup
@@ -67,9 +75,31 @@ const groups = computed(() =>
   gap: 44px 40px;
 }
 
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Only on a phone: on a desktop the sticker rides the shutter. Not tilted, so
+   the spider on its thread hangs straight. */
+.heading-sticker {
+  display: none;
+  flex: 0 0 auto;
+  width: 78px;
+  aspect-ratio: 586 / 515;
+  background: url('/assets/img/themeHalloween/codeortreat-sticker.svg') center / contain no-repeat;
+  pointer-events: none;
+}
+
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 32px;
+  }
+
+  .heading-sticker {
+    display: block;
   }
 }</style>

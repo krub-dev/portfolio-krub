@@ -31,6 +31,8 @@ export const copy = {
   hero: {
     en: {
       badge: 'Available',
+      // The badge while the season is on (Halloween).
+      spooky: 'Spooky',
       line1: 'FULL STACK',
       line2: 'DEVELOPER',
       skills: 'Frontend · Backend · 3D · Applied AI',
@@ -38,6 +40,7 @@ export const copy = {
     },
     es: {
       badge: 'Disponible',
+      spooky: 'Escalofriante',
       line1: 'DESARROLLADOR',
       line2: 'FULL STACK',
       skills: 'Frontend · Backend · 3D · IA Aplicada',
@@ -107,11 +110,17 @@ export const copy = {
   lemon: {
     en: {
       bubble: "Welcome! I'm Limonacho",
+      // What he says when the season has turned him into a pumpkin.
+      pumpkin: "Boo! I'm Calabazacho",
+      // And when he has just switched the lights back on.
+      touched: 'You only had to touch me!',
       cv: 'Have a look',
       form: 'Fill the fields in first',
     },
     es: {
       bubble: '¡Bienvenido! Soy Limonacho',
+      pumpkin: '¡Bu! Soy Calabazacho',
+      touched: '¡Solo tenías que tocarme!',
       cv: 'Échale un ojo',
       form: 'Rellena antes los campos',
     },

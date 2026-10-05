@@ -22,18 +22,33 @@ import { useLang } from '../../composables/useLang'
 import { useLemonVoice } from '../../composables/useLemonVoice'
 import { isPointerDevice, usePointer } from '../../composables/usePointer'
 import { usePastHero } from '../../composables/usePastHero'
+import { useSeason } from '../../composables/useSeason'
 import { copy } from '../../data'
 import SpeechBubble from '../base/SpeechBubble.vue'
 
 const PUPIL_TRAVEL = 4 // px the pupils can drift inside the eye
+// The pumpkin's eye holes are shallower, so its eyes travel less before they
+// would leave the white.
+const PUMPKIN_TRAVEL = 4
 
 const pointerDevice = isPointerDevice()
 
 const { lang } = useLang()
+const { season } = useSeason()
+
+/*
+  With the season on, Limonacho is a pumpkin. The CSS lemon is swapped for the
+  pumpkin and its eyes, which come from two SVGs that share one 4267x3755 canvas
+  — so the eyes land in the pumpkin's own holes at any size. The eyes are a single
+  layer that looks at the cursor, where the lemon's are two pupils; everything
+  else (the voice, the poke, the bubble) is unchanged.
+*/
+const pumpkin = computed(() => season.value === 'halloween')
 
 const body = ref(null)
 const leftPupil = ref(null)
 const rightPupil = ref(null)
+const eyes = ref(null)
 
 const shaking = ref(false)
 const greeting = ref(false)
@@ -42,7 +57,11 @@ let bubbleTimer = null
 let shakeTimer = null
 let unlisten = null
 
-const text = computed(() => copy.lemon[lang.value].bubble)
+// The greeting. With the season on he introduces himself as Calabazacho.
+const text = computed(() => {
+  const words = copy.lemon[lang.value]
+  return pumpkin.value ? words.pumpkin : words.bubble
+})
 // Same trigger as the footer, so the two arrive together.
 const shown = usePastHero()
 
@@ -64,6 +83,20 @@ const said = computed(() => message.value || (greeting.value ? text.value : ''))
   away you are.
 */
 function lookAt(x, y) {
+  // The pumpkin's eyes are one layer over the whole button, so it is the layer
+  // that drifts, measured from the button's own centre.
+  if (pumpkin.value) {
+    const el = eyes.value
+    if (!el) return
+    const box = el.getBoundingClientRect()
+    const dx = x - (box.left + box.width / 2)
+    const dy = y - (box.top + box.height / 2)
+    const length = Math.hypot(dx, dy) || 1
+    const travel = Math.min(PUMPKIN_TRAVEL, length)
+    el.style.transform = `translate(${((dx / length) * travel).toFixed(2)}px, ${((dy / length) * travel).toFixed(2)}px)`
+    return
+  }
+
   for (const pupil of [leftPupil.value, rightPupil.value]) {
     if (!pupil) continue
     const eye = pupil.parentElement.getBoundingClientRect()
@@ -106,6 +139,11 @@ function poke() {
 
   if (!first) return
 
+  // While the lights are out, the poke is what switches them back on, and the
+  // seasonal line says so; the welcome would talk over it. SeasonDark marks
+  // that on <html>, so this stays a plain "is the game on" read.
+  if (document.documentElement.hasAttribute('data-season-dark')) return
+
   greeting.value = true
   clearTimeout(bubbleTimer)
   bubbleTimer = setTimeout(() => (greeting.value = false), 4000)
@@ -130,29 +168,41 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="pet" :class="{ shown }">
-    <!-- Not live for a technology name: those change as the pointer sweeps the
-         grid, and every tile already carries its own alt. -->
-    <SpeechBubble v-if="said" :text="said" :live="!message" />
+  <div class="pet" :class="{ shown, pumpkin }">
+    <!--
+      Not live for a technology name: those change as the pointer sweeps the
+      grid, and every tile already carries its own alt. It goes when he goes:
+      the bubble is pinned to him, so on the way out it was hanging half off the
+      edge while he slid away.
+    -->
+    <SpeechBubble v-if="said && shown" :text="said" :live="!message" />
 
     <button
       ref="body"
       class="lemon"
-      :class="{ shaking }"
+      :class="{ shaking, pumpkin }"
       type="button"
       :aria-label="text"
       @click="poke"
     >
-      <span class="nub" aria-hidden="true" />
-      <span class="leaf" aria-hidden="true" />
-      <span class="skin">
-        <span class="pore p1" aria-hidden="true" />
-        <span class="pore p2" aria-hidden="true" />
-        <span class="pore p3" aria-hidden="true" />
-        <span class="pore p4" aria-hidden="true" />
-        <span class="eye"><span ref="leftPupil" class="pupil" /></span>
-        <span class="eye"><span ref="rightPupil" class="pupil" /></span>
-      </span>
+      <!-- Seasonal: the pumpkin and its own eyes, in place of the whole lemon. -->
+      <template v-if="pumpkin">
+        <span class="pumpkin-body" aria-hidden="true" />
+        <span ref="eyes" class="pumpkin-eyes" aria-hidden="true" />
+      </template>
+
+      <template v-else>
+        <span class="nub" aria-hidden="true" />
+        <span class="leaf" aria-hidden="true" />
+        <span class="skin">
+          <span class="pore p1" aria-hidden="true" />
+          <span class="pore p2" aria-hidden="true" />
+          <span class="pore p3" aria-hidden="true" />
+          <span class="pore p4" aria-hidden="true" />
+          <span class="eye"><span ref="leftPupil" class="pupil" /></span>
+          <span class="eye"><span ref="rightPupil" class="pupil" /></span>
+        </span>
+      </template>
     </button>
   </div>
 </template>
@@ -200,12 +250,23 @@ onUnmounted(() => {
 }
 
 /*
-  Off to his left rather than straight above him. The bubble has no tail, so
-  centred over the lemon it reads as sitting on his leaf; pushed left by exactly
-  his width it reads as his voice coming from beside him.
+  Out of the flex flow and pinned above-left of him. The bubble has no tail, so
+  centred over him it would read as sitting on his leaf; pushed left by exactly
+  his width it reads as his voice coming from beside him. Absolute so that
+  appearing and disappearing never nudges the mascot — with it in the column, the
+  pumpkin's taller box made that nudge visible where the lemon's did not.
 */
 .pet :deep(.bubble) {
-  margin-right: var(--lemon-w);
+  position: absolute;
+  right: var(--lemon-w);
+  bottom: calc(100% + 10px);
+  margin: 0;
+  /*
+    Out of the flow the width is shrink-to-fit against the pet, which is only as
+    wide as the mascot — so every word landed on its own line. `max-content`
+    takes the text's own width, capped by the bubble's max-width.
+  */
+  width: max-content;
 }
 
 .lemon {
@@ -218,8 +279,46 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
+/*
+  The pumpkin is a bigger mascot than the lemon, and a background is clipped to
+  its box — so making the art bigger means growing the box, not scaling past it.
+  The bubble's offset follows --lemon-w, so it keeps clear of the wider pumpkin.
+*/
+.pet.pumpkin {
+  --lemon-w: 92px;
+}
+
+.pet.pumpkin .lemon {
+  height: 78px;
+}
+
 .lemon.shaking {
   animation: lemonShake 0.5s ease;
+}
+
+/*
+  The pumpkin, in the same box as the lemon. Body and eyes are two masks over one
+  shared canvas, so they line up whatever the box size; `contain` keeps the whole
+  pumpkin in it.
+*/
+.pumpkin-body,
+.pumpkin-eyes {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* The art has margins inside the shared canvas, so `contain` left it small in
+     the box; scaling the canvas up to 150% of the height makes the pumpkin fill
+     the lemon's box. Body and eyes share the size, so they stay aligned. */
+  background-size: auto 150%;
+}
+
+.pumpkin-body {
+  background-image: url('/assets/img/themeHalloween/pumpkin.svg');
+}
+
+.pumpkin-eyes {
+  background-image: url('/assets/img/themeHalloween/eyes-pumpkin.svg');
 }
 
 .nub {
@@ -294,7 +393,8 @@ onUnmounted(() => {
    touch: on a pointer device the frame loop writes this every frame, and a
    transition there would drag the eyes behind the mouse. */
 @media (hover: none) {
-  .pupil {
+  .pupil,
+  .pumpkin-eyes {
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
@@ -315,7 +415,8 @@ onUnmounted(() => {
     animation: none;
   }
 
-  .pupil {
+  .pupil,
+  .pumpkin-eyes {
     transition: none;
   }
 }

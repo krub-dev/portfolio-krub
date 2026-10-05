@@ -81,4 +81,10 @@ export const cvPath = {
 
 export const photoPath = '/assets/img/krub-pfp.jpeg'
 
+// The seasonal stand-ins, swapped in while Halloween is on. Kept here, with the
+// other public/ paths, so no template holds the URL.
+export const seasonPhotoPath = '/assets/img/themeHalloween/krub-halloween-pfp.jpg'
+// The pumpkin, shown while the CV dialog renders its pages.
+export const seasonPumpkinPath = '/assets/img/themeHalloween/pumpkinsus.gif'
+
 export default socials

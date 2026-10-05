@@ -17,23 +17,10 @@
 */
 export const testimonials = [
   {
-    avatar: '/assets/img/creandomientras.svg',
-    en: {
-      quote:
-        '“I’m delighted with the site Kiko built for my macramé project. He knew how to put on screen what I had in my head. He also left me a simple guide so I can update it myself: photos, texts, calendar, labels... Thank you for your professionalism, your help and your patience.”',
-      name: 'Lourdes Campuzano',
-      role: 'CREANDOMIENTRAS',
-    },
-    es: {
-      quote:
-        '“Estoy encantada con la web que hizo Kiko para mi proyecto de macramé. Supo poner en pantalla lo que yo tenía en la cabeza. Además me dejó una guía sencilla para poder actualizarla yo misma: fotos, textos, calendario, etiquetas... Gracias por tu profesionalidad, tu ayuda y tu paciencia.”',
-      name: 'Lourdes Campuzano',
-      role: 'CREANDOMIENTRAS',
-    },
-  },
-  {
-    // Seasonal: a joke entry, only while Halloween is on.
-    avatar: '/icons/ghost/ghost.svg',
+    // Seasonal, and first on purpose: while it is on, the ghost opens the pager
+    // so it is the quote a visitor actually sees. With the season off the filter
+    // drops it and Lourdes is back at the top.
+    avatar: '/assets/img/themeHalloween/ghost.svg',
     season: 'halloween',
     en: {
       quote:
@@ -46,6 +33,21 @@ export const testimonials = [
         '“Llevo rondando esta web desde antes de que la cuadrícula tuviera celdas, y nunca me culpó por el cursor parpadeante. Cinco estrellas. Volvería a mover la persiana.”',
       name: 'Un fantasma amistoso',
       role: 'BECARIO SIN SUELDO',
+    },
+  },
+  {
+    avatar: '/assets/img/creandomientras.svg',
+    en: {
+      quote:
+        '“I’m delighted with the site Kiko built for my macramé project. He knew how to put on screen what I had in my head. He also left me a simple guide so I can update it myself: photos, texts, calendar, labels... Thank you for your professionalism, your help and your patience.”',
+      name: 'Lourdes Campuzano',
+      role: 'CREANDOMIENTRAS',
+    },
+    es: {
+      quote:
+        '“Estoy encantada con la web que hizo Kiko para mi proyecto de macramé. Supo poner en pantalla lo que yo tenía en la cabeza. Además me dejó una guía sencilla para poder actualizarla yo misma: fotos, textos, calendario, etiquetas... Gracias por tu profesionalidad, tu ayuda y tu paciencia.”',
+      name: 'Lourdes Campuzano',
+      role: 'CREANDOMIENTRAS',
     },
   },
 ]
