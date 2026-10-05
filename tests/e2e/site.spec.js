@@ -786,6 +786,16 @@ test('the orange accent turns the seasonal layer on and off', async ({ page }) =
       await expect(page.locator('.dark')).not.toHaveClass(/on/)
       await page.locator('.shutter').click()
       await expect(page.locator('.dark')).toHaveClass(/on/)
+
+      // Poking Calabazacho brings the light back and the page home, without a
+      // reload — he is fixed to the corner, so the poke can land anywhere. Far
+      // enough down that he has slid in, but not to the foot: reaching that end
+      // is its own way out, and would end the game before the poke.
+      await scrollTo(page, 1200)
+      await expect(page.locator('.lemon')).toBeVisible()
+      await page.locator('.lemon').click()
+      await expect(page.locator('.dark')).not.toHaveClass(/on/)
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(40)
     }
   } else {
     await expect(page.locator('.heading-sticker')).toBeVisible()
